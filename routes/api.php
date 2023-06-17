@@ -1,0 +1,71 @@
+<?php
+
+use App\Http\Controllers\admins\chefDocumentsController;
+use App\Http\Controllers\admins\kitchentypeController;
+use App\Http\Controllers\admins\regionController;
+use App\Http\Controllers\admins\shefTypesController;
+use App\Http\Controllers\admins\taxController;
+use App\Http\Controllers\chefs\ChefController;
+use App\Http\Controllers\users\UserController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+// Routes for users
+Route::controller(UserController::class)->group(function () {
+    Route::post('/UserRegisteration', 'UserRegisteration');
+    Route::post('/UserLogin', 'UserLogin');
+    Route::post('/getChefsByPostalCode', 'getChefsByPostalCode');
+    Route::post('/getChefDetails', 'getChefDetails');
+});
+
+// Routes for chefs
+Route::controller(ChefController::class)->group(function () {
+    Route::post('/ChefRegisteration', 'ChefRegisteration');
+    Route::post('/EditPersonalInfo', 'EditPersonalInfo');
+    Route::post('/ChefLogin', 'ChefLogin');
+});
+
+// /////////////////// Routes for admin /////////////////////////
+Route::controller(regionController::class)->group(function () {
+    Route::post('/addCountry', 'addCountry');
+    Route::post('/addState', 'addState');
+    Route::post('/addCity', 'addCity');
+    Route::post('/addPincode', 'addPincode');
+});
+
+Route::controller(chefDocumentsController::class)->group(function () {
+    Route::post('/addDocumentItemNameAccToChefType', 'addDocumentItemNameAccToChefType');
+    Route::post('/addDynamicFieldsForChef', 'addDynamicFieldsForChef');
+});
+
+Route::controller(kitchentypeController::class)->group(function () {
+    Route::post('/addKitchenTypes', 'addKitchenTypes');
+});
+
+Route::controller(taxController::class)->group(function () {
+    Route::post('/addTaxType', 'addTaxType');
+});
+
+Route::controller(taxController::class)->group(function () {
+    Route::post('/addTaxType', 'addTaxType');
+});
+
+Route::controller(shefTypesController::class)->group(function () {
+    Route::post('/addShefType', 'addShefType');
+    Route::post('/addShefSubType', 'addShefSubType');
+});

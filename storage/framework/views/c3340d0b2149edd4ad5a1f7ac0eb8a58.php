@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>HomeShef Registration </title>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+ 
+ <b>Hi <?php echo e(ucfirst($fullname)); ?></b>
+ <p>Your account has been created successfully.</p>
+ <p>You may access your account only after the verification of your documents and details.</p> 
+
+ <p>Kindly verify your email by clicking on the link below</p>
+
+ <a class="btn btn-primary">Email Verification<a>
+
+ <p>Regards,</p>
+ <p>Homeshef Team</p>
+</body>
+</html> <?php /**PATH D:\homesheflaravelserver\resources\views/UserEmailVerification.blade.php ENDPATH**/ ?>
