@@ -43,6 +43,17 @@ class shefTypesController extends Controller
 
     }
 
+    function getAllShefTypes() {
+        try {
+            $data = ShefType::all();
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false]);
+        }
+    }
+
     function addShefSubType(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -72,6 +83,17 @@ class shefTypesController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !'. $th->getMessage(), 'success' => false]);
+        }
+    }
+
+    function getAllShefSubTypes() {
+        try {
+            $data = ShefSubType::all();
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false]);
         }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\chefs;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\users\UserController;
+use App\Http\Controllers\utility\commonFunctions;
 use App\Mail\HomeshefChefEmailVerification;
 use App\Models\chef;
 use App\Models\User;
@@ -40,6 +41,14 @@ class ChefController extends Controller
             if ($req->newToCanada == 1) {
                 $chef->new_to_canada = $req->newToCanada;
             }
+            // $commonFunctions = new commonFunctions;
+            // $lat_long = $commonFunctions->get_lat_long(str_replace(" ", "", (strtolower($req->postal_code))));
+            // log::info($lat_long);
+            // $chef->latitude = $lat_long['lat'];
+            // $chef->longitude = $lat_long['long'];
+
+            $chef->latitude = 45.618200;
+            $chef->longitude = -73.797240;
             $chef->save();
             $chefDetail = chef::find($chef->id);
 
@@ -60,7 +69,7 @@ class ChefController extends Controller
             Mail::to(trim($req->email))->send(new HomeshefChefEmailVerification($chefDetail));
 
             DB::commit();
-            return response()->json(['message' => 'Register successfully!', 'success' => true]);
+            return response()->json(['message' => 'Register successfully!', "data" => $chefDetail, 'success' => true]);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -119,7 +128,7 @@ class ChefController extends Controller
                 "sub_type" => ucfirst($req->sub_type),
                 "address_line1" => htmlspecialchars(ucfirst($req->address_line1)),
                 "postal_code" => strtoupper($req->postal_code),
-                "profile_pic" => $profile
+                "profile_pic" => isset($profile) ? $profile : ''
             ]);
             return response()->json(["msg" => "profile updated successfully", "success" => true], 200);
 
@@ -169,6 +178,7 @@ class ChefController extends Controller
             return response()->json(['error' => 'please fill all the fields', 'success' => false], 400);
         }
         $chefDetail = chef::where("email", $req->email)->first();
+
         if ($chefDetail) {
             $chefDetail->makeVisible('password');
             if (Hash::check($req->password, $chefDetail['password'])) {
@@ -179,6 +189,21 @@ class ChefController extends Controller
             }
         } else {
             return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+        }
+    }
+
+
+    function getChefDetails(Request $req) {
+        if (!$req->chef_id) {
+            return response()->json(["msg" => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            $data = chef::find($req->chef_id);
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
         }
     }
 

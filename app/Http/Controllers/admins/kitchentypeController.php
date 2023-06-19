@@ -44,7 +44,7 @@ class kitchentypeController extends Controller
                     ->resize(200, 200)
                     ->save('storage/admin/kitchentype/' . $name_gen);
 
-                $filename = "storage/admin/kitchentype/" . $name_gen;
+                $filename = asset("storage/admin/kitchentype/" . $name_gen);
             }
             Kitchentype::insert([
                 'kitchentype' => strtolower($req->kitchentype),
@@ -53,6 +53,19 @@ class kitchentypeController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
+            return response()->json(["msg" => "added successfully", "success" => true], 201);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+        }
+    }
+
+    function getKitchenTypes()
+    {
+        try {
+            $kitchenTyepData = Kitchentype::all();
+            return response()->json(["data" => $kitchenTyepData, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

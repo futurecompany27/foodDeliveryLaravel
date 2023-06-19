@@ -38,6 +38,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/ChefRegisteration', 'ChefRegisteration');
     Route::post('/EditPersonalInfo', 'EditPersonalInfo');
     Route::post('/ChefLogin', 'ChefLogin');
+    Route::post('/getChefDetails', 'getChefDetails');
 });
 
 // /////////////////// Routes for admin /////////////////////////
@@ -55,10 +56,7 @@ Route::controller(chefDocumentsController::class)->group(function () {
 
 Route::controller(kitchentypeController::class)->group(function () {
     Route::post('/addKitchenTypes', 'addKitchenTypes');
-});
-
-Route::controller(taxController::class)->group(function () {
-    Route::post('/addTaxType', 'addTaxType');
+    Route::get('/getKitchenTypes', 'getKitchenTypes');
 });
 
 Route::controller(taxController::class)->group(function () {
@@ -67,5 +65,7 @@ Route::controller(taxController::class)->group(function () {
 
 Route::controller(shefTypesController::class)->group(function () {
     Route::post('/addShefType', 'addShefType');
+    Route::get('/getAllShefTypes', 'getAllShefTypes');
     Route::post('/addShefSubType', 'addShefSubType');
+    Route::get('/getAllShefSubTypes', 'getAllShefSubTypes');
 });
