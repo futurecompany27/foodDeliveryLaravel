@@ -4,6 +4,7 @@ namespace App\Http\Controllers\utility;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class commonFunctions extends Controller
@@ -15,7 +16,11 @@ class commonFunctions extends Controller
         Log::info("///////////////", $gmk);
         $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postal . ",canada&sensor=false&key=" . $gmk;
 
-        $result = simplexml_load_file($url);
+        // $result = simplexml_load_file($url);
+        $result = Http::get($url);
+        if ($result->successful()) {
+            Log::info("kkkkkkkkk",[$result->body()]);
+        }
         Log::info("///////////////",[$result]);
         if (isset($result->result->geometry)) {
             $latitude = json_decode($result->result->geometry->location->lat);

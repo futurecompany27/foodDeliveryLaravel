@@ -17,6 +17,14 @@ class UserController extends Controller
 {
     function UserRegisteration(Request $req)
     {
+        $userExist = User::where("email", $req->email)->first();
+        if ($userExist) {
+            return response()->json(['error' => "This email is already register please use another email!", "success" => false], 400);
+        }
+        $userExist = User::where('mobile', str_replace("-", "", $req->mobile))->first();
+        if ($userExist) {
+            return response()->json(['error' => "This mobileno is already register please use another mobileno!", "success" => false], 400);
+        }
         try {
 
             DB::beginTransaction();

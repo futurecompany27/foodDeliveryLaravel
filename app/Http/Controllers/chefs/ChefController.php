@@ -29,6 +29,15 @@ class ChefController extends Controller
             // if (!$checkPinCode) {
             //     return response()->json(["msg" => 'we are not offering our services in this region', 'success' => false], 400);
             // }
+
+            $chefExist = chef::where("email", $req->email)->first();
+            if ($chefExist) {
+                return response()->json(['error' => "This email is already register please use another email!", "success" => false], 400);
+            }
+            $chefExist = chef::where('mobile', str_replace("-", "", $req->mobile))->first();
+            if ($chefExist) {
+                return response()->json(['error' => "This mobileno is already register please use another mobileno!", "success" => false], 400);
+            }
             $chef = new chef();
             $chef->first_name = ucfirst($req->first_name);
             $chef->last_name = ucfirst($req->last_name);
@@ -193,7 +202,8 @@ class ChefController extends Controller
     }
 
 
-    function getChefDetails(Request $req) {
+    function getChefDetails(Request $req)
+    {
         if (!$req->chef_id) {
             return response()->json(["msg" => "please fill all the required fields", "success" => false], 400);
         }

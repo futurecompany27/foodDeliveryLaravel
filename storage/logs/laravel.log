@@ -1,1 +1,1 @@
-[2023-06-19 11:44:46] local.INFO: Undefined variable $profile  
+[2023-06-20 05:42:49] local.INFO: Illuminate\Log\LogManager::info(): Argument #2 ($context) must be of type array, null given, called in D:\fo9_final\vendor\laravel\framework\src\Illuminate\Support\Facades\Facade.php on line 353  
