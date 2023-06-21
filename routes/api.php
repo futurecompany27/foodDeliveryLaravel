@@ -6,7 +6,9 @@ use App\Http\Controllers\admins\regionController;
 use App\Http\Controllers\admins\shefTypesController;
 use App\Http\Controllers\admins\taxController;
 use App\Http\Controllers\chefs\ChefController;
+use App\Http\Controllers\users\otpController;
 use App\Http\Controllers\users\UserController;
+use App\Http\Controllers\utility\commonFunctions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +41,9 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/EditPersonalInfo', 'EditPersonalInfo');
     Route::post('/ChefLogin', 'ChefLogin');
     Route::post('/getChefDetails', 'getChefDetails');
+    Route::post('/updateChefPrimaryEmail', 'updateChefPrimaryEmail');
+    Route::post('/updateSocialMediaLinks', 'updateSocialMediaLinks');
+    Route::post('/updateBankDetails', 'updateBankDetails');
 });
 
 // /////////////////// Routes for admin /////////////////////////
@@ -68,4 +73,14 @@ Route::controller(shefTypesController::class)->group(function () {
     Route::get('/getAllShefTypes', 'getAllShefTypes');
     Route::post('/addShefSubType', 'addShefSubType');
     Route::get('/getAllShefSubTypes', 'getAllShefSubTypes');
+});
+
+Route::controller(otpController::class)->group(function () {
+    Route::post('/sendOTP', 'sendOTP');
+    Route::post('/verifyOtp', 'verifyOtp');
+});
+
+/////////////// common api's ///////////////
+Route::controller(commonFunctions::class)->group(function () {
+    Route::get("/getAllBankList", 'getAllBankList');
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\utility;
 
 use App\Http\Controllers\Controller;
+use App\Models\BankName;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -40,5 +41,10 @@ class commonFunctions extends Controller
             ];
         }
         return $data;
+    }
+
+    function getAllBankList(Request $req) {
+        $data = BankName::all();
+        return response()->json(["data" => $data, "success" => true], 200);
     }
 }

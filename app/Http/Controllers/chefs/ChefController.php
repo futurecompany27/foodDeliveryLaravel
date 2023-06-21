@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Validator;
 use Image; //Intervention Image
 use File;
 
-
 class ChefController extends Controller
 {
     function ChefRegisteration(Request $req)
@@ -201,7 +200,6 @@ class ChefController extends Controller
         }
     }
 
-
     function getChefDetails(Request $req)
     {
         if (!$req->chef_id) {
@@ -210,6 +208,96 @@ class ChefController extends Controller
         try {
             $data = chef::find($req->chef_id);
             return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+        }
+    }
+
+    function updateChefPrimaryEmail(Request $req)
+    {
+        if (!$req->chef_id || !$req->new_email) {
+            return response()->json(["msg" => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            $chefDetails = chef::find($req->chef_id);
+            if ($chefDetails->email == $req->new_email) {
+                return response()->json(['error' => 'Trying to use an existing primary email. Please use another email.', "success" => false], 500);
+            }
+
+            $isNewEmailAlreadyRegistered = chef::where('email', $req->new_email)->first();
+            if (!$isNewEmailAlreadyRegistered) {
+                $chefDetails->email = trim($req->new_email);
+                $chefDetails->is_email_verified = 0;
+                $chefDetails->email_verified_at = null;
+                $chefDetails->save();
+                Mail::to(trim($req->new_email))->send(new HomeshefChefEmailVerification($chefDetails));
+                return response()->json(['msg' => "Updated sucessfully", "success" => true], 200);
+            } else {
+                return response()->json(["error" => "This email is already registerd with Homeshef", "success" => false], 500);
+            }
+
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+        }
+    }
+
+    function updateSocialMediaLinks(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(["msg" => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            $chef = chef::find($req->chef_id);
+            if ($req->twitter_link) {
+                $chef->twitter_link = $req->twitter_link;
+            }
+            if ($req->facebook_link) {
+                $chef->facebook_link = $req->facebook_link;
+            }
+            if ($req->tiktok_link) {
+                $chef->tiktok_link = $req->tiktok_link;
+            }
+            $chef->save();
+            return response()->json(['msg' => 'Updated successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+        }
+    }
+
+    function updateBankDetails(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "chef_id" => 'required',
+            "bank_name" => 'required',
+            "account_number" => 'required',
+            "transit_number" => 'required',
+            "institution_number" => 'required',
+        ], [
+            "chef_id.required" => "please mention chef_id",
+            "bank_name.required" => "please fill bank_name",
+            "account_number.required" => "please fill account_number",
+            "transit_number.required" => "please select transit_number",
+            "institution_number.required" => "please select institution_number",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $chef = chef::find($req->chef_id);
+            $chef->bank_name = $req->bank_name;
+            $chef->account_number = $req->account_number;
+            $chef->transit_number = $req->transit_number;
+            $chef->institution_number = $req->institution_number;
+            $chef->save();
+            return response()->json(['msg' => "updated successfully", "success" => true], 200);
+
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
