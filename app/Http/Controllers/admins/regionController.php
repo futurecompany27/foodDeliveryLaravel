@@ -30,7 +30,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
         }
     }
 
@@ -84,7 +84,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
         }
     }
 
@@ -96,8 +96,17 @@ class regionController extends Controller
         try {
             DB::beginTransaction();
             $Pincode = new Pincode;
-            $Pincode->pincode = $req->pincode;
+            $Pincode->pincode = str_replace(" ", "", (strtolower($req->pincode)));
             $Pincode->city_id = $req->city_id;
+
+            // $commonFunctions = new commonFunctions;
+            // $lat_long = $commonFunctions->get_lat_long(str_replace(" ", "", (strtolower($req->postal_code))));
+            // log::info($lat_long);
+            // $Pincode->latitude = $lat_long['lat'];
+            // $Pincode->longitude = $lat_long['long'];
+
+            $Pincode->latitude = 45.618200;
+            $Pincode->longitude = -73.797240;
             $Pincode->save();
             DB::commit();
             return response()->json(["msg" => "pincode added successfully ", "success" => true], 200);

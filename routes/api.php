@@ -33,6 +33,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/UserLogin', 'UserLogin');
     Route::post('/getChefsByPostalCode', 'getChefsByPostalCode');
     Route::post('/getChefDetails', 'getChefDetails');
+    Route::post('/googleSigin', 'googleSigin');
 });
 
 // Routes for chefs
@@ -44,6 +45,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateChefPrimaryEmail', 'updateChefPrimaryEmail');
     Route::post('/updateSocialMediaLinks', 'updateSocialMediaLinks');
     Route::post('/updateBankDetails', 'updateBankDetails');
+    Route::post('/updateDocuments', 'updateDocuments');
 });
 
 // /////////////////// Routes for admin /////////////////////////
@@ -83,4 +85,6 @@ Route::controller(otpController::class)->group(function () {
 /////////////// common api's ///////////////
 Route::controller(commonFunctions::class)->group(function () {
     Route::get("/getAllBankList", 'getAllBankList');
+    Route::post("/getDocumentListAccToChefTypeAndState", 'getDocumentListAccToChefTypeAndState');
+
 });

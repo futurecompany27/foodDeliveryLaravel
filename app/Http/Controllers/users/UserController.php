@@ -53,9 +53,8 @@ class UserController extends Controller
         ];
         $validate = Validator::make($req->all(), $rules);
         if ($validate->fails()) {
-            return response()->json(["error" => ' please fill all the details', 'success' => false]);
+            return response()->json(["error" => ' please fill all the details', 'success' => false], 500);
         }
-        // return response()->json(["error" => $req->all(), 'success' => false]);
 
         $userDetails = User::where("mobile", $req->mobile)->first();
         if ($userDetails) {
@@ -103,5 +102,10 @@ class UserController extends Controller
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
+    }
+
+    function googleSigin(Request $req)
+    {
+        log::info("google data", [$req]);
     }
 }

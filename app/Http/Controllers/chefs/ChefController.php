@@ -7,6 +7,9 @@ use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
 use App\Mail\HomeshefChefEmailVerification;
 use App\Models\chef;
+use App\Models\ChefDocument;
+use App\Models\City;
+use App\Models\State;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,14 +52,16 @@ class ChefController extends Controller
             if ($req->newToCanada == 1) {
                 $chef->new_to_canada = $req->newToCanada;
             }
-            // $commonFunctions = new commonFunctions;
-            // $lat_long = $commonFunctions->get_lat_long(str_replace(" ", "", (strtolower($req->postal_code))));
-            // log::info($lat_long);
-            // $chef->latitude = $lat_long['lat'];
-            // $chef->longitude = $lat_long['long'];
 
-            $chef->latitude = 45.618200;
-            $chef->longitude = -73.797240;
+            if ($req->postal_code) {
+                $pinCodeDetail = Pincode::where('pincode', str_replace(" ", "", (strtolower($req->postal_code))))->first();
+                $chef->latitude = $pinCodeDetail->latitude;
+                $chef->longitude = $pinCodeDetail->longitude;
+                $cityDetail = City::where('id', $pinCodeDetail->city_id)->first();
+                $stateDetails = State::where('id', $cityDetail->state_id)->first();
+                $chef->state = $stateDetails->name;
+            }
+
             $chef->save();
             $chefDetail = chef::find($chef->id);
 
@@ -77,11 +82,11 @@ class ChefController extends Controller
             Mail::to(trim($req->email))->send(new HomeshefChefEmailVerification($chefDetail));
 
             DB::commit();
-            return response()->json(['message' => 'Register successfully!', "data" => $chefDetail, 'success' => true]);
+            return response()->json(['message' => 'Register successfully!', "data" => $chefDetail, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
@@ -139,34 +144,6 @@ class ChefController extends Controller
                 "profile_pic" => isset($profile) ? $profile : ''
             ]);
             return response()->json(["msg" => "profile updated successfully", "success" => true], 200);
-
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
-        }
-    }
-
-    function EditChefDocuments(Request $req)
-    {
-        $validator = Validator::make($req->all(), [
-            "chef_id" => 'required',
-            "address_proof" => 'required',
-            "address_proof_file" => 'required',
-            "id_proof1_file" => 'required',
-            "id_proof2_file" => 'required',
-        ], [
-            "chef_id.required" => "please mention chef_id",
-            "address_proof.required" => "please select address proof type",
-            "address_proof_file.required" => "please select address proof type",
-            "id_proof1_file.required" => "please upload id prood 1 ",
-            "id_proof2_file.required" => "please upload id prood 2",
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
-        }
-        try {
 
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -241,7 +218,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
@@ -301,7 +278,92 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function updateDocuments(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(['error' => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            DB::beginTransaction();
+            // Log::info($req);
+            $path = 'storage/chef/' . $req->chef_id;
+            if (!File::exists($path)) {
+                File::makeDirectory($path, $mode = 0777, true, true);
+            }
+
+            // store address proof 
+            if (isset($req->address_proof) && $req->hasFile('address_proof_file')) {
+                $name_gen = hexdec(uniqid()) . '.' . $req->file('address_proof_file')->getClientOriginalExtension();
+                $req->file('address_proof_file')->storeAs($path, $name_gen);
+                chef::where("id", $req->chef_id)->update(["address_proof_file" => asset($path . $name_gen), "address_proof" => $req->address_proof]);
+            }
+
+            // store ID proof 1
+            if ($req->hasFile('id_proof_1')) {
+                $name_gen = hexdec(uniqid()) . '.' . $req->file('id_proof_1')->getClientOriginalExtension();
+                $req->file('id_proof_1')->storeAs($path, $name_gen);
+                chef::where("id", $req->chef_id)->update(["id_proof_1" => asset($path . $name_gen)]);
+            }
+
+            // store ID proof 2
+            if ($req->hasFile('id_proof_2')) {
+                $name_gen = hexdec(uniqid()) . '.' . $req->file('id_proof_2')->getClientOriginalExtension();
+                $req->file('id_proof_2')->storeAs($path, $name_gen);
+                chef::where("id", $req->chef_id)->update(["id_proof_2" => asset($path . $name_gen)]);
+            }
+
+            // Additional fields which has values in string
+            if (isset($req->typeTextData)) {
+                $textTypeData = $req->typeTextData;
+                foreach ($textTypeData as $value) {
+                    $data = json_decode($value);
+                    if (isset($data->value) && $data->value != "") {
+                        ChefDocument::updateOrCreate(
+                            [
+                                "chef_id" => $req->chef_id,
+                                "document_field_id" => $data->id
+                            ],
+                            [
+                                "field_value" => $data->value
+                            ]
+                        );
+                    }
+                }
+            }
+
+            // Additional fields which has values in files
+            if (isset($req->files) && isset($req->id)) {
+                $fieldsArray = $req->input('id');
+                $filesArray = $req->file('files');
+                Log::info($fieldsArray);
+                foreach ($fieldsArray as $index => $value) {
+                    if (isset($filesArray[$index])) {
+
+                        $name_gen = hexdec(uniqid()) . '.' . $filesArray[$index]->getClientOriginalExtension();
+                        $filesArray[$index]->storeAs($path, $name_gen);
+
+                        ChefDocument::updateOrCreate(
+                            [
+                                "chef_id" => $req->chef_id,
+                                "document_field_id" => $value
+                            ],
+                            [
+                                "field_value" => asset($path . $name_gen)
+                            ]
+                        );
+                    }
+                }
+            }
+            DB::commit();
+            return response()->json(['msg' => "updated successfully", 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 

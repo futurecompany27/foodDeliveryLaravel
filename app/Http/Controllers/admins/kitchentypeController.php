@@ -24,7 +24,7 @@ class kitchentypeController extends Controller
             'kitchentype.unique' => 'Kitchen type already exists with us',
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors(), "success" => false]);
+            return response()->json(['error' => $validator->errors(), "success" => false],500);
         }
         try {
             $path = "storage/admin/kitchentype/";
@@ -57,7 +57,7 @@ class kitchentypeController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
         }
     }
 
@@ -69,7 +69,7 @@ class kitchentypeController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
         }
     }
 }
