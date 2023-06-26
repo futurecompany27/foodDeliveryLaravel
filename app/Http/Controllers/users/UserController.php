@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -106,6 +107,29 @@ class UserController extends Controller
 
     function googleSigin(Request $req)
     {
-        log::info("google data", [$req]);
+        try {
+
+            $userExist = User::where('email', $req->email)->first();
+            if ($userExist) {
+                return response()->json(['message' => 'Login successfully!', "data" => $userExist, 'success' => true], 200);
+            } else {
+                DB::beginTransaction();
+                $user = new User();
+                $user->fullname = $req->name;
+                $user->email = $req->email;
+                $user->social_id = $req->id;
+                $user->social_type = $req->provider;
+                $user->save();
+                $userDetail = User::find($user->id);
+                Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
+                DB::commit();
+                return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
+            }
+
+        } catch (\Throwable $th) {
+            Log::info($th);
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
     }
 }

@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('fullname');
             $table->string('mobile')->unique()->nullable();
             $table->string('email')->unique();
-            $table->text('password');
+            $table->text('password')->nullable();
             $table->string('social_id')->nullable();
             $table->string('social_type')->nullable();
             $table->timestamp('email_verified_at')->nullable();

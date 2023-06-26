@@ -53,14 +53,14 @@ class ChefController extends Controller
                 $chef->new_to_canada = $req->newToCanada;
             }
 
-            if ($req->postal_code) {
-                $pinCodeDetail = Pincode::where('pincode', str_replace(" ", "", (strtolower($req->postal_code))))->first();
-                $chef->latitude = $pinCodeDetail->latitude;
-                $chef->longitude = $pinCodeDetail->longitude;
-                $cityDetail = City::where('id', $pinCodeDetail->city_id)->first();
-                $stateDetails = State::where('id', $cityDetail->state_id)->first();
-                $chef->state = $stateDetails->name;
-            }
+            // if ($req->postal_code) {
+            //     $pinCodeDetail = Pincode::where('pincode', str_replace(" ", "", (strtolower($req->postal_code))))->first();
+            //     // $chef->latitude = $pinCodeDetail->latitude;
+            //     // $chef->longitude = $pinCodeDetail->longitude;
+            //     $cityDetail = City::where('id', $pinCodeDetail->city_id)->first();
+            //     $stateDetails = State::where('id', $cityDetail->state_id)->first();
+            //     $chef->state = $stateDetails->name;
+            // }
 
             $chef->save();
             $chefDetail = chef::find($chef->id);

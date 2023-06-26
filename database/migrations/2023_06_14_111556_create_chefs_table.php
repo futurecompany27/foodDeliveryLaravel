@@ -30,7 +30,7 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->tinyInteger("is_email_verified")->default(0)->comment("0 - not verified 1 - verified");
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->string("is_personal_detail_complete")->default(0)->comment("0 - incomplete, 1 - complete");
             $table->string("address_proof")->nullable();
             $table->string("address_proof_path")->nullable();
