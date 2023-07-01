@@ -42,7 +42,8 @@ return new class extends Migration {
             $table->string("facebook_link")->nullable();
             $table->string("tiktok_link")->nullable();
             $table->string("kitchen_name")->nullable();
-            $table->string("kitchen_image_path")->nullable();
+            $table->string("chef_banner_image")->nullable();
+            $table->string("chef_card_image")->nullable();
             $table->text("kitchen_types")->nullable();
             $table->text("other_kitchen_types")->nullable();
             $table->string("about_kitchen")->nullable();

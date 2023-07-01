@@ -18,24 +18,15 @@ class commonFunctions extends Controller
     function get_lat_long($postal)
     {
         $postal = str_replace(" ", "", $postal);
-        $gmk = env('GOOGLE_MAP_KEY');
-        Log::info("google key");
-        Log::info(env('GOOGLE_MAP_KEY'));
-        $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postal . ",canada&sensor=false&key=" . $gmk;
+        $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postal . ",canada&sensor=false&key=AIzaSyAbW2JsS5yI_X2Mmh8LBcF6ItH2aHqgzfc";
 
-        $result = simplexml_load_file($url);
-        dd($result);
-        // // $result = Http::get($url);
-        // if ($result->successful()) {
-        //     Log::info("kkkkkkkkk",[$result->body()]);
-        // }
-        Log::info($result);
-        if (isset($result->result->geometry)) {
-            $latitude = json_decode($result->result->geometry->location->lat);
-            $longitude = json_decode($result->result->geometry->location->lng);
+        $result = Http::get($url);
+        $xml = simplexml_load_string($result->body());
+        if ($xml->status == 'OK') {
+            Log::info($xml);
+            $latitude = (float) $xml->result->geometry->location->lat;
+            $longitude = (float) $xml->result->geometry->location->lng;
 
-            // $latitude = 45.618200;  for J7A1A4
-            // $longitude =-73.797240; for J7A1A4
             $data = [
                 'result' => 1,
                 'lat' => $latitude,
@@ -66,8 +57,10 @@ class commonFunctions extends Controller
             $chefDetail = chef::find($req->chef_id);
             $stateDetail = State::where('name', $chefDetail->state)->first();
             if ($stateDetail) {
-                $documentList = DocumentItemList::where(["state_id" => $stateDetail->id, "status" => 1])->get();
+                $documentList = DocumentItemList::where(["state_id" => $stateDetail->id])->get();
+                Log::info($documentList);
                 if (count($documentList) > 0) {
+                    Log::info("///////////////");
                     foreach ($documentList as $value) {
                         $docFeilds = DocumentItemField::where('document_item_list_id', $value->id)->get();
                         foreach ($docFeilds as $val) {

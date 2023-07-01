@@ -16,8 +16,8 @@ class DocumentItemList extends Model
         return $this->belongsTo(State::class);
     }
 
-    public function documentitemfields()
+    public function documentItemFields()
     {
-        return $this->hasMany(DocumentItemField::class);
+        return $this->hasMany(DocumentItemList::class, 'document_item_list_id', 'id');
     }
 }

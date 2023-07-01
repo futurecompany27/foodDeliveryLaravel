@@ -46,9 +46,11 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateSocialMediaLinks', 'updateSocialMediaLinks');
     Route::post('/updateBankDetails', 'updateBankDetails');
     Route::post('/updateDocuments', 'updateDocuments');
+    Route::post('/updateKitchen', 'updateKitchen');
+    Route::post('/updateSpecialBenifits', 'updateSpecialBenifits');
 });
 
-// /////////////////// Routes for admin /////////////////////////
+///////////////////// Routes for admin /////////////////////////
 Route::controller(regionController::class)->group(function () {
     Route::post('/addCountry', 'addCountry');
     Route::post('/addState', 'addState');

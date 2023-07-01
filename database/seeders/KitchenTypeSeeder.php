@@ -14,7 +14,6 @@ class KitchenTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('kitchentypes')->insert(['kitchentype' => 'All', 'image' => '', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Indian', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/indian.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Caribbean', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/caribbean.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'American', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/american.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);

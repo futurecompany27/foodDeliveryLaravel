@@ -9,6 +9,7 @@ use App\Mail\HomeshefChefEmailVerification;
 use App\Models\chef;
 use App\Models\ChefDocument;
 use App\Models\City;
+use App\Models\DocumentItemField;
 use App\Models\State;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -44,7 +45,7 @@ class ChefController extends Controller
             $chef->first_name = ucfirst($req->first_name);
             $chef->last_name = ucfirst($req->last_name);
             $chef->date_of_birth = $req->date_of_birth;
-            $chef->postal_code = str_replace(" ", "", (strtolower($req->postal_code)));
+            $chef->postal_code = str_replace(" ", "", ($req->postal_code));
             $chef->mobile = str_replace("-", "", $req->mobile);
             $chef->is_mobile_verified = 0;
             $chef->email = $req->email;
@@ -52,16 +53,6 @@ class ChefController extends Controller
             if ($req->newToCanada == 1) {
                 $chef->new_to_canada = $req->newToCanada;
             }
-
-            // if ($req->postal_code) {
-            //     $pinCodeDetail = Pincode::where('pincode', str_replace(" ", "", (strtolower($req->postal_code))))->first();
-            //     // $chef->latitude = $pinCodeDetail->latitude;
-            //     // $chef->longitude = $pinCodeDetail->longitude;
-            //     $cityDetail = City::where('id', $pinCodeDetail->city_id)->first();
-            //     $stateDetails = State::where('id', $cityDetail->state_id)->first();
-            //     $chef->state = $stateDetails->name;
-            // }
-
             $chef->save();
             $chefDetail = chef::find($chef->id);
 
@@ -101,7 +92,11 @@ class ChefController extends Controller
             "type" => 'required',
             "sub_type" => "required",
             "address_line1" => "required",
-            "postal_code" => 'required'
+            "postal_code" => 'required',
+            "latitude" => "required",
+            "longitude" => "required",
+            "city" => "required",
+            "state" => "required"
         ], [
             "chef_id.required" => "please mention chef_id",
             "first_name.required" => "please fill firstname",
@@ -109,7 +104,11 @@ class ChefController extends Controller
             "type.required" => "please select type",
             "sub_type.required" => "please select sub-type",
             "address_line1.required" => "please fill addressLine1",
-            "postal_code" => "please fill postal code"
+            "postal_code" => "please fill postal code",
+            "latitude" => "please fill latitude",
+            "longitude" => "please fill longitude",
+            "city" => "please fill city",
+            "state" => "please fill state"
         ]);
 
         if ($validator->fails()) {
@@ -141,7 +140,11 @@ class ChefController extends Controller
                 "sub_type" => ucfirst($req->sub_type),
                 "address_line1" => htmlspecialchars(ucfirst($req->address_line1)),
                 "postal_code" => strtoupper($req->postal_code),
-                "profile_pic" => isset($profile) ? $profile : ''
+                "profile_pic" => isset($profile) ? $profile : '',
+                "latitude" => isset($req->latitude) ? $req->latitude : '',
+                "longitude" => isset($req->longitude) ? $req->longitude : '',
+                "city" => isset($req->city) ? $req->city : '',
+                "state" => isset($req->state) ? $req->state : ''
             ]);
             return response()->json(["msg" => "profile updated successfully", "success" => true], 200);
 
@@ -183,7 +186,13 @@ class ChefController extends Controller
             return response()->json(["msg" => "please fill all the required fields", "success" => false], 400);
         }
         try {
-            $data = chef::find($req->chef_id);
+            $data = chef::whereId($req->chef_id)->with([
+                'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')
+                    ->with([
+                        'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                    ])
+            ])
+                ->first();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -289,31 +298,38 @@ class ChefController extends Controller
         }
         try {
             DB::beginTransaction();
-            // Log::info($req);
-            $path = 'storage/chef/' . $req->chef_id;
-            if (!File::exists($path)) {
-                File::makeDirectory($path, $mode = 0777, true, true);
-            }
+            $path = 'chef/' . $req->chef_id;
+
+            $chef = chef::find($req->chef_id);
 
             // store address proof 
-            if (isset($req->address_proof) && $req->hasFile('address_proof_file')) {
-                $name_gen = hexdec(uniqid()) . '.' . $req->file('address_proof_file')->getClientOriginalExtension();
-                $req->file('address_proof_file')->storeAs($path, $name_gen);
-                chef::where("id", $req->chef_id)->update(["address_proof_file" => asset($path . $name_gen), "address_proof" => $req->address_proof]);
+            if (isset($req->address_proof) && $req->hasFile('address_proof_path')) {
+                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->address_proof_path))) {
+                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->address_proof_path));
+                }
+                $storedPath = $req->file('address_proof_path')->store($path, 'public');
+                chef::where("id", $req->chef_id)->update(["address_proof_path" => asset('storage/' . $storedPath), "address_proof" => $req->address_proof]);
+
             }
 
             // store ID proof 1
-            if ($req->hasFile('id_proof_1')) {
-                $name_gen = hexdec(uniqid()) . '.' . $req->file('id_proof_1')->getClientOriginalExtension();
-                $req->file('id_proof_1')->storeAs($path, $name_gen);
-                chef::where("id", $req->chef_id)->update(["id_proof_1" => asset($path . $name_gen)]);
+            if ($req->hasFile('id_proof_path1')) {
+                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1))) {
+                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1));
+                }
+                $storedPath = $req->file('id_proof_path1')->store($path, 'public');
+                chef::where("id", $req->chef_id)->update(["id_proof_path1" => asset('storage/' . $storedPath)]);
+
             }
 
             // store ID proof 2
-            if ($req->hasFile('id_proof_2')) {
-                $name_gen = hexdec(uniqid()) . '.' . $req->file('id_proof_2')->getClientOriginalExtension();
-                $req->file('id_proof_2')->storeAs($path, $name_gen);
-                chef::where("id", $req->chef_id)->update(["id_proof_2" => asset($path . $name_gen)]);
+            if ($req->hasFile('id_proof_path2')) {
+                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1))) {
+                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1));
+                }
+                $storedPath = $req->file('id_proof_path2')->store($path, 'public');
+                chef::where("id", $req->chef_id)->update(["id_proof_path2" => asset('storage/' . $storedPath)]);
+
             }
 
             // Additional fields which has values in string
@@ -343,8 +359,7 @@ class ChefController extends Controller
                 foreach ($fieldsArray as $index => $value) {
                     if (isset($filesArray[$index])) {
 
-                        $name_gen = hexdec(uniqid()) . '.' . $filesArray[$index]->getClientOriginalExtension();
-                        $filesArray[$index]->storeAs($path, $name_gen);
+                        $storedPath = $filesArray[$index]->store($path, 'public');
 
                         ChefDocument::updateOrCreate(
                             [
@@ -352,18 +367,86 @@ class ChefController extends Controller
                                 "document_field_id" => $value
                             ],
                             [
-                                "field_value" => asset($path . $name_gen)
+                                "field_value" => asset('storage/' . $storedPath)
                             ]
                         );
                     }
                 }
             }
+
             DB::commit();
             return response()->json(['msg' => "updated successfully", 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function updateKitchen(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(['error' => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            DB::beginTransaction();
+            $path = 'chef/' . $req->chef_id;
+            $chef = chef::find($req->chef_id);
+
+            if ($req->hasFile('chef_banner_image')) {
+                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->chef_banner_image))) {
+                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->chef_banner_image));
+                }
+                $storedPath = $req->file('chef_banner_image')->store($path, 'public');
+                chef::where("id", $req->chef_id)->update(["chef_banner_image" => asset('storage/' . $storedPath)]);
+            }
+
+            if ($req->hasFile('chef_card_image')) {
+                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->chef_card_image))) {
+                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->chef_card_image));
+                }
+                $storedPath = $req->file('chef_card_image')->store($path, 'public');
+                chef::where("id", $req->chef_id)->update(["chef_card_image" => asset('storage/' . $storedPath)]);
+            }
+
+            $update = [
+                "kitchen_types" => $req->kitchen_types,
+                "about_kitchen" => $req->about_kitchen,
+                "kitchen_name" => $req->kitchen_name,
+            ];
+            chef::where('id', $req->chef_id)->update($update);
+            DB::commit();
+            return response()->json(["msg" => "updated successfully", "success" => true], 200);
+
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function updateSpecialBenifits(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(['error' => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            $path = 'chef/' . $req->chef_id;
+            $chef = chef::find($req->chef_id);
+            if ($req->hasFile('are_you_a_file_path')) {
+                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->are_you_a_file_path))) {
+                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->are_you_a_file_path));
+                }
+                $storedPath = $req->file('are_you_a_file_path')->store($path, 'public');
+                chef::where("id", $req->chef_id)->update(["are_you_a_file_path" => asset('storage/' . $storedPath), "are_you_a" => $req->are_you_a]);
+                return response()->json(["msg" => "updated successfully", "success" => true], 200);
+            } else {
+                return response()->json(["msg" => "please upload proof of " . $req->are_you_a, "success" => false], 500);
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 

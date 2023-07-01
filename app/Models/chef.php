@@ -30,4 +30,10 @@ class chef extends Model
         'password',
         'remember_token',
     ];
+
+
+    public function chefDocuments()
+    {
+        return $this->hasMany(ChefDocument::class, 'chef_id', 'id');
+    }
 }

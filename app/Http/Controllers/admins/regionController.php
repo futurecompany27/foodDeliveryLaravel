@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admins;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\utility\commonFunctions;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Pincode;
@@ -99,14 +100,14 @@ class regionController extends Controller
             $Pincode->pincode = str_replace(" ", "", (strtolower($req->pincode)));
             $Pincode->city_id = $req->city_id;
 
-            // $commonFunctions = new commonFunctions;
-            // $lat_long = $commonFunctions->get_lat_long(str_replace(" ", "", (strtolower($req->postal_code))));
+            $commonFunctions = new commonFunctions;
+            $lat_long = $commonFunctions->get_lat_long(str_replace(" ", "", (strtolower($req->postal_code))));
             // log::info($lat_long);
             // $Pincode->latitude = $lat_long['lat'];
             // $Pincode->longitude = $lat_long['long'];
 
-            $Pincode->latitude = 45.618200;
-            $Pincode->longitude = -73.797240;
+            // $Pincode->latitude = 45.618200;
+            // $Pincode->longitude = -73.797240;
             $Pincode->save();
             DB::commit();
             return response()->json(["msg" => "pincode added successfully ", "success" => true], 200);
