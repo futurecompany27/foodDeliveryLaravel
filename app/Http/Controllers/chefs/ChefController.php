@@ -12,6 +12,7 @@ use App\Models\City;
 use App\Models\DocumentItemField;
 use App\Models\State;
 use App\Models\User;
+use App\Models\ChangePassword;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -450,14 +451,58 @@ class ChefController extends Controller
             return response()->json(["msg" => "please fill all the required fields ", "success" => false], 400);
         }
         try {
-                $contact = new contact();
-                $contact->chef_id = $req->chef_id;
-                $contact->subject = $req->subject;
-                $contact->message = $req->message;
-                $contact->save();
-                return response()->json(['msg' => 'Submitted successfully', "success" => true], 200);
+            $contact = new contact();
+            $contact->chef_id = $req->chef_id;
+            $contact->subject = $req->subject;
+            $contact->message = $req->message;
+            $contact->save();
+            return response()->json(['msg' => 'Submitted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+    function ChangePassword(Request $req)
+    {
+
+        if (!$req->chef_id) {
+            return response()->json(["msg" => "please fill all the required fields ", "success" => false], 400);
+        }
+        try {
+            $validator = Validator::make($req->all(), [
+                "chef_id" => 'required',
+                "current_password" => 'required',
+                "new_password" => 'required',
+                "confirm_password" => 'required',
+            ], [
+                "chef_id.required" => "please fill chef_id",
+                "current_password.required" => "please fill current_password",
+                "new_password.required" => "please fill new_password",
+                "confirm_password.required" => "please fill confirm_password",
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(["error" => $validator->errors(), "success" => false], 400);
             }
-         catch (\Throwable $th) {
+
+            if ($req->new_password !== $req->confirm_password) {
+                return response()->json(["error" => $req->error(), "success" => false], 400);
+            }
+            $chefDetail = chef::find($req->chef_id);
+            if ($chefDetail) {
+                $chefDetail->makeVisible('password');
+                if (Hash::check($req->current_password, $chefDetail['password'])) {
+                    $chefDetail->password = Hash::make($req->new_password);
+                    $chefDetail->save();
+                    return response()->json(['message' => 'password changed successfully!', 'success' => true], 200);
+                } else {
+                    return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+                }
+            } else {
+                return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+            }
+        } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);

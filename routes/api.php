@@ -49,6 +49,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateKitchen', 'updateKitchen');
     Route::post('/updateSpecialBenifits', 'updateSpecialBenifits');
     Route::post('/AddContactData', 'AddContactData');
+    Route::post('/ChangePassword', 'ChangePassword');
 });
 
 ///////////////////// Routes for admin /////////////////////////
