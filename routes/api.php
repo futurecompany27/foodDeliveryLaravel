@@ -49,6 +49,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateKitchen', 'updateKitchen');
     Route::post('/updateSpecialBenifits', 'updateSpecialBenifits');
     Route::post('/chefScheduleAnCall', 'chefScheduleAnCall');
+    Route::post('/AddContactData', 'AddContactData');
 });
 
 ///////////////////// Routes for admin /////////////////////////
