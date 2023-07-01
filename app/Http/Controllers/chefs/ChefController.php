@@ -10,6 +10,7 @@ use App\Models\chef;
 use App\Models\ChefDocument;
 use App\Models\City;
 use App\Models\DocumentItemField;
+use App\Models\ScheduleCall;
 use App\Models\State;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -450,4 +451,32 @@ class ChefController extends Controller
         }
     }
 
+    function chefScheduleAnCall(Request $req)
+    {
+        if (!$req->chef_id || !$req->date || !$req->slot) {
+            return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
+        }
+        try {
+            $slotNotAvailable = ScheduleCall::where(['date' => $req->date, 'slot'=> $req->slot])->first();
+            if ($slotNotAvailable) {
+                return response()->json(['msg' => 'Slot not available select another slot', 'success' => false], 500);
+            }
+            $SameChefSameSlot = ScheduleCall::where(['chef_id' => $req->chef_id, 'slot' => $req->slot])->first();
+            if ($SameChefSameSlot) {
+                return response()->json(['msg' => 'Already booked on same slot', 'success' => false]);
+            }
+            DB::beginTransaction();
+            $scheduleNewCall = new ScheduleCall();
+            $scheduleNewCall->chef_id = $req->chef_id;
+            $scheduleNewCall->date = $req->date;
+            $scheduleNewCall->slot = $req->slot;
+            $scheduleNewCall->save();
+            DB::commit();
+            return response()->json(["msg" => 'Call has been scheduled successfully', 'success' => true]);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
 }
