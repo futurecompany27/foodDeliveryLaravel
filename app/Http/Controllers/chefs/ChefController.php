@@ -12,6 +12,7 @@ use App\Models\City;
 use App\Models\DocumentItemField;
 use App\Models\State;
 use App\Models\User;
+use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -147,7 +148,6 @@ class ChefController extends Controller
                 "state" => isset($req->state) ? $req->state : ''
             ]);
             return response()->json(["msg" => "profile updated successfully", "success" => true], 200);
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -187,9 +187,9 @@ class ChefController extends Controller
         }
         try {
             $data = chef::whereId($req->chef_id)->with([
-                'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')
+                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')
                     ->with([
-                        'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                        'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
                     ])
             ])
                 ->first();
@@ -223,7 +223,6 @@ class ChefController extends Controller
             } else {
                 return response()->json(["error" => "This email is already registerd with Homeshef", "success" => false], 500);
             }
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -283,7 +282,6 @@ class ChefController extends Controller
             $chef->institution_number = $req->institution_number;
             $chef->save();
             return response()->json(['msg' => "updated successfully", "success" => true], 200);
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -309,7 +307,6 @@ class ChefController extends Controller
                 }
                 $storedPath = $req->file('address_proof_path')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["address_proof_path" => asset('storage/' . $storedPath), "address_proof" => $req->address_proof]);
-
             }
 
             // store ID proof 1
@@ -319,7 +316,6 @@ class ChefController extends Controller
                 }
                 $storedPath = $req->file('id_proof_path1')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["id_proof_path1" => asset('storage/' . $storedPath)]);
-
             }
 
             // store ID proof 2
@@ -329,7 +325,6 @@ class ChefController extends Controller
                 }
                 $storedPath = $req->file('id_proof_path2')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["id_proof_path2" => asset('storage/' . $storedPath)]);
-
             }
 
             // Additional fields which has values in string
@@ -417,7 +412,6 @@ class ChefController extends Controller
             chef::where('id', $req->chef_id)->update($update);
             DB::commit();
             return response()->json(["msg" => "updated successfully", "success" => true], 200);
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -449,5 +443,24 @@ class ChefController extends Controller
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
+    function AddContactData(Request $req)
+    {
 
+        if (!$req->chef_id) {
+            return response()->json(["msg" => "please fill all the required fields ", "success" => false], 400);
+        }
+        try {
+                $contact = new contact();
+                $contact->chef_id = $req->chef_id;
+                $contact->subject = $req->subject;
+                $contact->message = $req->message;
+                $contact->save();
+                return response()->json(['msg' => 'Submitted successfully', "success" => true], 200);
+            }
+         catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
 }
