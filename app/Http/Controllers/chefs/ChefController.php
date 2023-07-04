@@ -10,6 +10,7 @@ use App\Models\chef;
 use App\Models\ChefDocument;
 use App\Models\City;
 use App\Models\DocumentItemField;
+use App\Models\FoodItem;
 use App\Models\ScheduleCall;
 use App\Models\State;
 use App\Models\User;
@@ -486,6 +487,137 @@ class ChefController extends Controller
             $scheduleNewCall->save();
             DB::commit();
             return response()->json(["msg" => 'Call has been scheduled successfully', 'success' => true]);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function chefAddNewOrUpdateFoodItem(Request $req)
+    {
+        try {
+            if ($req->food_id && $req->chef_id) {
+
+            } else {
+                $validator = Validator::make(
+                    $req->all(),
+                    [
+                        'dish_name' => 'required',
+                        'description' => 'required',
+                        'dishImage' => 'required|image',
+                        'regularDishAvailabilty' => 'required',
+                        'from' => 'nullable',
+                        'to' => 'nullable',
+                        'foodAvailibiltyOnWeekdays' => 'required',
+                        'orderLimit' => 'required|numeric',
+                        'foodTypeId' => 'required',
+                        'spicyLevel' => 'required',
+                        'heating_instruction_id' => 'required',
+                        'heating_instruction_description' => 'required',
+                        'package' => 'required',
+                        'size' => 'required',
+                        'expiresIn' => 'required',
+                        'serving_unit' => 'required',
+                        'serving_person' => 'required',
+                        'price' => 'required',
+                        'comments' => 'required',
+
+                    ],
+                    [
+                        'dish_name.required' => 'Please mention dish name',
+                        'description.required' => 'Please add dish discription',
+                        'dishImage.required' => 'please add dish image',
+                        'dishImage.image' => 'please select image file only',
+                        'regularDishAvailabilty.required' => 'please mention regularity of the dish',
+                        'foodAvailibiltyOnWeekdays.required' => 'please mention weekdays availablity of the food',
+                        'orderLimit.required' => 'please mention order limit',
+                        'orderLimit.numeric' => 'order limit must be in number only',
+                        'foodTypeId.required' => 'please select food type',
+                        'spicyLevel.required' => 'please select spicy level of the food',
+                        'heating_instruction_id.required' => 'please select heating instruction option',
+                        'heating_instruction_description.required' => 'please enter food heading instruction',
+                        'package.required' => 'please select package type',
+                        'size.required' => 'Please enter package size',
+                        'expiresIn.required' => 'Please mention the expirey period of the food',
+                        'serving_unit.required' => 'Please mention serving unit',
+                        'serving_person.required' => 'Please mention the food sufficency',
+                        'price.required' => 'please mention the price of the food',
+                        'comments.required' => 'Please mention some comments for the food'
+                    ]
+                );
+
+                if ($validator->fails()) {
+                    return response()->json(["error" => $validator->errors(), "success" => false], 400);
+                }
+
+                $OGfilePath = "";
+                $filename_thumb = "";
+                if ($req->hasFile('dishImage')) {
+                    $directoryPath = 'storage/foodItem/';
+                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
+                    if (!file_exists($directoryPath)) {
+                        mkdir($directoryPath, 0755, true);
+                    }
+                    if (!file_exists($directoryPathThumbnail)) {
+                        mkdir($directoryPathThumbnail, 0755, true);
+                    }
+                    $image = Image::make($req->file('dishImage'));
+                    $name_gen = hexdec(uniqid()) . '.' . $req->file('dishImage')->getClientOriginalExtension();
+                    $OGfilePath = $directoryPath . $name_gen;
+                    $image->fit(800, 800)->save($OGfilePath);
+                    $filename_thumb = $directoryPathThumbnail . $name_gen;
+                    $image->fit(200, 200)->save($filename_thumb);
+                }
+
+                DB::beginTransaction();
+                $foodItem = new FoodItem();
+                $foodItem->chef_id = $req->chef_id;
+                $foodItem->dish_name = $req->dish_name;
+                $foodItem->description = $req->description;
+                $foodItem->dishImage = asset($OGfilePath);
+                $foodItem->dishImageThumbnail = asset($filename_thumb);
+                $foodItem->regularDishAvailabilty = $req->regularDishAvailabilty;
+                $foodItem->from = $req->from;
+                $foodItem->to = $req->to;
+                $foodItem->foodAvailibiltyOnWeekdays = $req->foodAvailibiltyOnWeekdays;
+                $foodItem->orderLimit = $req->orderLimit;
+                $foodItem->foodTypeId = $req->foodTypeId;
+                $foodItem->spicyLevel = $req->spicyLevel;
+                $foodItem->geographicalCuisine = $req->geographicalCuisine;
+                $foodItem->otherCuisine = $req->otherCuisine;
+                $foodItem->ingredients = $req->ingredients;
+                $foodItem->otherIngredients = $req->otherIngredients;
+                $foodItem->nutritions = $req->nutritions;
+                $foodItem->dietary = $req->dietary;
+                $foodItem->heating_instruction_id = $req->heating_instruction_id;
+                $foodItem->heating_instruction_description = $req->heating_instruction_description;
+                $foodItem->package = $req->package;
+                $foodItem->size = $req->size;
+                $foodItem->expiresIn = $req->expiresIn;
+                $foodItem->serving_unit = $req->serving_unit;
+                $foodItem->serving_person = $req->serving_person;
+                $foodItem->price = $req->price;
+                $foodItem->comments = $req->comments;
+                $foodItem->save();
+                DB::commit();
+                return response()->json(['msg' => "Food Item Added Successfully", "success" => true], 200);
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+
+    }
+
+    function getMyFoodItems(Request $req) {
+        if (!$req->chef_id) {
+            return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
+        }
+        try {
+            $data = FoodItem::where('chef_id',$req->chef_id)->get();
+            return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

@@ -50,6 +50,8 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateSpecialBenifits', 'updateSpecialBenifits');
     Route::post('/chefScheduleAnCall', 'chefScheduleAnCall');
     Route::post('/AddContactData', 'AddContactData');
+    Route::post('/chefAddNewOrUpdateFoodItem', 'chefAddNewOrUpdateFoodItem');
+    Route::post('/getMyFoodItems', 'getMyFoodItems');
 });
 
 ///////////////////// Routes for admin /////////////////////////
@@ -90,5 +92,9 @@ Route::controller(otpController::class)->group(function () {
 Route::controller(commonFunctions::class)->group(function () {
     Route::get("/getAllBankList", 'getAllBankList');
     Route::post("/getDocumentListAccToChefTypeAndState", 'getDocumentListAccToChefTypeAndState');
-
+    Route::get("/getAllFoodTypes", 'getAllFoodTypes');
+    Route::get("/getAllHeatingInstructions", 'getAllHeatingInstructions');
+    Route::get("/getAllNutritions", 'getAllNutritions');
+    Route::get("/getAllDietaries", 'getAllDietaries');
+    Route::get("/getAllIngredients", 'getAllIngredients');
 });
