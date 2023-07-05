@@ -153,7 +153,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
         }
     }
 
@@ -611,12 +611,28 @@ class ChefController extends Controller
 
     }
 
-    function getMyFoodItems(Request $req) {
+    function getMyFoodItems(Request $req)
+    {
         if (!$req->chef_id) {
             return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
         }
         try {
-            $data = FoodItem::where('chef_id',$req->chef_id)->get();
+            $data = FoodItem::where('chef_id', $req->chef_id)->get();
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function getFoodItem(Request $req)
+    {
+        if (!$req->food_id) {
+            return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
+        }
+        try {
+            $data = FoodItem::where('id', $req->food_id)->first();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

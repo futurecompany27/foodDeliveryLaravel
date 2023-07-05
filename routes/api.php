@@ -6,6 +6,7 @@ use App\Http\Controllers\admins\regionController;
 use App\Http\Controllers\admins\shefTypesController;
 use App\Http\Controllers\admins\taxController;
 use App\Http\Controllers\chefs\ChefController;
+use App\Http\Controllers\users\cartController;
 use App\Http\Controllers\users\otpController;
 use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
@@ -52,6 +53,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/AddContactData', 'AddContactData');
     Route::post('/chefAddNewOrUpdateFoodItem', 'chefAddNewOrUpdateFoodItem');
     Route::post('/getMyFoodItems', 'getMyFoodItems');
+    Route::post('/getFoodItem', 'getFoodItem');
 });
 
 ///////////////////// Routes for admin /////////////////////////
@@ -86,6 +88,11 @@ Route::controller(shefTypesController::class)->group(function () {
 Route::controller(otpController::class)->group(function () {
     Route::post('/sendOTP', 'sendOTP');
     Route::post('/verifyOtp', 'verifyOtp');
+});
+
+Route::controller(cartController::class)->group(function () {
+    Route::post('/addToCart', 'addToCart');
+    Route::post('/getMyCart', 'getMyCart');
 });
 
 /////////////// common api's ///////////////

@@ -74,7 +74,7 @@ class UserController extends Controller
     function getChefsByPostalCode(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'postal_code' => ['regex:/^[a-zA-Z]\d[a-zA-Z]\d[a-zA-Z]\d$/', 'size:6'],
+            'postal_code' => "required",
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->all(), 'success' => false], 400);
