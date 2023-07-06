@@ -71,4 +71,47 @@ class cartController extends Controller
             return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
         }
     }
+
+    function changeQuantity(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'user_id' => 'required',
+            'food_id' => 'required',
+            'type' => 'required',
+            'quantity' => 'required'
+        ], [
+            'user_id.required' => 'please fill user_id',
+            'food.required' => 'please fill food_id',
+            'type.required' => 'please fill type',
+            'quantity.required' => 'please fill type',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $cart = Cart::where("user_id", $req->user_id)->first();
+            if ($cart) {
+                $foodItemsArray = $cart->foodItems;
+                foreach ($foodItemsArray as &$value) {
+                    if ($req->food_id == $value['food_id']) {
+                        if ($req->type == 'increase') {
+                            $value['quantity'] = ($value['quantity'] + $req->quantity);
+                        }
+                        if ($req->type == 'decrease') {
+                            $value['quantity'] = ($value['quantity'] - $req->quantity);
+                        }
+                    }
+                }
+                Cart::where("user_id", $req->user_id)->update(["foodItems" => $foodItemsArray]);
+                return response()->json(["msg" => "updated successfully", "success" => true], 200);
+            } else {
+                return response()->json(["msg" => "updated successfully", "success" => true], 200);
+            }
+
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+        }
+    }
 }

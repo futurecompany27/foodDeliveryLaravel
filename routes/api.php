@@ -37,6 +37,17 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/googleSigin', 'googleSigin');
 });
 
+Route::controller(cartController::class)->group(function () {
+    Route::post('/addToCart', 'addToCart');
+    Route::post('/getMyCart', 'getMyCart');
+    Route::post('/changeQuantity', 'changeQuantity');
+});
+
+Route::controller(otpController::class)->group(function () {
+    Route::post('/sendOTP', 'sendOTP');
+    Route::post('/verifyOtp', 'verifyOtp');
+});
+
 // Routes for chefs
 Route::controller(ChefController::class)->group(function () {
     Route::post('/ChefRegisteration', 'ChefRegisteration');
@@ -56,7 +67,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/getFoodItem', 'getFoodItem');
 });
 
-///////////////////// Routes for admin /////////////////////////
+// Route for admin
 Route::controller(regionController::class)->group(function () {
     Route::post('/addCountry', 'addCountry');
     Route::post('/addState', 'addState');
@@ -85,15 +96,6 @@ Route::controller(shefTypesController::class)->group(function () {
     Route::get('/getAllShefSubTypes', 'getAllShefSubTypes');
 });
 
-Route::controller(otpController::class)->group(function () {
-    Route::post('/sendOTP', 'sendOTP');
-    Route::post('/verifyOtp', 'verifyOtp');
-});
-
-Route::controller(cartController::class)->group(function () {
-    Route::post('/addToCart', 'addToCart');
-    Route::post('/getMyCart', 'getMyCart');
-});
 
 /////////////// common api's ///////////////
 Route::controller(commonFunctions::class)->group(function () {

@@ -1,1 +1,4 @@
 [2023-07-05 11:56:21] local.INFO: Indirect modification of overloaded property App\Models\Cart::$foodItems has no effect  
+[2023-07-06 13:46:25] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-06 13:47:24] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-06 13:47:52] local.INFO: Attempt to read property "foodItems" on null  

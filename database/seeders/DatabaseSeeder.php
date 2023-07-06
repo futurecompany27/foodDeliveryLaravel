@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
             KitchenTypeSeeder::class,
             UnitSeeder::class,
             NutritionsSeeder::class,
-            DietarysSeeder::class
+            DietarysSeeder::class,
+            ChefSeeder::class
         ]);
     }
 }
