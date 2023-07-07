@@ -27,7 +27,7 @@ class FoodItem extends Model
         'otherCuisine',
         'ingredients',
         'otherIngredients',
-        'nutritions',
+        'allergies',
         'dietary',
         'heating_instruction_id',
         'heating_instruction_description',

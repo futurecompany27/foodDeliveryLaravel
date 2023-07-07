@@ -29,7 +29,7 @@ return new class extends Migration
             $table->json('otherCuisine')->nullable();
             $table->json('ingredients')->nullable();
             $table->json('otherIngredients')->nullable();
-            $table->json('nutritions')->nullable();
+            $table->json('allergies')->nullable();
             $table->json('dietary')->nullable();
             $table->string('heating_instruction_id');
             $table->string('heating_instruction_description');

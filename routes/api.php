@@ -65,6 +65,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/chefAddNewOrUpdateFoodItem', 'chefAddNewOrUpdateFoodItem');
     Route::post('/getMyFoodItems', 'getMyFoodItems');
     Route::post('/getFoodItem', 'getFoodItem');
+    Route::post('/updateWeekAvailibilty', 'updateWeekAvailibilty');
 });
 
 // Route for admin
@@ -103,7 +104,7 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::post("/getDocumentListAccToChefTypeAndState", 'getDocumentListAccToChefTypeAndState');
     Route::get("/getAllFoodTypes", 'getAllFoodTypes');
     Route::get("/getAllHeatingInstructions", 'getAllHeatingInstructions');
-    Route::get("/getAllNutritions", 'getAllNutritions');
+    Route::get("/getAllAllergens", 'getAllAllergens');
     Route::get("/getAllDietaries", 'getAllDietaries');
     Route::get("/getAllIngredients", 'getAllIngredients');
 });

@@ -499,13 +499,46 @@ class ChefController extends Controller
         try {
             if ($req->food_id && $req->chef_id) {
 
+                $foodData = FoodItem::find($req->food_id);
+                Log::info($req->foodAvailibiltyOnWeekdays);
+                $foodData->fill($req->all());
+
+                $OGfilePath = "";
+                $filename_thumb = "";
+                if ($req->hasFile('foodImage')) {
+                    $directoryPath = 'storage/foodItem/';
+                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
+                    if (file_exists(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImage))) {
+                        unlink(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImage));
+                        $foodData->dishImage = '';
+                    }
+
+                    if (file_exists(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImageThumbnail))) {
+                        unlink(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImageThumbnail));
+                        $foodData->dishImageThumbnail = '';
+                    }
+
+                    $image = Image::make($req->file('foodImage'));
+                    $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
+                    $OGfilePath = $directoryPath . $name_gen;
+                    $image->fit(800, 800)->save($OGfilePath);
+                    $filename_thumb = $directoryPathThumbnail . $name_gen;
+                    $image->fit(200, 200)->save($filename_thumb);
+
+                    $foodData->dishImage = asset($OGfilePath);
+                    $foodData->dishImageThumbnail = asset($filename_thumb);
+                }
+
+                $foodData->save();
+                return response()->json(['msg' => 'updated successfully', 'success' => true], 200);
+
             } else {
                 $validator = Validator::make(
                     $req->all(),
                     [
                         'dish_name' => 'required',
                         'description' => 'required',
-                        'dishImage' => 'required|image',
+                        'foodImage' => 'required|image',
                         'regularDishAvailabilty' => 'required',
                         'from' => 'nullable',
                         'to' => 'nullable',
@@ -527,8 +560,8 @@ class ChefController extends Controller
                     [
                         'dish_name.required' => 'Please mention dish name',
                         'description.required' => 'Please add dish discription',
-                        'dishImage.required' => 'please add dish image',
-                        'dishImage.image' => 'please select image file only',
+                        'foodImage.required' => 'please add dish image',
+                        'foodImage.image' => 'please select image file only',
                         'regularDishAvailabilty.required' => 'please mention regularity of the dish',
                         'foodAvailibiltyOnWeekdays.required' => 'please mention weekdays availablity of the food',
                         'orderLimit.required' => 'please mention order limit',
@@ -553,7 +586,7 @@ class ChefController extends Controller
 
                 $OGfilePath = "";
                 $filename_thumb = "";
-                if ($req->hasFile('dishImage')) {
+                if ($req->hasFile('foodImage')) {
                     $directoryPath = 'storage/foodItem/';
                     $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
                     if (!file_exists($directoryPath)) {
@@ -562,8 +595,8 @@ class ChefController extends Controller
                     if (!file_exists($directoryPathThumbnail)) {
                         mkdir($directoryPathThumbnail, 0755, true);
                     }
-                    $image = Image::make($req->file('dishImage'));
-                    $name_gen = hexdec(uniqid()) . '.' . $req->file('dishImage')->getClientOriginalExtension();
+                    $image = Image::make($req->file('foodImage'));
+                    $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
                     $OGfilePath = $directoryPath . $name_gen;
                     $image->fit(800, 800)->save($OGfilePath);
                     $filename_thumb = $directoryPathThumbnail . $name_gen;
@@ -588,7 +621,7 @@ class ChefController extends Controller
                 $foodItem->otherCuisine = $req->otherCuisine;
                 $foodItem->ingredients = $req->ingredients;
                 $foodItem->otherIngredients = $req->otherIngredients;
-                $foodItem->nutritions = $req->nutritions;
+                $foodItem->allergies = $req->allergies;
                 $foodItem->dietary = $req->dietary;
                 $foodItem->heating_instruction_id = $req->heating_instruction_id;
                 $foodItem->heating_instruction_description = $req->heating_instruction_description;
@@ -608,7 +641,6 @@ class ChefController extends Controller
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
-
     }
 
     function getMyFoodItems(Request $req)
@@ -634,6 +666,34 @@ class ChefController extends Controller
         try {
             $data = FoodItem::where('id', $req->food_id)->first();
             return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function updateWeekAvailibilty(Request $req)
+    {
+        $validator = Validator::make(
+            $req->all(),
+            [
+                'food_id' => 'required',
+                'weekAvailibilty' => 'required',
+            ],
+            [
+                'food_id.required' => 'Please mention dish name',
+                'weekAvailibilty.required' => 'Please mention week availibilty',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            Log::info($req->weekAvailibilty);
+            FoodItem::where('id', $req->food_id)->update(['foodAvailibiltyOnWeekdays' => $req->weekAvailibilty]);
+            return response()->json(['msg' => 'updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

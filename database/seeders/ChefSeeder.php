@@ -25,46 +25,46 @@ class ChefSeeder extends Seeder
             "password" => Hash::make('Homeshef@123'),
             "kitchen_name" => "Ravindra's Kitchen",
             "about_kitchen" => "We have 1 year of experience in cooking with all type of cuisines",
-            "kitchen_types" => ['Indian', "American"],
+            "kitchen_types" => json_encode(['Indian', "American"]),
         ]);
         DB::table('chefs')->insert([
             "first_name" => 'Ravi',
             "last_name" => "Mandal",
             "date_of_birth" => "2005-11-04",
             "postal_code" => 'M4L',
-            "mobile" => "1111111111",
+            "mobile" => "1111111112",
             "is_mobile_verified" => "0",
             "email" => "ravi@gmail.com",
             "password" => Hash::make('Homeshef@123'),
             "kitchen_name" => "Ravi's Kitchen",
             "about_kitchen" => "We have 1 year of experience in cooking with all type of cuisines",
-            "kitchen_types" => ['Indian', "American"],
+            "kitchen_types" => json_encode(['Indian', "American"]),
         ]);
         DB::table('chefs')->insert([
             "first_name" => 'Sarita',
             "last_name" => "ma'am",
             "date_of_birth" => "1980-11-04",
             "postal_code" => 'M4L',
-            "mobile" => "1111111111",
+            "mobile" => "1111111113",
             "is_mobile_verified" => "0",
             "email" => "sarita@gmail.com",
             "password" => Hash::make('Homeshef@123'),
             "kitchen_name" => "Sarita's Kitchen",
             "about_kitchen" => "We have 10 year of experience in cooking with all type of cuisines",
-            "kitchen_types" => ['Indian', "American"],
+            "kitchen_types" => json_encode(['Indian', "American"]),
         ]);
         DB::table('chefs')->insert([
             "first_name" => 'himanta',
             "last_name" => "ma'am",
             "date_of_birth" => "1990-11-04",
             "postal_code" => 'M4L',
-            "mobile" => "1111111111",
+            "mobile" => "1111111114",
             "is_mobile_verified" => "0",
             "email" => "himanta@gmail.com",
             "password" => Hash::make('Homeshef@123'),
             "kitchen_name" => "Himanta's Kitchen",
             "about_kitchen" => "We have 10 year of experience in cooking with all type of cuisines",
-            "kitchen_types" => ['Indian', "American"],
+            "kitchen_types" => json_encode(['Indian', "American"]),
         ]);
     }
 }

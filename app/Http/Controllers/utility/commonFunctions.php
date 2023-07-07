@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\utility;
 
 use App\Http\Controllers\Controller;
+use App\Models\Allergy;
 use App\Models\BankName;
 use App\Models\chef;
 use App\Models\Dietary;
@@ -11,7 +12,6 @@ use App\Models\DocumentItemList;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
-use App\Models\Nutrition;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -109,10 +109,10 @@ class commonFunctions extends Controller
         }
     }
 
-    function getAllNutritions(Request $req)
+    function getAllAllergens(Request $req)
     {
         try {
-            return response()->json(['data' => Nutrition::all(), 'success' => true], 200);
+            return response()->json(['data' => Allergy::all(), 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

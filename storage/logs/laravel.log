@@ -1,4 +1,38 @@
-[2023-07-05 11:56:21] local.INFO: Indirect modification of overloaded property App\Models\Cart::$foodItems has no effect  
-[2023-07-06 13:46:25] local.INFO: Attempt to read property "foodItems" on null  
-[2023-07-06 13:47:24] local.INFO: Attempt to read property "foodItems" on null  
-[2023-07-06 13:47:52] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-07 13:58:19] local.INFO: ["Su","M","T"]  
+[2023-07-07 13:58:42] local.INFO: ["Su","M","T","W"]  
+[2023-07-07 14:00:02] local.INFO: ["Su","M","T"]  
+[2023-07-07 14:05:02] local.INFO: array (
+  0 => 'Su',
+  1 => 'M',
+  2 => 'T',
+  3 => 'W',
+)  
+[2023-07-07 14:07:15] local.INFO: array (
+  0 => 'Su',
+  1 => 'M',
+  2 => 'T',
+  3 => 'W',
+  4 => 'TH',
+)  
+[2023-07-07 14:07:25] local.INFO: array (
+  0 => 'Su',
+  1 => 'M',
+  2 => 'T',
+  3 => 'W',
+  4 => 'TH',
+  5 => 'F',
+)  
+[2023-07-07 14:08:18] local.INFO: array (
+  0 => 'Su',
+  1 => 'M',
+  2 => 'T',
+  3 => 'W',
+  4 => 'TH',
+)  
+[2023-07-07 14:08:18] local.INFO: array (
+  0 => 'Su',
+  1 => 'M',
+  2 => 'T',
+  3 => 'W',
+)  
+[2023-07-07 14:08:27] local.INFO: ["Su","M","T","W","TH","F","S"]  

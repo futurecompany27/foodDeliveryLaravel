@@ -32,7 +32,7 @@ class cartController extends Controller
                 foreach ($foodItemsArray as &$value) {
                     if ($req->food['food_id'] == $value['food_id']) {
                         $foodItemAlreadyInCart = true;
-                        $value['quantity'] = ($value['quantity'] + 1);
+                        $value['quantity'] = $req->food['quantity'];
                     }
                 }
                 if (!$foodItemAlreadyInCart) {

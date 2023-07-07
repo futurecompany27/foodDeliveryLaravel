@@ -14,16 +14,21 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
+            AllergiesSeeder::class,
             BankNameSeeder::class,
+            ChefSeeder::class,
             CountrySeeder::class,
+            StatesSeeder::class,
+            DietarysSeeder::class,
+            DocumetItemListSeeder::class,
+            DocumetItemFieldsSeeder::class,
             FoodCategorySeeder::class,
             HeatingInstructionSeeder::class,
             IngredientSeeder::class,
             KitchenTypeSeeder::class,
+            ShefTypeSeeder::class,
+            ShefSubTypeSeeder::class,
             UnitSeeder::class,
-            NutritionsSeeder::class,
-            DietarysSeeder::class,
-            ChefSeeder::class
         ]);
     }
 }
