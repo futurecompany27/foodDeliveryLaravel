@@ -710,7 +710,8 @@ class ChefController extends Controller
         }
     }
 
-    function addNewAlternativeContact(Request $req) {
+    function addNewAlternativeContact(Request $req)
+    {
         if (!$req->chef_id || !$req->mobile) {
             return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
         }
@@ -727,8 +728,33 @@ class ChefController extends Controller
         }
     }
 
-    function FunctionName(Request $req) {
-        
+    function getAllAlternativeContacts(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+        }
+        try {
+            return response()->json(['data' => ChefAlternativeContact::where('chef_id', $req->chef_id)->get(), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function updateStatusOfAlternativeContact(Request $req)
+    {
+        if (!$req->id || !$req->status) {
+            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+        }
+        try {
+            ChefAlternativeContact::where('id', $req->id)->update(['status' => $req->status]);
+            return response()->json(['msg' => 'Updated successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
     }
 
 }
