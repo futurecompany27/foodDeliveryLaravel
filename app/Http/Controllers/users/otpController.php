@@ -40,7 +40,7 @@ class otpController extends Controller
             return response()->json(['error' => "please fill required fields", "success" => false], 400);
         }
         try {
-            $verified = Otp::where(["mobile" => $req->mobile, "otp_number" => $req->otp])->first();
+            $verified = Otp::where(["mobile" => str_replace("-", "", $req->mobile), "otp_number" => $req->otp])->first();
             if ($verified) {
                 return response()->json(['msg' => "verified successfully", "success" => true], 200);
             } else {

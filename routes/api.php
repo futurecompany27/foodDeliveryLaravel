@@ -66,6 +66,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/getMyFoodItems', 'getMyFoodItems');
     Route::post('/getFoodItem', 'getFoodItem');
     Route::post('/updateWeekAvailibilty', 'updateWeekAvailibilty');
+    Route::post('/addNewAlternativeContact', 'addNewAlternativeContact');
 });
 
 // Route for admin

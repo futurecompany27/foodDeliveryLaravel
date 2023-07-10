@@ -15,6 +15,12 @@ class HeatingInstructionSeeder extends Seeder
     public function run(): void
     {
         DB::table('heating_instructions')->insert([
+            'title' => 'Not Required',
+            'description' => 'No heating required.',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+        DB::table('heating_instructions')->insert([
             'title' => 'Microwave (For Ready Meals)',
             'description' => 'Transfer meal to a microwave-safe dish. Heat on high for 3-4 minutes. Stir and continue heating in 1-minute increments, if necessary, until thoroughly hot.',
             'created_at' => Carbon::now(),

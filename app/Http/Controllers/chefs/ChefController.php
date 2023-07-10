@@ -7,6 +7,7 @@ use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
 use App\Mail\HomeshefChefEmailVerification;
 use App\Models\chef;
+use App\Models\ChefAlternativeContact;
 use App\Models\ChefDocument;
 use App\Models\City;
 use App\Models\DocumentItemField;
@@ -554,8 +555,6 @@ class ChefController extends Controller
                         'serving_unit' => 'required',
                         'serving_person' => 'required',
                         'price' => 'required',
-                        'comments' => 'required',
-
                     ],
                     [
                         'dish_name.required' => 'Please mention dish name',
@@ -576,7 +575,6 @@ class ChefController extends Controller
                         'serving_unit.required' => 'Please mention serving unit',
                         'serving_person.required' => 'Please mention the food sufficency',
                         'price.required' => 'please mention the price of the food',
-                        'comments.required' => 'Please mention some comments for the food'
                     ]
                 );
 
@@ -710,6 +708,27 @@ class ChefController extends Controller
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
+    }
+
+    function addNewAlternativeContact(Request $req) {
+        if (!$req->chef_id || !$req->mobile) {
+            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+        }
+        try {
+            $newAlternativeContact = new ChefAlternativeContact();
+            $newAlternativeContact->chef_id = $req->chef_id;
+            $newAlternativeContact->mobile = str_replace("-", "", $req->mobile);
+            $newAlternativeContact->save();
+            return response()->json(['msg' => 'Added successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function FunctionName(Request $req) {
+        
     }
 
 }
