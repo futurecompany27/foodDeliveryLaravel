@@ -57,7 +57,7 @@ class UserController extends Controller
             return response()->json(["error" => ' please fill all the details', 'success' => false], 500);
         }
 
-        $userDetails = User::where("mobile", $req->mobile)->first();
+        $userDetails = User::where("mobile", str_replace("-", "", $req->mobile))->first();
         if ($userDetails) {
             $userDetails->makeVisible('password');
             if ($userDetails && Hash::check($req->password, $userDetails->password)) {

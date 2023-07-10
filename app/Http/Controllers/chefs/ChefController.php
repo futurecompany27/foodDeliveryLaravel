@@ -649,7 +649,18 @@ class ChefController extends Controller
             return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
         }
         try {
-            $data = FoodItem::where('chef_id', $req->chef_id)->get();
+            $where = ["chef_id" => $req->chef_id];
+            if ($req->foodType) {
+                $where['foodTypeId'] = $req->foodType;
+            }
+            if ($req->approved) {
+                $where['approved_status'] = $req->approved;
+            }
+            $query = FoodItem::where($where);
+            if ($req->day) {
+                $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays,'\"$req->day\"')");
+            }
+            $data = $query->get();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
