@@ -176,10 +176,10 @@ class ChefController extends Controller
                 $chefDetail->makeHidden('password');
                 return response()->json(['message' => 'Logged in successfully!', 'data' => $chefDetail, 'success' => true], 200);
             } else {
-                return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+                return response()->json(['message' => 'Invalid credentials!', 'success' => false], 500);
             }
         } else {
-            return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+            return response()->json(['message' => 'Invalid credentials!', 'success' => false], 500);
         }
     }
 
@@ -744,12 +744,57 @@ class ChefController extends Controller
 
     function updateStatusOfAlternativeContact(Request $req)
     {
-        if (!$req->id || !$req->status) {
+        if (!$req->id) {
             return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
         }
         try {
             ChefAlternativeContact::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['msg' => 'Updated successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function changePasswordForChef(Request $req)
+    {
+        $validator = Validator::make(
+            $req->all(),
+            [
+                'chef_id' => 'required',
+                'currentPassword' => 'required',
+                'newPassword' => 'required',
+                'confirmPassword' => 'required',
+            ],
+            [
+                'chef_id.required' => 'Please mention chef_id',
+                'currentPassword.required' => 'Please mention current password',
+                'newPassword.required' => 'Please mention new password',
+                'confirmPassword.required' => 'Please mention confirm password',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->newPassword !== $req->confirmPassword) {
+                return response()->json(['msg' => 'new password does not matched', 'success' => false], 500);
+            }
+            $chefDetail = chef::find($req->chef_id);
+            if ($chefDetail) {
+                $chefDetail->makeVisible('password');
+                if (Hash::check($req->currentPassword, $chefDetail['password'])) {
+                    $chefDetail->makeHidden('password');
+                    chef::where('id', $req->chef_id)->update(['password' => Hash::make($req->newPassword)]);
+                    return response()->json(['message' => 'password updated successfully', 'success' => false], 200);
+                } else {
+                    return response()->json(['message' => 'current password is invalid', 'success' => false], 500);
+                }
+            } else {
+                return response()->json(['message' => 'current password is invalid', 'success' => false], 500);
+            }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

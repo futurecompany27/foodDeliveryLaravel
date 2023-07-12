@@ -4,6 +4,7 @@ namespace App\Http\Controllers\users;
 
 use App\Http\Controllers\Controller;
 use App\Mail\HomeshefUserEmailVerificationMail;
+use App\Models\NoRecordFound;
 use App\Models\User;
 use App\Models\chef;
 use Illuminate\Http\Request;
@@ -128,6 +129,46 @@ class UserController extends Controller
 
         } catch (\Throwable $th) {
             Log::info($th);
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function recordFoundSubmit(Request $req)
+    {
+        if (!$req->user_id) {
+            $validator = Validator::make($req->all(), [
+                'postal_code' => "required",
+                'fullname' => "required",
+                'email' => "required",
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()->all(), 'success' => false], 400);
+            }
+        }
+        try {
+            $newData = new NoRecordFound();
+            if ($req->user_id) {
+                $userDetail = User::find($req->user_id);
+                $ifSameData = NoRecordFound::where(['postal_code' => $req->postal_code, 'email' => $userDetail->email])->first();
+                if (!$ifSameData) {
+                    $newData->postal_code = $req->postal_code;
+                    $newData->full_name = $userDetail->fullname;
+                    $newData->email = $userDetail->email;
+                    $newData->save();
+                }
+            } else {
+                $ifSameData = NoRecordFound::where(['postal_code' => $req->postal_code, 'email' => $req->email])->first();
+                if (!$ifSameData) {
+                    $newData->postal_code = $req->postal_code;
+                    $newData->full_name = $req->fullname;
+                    $newData->email = $req->email;
+                    $newData->save();
+                }
+            }
+            return response()->json(['msg' => 'added successfull', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }

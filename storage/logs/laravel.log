@@ -20,3 +20,66 @@
   3 => 'S',
 )  
 [2023-07-10 14:21:28] local.INFO: ["Su","M","F","S"]  
+[2023-07-12 10:33:51] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 10:33:52] local.INFO: ///////////////  
+[2023-07-12 10:41:02] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 10:41:02] local.INFO: ///////////////  
+[2023-07-12 10:45:53] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 10:45:53] local.INFO: ///////////////  
+[2023-07-12 10:48:54] local.INFO: array (
+  0 => 'Su',
+  1 => 'M',
+  2 => 'TH',
+  3 => 'F',
+  4 => 'S',
+)  
+[2023-07-12 11:43:19] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 11:43:19] local.INFO: ///////////////  
+[2023-07-12 11:43:24] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 11:43:24] local.INFO: ///////////////  
+[2023-07-12 11:43:28] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 11:43:28] local.INFO: ///////////////  
+[2023-07-12 11:45:22] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 11:45:22] local.INFO: ///////////////  
+[2023-07-12 12:03:00] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 12:03:00] local.INFO: ///////////////  
+[2023-07-12 12:10:42] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 12:10:42] local.INFO: ///////////////  
+[2023-07-12 13:28:21] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-12 13:28:22] local.INFO: Attempt to read property "email" on null  
+[2023-07-12 13:28:59] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-12 13:28:59] local.INFO: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'postal_code' cannot be null (Connection: mysql, SQL: insert into `no_record_found` (`postal_code`, `full_name`, `email`, `updated_at`, `created_at`) values (?, Whiz Solutions, whizsolutions0@gmail.com, 2023-07-12 13:28:59, 2023-07-12 13:28:59))  
+[2023-07-12 13:29:43] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-12 13:30:15] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-12 13:43:15] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 13:43:15] local.INFO: ///////////////  
+[2023-07-12 13:46:35] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 13:46:35] local.INFO: ///////////////  
+[2023-07-12 13:47:58] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 13:47:58] local.INFO: ///////////////  
+[2023-07-12 13:49:39] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 13:49:39] local.INFO: ///////////////  
+[2023-07-12 13:50:16] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 13:50:16] local.INFO: ///////////////  
+[2023-07-12 13:52:07] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 13:52:07] local.INFO: ///////////////  
+[2023-07-12 13:56:40] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 13:56:40] local.INFO: ///////////////  
+[2023-07-12 13:58:34] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 13:58:34] local.INFO: ///////////////  
+[2023-07-12 13:59:58] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 13:59:58] local.INFO: ///////////////  
+[2023-07-12 14:06:19] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 14:06:19] local.INFO: ///////////////  
+[2023-07-12 14:06:23] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 14:06:23] local.INFO: ///////////////  
+[2023-07-12 14:06:25] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 14:06:25] local.INFO: ///////////////  
+[2023-07-12 14:06:28] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 14:06:28] local.INFO: ///////////////  
+[2023-07-12 14:06:37] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 14:06:37] local.INFO: ///////////////  
+[2023-07-12 14:06:44] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 14:06:44] local.INFO: ///////////////  
+[2023-07-12 14:07:03] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-07T11:30:22.000000Z","updated_at":"2023-07-07T11:30:22.000000Z"}]  
+[2023-07-12 14:07:03] local.INFO: ///////////////  

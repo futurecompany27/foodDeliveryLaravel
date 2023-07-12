@@ -35,6 +35,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/getChefsByPostalCode', 'getChefsByPostalCode');
     Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/googleSigin', 'googleSigin');
+    Route::post('/recordFoundSubmit', 'recordFoundSubmit');
 });
 
 Route::controller(cartController::class)->group(function () {
@@ -67,7 +68,9 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/getFoodItem', 'getFoodItem');
     Route::post('/updateWeekAvailibilty', 'updateWeekAvailibilty');
     Route::post('/addNewAlternativeContact', 'addNewAlternativeContact');
+    Route::post('/updateStatusOfAlternativeContact', 'updateStatusOfAlternativeContact');
     Route::post('/getAllAlternativeContacts', 'getAllAlternativeContacts');
+    Route::post('/changePasswordForChef', 'changePasswordForChef');
 });
 
 // Route for admin

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +27,8 @@ class ChefSeeder extends Seeder
             "kitchen_name" => "Ravindra's Kitchen",
             "about_kitchen" => "We have 1 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
         ]);
         DB::table('chefs')->insert([
             "first_name" => 'Ravi',
@@ -39,6 +42,8 @@ class ChefSeeder extends Seeder
             "kitchen_name" => "Ravi's Kitchen",
             "about_kitchen" => "We have 1 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
         ]);
         DB::table('chefs')->insert([
             "first_name" => 'Sarita',
@@ -52,6 +57,8 @@ class ChefSeeder extends Seeder
             "kitchen_name" => "Sarita's Kitchen",
             "about_kitchen" => "We have 10 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
         ]);
         DB::table('chefs')->insert([
             "first_name" => 'himanta',
@@ -65,6 +72,8 @@ class ChefSeeder extends Seeder
             "kitchen_name" => "Himanta's Kitchen",
             "about_kitchen" => "We have 10 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
         ]);
     }
 }
