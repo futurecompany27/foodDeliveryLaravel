@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             DocumetItemListSeeder::class,
             DocumetItemFieldsSeeder::class,
             FoodCategorySeeder::class,
+            FoodItemSeeder::class,
             HeatingInstructionSeeder::class,
             IngredientSeeder::class,
             KitchenTypeSeeder::class,

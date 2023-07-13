@@ -1,0 +1,97 @@
+[2023-07-13 11:32:14] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 11:32:25] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 11:33:36] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 11:34:26] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 11:34:34] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 11:37:37] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 11:40:33] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 11:42:15] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 11:43:13] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 13:09:18] local.ERROR: Cannot use empty array elements in arrays {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot use empty array elements in arrays at D:\\fo9_final\\database\\seeders\\CountrySeeder.php:19)
+[stacktrace]
+#0 {main}
+"} 
+[2023-07-13 13:10:42] local.ERROR: SQLSTATE[HY000]: General error: 1364 Field 'comments' doesn't have a default value (Connection: mysql, SQL: insert into `food_items` (`chef_id`, `dish_name`, `description`, `dishImage`, `dishImageThumbnail`, `regularDishAvailabilty`, `foodAvailibiltyOnWeekdays`, `orderLimit`, `foodTypeId`, `spicyLevel`, `geographicalCuisine`, `ingredients`, `allergies`, `heating_instruction_id`, `heating_instruction_description`, `package`, `size`, `expiresIn`, `serving_unit`, `serving_person`, `price`) values (1, samosa, ye samose ka description hai, http://127.0.0.1:8000/storage/foodItem/samosa.jpeg, http://127.0.0.1:8000/storage/foodItem/thumbnail/samosa.jpeg, No Limits, ["Su","M"], 10, 1, Mild Spicy, [2,1], [1,2,3], [2,3], 2, No heating required., Composer, 6363, 0.632620, Pieces, Serving 2-3, 545)) {"exception":"[object] (Illuminate\\Database\\QueryException(code: HY000): SQLSTATE[HY000]: General error: 1364 Field 'comments' doesn't have a default value (Connection: mysql, SQL: insert into `food_items` (`chef_id`, `dish_name`, `description`, `dishImage`, `dishImageThumbnail`, `regularDishAvailabilty`, `foodAvailibiltyOnWeekdays`, `orderLimit`, `foodTypeId`, `spicyLevel`, `geographicalCuisine`, `ingredients`, `allergies`, `heating_instruction_id`, `heating_instruction_description`, `package`, `size`, `expiresIn`, `serving_unit`, `serving_person`, `price`) values (1, samosa, ye samose ka description hai, http://127.0.0.1:8000/storage/foodItem/samosa.jpeg, http://127.0.0.1:8000/storage/foodItem/thumbnail/samosa.jpeg, No Limits, [\"Su\",\"M\"], 10, 1, Mild Spicy, [2,1], [1,2,3], [2,3], 2, No heating required., Composer, 6363, 0.632620, Pieces, Serving 2-3, 545)) at D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:795)
+[stacktrace]
+#0 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(755): Illuminate\\Database\\Connection->runQueryCallback('insert into `fo...', Array, Object(Closure))
+#1 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(581): Illuminate\\Database\\Connection->run('insert into `fo...', Array, Object(Closure))
+#2 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(533): Illuminate\\Database\\Connection->statement('insert into `fo...', Array)
+#3 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(3322): Illuminate\\Database\\Connection->insert('insert into `fo...', Array)
+#4 D:\\fo9_final\\database\\seeders\\FoodItemSeeder.php(37): Illuminate\\Database\\Query\\Builder->insert(Array)
+#5 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(36): Database\\Seeders\\FoodItemSeeder->run()
+#6 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#7 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#8 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(37): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#9 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#10 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(184): Illuminate\\Container\\Container->call(Array, Array)
+#11 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(193): Illuminate\\Database\\Seeder->Illuminate\\Database\\{closure}()
+#12 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(61): Illuminate\\Database\\Seeder->__invoke(Array)
+#13 D:\\fo9_final\\database\\seeders\\DatabaseSeeder.php(16): Illuminate\\Database\\Seeder->call('Database\\\\Seeder...')
+#14 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(36): Database\\Seeders\\DatabaseSeeder->run()
+#15 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#16 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#17 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(37): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#18 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#19 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(184): Illuminate\\Container\\Container->call(Array, Array)
+#20 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(193): Illuminate\\Database\\Seeder->Illuminate\\Database\\{closure}()
+#21 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Console\\Seeds\\SeedCommand.php(70): Illuminate\\Database\\Seeder->__invoke()
+#22 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Concerns\\GuardsAttributes.php(155): Illuminate\\Database\\Console\\Seeds\\SeedCommand->Illuminate\\Database\\Console\\Seeds\\{closure}()
+#23 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Console\\Seeds\\SeedCommand.php(71): Illuminate\\Database\\Eloquent\\Model::unguarded(Object(Closure))
+#24 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(36): Illuminate\\Database\\Console\\Seeds\\SeedCommand->handle()
+#25 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#26 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#27 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(37): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#28 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#29 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(208): Illuminate\\Container\\Container->call(Array)
+#30 D:\\fo9_final\\vendor\\symfony\\console\\Command\\Command.php(326): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#31 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(178): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#32 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(1081): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#33 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(320): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Seeds\\SeedCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#34 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(174): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#35 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(200): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#36 D:\\fo9_final\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#37 {main}
+
+[previous exception] [object] (PDOException(code: HY000): SQLSTATE[HY000]: General error: 1364 Field 'comments' doesn't have a default value at D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:580)
+[stacktrace]
+#0 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(580): PDOStatement->execute()
+#1 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(788): Illuminate\\Database\\Connection->Illuminate\\Database\\{closure}('insert into `fo...', Array)
+#2 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(755): Illuminate\\Database\\Connection->runQueryCallback('insert into `fo...', Array, Object(Closure))
+#3 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(581): Illuminate\\Database\\Connection->run('insert into `fo...', Array, Object(Closure))
+#4 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php(533): Illuminate\\Database\\Connection->statement('insert into `fo...', Array)
+#5 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Query\\Builder.php(3322): Illuminate\\Database\\Connection->insert('insert into `fo...', Array)
+#6 D:\\fo9_final\\database\\seeders\\FoodItemSeeder.php(37): Illuminate\\Database\\Query\\Builder->insert(Array)
+#7 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(36): Database\\Seeders\\FoodItemSeeder->run()
+#8 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#9 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#10 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(37): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#11 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#12 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(184): Illuminate\\Container\\Container->call(Array, Array)
+#13 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(193): Illuminate\\Database\\Seeder->Illuminate\\Database\\{closure}()
+#14 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(61): Illuminate\\Database\\Seeder->__invoke(Array)
+#15 D:\\fo9_final\\database\\seeders\\DatabaseSeeder.php(16): Illuminate\\Database\\Seeder->call('Database\\\\Seeder...')
+#16 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(36): Database\\Seeders\\DatabaseSeeder->run()
+#17 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#18 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#19 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(37): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#20 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#21 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(184): Illuminate\\Container\\Container->call(Array, Array)
+#22 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Seeder.php(193): Illuminate\\Database\\Seeder->Illuminate\\Database\\{closure}()
+#23 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Console\\Seeds\\SeedCommand.php(70): Illuminate\\Database\\Seeder->__invoke()
+#24 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Eloquent\\Concerns\\GuardsAttributes.php(155): Illuminate\\Database\\Console\\Seeds\\SeedCommand->Illuminate\\Database\\Console\\Seeds\\{closure}()
+#25 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Console\\Seeds\\SeedCommand.php(71): Illuminate\\Database\\Eloquent\\Model::unguarded(Object(Closure))
+#26 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(36): Illuminate\\Database\\Console\\Seeds\\SeedCommand->handle()
+#27 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Util.php(41): Illuminate\\Container\\BoundMethod::Illuminate\\Container\\{closure}()
+#28 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#29 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\BoundMethod.php(37): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#30 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Container\\Container.php(662): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#31 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(208): Illuminate\\Container\\Container->call(Array)
+#32 D:\\fo9_final\\vendor\\symfony\\console\\Command\\Command.php(326): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#33 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Console\\Command.php(178): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#34 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(1081): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#35 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(320): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\Seeds\\SeedCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#36 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(174): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#37 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(200): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#38 D:\\fo9_final\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#39 {main}
+"} 

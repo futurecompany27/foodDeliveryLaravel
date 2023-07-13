@@ -16,7 +16,7 @@ class CountrySeeder extends Seeder
     {
         DB::table('countries')->insert([
             'name' => 'Canada',
-            'country_code' => 'CA', ,
+            'country_code' => 'CA',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);

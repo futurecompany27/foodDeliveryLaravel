@@ -39,7 +39,7 @@ return new class extends Migration
             $table->string('serving_unit');
             $table->string('serving_person');
             $table->double('price');
-            $table->string('comments');
+            $table->string('comments')->nullable();
             $table->string('status')->default('active');
             $table->string('approved_status')->default('pending');
             $table->string('approvedAt')->nullable();
