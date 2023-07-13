@@ -26,7 +26,7 @@ class otpController extends Controller
                 ['otp_number' => $otp]
             );
 
-            return response()->json(['msg' => "Otp has been sent successfully", "otp" => 1111, "success" => true], 200);
+            return response()->json(['msg' => "Otp has been sent successfully", "otp" => $otp, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th);
             DB::rollback();
@@ -44,7 +44,7 @@ class otpController extends Controller
             if ($verified) {
                 return response()->json(['msg' => "verified successfully", "success" => true], 200);
             } else {
-                return response()->json(['msg' => "Invalid Otp", "success" => false], 500);
+                return response()->json(['msg' => "Invalid OTP", "success" => false], 500);
             }
         } catch (\Throwable $th) {
             Log::info($th);

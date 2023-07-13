@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             KitchenTypeSeeder::class,
             ShefTypeSeeder::class,
             ShefSubTypeSeeder::class,
+            SitesettingSeeder::class,
             UnitSeeder::class,
         ]);
     }

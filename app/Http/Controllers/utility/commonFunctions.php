@@ -12,6 +12,7 @@ use App\Models\DocumentItemList;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
+use App\Models\Sitesetting;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -131,9 +132,22 @@ class commonFunctions extends Controller
         }
     }
 
-    function getAllIngredients(Request $req) {
+    function getAllIngredients(Request $req)
+    {
         try {
             return response()->json(['data' => Ingredient::all(), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+        }
+    }
+
+    function getAllSiteSettings(Request $req)
+    {
+        try {
+            $data = Sitesetting::all();
+            return response()->json(['data' => $data[0], 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
