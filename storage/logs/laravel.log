@@ -109,3 +109,13 @@
 #9 D:\\fo9_final\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
 #10 {main}
 "} 
+[2023-07-13 13:58:08] local.INFO: Attempt to read property "foodItems" on null  
+[2023-07-13 14:01:10] local.INFO: array (
+  0 => 'Su',
+  1 => 'M',
+  2 => 'T',
+)  
+[2023-07-13 14:01:11] local.INFO: array (
+  0 => 'Su',
+  1 => 'M',
+)  
