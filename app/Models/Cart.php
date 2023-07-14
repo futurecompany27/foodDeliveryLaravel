@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Cart extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'foodItems'];
+    protected $fillable = ['user_id', 'chef_id', 'foodItems'];
     protected $casts = [
         'foodItems' => 'array'
     ];
