@@ -36,12 +36,16 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/googleSigin', 'googleSigin');
     Route::post('/recordFoundSubmit', 'recordFoundSubmit');
+    Route::post('/addUpdateShippingAddress', 'addUpdateShippingAddress');
+    Route::post('/getAllShippingAdressOfUser', 'getAllShippingAdressOfUser');
+    Route::post('/changeDefaultShippingAddress', 'changeDefaultShippingAddress');
 });
 
 Route::controller(cartController::class)->group(function () {
     Route::post('/addToCart', 'addToCart');
     Route::post('/getMyCart', 'getMyCart');
     Route::post('/changeQuantity', 'changeQuantity');
+    Route::post('/removeItemFromCart', 'removeItemFromCart');
 });
 
 Route::controller(otpController::class)->group(function () {
@@ -71,6 +75,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateStatusOfAlternativeContact', 'updateStatusOfAlternativeContact');
     Route::post('/getAllAlternativeContacts', 'getAllAlternativeContacts');
     Route::post('/changePasswordForChef', 'changePasswordForChef');
+    Route::post('/sendProfileForReview', 'sendProfileForReview');
 });
 
 // Route for admin
@@ -101,7 +106,6 @@ Route::controller(shefTypesController::class)->group(function () {
     Route::post('/addShefSubType', 'addShefSubType');
     Route::get('/getAllShefSubTypes', 'getAllShefSubTypes');
 });
-
 
 /////////////// common api's ///////////////
 Route::controller(commonFunctions::class)->group(function () {

@@ -66,14 +66,16 @@ class cartController extends Controller
         }
         try {
             $data = Cart::where('user_id', $req->user_id)->first();
-            $foodItems = $data->foodItems;
-            foreach ($foodItems as &$value) {
-                $data = FoodItem::select('dish_name', 'dishImage', 'price')->where('id', $value['food_id'])->first();
-                $value['dish_name'] = $data->dish_name;
-                $value['dishImage'] = $data->dishImage;
-                $value['price'] = $data->price;
+            if ($data) {
+                $foodItems = $data->foodItems;
+                foreach ($foodItems as &$value) {
+                    $data = FoodItem::select('dish_name', 'dishImage', 'price')->where('id', $value['food_id'])->first();
+                    $value['dish_name'] = $data->dish_name;
+                    $value['dishImage'] = $data->dishImage;
+                    $value['price'] = $data->price;
+                }
+                $data->foodItems = $foodItems;
             }
-            $data->foodItems = $foodItems;
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -118,6 +120,28 @@ class cartController extends Controller
                 return response()->json(["msg" => "updated successfully", "success" => true], 200);
             }
 
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+        }
+    }
+
+    function removeItemFromCart(Request $req)
+    {
+        if (!$req->user_id || !$req->food_id) {
+            return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            $cart = Cart::where("user_id", $req->user_id)->first();
+            $foodItemsArray = $cart->foodItems;
+            $food_id = $req->food_id;
+            $filteredFoods = array_filter($foodItemsArray, function ($food) use ($food_id) {
+                return $food['food_id'] !== $food_id;
+            });
+
+            $filteredFoods = array_values($filteredFoods);
+            return response()->json(['msg' => 'removed successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\users;
 use App\Http\Controllers\Controller;
 use App\Mail\HomeshefUserEmailVerificationMail;
 use App\Models\NoRecordFound;
+use App\Models\ShippingAddresse;
 use App\Models\User;
 use App\Models\chef;
 use Illuminate\Http\Request;
@@ -167,6 +168,97 @@ class UserController extends Controller
                 }
             }
             return response()->json(['msg' => 'added successfull', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function addUpdateShippingAddress(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'user_id' => "required",
+            'first_name' => "required",
+            'last_name' => "required",
+            'mobile_no' => "required",
+            'postal_code' => "required",
+            'city' => "required",
+            'state' => "required",
+            'landmark' => "required",
+            'locality' => "required",
+            'full_address' => "required",
+            'address_type' => "required",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => 'Please fill all the required field', 'success' => false], 400);
+        }
+
+        try {
+            if ($req->id) {
+                $updateData = $req->all();
+                $recordToUpdate = ShippingAddresse::find($req->id);
+                if ($recordToUpdate) {
+                    $recordToUpdate->update($updateData);
+                    return response()->json(['message' => 'Address updated successfully', 'success' => true], 200);
+                } else {
+                    return response()->json(['message' => 'Address not found', 'success' => false], 404);
+                }
+            } else {
+                $newAdrees = new ShippingAddresse();
+                $newAdrees->user_id = $req->user_id;
+                $newAdrees->first_name = $req->first_name;
+                $newAdrees->last_name = $req->last_name;
+                $newAdrees->mobile_no = str_replace("-", '', $req->mobile_no);
+                $newAdrees->postal_code = $req->postal_code;
+                $newAdrees->city = $req->city;
+                $newAdrees->state = $req->state;
+                $newAdrees->landmark = $req->postal_code;
+                $newAdrees->locality = $req->locality;
+                $newAdrees->full_address = $req->full_address;
+                $newAdrees->address_type = $req->address_type;
+
+                if ($req->default_address == 1) {
+                    $newAdrees->default_address = 1;
+                    ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
+                } else {
+                    $count = ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->count();
+                    if ($count < 1) {
+                        $newAdrees->default_address = 1;
+                    }
+                }
+                $newAdrees->save();
+                return response()->json(['msg' => 'Added successfully', 'success' => true], 200);
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function getAllShippingAdressOfUser(Request $req)
+    {
+        if (!$req->user_id) {
+            return response()->json(['error' => 'Please fill all the required field', 'success' => false], 400);
+        }
+        try {
+            return response()->json(['data' => ShippingAddresse::where(['user_id' => $req->user_id])->get(), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function changeDefaultShippingAddress(Request $req)
+    {
+        if (!$req->id) {
+            return response()->json(['error' => 'Please fill all the required field', 'success' => false], 400);
+        }
+        try {
+            ShippingAddresse::where('id', $req->id)->update(['default_address' => 1]);
+            return response()->json(['message' => 'Updated successfully','success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

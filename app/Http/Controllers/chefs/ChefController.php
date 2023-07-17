@@ -9,6 +9,7 @@ use App\Mail\HomeshefChefEmailVerification;
 use App\Models\chef;
 use App\Models\ChefAlternativeContact;
 use App\Models\ChefDocument;
+use App\Models\ChefProfileReviewByAdmin;
 use App\Models\City;
 use App\Models\DocumentItemField;
 use App\Models\FoodItem;
@@ -795,6 +796,23 @@ class ChefController extends Controller
             } else {
                 return response()->json(['message' => 'current password is invalid', 'success' => false], 500);
             }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function sendProfileForReview(Request $req) {
+        if (!$req->chef_id) {
+            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+        }
+        try {
+            $newProfileForReview = new ChefProfileReviewByAdmin();
+            $newProfileForReview->chef_id = $req->chef_id;
+            $newProfileForReview->save();
+            chef::where('id', $req->chef_id)->update(['status'=>2]);
+            return response()->json(['msg' => 'Request Submitted successfully','success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
