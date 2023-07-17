@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\utility;
 
 use App\Http\Controllers\Controller;
+use App\Models\Allergy;
 use App\Models\BankName;
 use App\Models\chef;
+use App\Models\Dietary;
 use App\Models\DocumentItemField;
 use App\Models\DocumentItemList;
+use App\Models\FoodCategory;
+use App\Models\HeatingInstruction;
+use App\Models\Ingredient;
+use App\Models\Sitesetting;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,8 +49,13 @@ class commonFunctions extends Controller
 
     function getAllBankList(Request $req)
     {
-        $data = BankName::all();
-        return response()->json(["data" => $data, "success" => true], 200);
+        try {
+            return response()->json(['data' => BankName::all(), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+        }
     }
 
     function getDocumentListAccToChefTypeAndState(Request $req)
@@ -64,7 +75,7 @@ class commonFunctions extends Controller
                     foreach ($documentList as $value) {
                         $docFeilds = DocumentItemField::where('document_item_list_id', $value->id)->get();
                         foreach ($docFeilds as $val) {
-                            array_push($allFeilds, $val) ;
+                            array_push($allFeilds, $val);
                         }
                     }
                 }
@@ -74,6 +85,73 @@ class commonFunctions extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false], 500);
+        }
+    }
+
+    function getAllFoodTypes()
+    {
+        try {
+            return response()->json(['data' => FoodCategory::all(), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+        }
+    }
+
+    function getAllHeatingInstructions(Request $req)
+    {
+        try {
+            return response()->json(["data" => HeatingInstruction::all(), "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+        }
+    }
+
+    function getAllAllergens(Request $req)
+    {
+        try {
+            return response()->json(['data' => Allergy::all(), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+        }
+    }
+
+    function getAllDietaries(Request $req)
+    {
+        try {
+            return response()->json(['data' => Dietary::all(), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+        }
+    }
+
+    function getAllIngredients(Request $req)
+    {
+        try {
+            return response()->json(['data' => Ingredient::all(), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+        }
+    }
+
+    function getAllSiteSettings(Request $req)
+    {
+        try {
+            $data = Sitesetting::all();
+            return response()->json(['data' => $data[0], 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
         }
     }
 }

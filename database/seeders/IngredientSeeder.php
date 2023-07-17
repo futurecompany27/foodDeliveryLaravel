@@ -72,7 +72,6 @@ class IngredientSeeder extends Seeder
         DB::table('ingredients')->insert(['ing_name' => 'cauliflower', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('ingredients')->insert(['ing_name' => 'mint', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('ingredients')->insert(['ing_name' => 'asafoetida', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-
         DB::table('ingredients')->insert(['ing_name' => 'green peas', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('ingredients')->insert(['ing_name' => 'cabbage', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('ingredients')->insert(['ing_name' => 'vinegar', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);

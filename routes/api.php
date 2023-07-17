@@ -6,6 +6,7 @@ use App\Http\Controllers\admins\regionController;
 use App\Http\Controllers\admins\shefTypesController;
 use App\Http\Controllers\admins\taxController;
 use App\Http\Controllers\chefs\ChefController;
+use App\Http\Controllers\users\cartController;
 use App\Http\Controllers\users\otpController;
 use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
@@ -34,6 +35,18 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/getChefsByPostalCode', 'getChefsByPostalCode');
     Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/googleSigin', 'googleSigin');
+    Route::post('/recordFoundSubmit', 'recordFoundSubmit');
+});
+
+Route::controller(cartController::class)->group(function () {
+    Route::post('/addToCart', 'addToCart');
+    Route::post('/getMyCart', 'getMyCart');
+    Route::post('/changeQuantity', 'changeQuantity');
+});
+
+Route::controller(otpController::class)->group(function () {
+    Route::post('/sendOTP', 'sendOTP');
+    Route::post('/verifyOtp', 'verifyOtp');
 });
 
 // Routes for chefs
@@ -48,11 +61,19 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateDocuments', 'updateDocuments');
     Route::post('/updateKitchen', 'updateKitchen');
     Route::post('/updateSpecialBenifits', 'updateSpecialBenifits');
+    Route::post('/chefScheduleAnCall', 'chefScheduleAnCall');
     Route::post('/AddContactData', 'AddContactData');
-    Route::post('/ChangePassword', 'ChangePassword');
+    Route::post('/chefAddNewOrUpdateFoodItem', 'chefAddNewOrUpdateFoodItem');
+    Route::post('/getMyFoodItems', 'getMyFoodItems');
+    Route::post('/getFoodItem', 'getFoodItem');
+    Route::post('/updateWeekAvailibilty', 'updateWeekAvailibilty');
+    Route::post('/addNewAlternativeContact', 'addNewAlternativeContact');
+    Route::post('/updateStatusOfAlternativeContact', 'updateStatusOfAlternativeContact');
+    Route::post('/getAllAlternativeContacts', 'getAllAlternativeContacts');
+    Route::post('/changePasswordForChef', 'changePasswordForChef');
 });
 
-///////////////////// Routes for admin /////////////////////////
+// Route for admin
 Route::controller(regionController::class)->group(function () {
     Route::post('/addCountry', 'addCountry');
     Route::post('/addState', 'addState');
@@ -81,14 +102,15 @@ Route::controller(shefTypesController::class)->group(function () {
     Route::get('/getAllShefSubTypes', 'getAllShefSubTypes');
 });
 
-Route::controller(otpController::class)->group(function () {
-    Route::post('/sendOTP', 'sendOTP');
-    Route::post('/verifyOtp', 'verifyOtp');
-});
 
 /////////////// common api's ///////////////
 Route::controller(commonFunctions::class)->group(function () {
     Route::get("/getAllBankList", 'getAllBankList');
     Route::post("/getDocumentListAccToChefTypeAndState", 'getDocumentListAccToChefTypeAndState');
-
+    Route::get("/getAllFoodTypes", 'getAllFoodTypes');
+    Route::get("/getAllHeatingInstructions", 'getAllHeatingInstructions');
+    Route::get("/getAllAllergens", 'getAllAllergens');
+    Route::get("/getAllDietaries", 'getAllDietaries');
+    Route::get("/getAllIngredients", 'getAllIngredients');
+    Route::get("/getAllSiteSettings", 'getAllSiteSettings');
 });

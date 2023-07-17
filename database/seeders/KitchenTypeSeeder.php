@@ -22,7 +22,7 @@ class KitchenTypeSeeder extends Seeder
         DB::table('kitchentypes')->insert(['kitchentype' => 'Southeast Asian', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/southeastasian.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Southern', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/southern.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Mediterranean', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/mediterranean.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-        DB::table('kitchentypes')->insert(['kitchentype' => 'Chinese', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/mediterranean.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        DB::table('kitchentypes')->insert(['kitchentype' => 'Chinese', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/chinese.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Italian', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/italian.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'African', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/african.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Japanese', 'image' => 'http://127.0.0.1:8000/storage/admin/kitchentype/japanese.png', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);

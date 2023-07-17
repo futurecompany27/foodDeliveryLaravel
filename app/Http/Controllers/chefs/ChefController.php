@@ -7,9 +7,12 @@ use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
 use App\Mail\HomeshefChefEmailVerification;
 use App\Models\chef;
+use App\Models\ChefAlternativeContact;
 use App\Models\ChefDocument;
 use App\Models\City;
 use App\Models\DocumentItemField;
+use App\Models\FoodItem;
+use App\Models\ScheduleCall;
 use App\Models\State;
 use App\Models\User;
 use App\Models\ChangePassword;
@@ -21,8 +24,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Pincode;
 use Illuminate\Support\Facades\Validator;
-use Image; //Intervention Image
-use File;
+use Intervention\Image\Image; //Intervention Image
+use Illuminate\Support\Facades\File;
 
 class ChefController extends Controller
 {
@@ -152,7 +155,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
         }
     }
 
@@ -174,10 +177,10 @@ class ChefController extends Controller
                 $chefDetail->makeHidden('password');
                 return response()->json(['message' => 'Logged in successfully!', 'data' => $chefDetail, 'success' => true], 200);
             } else {
-                return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+                return response()->json(['message' => 'Invalid credentials!', 'success' => false], 500);
             }
         } else {
-            return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+            return response()->json(['message' => 'Invalid credentials!', 'success' => false], 500);
         }
     }
 
@@ -188,9 +191,9 @@ class ChefController extends Controller
         }
         try {
             $data = chef::whereId($req->chef_id)->with([
-                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')
+                'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')
                     ->with([
-                        'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                        'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
                     ])
             ])
                 ->first();
@@ -444,9 +447,9 @@ class ChefController extends Controller
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
+
     function AddContactData(Request $req)
     {
-
         if (!$req->chef_id) {
             return response()->json(["msg" => "please fill all the required fields ", "success" => false], 400);
         }
@@ -463,49 +466,341 @@ class ChefController extends Controller
             return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
-    function ChangePassword(Request $req)
-    {
 
-        if (!$req->chef_id) {
-            return response()->json(["msg" => "please fill all the required fields ", "success" => false], 400);
+    function chefScheduleAnCall(Request $req)
+    {
+        if (!$req->chef_id || !$req->date || !$req->slot) {
+            return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
         }
         try {
-            $validator = Validator::make($req->all(), [
-                "chef_id" => 'required',
-                "current_password" => 'required',
-                "new_password" => 'required',
-                "confirm_password" => 'required',
-            ], [
-                "chef_id.required" => "please fill chef_id",
-                "current_password.required" => "please fill current_password",
-                "new_password.required" => "please fill new_password",
-                "confirm_password.required" => "please fill confirm_password",
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            $slotNotAvailable = ScheduleCall::where(['date' => $req->date, 'slot' => $req->slot])->first();
+            if ($slotNotAvailable) {
+                return response()->json(['msg' => 'Slot not available select another slot', 'success' => false], 500);
             }
-
-            if ($req->new_password !== $req->confirm_password) {
-                return response()->json(["error" => $req->error(), "success" => false], 400);
+            $SameChefSameSlot = ScheduleCall::where(['chef_id' => $req->chef_id, 'slot' => $req->slot])->first();
+            if ($SameChefSameSlot) {
+                return response()->json(['msg' => 'Already booked on same slot', 'success' => false]);
             }
-            $chefDetail = chef::find($req->chef_id);
-            if ($chefDetail) {
-                $chefDetail->makeVisible('password');
-                if (Hash::check($req->current_password, $chefDetail['password'])) {
-                    $chefDetail->password = Hash::make($req->new_password);
-                    $chefDetail->save();
-                    return response()->json(['message' => 'password changed successfully!', 'success' => true], 200);
-                } else {
-                    return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+            DB::beginTransaction();
+            $scheduleNewCall = new ScheduleCall();
+            $scheduleNewCall->chef_id = $req->chef_id;
+            $scheduleNewCall->date = $req->date;
+            $scheduleNewCall->slot = $req->slot;
+            $scheduleNewCall->save();
+            DB::commit();
+            return response()->json(["msg" => 'Call has been scheduled successfully', 'success' => true]);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function chefAddNewOrUpdateFoodItem(Request $req)
+    {
+        try {
+            if ($req->food_id && $req->chef_id) {
+
+                $foodData = FoodItem::find($req->food_id);
+                Log::info($req->foodAvailibiltyOnWeekdays);
+                $foodData->fill($req->all());
+
+                $OGfilePath = "";
+                $filename_thumb = "";
+                if ($req->hasFile('foodImage')) {
+                    $directoryPath = 'storage/foodItem/';
+                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
+                    if (file_exists(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImage))) {
+                        unlink(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImage));
+                        $foodData->dishImage = '';
+                    }
+
+                    if (file_exists(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImageThumbnail))) {
+                        unlink(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImageThumbnail));
+                        $foodData->dishImageThumbnail = '';
+                    }
+
+                    $image = Image::make($req->file('foodImage'));
+                    $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
+                    $OGfilePath = $directoryPath . $name_gen;
+                    $image->fit(800, 800)->save($OGfilePath);
+                    $filename_thumb = $directoryPathThumbnail . $name_gen;
+                    $image->fit(200, 200)->save($filename_thumb);
+
+                    $foodData->dishImage = asset($OGfilePath);
+                    $foodData->dishImageThumbnail = asset($filename_thumb);
                 }
+
+                $foodData->save();
+                return response()->json(['msg' => 'updated successfully', 'success' => true], 200);
+
             } else {
-                return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+                $validator = Validator::make(
+                    $req->all(),
+                    [
+                        'dish_name' => 'required',
+                        'description' => 'required',
+                        'foodImage' => 'required|image',
+                        'regularDishAvailabilty' => 'required',
+                        'from' => 'nullable',
+                        'to' => 'nullable',
+                        'foodAvailibiltyOnWeekdays' => 'required',
+                        'orderLimit' => 'required|numeric',
+                        'foodTypeId' => 'required',
+                        'spicyLevel' => 'required',
+                        'heating_instruction_id' => 'required',
+                        'heating_instruction_description' => 'required',
+                        'package' => 'required',
+                        'size' => 'required',
+                        'expiresIn' => 'required',
+                        'serving_unit' => 'required',
+                        'serving_person' => 'required',
+                        'price' => 'required',
+                    ],
+                    [
+                        'dish_name.required' => 'Please mention dish name',
+                        'description.required' => 'Please add dish discription',
+                        'foodImage.required' => 'please add dish image',
+                        'foodImage.image' => 'please select image file only',
+                        'regularDishAvailabilty.required' => 'please mention regularity of the dish',
+                        'foodAvailibiltyOnWeekdays.required' => 'please mention weekdays availablity of the food',
+                        'orderLimit.required' => 'please mention order limit',
+                        'orderLimit.numeric' => 'order limit must be in number only',
+                        'foodTypeId.required' => 'please select food type',
+                        'spicyLevel.required' => 'please select spicy level of the food',
+                        'heating_instruction_id.required' => 'please select heating instruction option',
+                        'heating_instruction_description.required' => 'please enter food heading instruction',
+                        'package.required' => 'please select package type',
+                        'size.required' => 'Please enter package size',
+                        'expiresIn.required' => 'Please mention the expirey period of the food',
+                        'serving_unit.required' => 'Please mention serving unit',
+                        'serving_person.required' => 'Please mention the food sufficency',
+                        'price.required' => 'please mention the price of the food',
+                    ]
+                );
+
+                if ($validator->fails()) {
+                    return response()->json(["error" => $validator->errors(), "success" => false], 400);
+                }
+
+                $OGfilePath = "";
+                $filename_thumb = "";
+                if ($req->hasFile('foodImage')) {
+                    $directoryPath = 'storage/foodItem/';
+                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
+                    if (!file_exists($directoryPath)) {
+                        mkdir($directoryPath, 0755, true);
+                    }
+                    if (!file_exists($directoryPathThumbnail)) {
+                        mkdir($directoryPathThumbnail, 0755, true);
+                    }
+                    $image = Image::make($req->file('foodImage'));
+                    $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
+                    $OGfilePath = $directoryPath . $name_gen;
+                    $image->fit(800, 800)->save($OGfilePath);
+                    $filename_thumb = $directoryPathThumbnail . $name_gen;
+                    $image->fit(200, 200)->save($filename_thumb);
+                }
+
+                DB::beginTransaction();
+                $foodItem = new FoodItem();
+                $foodItem->chef_id = $req->chef_id;
+                $foodItem->dish_name = $req->dish_name;
+                $foodItem->description = $req->description;
+                $foodItem->dishImage = asset($OGfilePath);
+                $foodItem->dishImageThumbnail = asset($filename_thumb);
+                $foodItem->regularDishAvailabilty = $req->regularDishAvailabilty;
+                $foodItem->from = $req->from;
+                $foodItem->to = $req->to;
+                $foodItem->foodAvailibiltyOnWeekdays = $req->foodAvailibiltyOnWeekdays;
+                $foodItem->orderLimit = $req->orderLimit;
+                $foodItem->foodTypeId = $req->foodTypeId;
+                $foodItem->spicyLevel = $req->spicyLevel;
+                $foodItem->geographicalCuisine = $req->geographicalCuisine;
+                $foodItem->otherCuisine = $req->otherCuisine;
+                $foodItem->ingredients = $req->ingredients;
+                $foodItem->otherIngredients = $req->otherIngredients;
+                $foodItem->allergies = $req->allergies;
+                $foodItem->dietary = $req->dietary;
+                $foodItem->heating_instruction_id = $req->heating_instruction_id;
+                $foodItem->heating_instruction_description = $req->heating_instruction_description;
+                $foodItem->package = $req->package;
+                $foodItem->size = $req->size;
+                $foodItem->expiresIn = $req->expiresIn;
+                $foodItem->serving_unit = $req->serving_unit;
+                $foodItem->serving_person = $req->serving_person;
+                $foodItem->price = $req->price;
+                $foodItem->comments = $req->comments;
+                $foodItem->save();
+                DB::commit();
+                return response()->json(['msg' => "Food Item Added Successfully", "success" => true], 200);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
+
+    function getMyFoodItems(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
+        }
+        try {
+            $where = ["chef_id" => $req->chef_id];
+            if ($req->foodType) {
+                $where['foodTypeId'] = $req->foodType;
+            }
+            if ($req->approved) {
+                $where['approved_status'] = $req->approved;
+            }
+            $query = FoodItem::where($where);
+            if ($req->day) {
+                $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays,'\"$req->day\"')");
+            }
+            $data = $query->get();
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function getFoodItem(Request $req)
+    {
+        if (!$req->food_id) {
+            return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
+        }
+        try {
+            $data = FoodItem::where('id', $req->food_id)->first();
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function updateWeekAvailibilty(Request $req)
+    {
+        $validator = Validator::make(
+            $req->all(),
+            [
+                'food_id' => 'required',
+                'weekAvailibilty' => 'required',
+            ],
+            [
+                'food_id.required' => 'Please mention dish name',
+                'weekAvailibilty.required' => 'Please mention week availibilty',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            Log::info($req->weekAvailibilty);
+            FoodItem::where('id', $req->food_id)->update(['foodAvailibiltyOnWeekdays' => $req->weekAvailibilty]);
+            return response()->json(['msg' => 'updated successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function addNewAlternativeContact(Request $req)
+    {
+        if (!$req->chef_id || !$req->mobile) {
+            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+        }
+        try {
+            $newAlternativeContact = new ChefAlternativeContact();
+            $newAlternativeContact->chef_id = $req->chef_id;
+            $newAlternativeContact->mobile = str_replace("-", "", $req->mobile);
+            $newAlternativeContact->save();
+            return response()->json(['msg' => 'Added successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function getAllAlternativeContacts(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+        }
+        try {
+            return response()->json(['data' => ChefAlternativeContact::where('chef_id', $req->chef_id)->get(), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function updateStatusOfAlternativeContact(Request $req)
+    {
+        if (!$req->id) {
+            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+        }
+        try {
+            ChefAlternativeContact::where('id', $req->id)->update(['status' => $req->status]);
+            return response()->json(['msg' => 'Updated successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function changePasswordForChef(Request $req)
+    {
+        $validator = Validator::make(
+            $req->all(),
+            [
+                'chef_id' => 'required',
+                'currentPassword' => 'required',
+                'newPassword' => 'required',
+                'confirmPassword' => 'required',
+            ],
+            [
+                'chef_id.required' => 'Please mention chef_id',
+                'currentPassword.required' => 'Please mention current password',
+                'newPassword.required' => 'Please mention new password',
+                'confirmPassword.required' => 'Please mention confirm password',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->newPassword !== $req->confirmPassword) {
+                return response()->json(['msg' => 'new password does not matched', 'success' => false], 500);
+            }
+            $chefDetail = chef::find($req->chef_id);
+            if ($chefDetail) {
+                $chefDetail->makeVisible('password');
+                if (Hash::check($req->currentPassword, $chefDetail['password'])) {
+                    $chefDetail->makeHidden('password');
+                    chef::where('id', $req->chef_id)->update(['password' => Hash::make($req->newPassword)]);
+                    return response()->json(['message' => 'password updated successfully', 'success' => false], 200);
+                } else {
+                    return response()->json(['message' => 'current password is invalid', 'success' => false], 500);
+                }
+            } else {
+                return response()->json(['message' => 'current password is invalid', 'success' => false], 500);
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
 }
