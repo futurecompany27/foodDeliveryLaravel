@@ -46,7 +46,7 @@ return new class extends Migration {
             $table->string("chef_card_image")->nullable();
             $table->text("kitchen_types")->nullable();
             $table->text("other_kitchen_types")->nullable();
-            $table->string("about_kitchen")->nullable();
+            $table->text("about_kitchen")->nullable();
             $table->string("bank_name")->nullable();
             $table->string("transit_number")->nullable();
             $table->string("account_number")->nullable();

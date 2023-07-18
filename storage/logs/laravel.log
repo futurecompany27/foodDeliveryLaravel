@@ -1,0 +1,38 @@
+[2023-07-18 07:06:21] local.INFO: array (
+)  
+[2023-07-18 07:57:44] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 07:57:44] local.INFO: ///////////////  
+[2023-07-18 08:00:12] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:00:12] local.INFO: ///////////////  
+[2023-07-18 08:01:28] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:01:28] local.INFO: ///////////////  
+[2023-07-18 08:03:49] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:03:49] local.INFO: ///////////////  
+[2023-07-18 08:04:16] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:04:16] local.INFO: ///////////////  
+[2023-07-18 08:04:59] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:04:59] local.INFO: ///////////////  
+[2023-07-18 08:06:23] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:06:23] local.INFO: ///////////////  
+[2023-07-18 08:06:52] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:06:52] local.INFO: ///////////////  
+[2023-07-18 08:07:13] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:07:13] local.INFO: ///////////////  
+[2023-07-18 08:07:54] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:07:54] local.INFO: ///////////////  
+[2023-07-18 08:08:31] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:08:31] local.INFO: ///////////////  
+[2023-07-18 08:10:17] local.INFO: SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'about_kitchen' at row 1 (Connection: mysql, SQL: update `chefs` set `kitchen_types` = ["Indian","American"], `about_kitchen` = We have 1 year of experience in cooking with all type of cooking.We have 1 year of experience in cooking with all type of cooking. We have 1 year of experience in cooking with all type of cooking.We have 1 year of experience in cooking with all type of cooking. We have 1 year of experience in cooking with all type of cooking.We have 1 year of experience in cooking with all type of cooking. We have 1 year of experience in cooking with all type of cooking.We have 1 year of experience in cooking with all type of cooking., `kitchen_name` = Ravindra's Kitchen, `chefs`.`updated_at` = 2023-07-18 08:10:17 where `id` = 1)  
+[2023-07-18 08:11:49] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:11:49] local.INFO: ///////////////  
+[2023-07-18 08:29:36] local.INFO: [{"id":1,"state_id":1,"document_item_name":"food safety certificate","chef_type":"Individual","reference_links":null,"additional_links":null,"detail_information":null,"status":"0","created_at":"2023-07-14T10:06:37.000000Z","updated_at":"2023-07-14T10:06:37.000000Z"}]  
+[2023-07-18 08:29:36] local.INFO: ///////////////  
+[2023-07-18 09:59:02] local.ERROR: There are no commands defined in the "clear" namespace. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\NamespaceNotFoundException(code: 0): There are no commands defined in the \"clear\" namespace. at D:\\fo9_final\\vendor\\symfony\\console\\Application.php:657)
+[stacktrace]
+#0 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(708): Symfony\\Component\\Console\\Application->findNamespace('clear')
+#1 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(262): Symfony\\Component\\Console\\Application->find('clear:cache')
+#2 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(174): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#3 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(200): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#4 D:\\fo9_final\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#5 {main}
+"} 

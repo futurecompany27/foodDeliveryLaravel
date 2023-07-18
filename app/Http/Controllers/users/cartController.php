@@ -141,6 +141,11 @@ class cartController extends Controller
             });
 
             $filteredFoods = array_values($filteredFoods);
+            if (count($filteredFoods) > 0) {
+                Cart::where("user_id", $req->user_id)->update(["foodItems" => $filteredFoods]);
+            }else{
+                Cart::where("user_id", $req->user_id)->delete();
+            }
             return response()->json(['msg' => 'removed successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
