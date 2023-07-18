@@ -135,7 +135,7 @@ class UserController extends Controller
         }
     }
 
-    function recordFoundSubmit(Request $req)
+    function recordNotFoundSubmit(Request $req)
     {
         if (!$req->user_id) {
             $validator = Validator::make($req->all(), [
@@ -171,7 +171,7 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
 
@@ -218,7 +218,7 @@ class UserController extends Controller
                 $newAdrees->full_address = $req->full_address;
                 $newAdrees->address_type = $req->address_type;
 
-                if ($req->default_address == 1) {
+                if ($req->default_address) {
                     $newAdrees->default_address = 1;
                     ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
                 } else {
@@ -228,12 +228,12 @@ class UserController extends Controller
                     }
                 }
                 $newAdrees->save();
-                return response()->json(['msg' => 'Added successfully', 'success' => true], 200);
+                return response()->json(['message' => 'Added successfully', 'success' => true], 200);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
 
@@ -247,22 +247,37 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
 
     function changeDefaultShippingAddress(Request $req)
     {
-        if (!$req->id) {
+        if (!$req->id || !$req->user_id) {
             return response()->json(['error' => 'Please fill all the required field', 'success' => false], 400);
         }
         try {
+            ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
             ShippingAddresse::where('id', $req->id)->update(['default_address' => 1]);
-            return response()->json(['message' => 'Updated successfully','success' => true], 200);
+            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+        }
+    }
+
+    function deleteShippingAddress(Request $req) {
+        if (!$req->id) {
+            return response()->json(['error' => 'Please fill all the required field','success' => false], 400);
+        }
+        try {
+            ShippingAddresse::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully','success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again!','success' => false], 500);
         }
     }
 }

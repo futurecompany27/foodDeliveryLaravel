@@ -35,10 +35,11 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/getChefsByPostalCode', 'getChefsByPostalCode');
     Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/googleSigin', 'googleSigin');
-    Route::post('/recordFoundSubmit', 'recordFoundSubmit');
+    Route::post('/recordNotFoundSubmit', 'recordNotFoundSubmit');
     Route::post('/addUpdateShippingAddress', 'addUpdateShippingAddress');
     Route::post('/getAllShippingAdressOfUser', 'getAllShippingAdressOfUser');
     Route::post('/changeDefaultShippingAddress', 'changeDefaultShippingAddress');
+    Route::post('/deleteShippingAddress', 'deleteShippingAddress');
 });
 
 Route::controller(cartController::class)->group(function () {
