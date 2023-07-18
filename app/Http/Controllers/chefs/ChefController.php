@@ -10,13 +10,9 @@ use App\Models\chef;
 use App\Models\ChefAlternativeContact;
 use App\Models\ChefDocument;
 use App\Models\ChefProfileReviewByAdmin;
-use App\Models\City;
-use App\Models\DocumentItemField;
 use App\Models\FoodItem;
 use App\Models\ScheduleCall;
-use App\Models\State;
 use App\Models\User;
-use App\Models\ChangePassword;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +21,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Pincode;
 use Illuminate\Support\Facades\Validator;
-use Image; //Intervention Image
+// use Image; //Intervention Image
+use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\File;
 
 class ChefController extends Controller
@@ -804,7 +801,8 @@ class ChefController extends Controller
         }
     }
 
-    function sendProfileForReview(Request $req) {
+    function sendProfileForReview(Request $req)
+    {
         if (!$req->chef_id) {
             return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
         }
@@ -812,8 +810,8 @@ class ChefController extends Controller
             $newProfileForReview = new ChefProfileReviewByAdmin();
             $newProfileForReview->chef_id = $req->chef_id;
             $newProfileForReview->save();
-            chef::where('id', $req->chef_id)->update(['status'=>2]);
-            return response()->json(['msg' => 'Request Submitted successfully','success' => true], 200);
+            chef::where('id', $req->chef_id)->update(['status' => 2]);
+            return response()->json(['msg' => 'Request Submitted successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

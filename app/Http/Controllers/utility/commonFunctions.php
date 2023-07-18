@@ -160,23 +160,25 @@ class commonFunctions extends Controller
     }
     function giveSiteFeedback(Request $req)
     {
-        $validator = Validator::make($req->all(), [
-            "images" => 'required',
-            "radio" => 'required|in:option1,option2',
-            "name" => 'required',
-            "email" => 'required',
-            "profession" => 'required',
-            "message" => "required",
-            "star_rating" => "required|integer|min:1|max:5",
-        ], [
-            "images.required" => "please mention images",
-            "radio.required" => "please fill Are you a?",
-            "name.required" => "please fill name",
-            "email.required" => "please select email",
-            "profession.required" => "please select profession",
-            "message.required" => "please fill message",
-            "star_rating" => "please fill star_rating",
-        ]);
+        $validator = Validator::make(
+            $req->all(),
+            [
+                "are_you_a" => 'required|in:option1,option2',
+                "name" => 'required',
+                "email" => 'required',
+                "profession" => 'required',
+                "message" => "required",
+                "star_rating" => "required|integer|min:1|max:5",
+            ],
+            [
+                "are_you_a.required" => "please fill Are you a?",
+                "name.required" => "please fill name",
+                "email.required" => "please select email",
+                "profession.required" => "please select profession",
+                "message.required" => "please fill message",
+                "star_rating" => "please fill star_rating",
+            ]
+        );
 
         if ($validator->fails()) {
             return response()->json(["error" => $validator->errors(), "success" => false], 400);
@@ -184,18 +186,13 @@ class commonFunctions extends Controller
         if (!File::exists("storage/feedback_profiles/")) {
             File::makeDirectory("storage/feedback_profiles/", $mode = 0777, true, true);
         }
-        $images = $req->file('images');
-        $imagePaths = [];          // Used Array to store multiple image paths
-        foreach ($images as $profile_pic) {
-            $imagePath = $profile_pic->store("feedback_profiles", "public");
-            array_push($imagePaths, asset('storage/' . $imagePath));
-
-            Log::info($imagePaths);
-        }
         try {
             $feedback = new Feedback();
-            $feedback->images = json_encode($imagePaths);
-            $feedback->radio = $req->radio;
+            if ($req->hasFile('images')) {
+                $imagePath = $req->file('images')->store("feedback_profiles", "public");
+                $feedback->images = asset('storage/' . $imagePath);
+            }
+            $feedback->are_you_a = $req->are_you_a;
             $feedback->name = $req->name;
             $feedback->email = $req->email;
             $feedback->profession = $req->profession;
@@ -217,5 +214,5 @@ class commonFunctions extends Controller
         }
         return response()->json(['data' => $data, "success" => true], 200);
     }
-    
+
 }
