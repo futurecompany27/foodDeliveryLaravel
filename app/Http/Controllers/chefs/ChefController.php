@@ -16,6 +16,7 @@ use App\Models\FoodItem;
 use App\Models\ScheduleCall;
 use App\Models\State;
 use App\Models\User;
+use App\Models\ChangePassword;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\Pincode;
 use Illuminate\Support\Facades\Validator;
 use Image; //Intervention Image
-use File;
+use Illuminate\Support\Facades\File;
 
 class ChefController extends Controller
 {

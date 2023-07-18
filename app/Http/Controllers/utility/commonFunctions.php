@@ -9,6 +9,7 @@ use App\Models\chef;
 use App\Models\Dietary;
 use App\Models\DocumentItemField;
 use App\Models\DocumentItemList;
+use App\Models\Feedback;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
@@ -18,6 +19,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Image; //Intervention Image
+use Illuminate\Support\Facades\File;
 
 class commonFunctions extends Controller
 {
@@ -154,4 +158,64 @@ class commonFunctions extends Controller
             return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
         }
     }
+    function giveSiteFeedback(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "images" => 'required',
+            "radio" => 'required|in:option1,option2',
+            "name" => 'required',
+            "email" => 'required',
+            "profession" => 'required',
+            "message" => "required",
+            "star_rating" => "required|integer|min:1|max:5",
+        ], [
+            "images.required" => "please mention images",
+            "radio.required" => "please fill Are you a?",
+            "name.required" => "please fill name",
+            "email.required" => "please select email",
+            "profession.required" => "please select profession",
+            "message.required" => "please fill message",
+            "star_rating" => "please fill star_rating",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        if (!File::exists("storage/feedback_profiles/")) {
+            File::makeDirectory("storage/feedback_profiles/", $mode = 0777, true, true);
+        }
+        $images = $req->file('images');
+        $imagePaths = [];          // Used Array to store multiple image paths
+        foreach ($images as $profile_pic) {
+            $imagePath = $profile_pic->store("feedback_profiles", "public");
+            array_push($imagePaths, asset('storage/' . $imagePath));
+
+            Log::info($imagePaths);
+        }
+        try {
+            $feedback = new Feedback();
+            $feedback->images = json_encode($imagePaths);
+            $feedback->radio = $req->radio;
+            $feedback->name = $req->name;
+            $feedback->email = $req->email;
+            $feedback->profession = $req->profession;
+            $feedback->message = $req->message;
+            $feedback->star_rating = $req->star_rating;
+            $feedback->save();
+            return response()->json(['msg' => "Feedback submitted successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+    function getSiteFeedback()
+    {
+        $data = Feedback::all();
+        foreach ($data as $value) {
+            $value->images = json_decode($value->images);
+        }
+        return response()->json(['data' => $data, "success" => true], 200);
+    }
+    
 }

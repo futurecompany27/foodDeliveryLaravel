@@ -12,7 +12,8 @@ return new class extends Migration {
     {
         Schema::create('otps', function (Blueprint $table) {
             $table->id();
-            $table->string('mobile');
+            $table->string('mobile')->nullable();
+            $table->string('email')->nullable();
             $table->integer('otp_number');
             $table->timestamps();
         });
