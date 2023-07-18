@@ -1,0 +1,23 @@
+[2023-07-17 13:54:40] local.INFO: Undefined array key 0  
+[2023-07-17 13:57:03] local.INFO: array (
+  0 => 'http://127.0.0.1:8000/storage/feedback_profiles/etHFpH3XAk0xoGKEg4wS5KdGWN1emzwTABF9K8BH.jpg',
+)  
+[2023-07-17 13:57:03] local.INFO: array (
+  0 => 'http://127.0.0.1:8000/storage/feedback_profiles/etHFpH3XAk0xoGKEg4wS5KdGWN1emzwTABF9K8BH.jpg',
+  1 => 'http://127.0.0.1:8000/storage/feedback_profiles/wIVPl1vSLVqJcLyFwxyuhPCn5PO6OuRPtR3NYHfK.jpg',
+)  
+[2023-07-18 09:48:48] local.INFO: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it (Connection: mysql, SQL: select * from `sitesettings`)  
+[2023-07-18 09:53:46] local.INFO: array (
+  0 => 'http://127.0.0.1:8000/storage/feedback_profiles/9AKO1MQP9wY7N47TF9X3naEgw9gVguwGRJoGlWUn.jpg',
+)  
+[2023-07-18 09:53:46] local.INFO: array (
+  0 => 'http://127.0.0.1:8000/storage/feedback_profiles/9AKO1MQP9wY7N47TF9X3naEgw9gVguwGRJoGlWUn.jpg',
+  1 => 'http://127.0.0.1:8000/storage/feedback_profiles/NS6Y20UikG0DkUlaGCKQiBfECLZBdMbU4U1lPQhG.jpg',
+)  
+[2023-07-18 09:54:43] local.INFO: array (
+  0 => 'http://127.0.0.1:8000/storage/feedback_profiles/PyKym67X4ZKGMe5pVy07uiZCQoVvyI0Pw2HTVRtr.jpg',
+)  
+[2023-07-18 09:54:43] local.INFO: array (
+  0 => 'http://127.0.0.1:8000/storage/feedback_profiles/PyKym67X4ZKGMe5pVy07uiZCQoVvyI0Pw2HTVRtr.jpg',
+  1 => 'http://127.0.0.1:8000/storage/feedback_profiles/PqSc7D879IOVX878vMKb0WeAzxYte34kK56S9oWV.jpg',
+)  

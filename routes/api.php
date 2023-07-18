@@ -113,4 +113,6 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::get("/getAllDietaries", 'getAllDietaries');
     Route::get("/getAllIngredients", 'getAllIngredients');
     Route::get("/getAllSiteSettings", 'getAllSiteSettings');
+    Route::post("/giveSiteFeedback", "giveSiteFeedback");
+    Route::get("/getSiteFeedback", 'getSiteFeedback');
 });

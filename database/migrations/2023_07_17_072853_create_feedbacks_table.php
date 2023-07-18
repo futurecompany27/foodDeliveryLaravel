@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('feedbacks', function (Blueprint $table) {
             $table->id();
-            $table->json('profile_pic');
+            $table->json('images');
             $table->string('radio');
             $table->string('name');
             $table->string('email');
