@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::controller(UserController::class)->group(function () {
     Route::post('/UserRegisteration', 'UserRegisteration');
     Route::post('/UserLogin', 'UserLogin');
+    Route::post('/getUserDetails', 'getUserDetails');
     Route::post('/getChefsByPostalCode', 'getChefsByPostalCode');
     Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/googleSigin', 'googleSigin');
@@ -40,6 +41,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/getAllShippingAdressOfUser', 'getAllShippingAdressOfUser');
     Route::post('/changeDefaultShippingAddress', 'changeDefaultShippingAddress');
     Route::post('/deleteShippingAddress', 'deleteShippingAddress');
+    Route::post('/updateUserDetail', 'updateUserDetail');
 });
 
 Route::controller(cartController::class)->group(function () {

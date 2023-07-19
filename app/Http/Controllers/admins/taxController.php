@@ -20,7 +20,7 @@ class taxController extends Controller
             'tax_type.string' => 'Only letters allowed',
         ]);
         if ($validatedData->fails()) {
-            return response()->json(['error' => $validatedData->errors(), "success" => false], 400);
+            return response()->json(['message' => $validatedData->errors(), "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -33,7 +33,7 @@ class taxController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 }

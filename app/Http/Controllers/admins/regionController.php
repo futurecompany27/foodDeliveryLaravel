@@ -18,7 +18,7 @@ class regionController extends Controller
     function addCountry(Request $req)
     {
         if (!$req->name || !$req->country_code) {
-            return response()->json(['error' => 'please fill all the fields', 'success' => false], 400);
+            return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -31,7 +31,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
         }
     }
 
@@ -50,7 +50,7 @@ class regionController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors(), 'success' => false], 400);
+            return response()->json(['message' => $validator->errors(), 'success' => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -65,14 +65,14 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
         }
     }
 
     function addCity(Request $req)
     {
         if (!$req->name || !$req->state_id) {
-            return response()->json(['error' => 'please fill all the fields', 'success' => false], 400);
+            return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -85,14 +85,14 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
         }
     }
 
     function addPincode(Request $req)
     {
         if (!$req->pincode || !$req->city_id) {
-            return response()->json(['error' => 'please fill all the fields', 'success' => false], 400);
+            return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -114,7 +114,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
         }
     }
 }

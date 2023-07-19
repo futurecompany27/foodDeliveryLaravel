@@ -55,7 +55,7 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
 
@@ -80,7 +80,7 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
         }
     }
 
@@ -123,7 +123,7 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
         }
     }
 
@@ -150,7 +150,7 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
         }
     }
 }

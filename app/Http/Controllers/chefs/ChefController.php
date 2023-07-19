@@ -38,11 +38,11 @@ class ChefController extends Controller
 
             $chefExist = chef::where("email", $req->email)->first();
             if ($chefExist) {
-                return response()->json(['error' => "This email is already register please use another email!", "success" => false], 400);
+                return response()->json(['message' => "This email is already register please use another email!", "success" => false], 400);
             }
             $chefExist = chef::where('mobile', str_replace("-", "", $req->mobile))->first();
             if ($chefExist) {
-                return response()->json(['error' => "This mobileno is already register please use another mobileno!", "success" => false], 400);
+                return response()->json(['message' => "This mobileno is already register please use another mobileno!", "success" => false], 400);
             }
             $chef = new chef();
             $chef->first_name = ucfirst($req->first_name);
@@ -80,7 +80,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
@@ -153,7 +153,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
         }
     }
 
@@ -165,7 +165,7 @@ class ChefController extends Controller
         ];
         $validate = Validator::make($req->all(), $rules);
         if ($validate->fails()) {
-            return response()->json(['error' => 'please fill all the fields', 'success' => false], 400);
+            return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
         }
         $chefDetail = chef::where("email", $req->email)->first();
 
@@ -199,7 +199,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
         }
     }
 
@@ -211,7 +211,7 @@ class ChefController extends Controller
         try {
             $chefDetails = chef::find($req->chef_id);
             if ($chefDetails->email == $req->new_email) {
-                return response()->json(['error' => 'Trying to use an existing primary email. Please use another email.', "success" => false], 500);
+                return response()->json(['message' => 'Trying to use an existing primary email. Please use another email.', "success" => false], 500);
             }
 
             $isNewEmailAlreadyRegistered = chef::where('email', $req->new_email)->first();
@@ -228,7 +228,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
@@ -253,7 +253,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
         }
     }
 
@@ -287,14 +287,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
     function updateDocuments(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['error' => "please fill all the required fields", "success" => false], 400);
+            return response()->json(['message' => "please fill all the required fields", "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -376,14 +376,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
     function updateKitchen(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['error' => "please fill all the required fields", "success" => false], 400);
+            return response()->json(['message' => "please fill all the required fields", "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -417,14 +417,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
     function updateSpecialBenifits(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['error' => "please fill all the required fields", "success" => false], 400);
+            return response()->json(['message' => "please fill all the required fields", "success" => false], 400);
         }
         try {
             $path = 'chef/' . $req->chef_id;
@@ -442,7 +442,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -461,7 +461,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
@@ -490,7 +490,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -636,7 +636,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -662,7 +662,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -677,7 +677,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -705,7 +705,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -723,7 +723,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -737,7 +737,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -752,7 +752,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -797,7 +797,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 
@@ -815,7 +815,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
 

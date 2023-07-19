@@ -21,18 +21,18 @@ class UserController extends Controller
     {
         $userExist = User::where("email", $req->email)->first();
         if ($userExist) {
-            return response()->json(['error' => "This email is already register please use another email!", "success" => false], 400);
+            return response()->json(['message' => "This email is already register please use another email!", "success" => false], 400);
         }
         $userExist = User::where('mobile', str_replace("-", "", $req->mobile))->first();
         if ($userExist) {
-            return response()->json(['error' => "This mobileno is already register please use another mobileno!", "success" => false], 400);
+            return response()->json(['message' => "This mobileno is already register please use another mobileno!", "success" => false], 400);
         }
         try {
 
             DB::beginTransaction();
             $user = new User();
             $user->fullname = $req->fullname;
-            $user->mobile = $req->mobile;
+            $user->mobile = str_replace("-", "", $req->mobile);
             $user->email = $req->email;
             $user->password = Hash::make($req->password);
             $user->save();
@@ -78,7 +78,7 @@ class UserController extends Controller
             'postal_code' => "required",
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->all(), 'success' => false], 400);
+            return response()->json(['message' => $validator->errors()->all(), 'success' => false], 400);
         }
 
         try {
@@ -143,7 +143,7 @@ class UserController extends Controller
                 'email' => "required",
             ]);
             if ($validator->fails()) {
-                return response()->json(['error' => $validator->errors()->all(), 'success' => false], 400);
+                return response()->json(['message' => $validator->errors()->all(), 'success' => false], 400);
             }
         }
         try {
@@ -190,7 +190,7 @@ class UserController extends Controller
             'address_type' => "required",
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => 'Please fill all the required field', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
         }
 
         try {
@@ -239,7 +239,7 @@ class UserController extends Controller
     function getAllShippingAdressOfUser(Request $req)
     {
         if (!$req->user_id) {
-            return response()->json(['error' => 'Please fill all the required field', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
         }
         try {
             return response()->json(['data' => ShippingAddresse::where(['user_id' => $req->user_id])->get(), 'success' => true], 200);
@@ -253,7 +253,7 @@ class UserController extends Controller
     function changeDefaultShippingAddress(Request $req)
     {
         if (!$req->id || !$req->user_id) {
-            return response()->json(['error' => 'Please fill all the required field', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
         }
         try {
             ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
@@ -266,17 +266,58 @@ class UserController extends Controller
         }
     }
 
-    function deleteShippingAddress(Request $req) {
+    function deleteShippingAddress(Request $req)
+    {
         if (!$req->id) {
-            return response()->json(['error' => 'Please fill all the required field','success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
         }
         try {
             ShippingAddresse::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully','success' => true], 200);
+            return response()->json(['message' => 'Deleted successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again!','success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again!', 'success' => false], 500);
+        }
+    }
+
+    function getUserDetails(Request $req)
+    {
+        if (!$req->user_id) {
+            return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
+        }
+        try {
+            return response()->json(['data' => User::find($req->user_id), 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again!', 'success' => false], 500);
+        }
+    }
+
+    function updateUserDetail(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'user_id' => "required",
+            'fullname' => "required",
+            'mobile' => "required",
+            'email' => "required",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
+        }
+        try {
+            $recordToUpdate = User::where('id', $req->user_id)->update(['fullname' => $req->fullname, 'email' => $req->email, 'mobile' => str_replace('-', '', $req->mobile)]);
+            if ($recordToUpdate) {
+                return response()->json(['message' => 'User updated successfully', 'success' => true], 200);
+            } else {
+                return response()->json(['message' => 'User not found', 'success' => false], 404);
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again!', 'success' => false], 500);
         }
     }
 }

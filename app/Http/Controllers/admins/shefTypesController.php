@@ -23,7 +23,7 @@ class shefTypesController extends Controller
             'name.min' => 'Tag name should be atleast 4 letters longs',
         ]);
         if ($validatedData->fails()) {
-            return response()->json(['error' => $validatedData->errors(), "success" => false], 400);
+            return response()->json(['message' => $validatedData->errors(), "success" => false], 400);
         }
 
         try {
@@ -38,7 +38,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
         }
 
     }
@@ -50,7 +50,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false]);
         }
     }
 
@@ -65,7 +65,7 @@ class shefTypesController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors(), "success" => false], 400);
+            return response()->json(['message' => $validator->errors(), "success" => false], 400);
         }
 
         try {
@@ -82,7 +82,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !'. $th->getMessage(), 'success' => false],500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !'. $th->getMessage(), 'success' => false],500);
         }
     }
 
@@ -93,7 +93,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false],500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false],500);
         }
     }
 }

@@ -40,7 +40,7 @@ class otpController extends Controller
     function verifyOtp(Request $req)
     {
         if (!$req->otp) {
-            return response()->json(['error' => "please fill required fields", "success" => false], 400);
+            return response()->json(['message' => "please fill required fields", "success" => false], 400);
         }
         try {
             if ($req->mobile) {
