@@ -163,7 +163,7 @@ class commonFunctions extends Controller
         $validator = Validator::make(
             $req->all(),
             [
-                "are_you_a" => 'required|in:option1,option2',
+                "are_you_a" => 'required',
                 "name" => 'required',
                 "email" => 'required',
                 "profession" => 'required',
