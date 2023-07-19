@@ -13,19 +13,22 @@ class otpController extends Controller
 {
     function sendOTP(Request $req)
     {
-        if (!$req->mobile) {
-            return response()->json(['error' => "please fill required fields", "success" => false], 400);
-        }
         try {
             $otp = mt_rand(1000, 9999);
-            // $otp_msg = $otp . "+is+your+one+time+verification+code+for+HomeShef";
-            // $url = "https://platform.clickatell.com/messages/http/send?apiKey=WzKPQFifSAe-c5nFp7SynQ==&to=1" . $req->mobile . "&content=" . $otp_msg;
-            // $response = Http::get($url);
-            Otp::updateOrCreate(
-                ['mobile' => str_replace("-", "", $req->mobile)],
-                ['otp_number' => $otp]
-            );
-
+            if ($req->mobile) {
+                // $otp_msg = $otp . "+is+your+one+time+verification+code+for+HomeShef";
+                // $url = "https://platform.clickatell.com/messages/http/send?apiKey=WzKPQFifSAe-c5nFp7SynQ==&to=1" . $req->mobile . "&content=" . $otp_msg;
+                // $response = Http::get($url);
+                Otp::updateOrCreate(
+                    ['mobile' => str_replace("-", "", $req->mobile)],
+                    ['otp_number' => $otp]
+                );
+            } elseif ($req->email) {
+                Otp::updateOrCreate(
+                    ['email' => $req->email],
+                    ['otp_number' => $otp]
+                );
+            }
             return response()->json(['msg' => "Otp has been sent successfully", "otp" => $otp, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th);
@@ -36,11 +39,16 @@ class otpController extends Controller
 
     function verifyOtp(Request $req)
     {
-        if (!$req->mobile || !$req->otp) {
+        if (!$req->otp) {
             return response()->json(['error' => "please fill required fields", "success" => false], 400);
         }
         try {
-            $verified = Otp::where(["mobile" => str_replace("-", "", $req->mobile), "otp_number" => $req->otp])->first();
+            if ($req->mobile) {
+                $verified = Otp::where(["mobile" => str_replace("-", "", $req->mobile), "otp_number" => $req->otp])->first();
+            }
+            if ($req->email) {
+                $verified = Otp::where(["email" => $req->email, "otp_number" => $req->otp])->first();
+            }
             if ($verified) {
                 return response()->json(['msg' => "verified successfully", "success" => true], 200);
             } else {
@@ -52,5 +60,6 @@ class otpController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
+
 
 }
