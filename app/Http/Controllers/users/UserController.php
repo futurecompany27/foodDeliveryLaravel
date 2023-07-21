@@ -89,8 +89,14 @@ class UserController extends Controller
         }
 
         try {
-            $data = chef::where('postal_code', strtolower($req->postal_code))->get();
-            return response()->json(['data' => $data, 'success' => true], 200);
+            $totalRecords = UserContact::count();
+            $skip = $req->page * 10;
+            $items = chef::skip($skip)->take(10)->get();
+
+            return response()->json([
+                'data' => $items,
+                'TotalRecords' => $totalRecords,
+            ]);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
