@@ -43,10 +43,10 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/deleteShippingAddress', 'deleteShippingAddress');
     Route::post('/updateUserDetail', 'updateUserDetail');
     Route::post('/storeNewPaymentDeatil', 'storeNewPaymentDeatil');
-    Route::post('/addUserContacts', 'addUserContacts');
+    
     Route::post('/ChefReview', 'ChefReview');
     Route::post('/deleteChefReview', 'deleteChefReview');
-    Route::get('/getUserContact', 'getUserContact');
+    
     Route::get('/getChefReview', 'getChefReview');
 
 });
@@ -131,4 +131,6 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::get("/getAllSiteSettings", 'getAllSiteSettings');
     Route::post("/giveSiteFeedback", "giveSiteFeedback");
     Route::get("/getSiteFeedback", 'getSiteFeedback');
+    Route::post('/addUserContacts', 'addUserContacts');
+    Route::get('/getUserContact', 'getUserContact');
 });

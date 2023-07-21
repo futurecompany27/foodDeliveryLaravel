@@ -34,7 +34,7 @@ class shefTypesController extends Controller
             ]);
             DB::commit();
 
-            return response()->json(['msg' => 'Shef type created successfully', "success" => true], 200);
+            return response()->json(['message' => 'Shef type created successfully', "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -78,7 +78,7 @@ class shefTypesController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(['msg' => 'Shef subtype Added Successfully', "success" => true], 200);
+            return response()->json(['message' => 'Shef subtype Added Successfully', "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

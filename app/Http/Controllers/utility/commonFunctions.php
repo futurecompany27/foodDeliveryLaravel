@@ -15,6 +15,7 @@ use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
 use App\Models\Sitesetting;
 use App\Models\State;
+use App\Models\UserContact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -188,15 +189,12 @@ class commonFunctions extends Controller
         if (!File::exists("storage/feedback_profiles/")) {
             File::makeDirectory("storage/feedback_profiles/", $mode = 0777, true, true);
         }
-        $images = $req->file('images');
-        $imagePaths = [];          // Used Array to store multiple image paths
-        foreach ($images as $image) {
-            $imagePath = $image->store("feedback_profiles", "public");
-            array_push($imagePaths, asset('storage/' . $imagePath));
-        }
+
+        $imagePath = $req->file('images')->store("feedback_profiles", "public");
+
         try {
             $feedback = new Feedback();
-            $feedback->images = json_encode($imagePaths);
+            $feedback->images = asset('storage/' . $imagePath);
             $feedback->are_you_a = $req->are_you_a;
             $feedback->name = $req->name;
             $feedback->email = $req->email;
@@ -204,19 +202,80 @@ class commonFunctions extends Controller
             $feedback->message = $req->message;
             $feedback->star_rating = $req->star_rating;
             $feedback->save();
-            return response()->json(['msg' => "Feedback submitted successfully", "success" => true], 200);
+            return response()->json(['message' => "Feedback submitted successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
+
     function getSiteFeedback()
     {
-        $data = Feedback::all();
-        foreach ($data as $value) {
-            $value->images = json_decode($value->images);
+        try {
+            $data = Feedback::all();
+            return response()->json(['data' => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
-        return response()->json(['data' => $data, "success" => true], 200);
+    }
+
+    public function addUserContacts(Request $req)
+    {
+        $validator = Validator::make(
+            $req->all(),
+            [
+                "are_you_a" => 'required',
+                "full_name" => 'required',
+                "email" => 'required',
+                "subject" => 'required',
+                "message" => "required",
+            ],
+            [
+                "are_you_a.required" => "please fill Are you a?",
+                "full_name.required" => "please fill full_name",
+                "email.required" => "please select email",
+                "subject.required" => "please select subject",
+                "message.required" => "please fill message",
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $contact = new UserContact();
+            $contact->are_you_a = $req->are_you_a;
+            $contact->full_name = $req->full_name;
+            $contact->email = $req->email;
+            $contact->subject = $req->subject;
+            $contact->message = $req->message;
+            $contact->save();
+            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    public function getUserContact(Request $req)
+    {
+        try {
+            $totalRecords = UserContact::count();
+            $skip = $req->page * 10;
+            $items = UserContact::skip($skip)->take(10)->get();
+
+            return response()->json([
+                'data' => $items,
+                'TotalRecords' => $totalRecords,
+            ]);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
     }
 }

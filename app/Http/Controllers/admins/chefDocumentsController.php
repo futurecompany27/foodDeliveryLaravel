@@ -78,7 +78,7 @@ class chefDocumentsController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(['msg' => 'Document item Field created Successfully', "success" => true], 200);
+            return response()->json(['message' => 'Document item Field created Successfully', "success" => true], 200);
 
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Mail\HomeshefUserEmailVerificationMail;
 use App\Models\NoRecordFound;
 use App\Models\PaymentCredentialsCardData;
-use App\Models\PaymentCredentialsData;
 use App\Models\PaymentCredentialsPayPalData;
 use App\Models\ShippingAddresse;
 use App\Models\User;
@@ -17,13 +16,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use PhpParser\Node\Expr\Array_;
-use Illuminate\Support\Facades\Session;
-use Intervention\Image\Image; //Intervention Image
-use Illuminate\Support\Facades\File;
 
 class UserController extends Controller
 {
@@ -110,7 +104,7 @@ class UserController extends Controller
     function getChefDetails(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['msg' => 'please fill all th required fields', "success" => false], 400);
+            return response()->json(['message' => 'please fill all th required fields', "success" => false], 400);
         }
         try {
             $data = chef::find($req->chef_id);
@@ -181,7 +175,7 @@ class UserController extends Controller
                     $newData->save();
                 }
             }
-            return response()->json(['msg' => 'added successfull', 'success' => true], 200);
+            return response()->json(['message' => 'added successfull', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -376,62 +370,6 @@ class UserController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try again!', 'success' => false], 500);
         }
     }
-    public function addUserContacts(Request $req)
-    {
-        $validator = Validator::make(
-            $req->all(),
-            [
-                "are_you_a" => 'required',
-                "full_name" => 'required',
-                "email" => 'required',
-                "subject" => 'required',
-                "message" => "required",
-            ],
-            [
-                "are_you_a.required" => "please fill Are you a?",
-                "full_name.required" => "please fill full_name",
-                "email.required" => "please select email",
-                "subject.required" => "please select subject",
-                "message.required" => "please fill message",
-            ]
-        );
-
-        if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
-        }
-        try {
-            $contact = new UserContact();
-            $contact->are_you_a = $req->are_you_a;
-            $contact->full_name = $req->full_name;
-            $contact->email = $req->email;
-            $contact->subject = $req->subject;
-            $contact->message = $req->message;
-            $contact->save();
-            return response()->json(['msg' => "Submitted successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
-        }
-    }
-
-    public function getUserContact(Request $req)
-    {
-        try {
-            $totalRecords = UserContact::count();
-            $skip = $req->page * 10;
-            $items = UserContact::skip($skip)->take(10)->get();
-
-            return response()->json([
-                'data' => $items,
-                'TotalRecords' => $totalRecords,
-            ]);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
-        }
-    }
 
     public function ChefReview(Request $req)
     {
@@ -473,7 +411,7 @@ class UserController extends Controller
             $review->star_rating = $req->star_rating;
             $review->message = $req->message;
             $review->save();
-            return response()->json(['msg' => "Submitted successfully", "success" => true], 200);
+            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -502,11 +440,11 @@ class UserController extends Controller
                 }
             }
             ChefReview::where('id', $req->id)->delete();
-            return response()->json(['msg' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
         }
     }
 

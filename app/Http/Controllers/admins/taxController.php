@@ -29,7 +29,7 @@ class taxController extends Controller
                 'tax_type' => strtoupper($req->tax_type),
             ]);
             DB::commit();
-            return response()->json(['msg' => "added successfully", "success" => true], 200);
+            return response()->json(['message' => "added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
