@@ -42,6 +42,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/changeDefaultShippingAddress', 'changeDefaultShippingAddress');
     Route::post('/deleteShippingAddress', 'deleteShippingAddress');
     Route::post('/updateUserDetail', 'updateUserDetail');
+    Route::post('/storeNewPaymentDeatil', 'storeNewPaymentDeatil');
 });
 
 Route::controller(cartController::class)->group(function () {
@@ -79,6 +80,8 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/getAllAlternativeContacts', 'getAllAlternativeContacts');
     Route::post('/changePasswordForChef', 'changePasswordForChef');
     Route::post('/sendProfileForReview', 'sendProfileForReview');
+    Route::post('/requestForUpdate', 'requestForUpdate');
+    Route::post('/getApprovedUpdaterequest', 'getApprovedUpdaterequest');
 });
 
 // Route for admin

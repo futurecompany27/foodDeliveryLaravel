@@ -5,6 +5,9 @@ namespace App\Http\Controllers\users;
 use App\Http\Controllers\Controller;
 use App\Mail\HomeshefUserEmailVerificationMail;
 use App\Models\NoRecordFound;
+use App\Models\PaymentCredentialsCardData;
+use App\Models\PaymentCredentialsData;
+use App\Models\PaymentCredentialsPayPalData;
 use App\Models\ShippingAddresse;
 use App\Models\User;
 use App\Models\chef;
@@ -313,6 +316,47 @@ class UserController extends Controller
                 return response()->json(['message' => 'User updated successfully', 'success' => true], 200);
             } else {
                 return response()->json(['message' => 'User not found', 'success' => false], 404);
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again!', 'success' => false], 500);
+        }
+    }
+
+    function storeNewPaymentDeatil(Request $req)
+    {
+        if (!$req->user_id || !$req->type) {
+            return response()->json(['message' => "please fill required fields", "success" => false], 400);
+        }
+        try {
+            if ($req->type == 'card') {
+                $PayPalIsDefault = PaymentCredentialsPayPalData::where(['user_id' => $req->user_id, 'isParentIsDefault' => 1])->first();
+                $dataExist = PaymentCredentialsCardData::where('user_id', $req->user_id)->first();
+                $newCard = new PaymentCredentialsCardData();
+                $newCard->card_holder_name = $req->card_holder_name;
+                $newCard->card_number = $req->card_number;
+                $newCard->expiry_date = $req->expiry_date;
+                $newCard->cvv = $req->cvv;
+                if (!$dataExist) {
+                    $newCard->isDefault = 1;
+                }
+                if (!$PayPalIsDefault) {
+                    $newCard->isParentIsDefault = 1;
+                }
+                $newCard->save();
+            } else if ($req->type == 'paypal') {
+                $cardIsDefault = PaymentCredentialsCardData::where(['user_id' => $req->user_id, 'isParentIsDefault' => 1])->first();
+                $dataExist = PaymentCredentialsPayPalData::where('user_id', $req->user_id)->first();
+                $newPayPal = new PaymentCredentialsPayPalData();
+                $newPayPal->name = $req->name;
+                $newPayPal->email = $req->email;
+                if (!$dataExist) {
+                    $newPayPal->isDefault = 1;
+                }
+                if (!$cardIsDefault) {
+                    $newPayPal->isParentIsDefault = 1;
+                }
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

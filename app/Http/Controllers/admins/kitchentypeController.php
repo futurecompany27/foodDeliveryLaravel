@@ -24,8 +24,7 @@ class kitchentypeController extends Controller
             'kitchentype.unique' => 'Kitchen type already exists with us',
         ]);
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors(), "success" => false],500);
-        }
+            return response()->json(['message' => $validator->errors(), "success" => false], 400);        }
         try {
             $path = "storage/admin/kitchentype/";
             if (!File::exists($path)) {

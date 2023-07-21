@@ -11,6 +11,7 @@ use App\Models\ChefAlternativeContact;
 use App\Models\ChefDocument;
 use App\Models\ChefProfileReviewByAdmin;
 use App\Models\FoodItem;
+use App\Models\RequestForUpdateDetails;
 use App\Models\ScheduleCall;
 use App\Models\User;
 use App\Models\Contact;
@@ -136,7 +137,7 @@ class ChefController extends Controller
                 $profile = asset('storage/chef/' . $name_gen);
             }
 
-            $result = chef::where('id', $req->chef_id)->update([
+            chef::where('id', $req->chef_id)->update([
                 "first_name" => ucfirst($req->first_name),
                 "last_name" => ucfirst($req->last_name),
                 "type" => ucfirst($req->type),
@@ -147,7 +148,8 @@ class ChefController extends Controller
                 "latitude" => isset($req->latitude) ? $req->latitude : '',
                 "longitude" => isset($req->longitude) ? $req->longitude : '',
                 "city" => isset($req->city) ? $req->city : '',
-                "state" => isset($req->state) ? $req->state : ''
+                "state" => isset($req->state) ? $req->state : '',
+                'status' => 0
             ]);
             return response()->json(["msg" => "profile updated successfully", "success" => true], 200);
         } catch (\Throwable $th) {
@@ -219,6 +221,7 @@ class ChefController extends Controller
                 $chefDetails->email = trim($req->new_email);
                 $chefDetails->is_email_verified = 0;
                 $chefDetails->email_verified_at = null;
+                $chefDetails->status = 0;
                 $chefDetails->save();
                 Mail::to(trim($req->new_email))->send(new HomeshefChefEmailVerification($chefDetails));
                 return response()->json(['msg' => "Updated sucessfully", "success" => true], 200);
@@ -248,6 +251,7 @@ class ChefController extends Controller
             if ($req->tiktok_link) {
                 $chef->tiktok_link = $req->tiktok_link;
             }
+            $chef->status = 0;
             $chef->save();
             return response()->json(['msg' => 'Updated successfully', "success" => true], 200);
         } catch (\Throwable $th) {
@@ -282,6 +286,7 @@ class ChefController extends Controller
             $chef->account_number = $req->account_number;
             $chef->transit_number = $req->transit_number;
             $chef->institution_number = $req->institution_number;
+            $chef->status = 0;
             $chef->save();
             return response()->json(['msg' => "updated successfully", "success" => true], 200);
         } catch (\Throwable $th) {
@@ -308,7 +313,7 @@ class ChefController extends Controller
                     unlink(str_replace('http://127.0.0.1:8000/', '', $chef->address_proof_path));
                 }
                 $storedPath = $req->file('address_proof_path')->store($path, 'public');
-                chef::where("id", $req->chef_id)->update(["address_proof_path" => asset('storage/' . $storedPath), "address_proof" => $req->address_proof]);
+                chef::where("id", $req->chef_id)->update(["address_proof_path" => asset('storage/' . $storedPath), "address_proof" => $req->address_proof, 'status' => 0]);
             }
 
             // store ID proof 1
@@ -317,7 +322,7 @@ class ChefController extends Controller
                     unlink(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1));
                 }
                 $storedPath = $req->file('id_proof_path1')->store($path, 'public');
-                chef::where("id", $req->chef_id)->update(["id_proof_path1" => asset('storage/' . $storedPath)]);
+                chef::where("id", $req->chef_id)->update(["id_proof_path1" => asset('storage/' . $storedPath), 'status' => 0]);
             }
 
             // store ID proof 2
@@ -326,7 +331,7 @@ class ChefController extends Controller
                     unlink(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1));
                 }
                 $storedPath = $req->file('id_proof_path2')->store($path, 'public');
-                chef::where("id", $req->chef_id)->update(["id_proof_path2" => asset('storage/' . $storedPath)]);
+                chef::where("id", $req->chef_id)->update(["id_proof_path2" => asset('storage/' . $storedPath), 'status' => 0]);
             }
 
             // Additional fields which has values in string
@@ -344,6 +349,7 @@ class ChefController extends Controller
                                 "field_value" => $data->value
                             ]
                         );
+                        chef::where("id", $req->chef_id)->update(['status' => 0]);
                     }
                 }
             }
@@ -367,6 +373,7 @@ class ChefController extends Controller
                                 "field_value" => asset('storage/' . $storedPath)
                             ]
                         );
+                        chef::where("id", $req->chef_id)->update(['status' => 0]);
                     }
                 }
             }
@@ -410,6 +417,7 @@ class ChefController extends Controller
                 "kitchen_types" => $req->kitchen_types,
                 "about_kitchen" => $req->about_kitchen,
                 "kitchen_name" => $req->kitchen_name,
+                'status' => 0
             ];
             chef::where('id', $req->chef_id)->update($update);
             DB::commit();
@@ -434,7 +442,7 @@ class ChefController extends Controller
                     unlink(str_replace('http://127.0.0.1:8000/', '', $chef->are_you_a_file_path));
                 }
                 $storedPath = $req->file('are_you_a_file_path')->store($path, 'public');
-                chef::where("id", $req->chef_id)->update(["are_you_a_file_path" => asset('storage/' . $storedPath), "are_you_a" => $req->are_you_a]);
+                chef::where("id", $req->chef_id)->update(["are_you_a_file_path" => asset('storage/' . $storedPath), "are_you_a" => $req->are_you_a, 'status' => 0]);
                 return response()->json(["msg" => "updated successfully", "success" => true], 200);
             } else {
                 return response()->json(["msg" => "please upload proof of " . $req->are_you_a, "success" => false], 500);
@@ -804,13 +812,14 @@ class ChefController extends Controller
     function sendProfileForReview(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+            return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
         }
         try {
             $newProfileForReview = new ChefProfileReviewByAdmin();
             $newProfileForReview->chef_id = $req->chef_id;
             $newProfileForReview->save();
             chef::where('id', $req->chef_id)->update(['status' => 2]);
+            RequestForUpdateDetails::where(['chef_id' => $req->chef_id, 'status' => 1])->update(['status' => 2]);
             return response()->json(['msg' => 'Request Submitted successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -819,4 +828,41 @@ class ChefController extends Controller
         }
     }
 
+    function requestForUpdate(Request $req)
+    {
+        if (!$req->chef_id || !$req->request_for || !$req->message) {
+            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+        }
+        try {
+            $alreadyPending = RequestForUpdateDetails::where('chef_id', $req->chef_id)->whereNotIn('status', [1, 2])->first();
+            if ($alreadyPending) {
+                return response()->json(['message' => 'you have a pending request for update', 'success' => false], 500);
+            }
+            $newRequest = new RequestForUpdateDetails();
+            $newRequest->chef_id = $req->chef_id;
+            $newRequest->request_for = $req->request_for;
+            $newRequest->message = $req->message;
+            $newRequest->save();
+            return response()->json(['message' => 'Request Submitted successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function getApprovedUpdaterequest(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(['msg' => 'please fill all the required fields', 'success' => false], 400);
+        }
+        try {
+            $data = RequestForUpdateDetails::where('chef_id', $req->chef_id)->where('status', 1)->first();
+            return response()->json(['data' => $data, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
 }
