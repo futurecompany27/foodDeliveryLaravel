@@ -89,14 +89,11 @@ class UserController extends Controller
         }
 
         try {
-            $totalRecords = UserContact::count();
+            $totalRecords = chef::count();
             $skip = $req->page * 10;
-            $items = chef::skip($skip)->take(10)->get();
-
-            return response()->json([
-                'data' => $items,
-                'TotalRecords' => $totalRecords,
-            ]);
+            Log::info($skip);
+            $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->take(10)->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -334,10 +331,7 @@ class UserController extends Controller
 
     public function getUserContact(Request $req)
     {
-
         $totalRecords = UserContact::count();
-
-
         $skip = $req->page * 10;
         $items = UserContact::skip($skip)->take(10)->get();
 
