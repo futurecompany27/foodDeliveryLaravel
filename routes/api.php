@@ -43,6 +43,12 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/deleteShippingAddress', 'deleteShippingAddress');
     Route::post('/updateUserDetail', 'updateUserDetail');
     Route::post('/storeNewPaymentDeatil', 'storeNewPaymentDeatil');
+    Route::post('/addUserContacts', 'addUserContacts');
+    Route::post('/ChefReview', 'ChefReview');
+    Route::post('/deleteChefReview', 'deleteChefReview');
+    Route::get('/getUserContact', 'getUserContact');
+    Route::get('/getChefReview', 'getChefReview');
+
 });
 
 Route::controller(cartController::class)->group(function () {

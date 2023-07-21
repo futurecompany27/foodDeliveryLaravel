@@ -11,12 +11,19 @@ use App\Models\PaymentCredentialsPayPalData;
 use App\Models\ShippingAddresse;
 use App\Models\User;
 use App\Models\chef;
+use App\Models\ChefReview;
+use App\Models\UserContact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Expr\Array_;
+use Illuminate\Support\Facades\Session;
+use Intervention\Image\Image; //Intervention Image
+use Illuminate\Support\Facades\File;
 
 class UserController extends Controller
 {
@@ -85,8 +92,14 @@ class UserController extends Controller
         }
 
         try {
-            $data = chef::where('postal_code', strtolower($req->postal_code))->get();
-            return response()->json(['data' => $data, 'success' => true], 200);
+            $totalRecords = UserContact::count();
+            $skip = $req->page * 10;
+            $items = chef::skip($skip)->take(10)->get();
+
+            return response()->json([
+                'data' => $items,
+                'TotalRecords' => $totalRecords,
+            ]);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -129,7 +142,6 @@ class UserController extends Controller
                 DB::commit();
                 return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
             }
-
         } catch (\Throwable $th) {
             Log::info($th);
             DB::rollback();
@@ -362,6 +374,154 @@ class UserController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try again!', 'success' => false], 500);
+        }
+    }
+    public function addUserContacts(Request $req)
+    {
+        $validator = Validator::make(
+            $req->all(),
+            [
+                "are_you_a" => 'required',
+                "full_name" => 'required',
+                "email" => 'required',
+                "subject" => 'required',
+                "message" => "required",
+            ],
+            [
+                "are_you_a.required" => "please fill Are you a?",
+                "full_name.required" => "please fill full_name",
+                "email.required" => "please select email",
+                "subject.required" => "please select subject",
+                "message.required" => "please fill message",
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $contact = new UserContact();
+            $contact->are_you_a = $req->are_you_a;
+            $contact->full_name = $req->full_name;
+            $contact->email = $req->email;
+            $contact->subject = $req->subject;
+            $contact->message = $req->message;
+            $contact->save();
+            return response()->json(['msg' => "Submitted successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    public function getUserContact(Request $req)
+    {
+        try {
+            $totalRecords = UserContact::count();
+            $skip = $req->page * 10;
+            $items = UserContact::skip($skip)->take(10)->get();
+
+            return response()->json([
+                'data' => $items,
+                'TotalRecords' => $totalRecords,
+            ]);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    public function ChefReview(Request $req)
+    {
+
+        $validator = Validator::make(
+            $req->all(),
+            [
+                "full_name" => 'required',
+                "chef_id" => 'required',
+                "images" => 'required',
+                "star_rating" => "required|integer|min:1|max:5",
+                "message" => 'required',
+            ],
+            [
+                "full_name.required" => "please fill full_name",
+                "chef_id.required" => "please fill chef_id",
+                "images.required" => "please select images",
+                "star_rating.required" => "please select star_rating",
+                "message.required" => "please fill message",
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        if ($req->hasFile('images')) {
+            $images = $req->file('images');
+            $imagePaths = [];
+            // Used Array to store multiple image paths
+            foreach ($images as $image) {
+                $imagePath = $image->store('chef_reviews', "public");
+                array_push($imagePaths, asset('storage/' . $imagePath));
+            }
+        }
+        try {
+            $review = new ChefReview();
+            $review->full_name = $req->full_name;
+            $review->chef_id = $req->chef_id;
+            $review->images = json_encode($imagePaths); //Encode Array into String to store it in database
+            $review->star_rating = $req->star_rating;
+            $review->message = $req->message;
+            $review->save();
+            return response()->json(['msg' => "Submitted successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    public function deleteChefReview(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = ChefReview::where('id', $req->id)->first();
+            $images = json_decode($data->images);
+
+            foreach ($images as $image) {
+                str_replace('http://127.0.0.1:8000/', '', $image);
+                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $image))) {
+                    unlink(str_replace('http://127.0.0.1:8000/', '', $image));
+                }
+            }
+            ChefReview::where('id', $req->id)->delete();
+            return response()->json(['msg' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+        }
+    }
+
+    public function getChefReview(Request $req)
+    {
+        try {
+            $data = ChefReview::all();
+            foreach ($data as $value) {
+                $value->images = json_decode($value->images);
+            }
+            return response()->json(['data' => $data, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
         }
     }
 }
