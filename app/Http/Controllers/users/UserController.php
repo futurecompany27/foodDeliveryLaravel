@@ -377,14 +377,12 @@ class UserController extends Controller
         $validator = Validator::make(
             $req->all(),
             [
-                "full_name" => 'required',
                 "chef_id" => 'required',
                 "images" => 'required',
                 "star_rating" => "required|integer|min:1|max:5",
                 "message" => 'required',
             ],
             [
-                "full_name.required" => "please fill full_name",
                 "chef_id.required" => "please fill chef_id",
                 "images.required" => "please select images",
                 "star_rating.required" => "please select star_rating",
@@ -397,7 +395,6 @@ class UserController extends Controller
         if ($req->hasFile('images')) {
             $images = $req->file('images');
             $imagePaths = [];
-            // Used Array to store multiple image paths
             foreach ($images as $image) {
                 $imagePath = $image->store('chef_reviews', "public");
                 array_push($imagePaths, asset('storage/' . $imagePath));
