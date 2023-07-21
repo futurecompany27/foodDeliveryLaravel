@@ -40,6 +40,12 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/getAllShippingAdressOfUser', 'getAllShippingAdressOfUser');
     Route::post('/changeDefaultShippingAddress', 'changeDefaultShippingAddress');
     Route::post('/deleteShippingAddress', 'deleteShippingAddress');
+    Route::post('/addUserContacts', 'addUserContacts');
+    Route::post('/ChefReview', 'ChefReview');
+    Route::post('/deleteChefReview', 'deleteChefReview');
+    Route::get('/getUserContact', 'getUserContact');
+    Route::get('/getChefReview', 'getChefReview');
+    
 });
 
 Route::controller(cartController::class)->group(function () {

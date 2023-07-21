@@ -163,6 +163,7 @@ class commonFunctions extends Controller
         $validator = Validator::make(
             $req->all(),
             [
+                "images" => 'required',
                 "are_you_a" => 'required',
                 "name" => 'required',
                 "email" => 'required',
@@ -171,6 +172,7 @@ class commonFunctions extends Controller
                 "star_rating" => "required|integer|min:1|max:5",
             ],
             [
+                "images.required" => "please fill images",
                 "are_you_a.required" => "please fill Are you a?",
                 "name.required" => "please fill name",
                 "email.required" => "please select email",
@@ -186,12 +188,15 @@ class commonFunctions extends Controller
         if (!File::exists("storage/feedback_profiles/")) {
             File::makeDirectory("storage/feedback_profiles/", $mode = 0777, true, true);
         }
+        $images = $req->file('images');
+        $imagePaths = [];          // Used Array to store multiple image paths
+        foreach ($images as $image) {
+            $imagePath = $image->store("feedback_profiles", "public");
+            array_push($imagePaths, asset('storage/' . $imagePath));
+        }
         try {
             $feedback = new Feedback();
-            if ($req->hasFile('images')) {
-                $imagePath = $req->file('images')->store("feedback_profiles", "public");
-                $feedback->images = asset('storage/' . $imagePath);
-            }
+            $feedback->images = json_encode($imagePaths);
             $feedback->are_you_a = $req->are_you_a;
             $feedback->name = $req->name;
             $feedback->email = $req->email;
@@ -214,5 +219,4 @@ class commonFunctions extends Controller
         }
         return response()->json(['data' => $data, "success" => true], 200);
     }
-
 }
