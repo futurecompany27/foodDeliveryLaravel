@@ -396,13 +396,13 @@ class UserController extends Controller
             $images = $req->file('images');
             $imagePaths = [];
             foreach ($images as $image) {
-                $imagePath = $image->store('chef_reviews', "public");
+                $imagePath = $image->store('chef_reviews/' . $req->chef_id . '/', "public");
                 array_push($imagePaths, asset('storage/' . $imagePath));
             }
         }
         try {
             $review = new ChefReview();
-            $review->full_name = $req->full_name;
+            $review->full_name = isset($req->full_name) ? $req->full_name : 'anonymous';
             $review->chef_id = $req->chef_id;
             $review->images = json_encode($imagePaths); //Encode Array into String to store it in database
             $review->star_rating = $req->star_rating;
@@ -448,7 +448,7 @@ class UserController extends Controller
     public function getChefReview(Request $req)
     {
         try {
-            $data = ChefReview::all();
+            $data = ChefReview::where('chef_id', $req->chef_id)->get();
             foreach ($data as $value) {
                 $value->images = json_decode($value->images);
             }
