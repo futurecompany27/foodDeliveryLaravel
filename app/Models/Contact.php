@@ -10,6 +10,7 @@ use App\Http\Controllers\chefs\ChefController;
 class Contact extends Model
 {
     use HasFactory;
+    protected $table = "contacts";
     protected $fillable = ['chef_id', 'subject', 'message'];
    
 }

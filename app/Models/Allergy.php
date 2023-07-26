@@ -9,4 +9,5 @@ class Allergy extends Model
 {
     use HasFactory;
     protected $table = 'allergies';
+    protected $fillable = ['image','small_description','allergy_name'];
 }

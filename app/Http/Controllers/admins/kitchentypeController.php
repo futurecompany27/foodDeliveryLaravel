@@ -9,8 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use File;
-use Image;
+// use Intervention\Image\Image; //Intervention Image
+use Intervention\Image\ImageManagerStatic as Image;
+use Illuminate\Support\Facades\File;
 
 class kitchentypeController extends Controller
 {
@@ -24,7 +25,8 @@ class kitchentypeController extends Controller
             'kitchentype.unique' => 'Kitchen type already exists with us',
         ]);
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors(), "success" => false], 400);        }
+            return response()->json(['message' => $validator->errors(), "success" => false], 500);
+        }
         try {
             $path = "storage/admin/kitchentype/";
             if (!File::exists($path)) {
@@ -52,11 +54,11 @@ class kitchentypeController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(["msg" => "added successfully", "success" => true], 201);
+            return response()->json(["message" => "added successfully", "success" => true], 201);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
@@ -68,7 +70,80 @@ class kitchentypeController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    public function updateKitchenTypes(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        if (!File::exists("storage/admin/kitchentype/")) {
+            File::makeDirectory("storage/admin/kitchentype/", $mode = 0777, true, true);
+        }
+        try {
+            $data = Kitchentype::where('id', $req->id)->first();
+            $updateData = [];
+            if ($req->kitchentype) {
+                $updateData['kitchentype'] = $req->kitchentype;
+            }
+            if ($req->hasFile('image')) {
+                $images = $data->image;
+                str_replace('http://127.0.0.1:8000/', '', $images);
+                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
+                    unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+                }
+                if ($req->file('image') && isset($req->image)) {
+
+                    $big_image = $req->file('image');
+                    $image_name = strtolower($req->kitchentype);
+                    $new_name = str_replace(" ", "", $image_name);
+                    $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
+                    $big_img = Image::make($req->file('image'))
+                        ->resize(200, 200)
+                        ->save('storage/admin/kitchentype/' . $name_gen);
+                    $filename = asset("storage/admin/kitchentype/" . $name_gen);
+                    $updateData['image'] = $filename;
+                }
+            }
+            Kitchentype::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function deleteKitchenTypes(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = Kitchentype::where('id', $req->id)->first();
+            $images = $data->image;
+            str_replace('http://127.0.0.1:8000/', '', $images);
+            if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
+                unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+            }
+            Kitchentype::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
         }
     }
 }

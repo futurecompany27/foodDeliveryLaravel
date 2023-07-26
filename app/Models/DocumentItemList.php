@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class DocumentItemList extends Model
 {
     use HasFactory;
-
-    protected $fillable = ['state_id', 'document_item_name', 'chef_type', 'reference_links', 'additional_links', 'detail_information', 'status'];
+    protected $table = "document_item_lists";
+    protected $fillable = ['id', 'state_id', 'document_item_name', 'chef_type', 'reference_links', 'additional_links', 'detail_information', 'status'];
 
     public function state()
     {

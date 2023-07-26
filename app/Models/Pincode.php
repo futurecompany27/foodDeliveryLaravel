@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Pincode extends Model
 {
     use HasFactory;
-    protected $fillable = ['city_id', 'pincode', 'status'];
+    protected $fillable = ['city_id', 'pincode', 'latitude', 'longitude', 'status'];
 
     public function city()
     {

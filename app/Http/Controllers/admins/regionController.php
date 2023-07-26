@@ -7,7 +7,9 @@ use App\Http\Controllers\utility\commonFunctions;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Pincode;
+use App\Models\PostalCode;
 use App\Models\State;
+use Database\Seeders\CountrySeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,11 +29,72 @@ class regionController extends Controller
             $country->country_code = $req->country_code;
             $country->save();
             DB::commit();
-            return response()->json(["msg" => "country added successfully", "success" => true], 200);
+            return response()->json(["message" => "country added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function updateCountry(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $updateData = $req->all();
+            Country::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function deleteCountry(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            Country::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function getCountry(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "country_code" => 'required',
+        ], [
+            "country_code.required" => "please fill country_code",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = Country::where('country_code', $req->country_code)->get();
+            return response()->json(['data' => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
 
@@ -61,11 +124,85 @@ class regionController extends Controller
             $state->tax_value = json_encode($req->tax_value);
             $state->save();
             DB::commit();
-            return response()->json(["msg" => "State added successfully", "success" => true], 200);
+            return response()->json(["message" => "State added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+        }
+    }
+
+    function updateState(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        if ($req->country_id) {
+            $updateData['country_id'] = $req->country_id;
+        }
+        if ($req->name) {
+            $updateData['name'] = $req->name;
+        }
+        if ($req->tax_type) {
+            $updateData['tax_type.*'] = json_encode($req->tax_type);
+        }
+        if ($req->tax_value) {
+            $updateData['tax_value.*'] = json_encode($req->tax_value);
+        }
+        try {
+            $data = State::where('id', $req->id)->first();
+            State::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function deleteState(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = State::where('id', $req->id)->first();
+            State::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function getState(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'country_id' => 'required',
+        ], [
+            "country_id.required" => "please fill country_id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = State::where('country_id', $req->country_id)->get();
+            return response()->json(['data' => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
 
@@ -85,7 +222,70 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false],500);
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function updateCity(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = City::where('id', $req->id)->first();
+            $updateData = $req->all();
+            City::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function deleteCity(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = City::where('id', $req->id)->first();
+            City::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function getCity(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "state_id" => 'required',
+        ], [
+            "state_id.required" => "please fill state_id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = City::where('state_id', $req->state_id)->get();
+            return response()->json(['data' => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
 
@@ -99,22 +299,76 @@ class regionController extends Controller
             $Pincode = new Pincode;
             $Pincode->pincode = str_replace(" ", "", (strtolower($req->pincode)));
             $Pincode->city_id = $req->city_id;
-
-            $commonFunctions = new commonFunctions;
-            $lat_long = $commonFunctions->get_lat_long(str_replace(" ", "", (strtolower($req->postal_code))));
-            // log::info($lat_long);
-            // $Pincode->latitude = $lat_long['lat'];
-            // $Pincode->longitude = $lat_long['long'];
-
-            // $Pincode->latitude = 45.618200;
-            // $Pincode->longitude = -73.797240;
+            $Pincode->latitude = $req->lat;
+            $Pincode->longitude = $req->long;
             $Pincode->save();
             DB::commit();
-            return response()->json(["msg" => "pincode added successfully ", "success" => true], 200);
+            return response()->json(["message" => "pincode added successfully ", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+        }
+    }
+
+    function updatePincode(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $updateData = $req->all();
+            Pincode::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function deletePincode(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            Pincode::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function getPincode(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "city_id" => 'required',
+        ], [
+            "city_id.required" => "please fill city_id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = Pincode::where('city_id', $req->city_id)->get();
+            return response()->json(['data' => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
 }

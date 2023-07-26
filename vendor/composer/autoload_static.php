@@ -526,6 +526,7 @@ class ComposerStaticInit8090759d8e09e70b0a30f08aa6c8d584
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Controllers\\StripeController' => __DIR__ . '/../..' . '/app/Http/Controllers/StripeController.php',
+        'App\\Http\\Controllers\\admins\\AdminController' => __DIR__ . '/../..' . '/app/Http/Controllers/admins/AdminController.php',
         'App\\Http\\Controllers\\admins\\chefDocumentsController' => __DIR__ . '/../..' . '/app/Http/Controllers/admins/chefDocumentsController.php',
         'App\\Http\\Controllers\\admins\\kitchentypeController' => __DIR__ . '/../..' . '/app/Http/Controllers/admins/kitchentypeController.php',
         'App\\Http\\Controllers\\admins\\regionController' => __DIR__ . '/../..' . '/app/Http/Controllers/admins/regionController.php',
