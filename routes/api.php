@@ -43,7 +43,6 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/changeDefaultShippingAddress', 'changeDefaultShippingAddress');
     Route::post('/deleteShippingAddress', 'deleteShippingAddress');
     Route::post('/updateUserDetail', 'updateUserDetail');
-    Route::post('/storeNewPaymentDeatil', 'storeNewPaymentDeatil');
 
     Route::post('/ChefReview', 'ChefReview');
     Route::post('/deleteChefReview', 'deleteChefReview');
