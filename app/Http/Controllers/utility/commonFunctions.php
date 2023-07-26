@@ -151,8 +151,8 @@ class commonFunctions extends Controller
     function getAllSiteSettings(Request $req)
     {
         try {
-            $data = Sitesetting::all();
-            return response()->json(['data' => $data[0], 'success' => true], 200);
+            $data = Sitesetting::first();
+            return response()->json(['data' => $data, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -210,11 +210,13 @@ class commonFunctions extends Controller
         }
     }
 
-    function getSiteFeedback()
+    function getSiteFeedback(Request $req)
     {
         try {
-            $data = Feedback::all();
-            return response()->json(['data' => $data, "success" => true], 200);
+            $totalRecords = Feedback::count();
+            $skip = $req->page * 10;
+            $data = Feedback::skip($skip)->take(10)->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -267,11 +269,7 @@ class commonFunctions extends Controller
             $totalRecords = UserContact::count();
             $skip = $req->page * 10;
             $items = UserContact::skip($skip)->take(10)->get();
-
-            return response()->json([
-                'data' => $items,
-                'TotalRecords' => $totalRecords,
-            ]);
+            return response()->json(['data' => $items, 'TotalRecords' => $totalRecords, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

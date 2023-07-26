@@ -6,6 +6,7 @@ use App\Http\Controllers\admins\regionController;
 use App\Http\Controllers\admins\shefTypesController;
 use App\Http\Controllers\admins\taxController;
 use App\Http\Controllers\chefs\ChefController;
+use App\Http\Controllers\StripeController;
 use App\Http\Controllers\users\cartController;
 use App\Http\Controllers\users\otpController;
 use App\Http\Controllers\users\UserController;
@@ -43,10 +44,10 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/deleteShippingAddress', 'deleteShippingAddress');
     Route::post('/updateUserDetail', 'updateUserDetail');
     Route::post('/storeNewPaymentDeatil', 'storeNewPaymentDeatil');
-    
+
     Route::post('/ChefReview', 'ChefReview');
     Route::post('/deleteChefReview', 'deleteChefReview');
-    
+
     Route::post('/getChefReview', 'getChefReview');
 
 });
@@ -134,3 +135,8 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::post('/addUserContacts', 'addUserContacts');
     Route::get('/getUserContact', 'getUserContact');
 });
+
+
+
+////////////// Routes for stripe ///////////
+Route::post('/makePayment', [StripeController::class, 'makePayment']);
