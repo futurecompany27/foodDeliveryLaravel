@@ -66,8 +66,9 @@ Route::controller(otpController::class)->group(function () {
 // Routes for chefs
 Route::controller(ChefController::class)->group(function () {
     Route::post('/ChefRegisteration', 'ChefRegisteration');
-    Route::post('/EditPersonalInfo', 'EditPersonalInfo');
     Route::post('/ChefLogin', 'ChefLogin');
+
+    Route::post('/EditPersonalInfo', 'EditPersonalInfo');
     Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/updateChefPrimaryEmail', 'updateChefPrimaryEmail');
     Route::post('/updateSocialMediaLinks', 'updateSocialMediaLinks');
@@ -95,31 +96,37 @@ Route::controller(ChefController::class)->group(function () {
 Route::controller(AdminController::class)->group(function () {
     Route::post('/adminRegistration', 'adminRegistration');
     Route::post('/adminLogin', 'adminLogin');
+
     Route::post('/addSiteSettings', 'addSiteSettings');
     Route::post('/updateSiteSettings', 'updateSiteSettings');
     Route::post('/deleteSiteSettings', 'deleteSiteSettings');
     Route::get('/getSiteSettings', 'getSiteSettings');
+
     Route::post('/addAdminSettings', 'addAdminSettings');
     Route::post('/updateAdminSettings', 'updateAdminSettings');
     Route::post('/deleteAdminSettings', 'deleteAdminSettings');
-    Route::get('/getAdminSettings', 'getAdminSettings');
+    Route::get('/getAdminSettings', 'getAdminSettings')
+    ;
     Route::post('/addFoodTypes', 'addFoodTypes');
     Route::post('/updateFoodTypes', 'updateFoodTypes');
     Route::post('/deleteFoodTypes', 'deleteFoodTypes');
+
     Route::post('/addAllergies', 'addAllergies');
     Route::post('/updateAllergies', 'updateAllergies');
     Route::post('/deleteAllergies', 'deleteAllergies');
+
     Route::post('/addDietaries', 'addDietaries');
     Route::post('/updateDietaries', 'updateDietaries');
     Route::post('/deleteDietaries', 'deleteDietaries');
+
     Route::post('/addHeatingInstructions', 'addHeatingInstructions');
     Route::post('/updateHeatingInstructions', 'updateHeatingInstructions');
     Route::post('/deleteHeatingInstructions', 'deleteHeatingInstructions');
-    Route::get('/getHeatingInstructions', 'getHeatingInstructions');
+
     Route::post('/addIngredients', 'addIngredients');
     Route::post('/updateIngredient', 'updateIngredient');
     Route::post('/deleteIngredient', 'deleteIngredient');
-    Route::get('/getIngredient', 'getIngredient');
+
     Route::post('/sendMessageToChef', 'sendMessageToChef');
     Route::post('/updateMessageToChef', 'updateMessageToChef');
     Route::post('/deleteMessageToChef', 'deleteMessageToChef');
@@ -128,21 +135,24 @@ Route::controller(AdminController::class)->group(function () {
 
 Route::controller(regionController::class)->group(function () {
     Route::post('/addCountry', 'addCountry');
-    Route::post('/addState', 'addState');
-    Route::post('/addCity', 'addCity');
-    Route::post('/addPincode', 'addPincode');
     Route::post('/updateCountry', 'updateCountry');
-    Route::post('/updateState', 'updateState');
-    Route::post('/updateCity', 'updateCity');
-    Route::post('/updatePincode', 'updatePincode');
+    Route::get('/getCountry', 'getCountry');
     Route::post('/deleteCountry', 'deleteCountry');
+
+    Route::post('/addState', 'addState');
+    Route::post('/updateState', 'updateState');
+    Route::get('/getState', 'getState');
     Route::post('/deleteState', 'deleteState');
+
+    Route::post('/addCity', 'addCity');
+    Route::post('/updateCity', 'updateCity');
+    Route::get('/getCity', 'getCity');
     Route::post('/deleteCity', 'deleteCity');
+
+    Route::post('/addPincode', 'addPincode');
+    Route::post('/updatePincode', 'updatePincode');
     Route::post('/deletePincode', 'deletePincode');
     Route::get('/getPincode', 'getPincode');
-    Route::get('/getCountry', 'getCountry');
-    Route::get('/getState', 'getState');
-    Route::get('/getCity', 'getCity');
 });
 
 Route::controller(chefDocumentsController::class)->group(function () {
@@ -193,12 +203,7 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::get("/getAllSiteSettings", 'getAllSiteSettings');
     Route::post("/giveSiteFeedback", "giveSiteFeedback");
     Route::get("/getSiteFeedback", 'getSiteFeedback');
-<<<<<<< HEAD
-    Route::post('/addUserContacts', 'addUserContacts');
-    Route::get('/getUserContact', 'getUserContact');
-=======
     Route::get("/get_lat_long", 'get_lat_long');
->>>>>>> 81dacc53879715f67b1e1855870f45b8f67aa5c9
 });
 
 

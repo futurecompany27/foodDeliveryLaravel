@@ -316,7 +316,6 @@ class AdminController extends Controller
         }
     }
 
-
     public function getAdminSettings(Request $req)
     {
         try {
@@ -749,23 +748,6 @@ class AdminController extends Controller
         }
     }
 
-    public function getHeatingInstructions(Request $req)
-    {
-        try {
-            $totalRecords = HeatingInstruction::count();
-            $skip = $req->page * 10;
-            $data = HeatingInstruction::skip($skip)->take(10)->get();
-            return response()->json([
-                'data' => $data,
-                'TotalRecords' => $totalRecords,
-            ]);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
-        }
-    }
-
     public function addIngredients(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -828,23 +810,6 @@ class AdminController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
-        }
-    }
-
-    public function getIngredient(Request $req)
-    {
-        try {
-            $totalRecords = Ingredient::count();
-            $skip = $req->page * 10;
-            $data = Ingredient::skip($skip)->take(10)->get();
-            return response()->json([
-                'data' => $data,
-                'TotalRecords' => $totalRecords,
-            ]);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
 
