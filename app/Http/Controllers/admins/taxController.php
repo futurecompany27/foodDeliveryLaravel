@@ -20,7 +20,7 @@ class taxController extends Controller
             'tax_type.string' => 'Only letters allowed',
         ]);
         if ($validatedData->fails()) {
-            return response()->json(['error' => $validatedData->errors(), "success" => false], 400);
+            return response()->json(['message' => $validatedData->errors(), "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -29,11 +29,76 @@ class taxController extends Controller
                 'tax_type' => strtoupper($req->tax_type),
             ]);
             DB::commit();
-            return response()->json(['msg' => "added successfully", "success" => true], 200);
+            return response()->json(['message' => "added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function updateTaxType(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            'tax_type' => 'required|string',
+        ], [
+            "id.required" => "please fill id",
+            'tax_type.required' => 'Tax type is required',
+            'tax_type.string' => 'Only letters allowed',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->tax_type) {
+                $updateData['tax_type'] = strtoupper($req->tax_type);
+            }
+            $data = Tax::where('id', $req->id)->first();
+            Tax::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function deleteTaxType(Request $req){
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = Tax::where('id', $req->id)->first();
+            Tax::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function getTaxType(Request $req)
+    {
+        try {
+            $totalRecords = Tax::count();
+            $skip = $req->page * 10;
+            $data = Tax::skip($skip)->take(10)->get();
+
+            return response()->json([
+                'data' => $data,
+                'TotalRecords' => $totalRecords,
+            ]);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
 }

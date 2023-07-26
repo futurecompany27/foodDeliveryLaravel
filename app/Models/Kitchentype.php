@@ -8,5 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Kitchentype extends Model
 {
     use HasFactory;
-    protected $fillable = ['kitchentype', 'status'];
+    protected $table = "kitchentypes";
+    protected $fillable = ['kitchentype','image', 'status'];
 }

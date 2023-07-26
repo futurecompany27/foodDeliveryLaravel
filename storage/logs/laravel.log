@@ -1,15 +1,64 @@
-
-[2023-07-21 04:51:57] local.INFO: Undefined array key 0  
-[2023-07-21 04:53:19] local.INFO: storage/chef_reviews/VpSXQM5OnLT8YjltB3v9RfZzItJI0eG0KSC176pH.jpg  
-[2023-07-21 04:53:19] local.INFO: storage/chef_reviews/78T0oig72v38IGrGrcqMfxc2ZdvdJ6DBuHPfwljL.jpg  
-[2023-07-21 04:55:47] local.INFO: storage/chef_reviews/xguVpWreaocewsh2DioRdmf1NBQyCS8DCmVLYF6o.jpg  
-[2023-07-21 04:55:47] local.INFO: storage/chef_reviews/kIBoAOLVUcYwTDkx0c8KinNObK5b6DYhnUE10Dnk.jpg  
-[2023-07-21 04:58:09] local.INFO: storage/chef_reviews/TeZPOxQcRJnQnlCKkXeyJj08L4Dkpwt1VpWmyUYC.jpg  
-[2023-07-21 04:58:09] local.INFO: storage/chef_reviews/o6ogoSraGW5Wob5GIjU4KI8XJ189EOFKCQLJ6QYq.jpg  
-[2023-07-21 05:09:15] local.INFO: http://127.0.0.1:8000/storage/chef_reviews/Iyyw8hqpXsFfWgSW1OWb2JvGZ0a8vu8BobNdhkF9.jpg  
-[2023-07-21 05:09:15] local.INFO: http://127.0.0.1:8000/storage/chef_reviews/AuG8Cl5hsZzlXuGwzESix29BHqw3iLpqMQjqsNcZ.jpg  
-[2023-07-21 05:10:26] local.INFO: Undefined array key 0  
-[2023-07-21 05:13:13] local.INFO: Attempt to read property "images" on null  
-[2023-07-21 05:32:28] local.INFO: storage/chef_reviews/bibwP3i391np2LMbObkz5rxSv3k25Ar8eBrMsCtx.jpg  
-[2023-07-21 05:32:28] local.INFO: storage/chef_reviews/Nz6TgqR2aPCprBshyOxvW1qk64cmuKfk4LjCKWKB.jpg  
-[2023-07-21 06:26:55] local.INFO: 0  
+[2023-07-25 13:19:04] local.INFO: array (
+  'results' => 
+  array (
+    0 => 
+    array (
+      'address_components' => 
+      array (
+        0 => 
+        array (
+          'long_name' => 'Canada',
+          'short_name' => 'CA',
+          'types' => 
+          array (
+            0 => 'country',
+            1 => 'political',
+          ),
+        ),
+      ),
+      'formatted_address' => 'Canada',
+      'geometry' => 
+      array (
+        'bounds' => 
+        array (
+          'northeast' => 
+          array (
+            'lat' => 83.6381,
+            'lng' => -50.9766,
+          ),
+          'southwest' => 
+          array (
+            'lat' => 41.6765559,
+            'lng' => -141.00187,
+          ),
+        ),
+        'location' => 
+        array (
+          'lat' => 56.130366,
+          'lng' => -106.346771,
+        ),
+        'location_type' => 'APPROXIMATE',
+        'viewport' => 
+        array (
+          'northeast' => 
+          array (
+            'lat' => 70,
+            'lng' => -50,
+          ),
+          'southwest' => 
+          array (
+            'lat' => 42,
+            'lng' => -142,
+          ),
+        ),
+      ),
+      'place_id' => 'ChIJ2WrMN9MDDUsRpY9Doiq3aJk',
+      'types' => 
+      array (
+        0 => 'country',
+        1 => 'political',
+      ),
+    ),
+  ),
+  'status' => 'OK',
+)  

@@ -331,14 +331,20 @@ class UserController extends Controller
 
     public function getUserContact(Request $req)
     {
-        $totalRecords = UserContact::count();
-        $skip = $req->page * 10;
-        $items = UserContact::skip($skip)->take(10)->get();
+        try {
+            $totalRecords = UserContact::count();
+            $skip = $req->page * 10;
+            $items = UserContact::skip($skip)->take(10)->get();
 
-        return response()->json([
-            'data' => $items,
-            'TotalRecords' => $totalRecords,
-        ]);
+            return response()->json([
+                'data' => $items,
+                'TotalRecords' => $totalRecords,
+            ]);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
     }
 
     public function ChefReview(Request $req)
@@ -420,16 +426,29 @@ class UserController extends Controller
 
     public function getChefReview(Request $req)
     {
+        $validator = Validator::make($req->all(), [
+            "chef_id" => 'required',
+        ], [
+            "chef_id.required" => "please fill chef_id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
         try {
-            $data = ChefReview::all();
+            $totalRecords = ChefReview::count();
+            $skip = $req->page * 10;
+            $data = ChefReview::where('chef_id',$req->chef_id)->get();
             foreach ($data as $value) {
                 $value->images = json_decode($value->images);
             }
-            return response()->json(['data' => $data, 'success' => true], 200);
+            return response()->json([
+                'data' => $data,
+                'TotalRecords' => $totalRecords,
+            ]);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 }

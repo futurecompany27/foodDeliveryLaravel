@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('dietaries', function (Blueprint $table) {
             $table->id();
             $table->string('diet_name')->unique();
-            $table->string('diet_image')->nullable();
+            $table->string('image')->nullable();
             $table->string('small_description')->nullable();
             $table->timestamps();
         });

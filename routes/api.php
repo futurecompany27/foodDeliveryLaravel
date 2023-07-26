@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admins\AdminController;
 use App\Http\Controllers\admins\chefDocumentsController;
 use App\Http\Controllers\admins\kitchentypeController;
 use App\Http\Controllers\admins\regionController;
@@ -45,7 +46,6 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/deleteChefReview', 'deleteChefReview');
     Route::get('/getUserContact', 'getUserContact');
     Route::get('/getChefReview', 'getChefReview');
-    
 });
 
 Route::controller(cartController::class)->group(function () {
@@ -86,31 +86,93 @@ Route::controller(ChefController::class)->group(function () {
 });
 
 // Route for admin
+
+Route::controller(AdminController::class)->group(function () {
+    Route::post('/adminRegistration', 'adminRegistration');
+    Route::post('/adminLogin', 'adminLogin');
+    Route::post('/addSiteSettings', 'addSiteSettings');
+    Route::post('/updateSiteSettings', 'updateSiteSettings');
+    Route::post('/deleteSiteSettings', 'deleteSiteSettings');
+    Route::get('/getSiteSettings', 'getSiteSettings');
+    Route::post('/addAdminSettings', 'addAdminSettings');
+    Route::post('/updateAdminSettings', 'updateAdminSettings');
+    Route::post('/deleteAdminSettings', 'deleteAdminSettings');
+    Route::get('/getAdminSettings', 'getAdminSettings');
+    Route::post('/addFoodTypes', 'addFoodTypes');
+    Route::post('/updateFoodTypes', 'updateFoodTypes');
+    Route::post('/deleteFoodTypes', 'deleteFoodTypes');
+    Route::post('/addAllergies', 'addAllergies');
+    Route::post('/updateAllergies', 'updateAllergies');
+    Route::post('/deleteAllergies', 'deleteAllergies');
+    Route::post('/addDietaries', 'addDietaries');
+    Route::post('/updateDietaries', 'updateDietaries');
+    Route::post('/deleteDietaries', 'deleteDietaries');
+    Route::post('/addHeatingInstructions', 'addHeatingInstructions');
+    Route::post('/updateHeatingInstructions', 'updateHeatingInstructions');
+    Route::post('/deleteHeatingInstructions', 'deleteHeatingInstructions');
+    Route::get('/getHeatingInstructions', 'getHeatingInstructions');
+    Route::post('/addIngredients', 'addIngredients');
+    Route::post('/updateIngredient', 'updateIngredient');
+    Route::post('/deleteIngredient', 'deleteIngredient');
+    Route::get('/getIngredient', 'getIngredient');
+    Route::post('/sendMessageToChef', 'sendMessageToChef');
+    Route::post('/updateMessageToChef', 'updateMessageToChef');
+    Route::post('/deleteMessageToChef', 'deleteMessageToChef');
+    Route::get('/getMessageToChef', 'getMessageToChef');
+});
+
 Route::controller(regionController::class)->group(function () {
     Route::post('/addCountry', 'addCountry');
     Route::post('/addState', 'addState');
     Route::post('/addCity', 'addCity');
     Route::post('/addPincode', 'addPincode');
+    Route::post('/updateCountry', 'updateCountry');
+    Route::post('/updateState', 'updateState');
+    Route::post('/updateCity', 'updateCity');
+    Route::post('/updatePincode', 'updatePincode');
+    Route::post('/deleteCountry', 'deleteCountry');
+    Route::post('/deleteState', 'deleteState');
+    Route::post('/deleteCity', 'deleteCity');
+    Route::post('/deletePincode', 'deletePincode');
+    Route::get('/getPincode', 'getPincode');
+    Route::get('/getCountry', 'getCountry');
+    Route::get('/getState', 'getState');
+    Route::get('/getCity', 'getCity');
 });
 
 Route::controller(chefDocumentsController::class)->group(function () {
     Route::post('/addDocumentItemNameAccToChefType', 'addDocumentItemNameAccToChefType');
+    Route::post('/updateDocumentItemNameAccToChefType', 'updateDocumentItemNameAccToChefType');
+    Route::post('/deleteDocumentItemNameAccToChefType', 'deleteDocumentItemNameAccToChefType');
+    Route::get('/getDocumentListAccToChefType', 'getDocumentListAccToChefType');
     Route::post('/addDynamicFieldsForChef', 'addDynamicFieldsForChef');
+    Route::post('/updateDynamicFieldsForChef', 'updateDynamicFieldsForChef');
+    Route::post('/deleteDynamicFieldsForChef', 'deleteDynamicFieldsForChef');
+    Route::get('/getDynamicFieldsForChef', 'getDynamicFieldsForChef');
 });
 
 Route::controller(kitchentypeController::class)->group(function () {
     Route::post('/addKitchenTypes', 'addKitchenTypes');
     Route::get('/getKitchenTypes', 'getKitchenTypes');
+    Route::post('/updateKitchenTypes', 'updateKitchenTypes');
+    Route::post('/deleteKitchenTypes', 'deleteKitchenTypes');
 });
 
 Route::controller(taxController::class)->group(function () {
     Route::post('/addTaxType', 'addTaxType');
+    Route::post('/updateTaxType', 'updateTaxType');
+    Route::post('/deleteTaxType', 'deleteTaxType');
+    Route::get('/getTaxType', 'getTaxType');
 });
 
 Route::controller(shefTypesController::class)->group(function () {
     Route::post('/addShefType', 'addShefType');
+    Route::post('/updateShefType', 'updateShefType');
+    Route::post('/deleteShefType', 'deleteShefType');
     Route::get('/getAllShefTypes', 'getAllShefTypes');
     Route::post('/addShefSubType', 'addShefSubType');
+    Route::post('/updateShefSubType', 'updateShefSubType');
+    Route::post('/deleteShefSubType', 'deleteShefSubType');
     Route::get('/getAllShefSubTypes', 'getAllShefSubTypes');
 });
 
@@ -126,4 +188,5 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::get("/getAllSiteSettings", 'getAllSiteSettings');
     Route::post("/giveSiteFeedback", "giveSiteFeedback");
     Route::get("/getSiteFeedback", 'getSiteFeedback');
+    Route::get("/get_lat_long", 'get_lat_long');
 });

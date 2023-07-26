@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('states', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('country_id');
-            $table->string('name')->unqiue()->nullable();
+            $table->string('name')->unqiue();
             $table->tinyInteger('status')->default(1)->comment('1-active , 0-inactive');
             $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
             $table->string('tax_type')->nullable();

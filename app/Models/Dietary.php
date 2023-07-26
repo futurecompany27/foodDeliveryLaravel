@@ -9,5 +9,5 @@ class Dietary extends Model
 {
     use HasFactory;
     protected $table = 'dietaries';
-    protected $fillable = ['diet_name', 'diet_image', 'small_description'];
+    protected $fillable = ['diet_name', 'image', 'small_description'];
 }

@@ -25,30 +25,35 @@ use Illuminate\Support\Facades\File;
 
 class commonFunctions extends Controller
 {
-    function get_lat_long($postal)
+
+    function get_lat_long(Request $req)
     {
-        $postal = str_replace(" ", "", $postal);
-        $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postal . ",canada&sensor=false&key=AIzaSyAbW2JsS5yI_X2Mmh8LBcF6ItH2aHqgzfc";
+        try {
+            $postalCode = $req->input('postal_code');
+            $postalCode = str_replace(" ", "", $postalCode);
 
-        $result = Http::get($url);
-        $xml = simplexml_load_string($result->body());
-        if ($xml->status == 'OK') {
-            Log::info($xml);
-            $latitude = (float) $xml->result->geometry->location->lat;
-            $longitude = (float) $xml->result->geometry->location->lng;
+            $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postalCode . ",canada&sensor=false&key=AIzaSyAbW2JsS5yI_X2Mmh8LBcF6ItH2aHqgzfc";
 
-            $data = [
-                'result' => 1,
-                'lat' => $latitude,
-                'long' => $longitude
-            ];
-        } else {
-            $data = [
-                'result' => 0,
-                'message' => 'Please check the Postal Code'
-            ];
+            $result = Http::get($url);
+            $xml = simplexml_load_string($result->body());
+
+            if ($xml->status == 'OK') {
+                $latitude = (float) $xml->result->geometry->location->lat;
+                $longitude = (float) $xml->result->geometry->location->lng;
+
+                $data = [
+                    'lat' => $latitude,
+                    'long' => $longitude
+                ];
+
+                return response()->json(['data' => $data, 'success' => true], 200);
+            } else {
+                return response()->json(['message' => 'Please check the Postal Code',], 400);
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again!', 'success' => false], 500);
         }
-        return $data;
     }
 
     function getAllBankList(Request $req)
@@ -75,7 +80,6 @@ class commonFunctions extends Controller
                 $documentList = DocumentItemList::where(["state_id" => $stateDetail->id])->get();
                 Log::info($documentList);
                 if (count($documentList) > 0) {
-                    Log::info("///////////////");
                     foreach ($documentList as $value) {
                         $docFeilds = DocumentItemField::where('document_item_list_id', $value->id)->get();
                         foreach ($docFeilds as $val) {
