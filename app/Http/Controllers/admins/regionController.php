@@ -80,21 +80,12 @@ class regionController extends Controller
 
     public function getCountry(Request $req)
     {
-        $validator = Validator::make($req->all(), [
-            "country_code" => 'required',
-        ], [
-            "country_code.required" => "please fill country_code",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
-        }
         try {
-            $data = Country::where('country_code', $req->country_code)->get();
-            return response()->json(['data' => $data, "success" => true], 200);
+            return response()->json(['data' => Country::all(), "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
 
@@ -188,16 +179,16 @@ class regionController extends Controller
 
     public function getState(Request $req)
     {
-        $validator = Validator::make($req->all(), [
-            'country_id' => 'required',
-        ], [
-            "country_id.required" => "please fill country_id",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
-        }
+        // $validator = Validator::make($req->all(), [
+        //     'country_id' => 'required',
+        // ], [
+        //     "country_id.required" => "please fill country_id",
+        // ]);
+        // if ($validator->fails()) {
+        //     return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        // }
         try {
-            $data = State::where('country_id', $req->country_id)->get();
+            $data = State::with('country:id,name')->get();
             return response()->json(['data' => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

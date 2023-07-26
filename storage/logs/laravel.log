@@ -1,0 +1,2 @@
+[2023-07-26 11:42:30] local.INFO: Method Illuminate\Database\Eloquent\Collection::with does not exist.  
+[2023-07-26 11:45:32] local.INFO: Call to undefined method Illuminate\Database\Eloquent\Builder::all()  

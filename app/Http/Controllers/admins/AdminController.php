@@ -6,24 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\Adminsetting;
 use App\Models\Allergy;
-use App\Models\Chef;
 use App\Models\Contact;
 use App\Models\Dietary;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
-use App\Models\Province;
 use App\Models\Sitesetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
-use PhpParser\Node\Expr\Array_;
-use Illuminate\Support\Facades\Session;
 use Intervention\Image\ImageManagerStatic as Image;
 // use Intervention\Image\Image; //Intervention Image
 use Illuminate\Support\Facades\File;
@@ -355,7 +349,7 @@ class AdminController extends Controller
             $foodcategory = new FoodCategory();
             $foodcategory->category = $req->category;
             $foodcategory->commission = $req->commission;
-            $foodcategory->image =  json_encode($filename);
+            $foodcategory->image = json_encode($filename);
             $foodcategory->save();
             return response()->json(["message" => "Submitted successfully", "success" => true], 200);
         } catch (\Throwable $th) {
