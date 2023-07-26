@@ -325,7 +325,6 @@ class regionController extends Controller
         }
         try {
             $updateData = $req->all();
-            $data = Pincode::where('id', $req->id)->first();
             Pincode::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
