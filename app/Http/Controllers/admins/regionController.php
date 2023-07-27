@@ -387,7 +387,6 @@ class regionController extends Controller
             if ($req->status == "0" || $req->status == "1") {
                 $updateData['status'] = $req->status;
             }
-            // $updateData = $req->status;
             Country::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
@@ -413,7 +412,6 @@ class regionController extends Controller
             if ($req->status == "0" || $req->status == "1") {
                 $updateData['status'] = $req->status;
             }
-            // $updateData = $req->status;
             State::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {

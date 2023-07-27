@@ -32,7 +32,7 @@ class commonFunctions extends Controller
         try {
             $postalCode = str_replace(" ", "", $req->postalCode);
 
-            $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postalCode . ",canada&sensor=false&key=AIzaSyAbW2JsS5yI_X2Mmh8LBcF6ItH2aHqgzfc";
+            $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postalCode . ",canada&sensor=false&key=" . env('GOOGLE_MAP_KEY');
 
             $result = Http::get($url);
             $xml = simplexml_load_string($result->body());
