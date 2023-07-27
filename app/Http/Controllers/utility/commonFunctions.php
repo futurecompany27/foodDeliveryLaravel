@@ -30,8 +30,7 @@ class commonFunctions extends Controller
     function get_lat_long(Request $req)
     {
         try {
-            $postalCode = $req->input('postal_code');
-            $postalCode = str_replace(" ", "", $postalCode);
+            $postalCode = str_replace(" ", "", $req->postalCode);
 
             $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postalCode . ",canada&sensor=false&key=AIzaSyAbW2JsS5yI_X2Mmh8LBcF6ItH2aHqgzfc";
 

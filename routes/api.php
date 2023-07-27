@@ -203,7 +203,7 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::get("/getAllSiteSettings", 'getAllSiteSettings');
     Route::post("/giveSiteFeedback", "giveSiteFeedback");
     Route::get("/getSiteFeedback", 'getSiteFeedback');
-    Route::get("/get_lat_long", 'get_lat_long');
+    Route::post("/get_lat_long", 'get_lat_long');
 });
 
 

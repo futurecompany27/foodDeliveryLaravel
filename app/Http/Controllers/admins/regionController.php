@@ -179,16 +179,12 @@ class regionController extends Controller
 
     public function getState(Request $req)
     {
-        // $validator = Validator::make($req->all(), [
-        //     'country_id' => 'required',
-        // ], [
-        //     "country_id.required" => "please fill country_id",
-        // ]);
-        // if ($validator->fails()) {
-        //     return response()->json(["message" => $validator->errors(), "success" => false], 400);
-        // }
         try {
-            $data = State::with('country:id,name')->get();
+            if ($req->country_id) {
+                $data = State::where('country_id', $req->country_id)->get();
+            } else {
+                $data = State::with('country:id,name')->get();
+            }
             return response()->json(['data' => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -262,16 +258,20 @@ class regionController extends Controller
 
     public function getCity(Request $req)
     {
-        $validator = Validator::make($req->all(), [
-            "state_id" => 'required',
-        ], [
-            "state_id.required" => "please fill state_id",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
-        }
+
         try {
-            $data = City::where('state_id', $req->state_id)->get();
+            if ($req->state_id) {
+                $data = City::where('state_id', $req->state_id)->get();
+            } else {
+                $data = City::with([
+                    'state' => function ($query) {
+                        $query->select('id', 'name', 'country_id');
+                    },
+                    'state.country' => function ($query) {
+                        $query->select('id', 'name');
+                    }
+                ])->get();
+            }
             return response()->json(['data' => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -345,16 +345,8 @@ class regionController extends Controller
 
     public function getPincode(Request $req)
     {
-        $validator = Validator::make($req->all(), [
-            "city_id" => 'required',
-        ], [
-            "city_id.required" => "please fill city_id",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
-        }
         try {
-            $data = Pincode::where('city_id', $req->city_id)->get();
+            $data = Pincode::with('city:id,name')->get();
             return response()->json(['data' => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
