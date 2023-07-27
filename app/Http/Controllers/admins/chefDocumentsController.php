@@ -125,6 +125,32 @@ class chefDocumentsController extends Controller
         }
     }
 
+    public function updateDocumentItemNameAccToChefTypeStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->status == "0" || $req->status == "1") {
+                $updateData['status'] = $req->status;
+            }
+            // $updateData = $req->status;
+            DocumentItemList::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
     function addDynamicFieldsForChef(Request $req)
     {
         $validator = Validator::make($req->all(), [

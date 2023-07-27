@@ -35,15 +35,18 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/UserRegisteration', 'UserRegisteration');
     Route::post('/UserLogin', 'UserLogin');
     Route::post('/getUserDetails', 'getUserDetails');
+    Route::post('/updateUserDetail', 'updateUserDetail');
+    Route::post('/updateUserDetailsStatus', 'updateUserDetailsStatus');
+
     Route::post('/getChefsByPostalCode', 'getChefsByPostalCode');
     Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/googleSigin', 'googleSigin');
     Route::post('/recordNotFoundSubmit', 'recordNotFoundSubmit');
+
     Route::post('/addUpdateShippingAddress', 'addUpdateShippingAddress');
     Route::post('/getAllShippingAdressOfUser', 'getAllShippingAdressOfUser');
     Route::post('/changeDefaultShippingAddress', 'changeDefaultShippingAddress');
     Route::post('/deleteShippingAddress', 'deleteShippingAddress');
-    Route::post('/updateUserDetail', 'updateUserDetail');
 
     Route::post('/ChefReview', 'ChefReview');
     Route::post('/deleteChefReview', 'deleteChefReview');
@@ -89,6 +92,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/sendProfileForReview', 'sendProfileForReview');
     Route::post('/requestForUpdate', 'requestForUpdate');
     Route::post('/getApprovedUpdaterequest', 'getApprovedUpdaterequest');
+    Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
 });
 
 // Route for admin
@@ -105,8 +109,8 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/addAdminSettings', 'addAdminSettings');
     Route::post('/updateAdminSettings', 'updateAdminSettings');
     Route::post('/deleteAdminSettings', 'deleteAdminSettings');
-    Route::get('/getAdminSettings', 'getAdminSettings')
-    ;
+    Route::get('/getAdminSettings', 'getAdminSettings');
+
     Route::post('/addFoodTypes', 'addFoodTypes');
     Route::post('/updateFoodTypes', 'updateFoodTypes');
     Route::post('/deleteFoodTypes', 'deleteFoodTypes');
@@ -122,10 +126,12 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/addHeatingInstructions', 'addHeatingInstructions');
     Route::post('/updateHeatingInstructions', 'updateHeatingInstructions');
     Route::post('/deleteHeatingInstructions', 'deleteHeatingInstructions');
+    Route::post('/updateHeatingInstructionsStatus', 'updateHeatingInstructionsStatus');
 
     Route::post('/addIngredients', 'addIngredients');
     Route::post('/updateIngredient', 'updateIngredient');
     Route::post('/deleteIngredient', 'deleteIngredient');
+    Route::post('/updateIngredientStatus', 'updateIngredientStatus');
 
     Route::post('/sendMessageToChef', 'sendMessageToChef');
     Route::post('/updateMessageToChef', 'updateMessageToChef');
@@ -138,21 +144,25 @@ Route::controller(regionController::class)->group(function () {
     Route::post('/updateCountry', 'updateCountry');
     Route::get('/getCountry', 'getCountry');
     Route::post('/deleteCountry', 'deleteCountry');
+    Route::post('/updateCountryStatus', 'updateCountryStatus');
 
     Route::post('/addState', 'addState');
     Route::post('/updateState', 'updateState');
     Route::get('/getState', 'getState');
     Route::post('/deleteState', 'deleteState');
+    Route::post('/updateStateStatus', 'updateStateStatus');
 
     Route::post('/addCity', 'addCity');
     Route::post('/updateCity', 'updateCity');
     Route::get('/getCity', 'getCity');
     Route::post('/deleteCity', 'deleteCity');
+    Route::post('/updateCityStatus', 'updateCityStatus');
 
     Route::post('/addPincode', 'addPincode');
     Route::post('/updatePincode', 'updatePincode');
     Route::post('/deletePincode', 'deletePincode');
     Route::get('/getPincode', 'getPincode');
+    Route::post('/updatePincodeStatus', 'updatePincodeStatus');
 });
 
 Route::controller(chefDocumentsController::class)->group(function () {
@@ -160,6 +170,8 @@ Route::controller(chefDocumentsController::class)->group(function () {
     Route::post('/updateDocumentItemNameAccToChefType', 'updateDocumentItemNameAccToChefType');
     Route::post('/deleteDocumentItemNameAccToChefType', 'deleteDocumentItemNameAccToChefType');
     Route::get('/getDocumentListAccToChefType', 'getDocumentListAccToChefType');
+    Route::post('/updateDocumentItemNameAccToChefTypeStatus', 'updateDocumentItemNameAccToChefTypeStatus');
+
     Route::post('/addDynamicFieldsForChef', 'addDynamicFieldsForChef');
     Route::post('/updateDynamicFieldsForChef', 'updateDynamicFieldsForChef');
     Route::post('/deleteDynamicFieldsForChef', 'deleteDynamicFieldsForChef');
@@ -171,6 +183,7 @@ Route::controller(kitchentypeController::class)->group(function () {
     Route::get('/getKitchenTypes', 'getKitchenTypes');
     Route::post('/updateKitchenTypes', 'updateKitchenTypes');
     Route::post('/deleteKitchenTypes', 'deleteKitchenTypes');
+    Route::post('/updateKitchentypeStatus', 'updateKitchentypeStatus');
 });
 
 Route::controller(taxController::class)->group(function () {
@@ -185,10 +198,13 @@ Route::controller(shefTypesController::class)->group(function () {
     Route::post('/updateShefType', 'updateShefType');
     Route::post('/deleteShefType', 'deleteShefType');
     Route::get('/getAllShefTypes', 'getAllShefTypes');
+    Route::post('/updateShefTypeStatus', 'updateShefTypeStatus');
+
     Route::post('/addShefSubType', 'addShefSubType');
     Route::post('/updateShefSubType', 'updateShefSubType');
     Route::post('/deleteShefSubType', 'deleteShefSubType');
     Route::get('/getAllShefSubTypes', 'getAllShefSubTypes');
+    Route::post('/updateShefSubTypeStatus', 'updateShefSubTypeStatus');
 });
 
 /////////////// common api's ///////////////
