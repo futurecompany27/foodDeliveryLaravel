@@ -1,6 +1,0 @@
-[2023-07-26 11:42:30] local.INFO: Method Illuminate\Database\Eloquent\Collection::with does not exist.  
-[2023-07-26 11:45:32] local.INFO: Call to undefined method Illuminate\Database\Eloquent\Builder::all()  
-[2023-07-27 04:46:10] local.INFO: Call to undefined relationship [country] on model [App\Models\City].  
-[2023-07-27 04:49:58] local.INFO: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'country' in 'field list' (Connection: mysql, SQL: select `id`, `name`, `country` from `states` where `states`.`id` in (1))  
-[2023-07-27 04:51:29] local.INFO: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'state.country' in 'field list' (Connection: mysql, SQL: select `id`, `name`, `state`.`country` from `states` where `states`.`id` in (1))  
-[2023-07-27 06:38:26] local.INFO: Undefined variable $data  

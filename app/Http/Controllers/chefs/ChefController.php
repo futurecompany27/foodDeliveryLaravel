@@ -191,9 +191,9 @@ class ChefController extends Controller
         }
         try {
             $data = chef::whereId($req->chef_id)->with([
-                'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')
+                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')
                     ->with([
-                        'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                        'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
                     ])
             ])
                 ->first();
@@ -202,6 +202,37 @@ class ChefController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+        }
+    }
+
+    public function updateChefDetailsStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->status == "0" || $req->status == "1" || $req->status == "2") {
+                $updateData['status'] = $req->status;
+            } else {
+                // Default action when $req->status is not "0", "1", or "2"
+                // For example, set a default value for $updateData['status']:
+                $updateData['status'] = "0";
+            }
+            
+            // $updateData = $req->status;
+            chef::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
 
@@ -539,7 +570,6 @@ class ChefController extends Controller
 
                 $foodData->save();
                 return response()->json(['message' => 'updated successfully', 'success' => true], 200);
-
             } else {
                 $validator = Validator::make(
                     $req->all(),

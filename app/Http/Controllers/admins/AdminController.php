@@ -742,6 +742,32 @@ class AdminController extends Controller
         }
     }
 
+    public function updateHeatingInstructionsStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->status == "0" || $req->status == "1") {
+                $updateData['status'] = $req->status;
+            }
+            // $updateData = $req->status;
+            HeatingInstruction::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
     public function addIngredients(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -800,6 +826,32 @@ class AdminController extends Controller
             $data = Ingredient::where('id', $req->id)->first();
             Ingredient::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function updateIngredientStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->status == "0" || $req->status == "1") {
+                $updateData['status'] = $req->status;
+            }
+            // $updateData = $req->status;
+            Ingredient::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
