@@ -24,6 +24,10 @@ class regionController extends Controller
         }
         try {
             DB::beginTransaction();
+            $countryExist = Country::where("name", $req->name)->first();
+            if ($countryExist) {
+                return response()->json(["message" => 'Country is already exist!', "success" => false], 400);
+            }
             $country = new Country;
             $country->name = $req->name;
             $country->country_code = $req->country_code;
@@ -108,6 +112,10 @@ class regionController extends Controller
         }
         try {
             DB::beginTransaction();
+            $stateExist = State::where("name", $req->name)->first();
+            if ($stateExist) {
+                return response()->json(["message" => 'State is already exist!', "success" => false], 400);
+            }
             $state = new State;
             $state->name = $req->name;
             $state->country_id = $req->country_id;
@@ -140,10 +148,10 @@ class regionController extends Controller
             $updateData['name'] = $req->name;
         }
         if ($req->tax_type) {
-            $updateData['tax_type.*'] = json_encode($req->tax_type);
+            $updateData['tax_type'] = json_encode($req->tax_type);
         }
         if ($req->tax_value) {
-            $updateData['tax_value.*'] = json_encode($req->tax_value);
+            $updateData['tax_value'] = json_encode($req->tax_value);
         }
         try {
             $data = State::where('id', $req->id)->first();
@@ -204,6 +212,10 @@ class regionController extends Controller
         }
         try {
             DB::beginTransaction();
+            $cityExist = City::where("name", $req->name)->first();
+            if ($cityExist) {
+                return response()->json(["message" => 'City is already exist!', "success" => false], 400);
+            }
             $City = new City;
             $City->name = $req->name;
             $City->state_id = $req->state_id;
@@ -287,6 +299,10 @@ class regionController extends Controller
         }
         try {
             DB::beginTransaction();
+            $pincodeExist = Pincode::where("pincode", $req->pincode)->first();
+            if ($pincodeExist) {
+                return response()->json(["message" => 'Pincode is already exist!', "success" => false], 400);
+            }
             $Pincode = new Pincode;
             $Pincode->pincode = str_replace(" ", "", (strtolower($req->pincode)));
             $Pincode->city_id = $req->city_id;

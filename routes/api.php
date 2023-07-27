@@ -36,7 +36,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/UserLogin', 'UserLogin');
     Route::post('/getUserDetails', 'getUserDetails');
     Route::post('/updateUserDetail', 'updateUserDetail');
-    Route::post('/updateUserDetailsStatus', 'updateUserDetailsStatus');
+    Route::post('/updateUserDetailStatus', 'updateUserDetailStatus');
 
     Route::post('/getChefsByPostalCode', 'getChefsByPostalCode');
     Route::post('/getChefDetails', 'getChefDetails');
