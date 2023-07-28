@@ -66,9 +66,6 @@ class kitchentypeController extends Controller
     {
         try {
             $kitchenTyepData = Kitchentype::all();
-            foreach ($kitchenTyepData as $value) {
-                $value->image = json_decode($value->image);
-            }
             return response()->json(["data" => $kitchenTyepData, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

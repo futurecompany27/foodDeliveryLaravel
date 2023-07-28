@@ -65,18 +65,18 @@ class cartController extends Controller
             return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
         }
         try {
-            $data = Cart::where('user_id', $req->user_id)->first();
-            if ($data) {
-                $foodItems = $data->foodItems;
+            $myCart = Cart::where('user_id', $req->user_id)->first();
+            if ($myCart) {
+                $foodItems = $myCart->foodItems;
                 foreach ($foodItems as &$value) {
                     $data = FoodItem::select('dish_name', 'dishImage', 'price')->where('id', $value['food_id'])->first();
                     $value['dish_name'] = $data->dish_name;
                     $value['dishImage'] = $data->dishImage;
                     $value['price'] = $data->price;
                 }
-                $data->foodItems = $foodItems;
+                $myCart->foodItems = $foodItems;
             }
-            return response()->json(["data" => $data, "success" => true], 200);
+            return response()->json(["data" => $myCart, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

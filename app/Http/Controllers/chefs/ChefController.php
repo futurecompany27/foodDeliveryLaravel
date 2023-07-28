@@ -4,7 +4,6 @@ namespace App\Http\Controllers\chefs;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\users\UserController;
-use App\Http\Controllers\utility\commonFunctions;
 use App\Mail\HomeshefChefEmailVerification;
 use App\Models\chef;
 use App\Models\ChefAlternativeContact;

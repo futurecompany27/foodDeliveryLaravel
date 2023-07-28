@@ -112,11 +112,15 @@ class UserController extends Controller
         }
 
         try {
-            $totalRecords = chef::count();
-            $skip = $req->page * 10;
-            Log::info($skip);
-            $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->take(10)->get();
-            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
+            $total = chef::where('postal_code', strtolower($req->postal_code))->count();
+            if ($req->refresh) {
+                $skip = ($req->page + 1) * 1;
+                $data = chef::where('postal_code', strtolower($req->postal_code))->limit($skip)->get();
+            } else {
+                $skip = $req->page * 1;
+                $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->limit(1)->get();
+            }
+            return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
