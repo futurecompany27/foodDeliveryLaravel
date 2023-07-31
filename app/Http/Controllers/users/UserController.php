@@ -114,11 +114,11 @@ class UserController extends Controller
         try {
             $total = chef::where('postal_code', strtolower($req->postal_code))->count();
             if ($req->refresh) {
-                $skip = ($req->page + 1) * 1;
+                $skip = ($req->page + 1) * 10;
                 $data = chef::where('postal_code', strtolower($req->postal_code))->limit($skip)->get();
             } else {
-                $skip = $req->page * 1;
-                $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->limit(1)->get();
+                $skip = $req->page * 10;
+                $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->limit(10)->get();
             }
             return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
         } catch (\Throwable $th) {
