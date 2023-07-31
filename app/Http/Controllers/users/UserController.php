@@ -112,19 +112,34 @@ class UserController extends Controller
         }
 
         try {
-            $total = chef::where('postal_code', strtolower($req->postal_code))->count();
-            if ($req->refresh) {
-                $skip = ($req->page + 1) * 10;
-                $data = chef::where('postal_code', strtolower($req->postal_code))->limit($skip)->get();
+            if ($req->filter) {
+                $query = chef::where('postal_code', strtolower($req->postal_code));
+                $skip = $req->page * 12;
+                if ($req->min) {
+                    $minPrice = $req->input('min');
+                    $query->whereHas('food_items', function ($query) use ($minPrice) {
+                        $query->where('price', '>=', $minPrice);
+                    });
+                }
+                $total = $query->count();
+                $data = $query->skip($skip)->limit(12)->get();
+                return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
+
             } else {
-                $skip = $req->page * 10;
-                $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->limit(10)->get();
+                $total = chef::where('postal_code', strtolower($req->postal_code))->count();
+                if ($req->refresh) {
+                    $skip = ($req->page + 1) * 12;
+                    $data = chef::where('postal_code', strtolower($req->postal_code))->limit($skip)->get();
+                } else {
+                    $skip = $req->page * 12;
+                    $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->limit(12)->get();
+                }
+                return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
             }
-            return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
 
