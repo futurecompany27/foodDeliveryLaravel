@@ -36,4 +36,9 @@ class chef extends Model
     {
         return $this->hasMany(ChefDocument::class, 'chef_id', 'id');
     }
+
+    public function foodItems()
+    {
+        return $this->hasMany(FoodItem::class, 'chef_id', 'id');
+    }
 }

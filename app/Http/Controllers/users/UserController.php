@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Mockery\Undefined;
 
 class UserController extends Controller
 {
@@ -114,16 +115,32 @@ class UserController extends Controller
         try {
             if ($req->filter) {
                 $query = chef::where('postal_code', strtolower($req->postal_code));
-                $skip = $req->page * 12;
-                if ($req->min) {
-                    $minPrice = $req->input('min');
-                    $query->whereHas('food_items', function ($query) use ($minPrice) {
-                        $query->where('price', '>=', $minPrice);
-                    });
+                $foodType = $req->input('foodType');
+                $spicy = $req->input('spicyLevel');
+                $allergies = $req->input('allergies');
+                $minPrice = $req->input('min');
+                if ($req->input('max') > 300) {
+                    $maxPrice = 99999999999999999;
+                } else {
+                    $maxPrice = $req->input('max');
                 }
+                $skip = $req->page * 12;
+                $query->whereHas('foodItems', function ($query) use ($minPrice, $maxPrice, $foodType, $spicy, $allergies) {
+                    $query->where('price', '>=', $minPrice)->where('price', '<=', $maxPrice);
+                    if ($foodType) {
+                        $query->whereIn('foodTypeId', $foodType);
+                    }
+                    if ($spicy) {
+                        $query->whereIn('spicyLevel', $spicy);
+                    }
+                    if ($allergies) {
+                        $query->whereIn('allergies', $allergies);
+                    }
+                });
                 $total = $query->count();
                 $data = $query->skip($skip)->limit(12)->get();
                 return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
+
 
             } else {
                 $total = chef::where('postal_code', strtolower($req->postal_code))->count();
@@ -457,13 +474,25 @@ class UserController extends Controller
         }
         try {
             $review = new ChefReview();
-            $review->full_name = isset($req->full_name) ? $req->full_name : 'anonymous';
+            $review->full_name = $req->full_name;
             $review->chef_id = $req->chef_id;
             $review->images = json_encode($imagePaths); //Encode Array into String to store it in database
             $review->star_rating = $req->star_rating;
             $review->message = $req->message;
-            $review->save();
-            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+            $result = $review->save();
+
+            if ($result) {
+                $allReview = ChefReview::select('star_rating')->where('chef_id', $req->chef_id)->get();
+                $totalNoReview = ChefReview::where('chef_id', $req->chef_id)->count();
+                $totalStars = 0;
+                foreach ($allReview as $value) {
+                    $totalStars = $totalStars + $value['star_rating'];
+                }
+                $rating = $totalStars / $totalNoReview;
+                Log::info($rating);
+                chef::where('id', $req->chef_id)->update(['rating' => $rating]);
+                return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+            }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

@@ -51,7 +51,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/ChefReview', 'ChefReview');
     Route::post('/deleteChefReview', 'deleteChefReview');
     Route::get('/getUserContact', 'getUserContact');
-    Route::get('/getChefReview', 'getChefReview');
+    Route::post('/getChefReview', 'getChefReview');
 });
 
 Route::controller(cartController::class)->group(function () {
