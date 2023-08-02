@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('chef_reviews', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name');
-            $table->string('chef_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('chef_id');
             $table->string('images');
             $table->unsignedInteger('star_rating');
             $table->string('message');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('cascade');
             $table->timestamps();
         });
     }

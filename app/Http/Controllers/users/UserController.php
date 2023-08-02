@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Mockery\Undefined;
+use Illuminate\Support\Facades\File;
 
 class UserController extends Controller
 {
@@ -114,10 +114,10 @@ class UserController extends Controller
 
         try {
             if ($req->filter) {
-                $query = chef::where('postal_code', strtolower($req->postal_code));
                 $foodType = $req->input('foodType');
                 $spicy = $req->input('spicyLevel');
                 $allergies = $req->input('allergies');
+                $rating = $req->input('rating');
                 $minPrice = $req->input('min');
                 if ($req->input('max') > 300) {
                     $maxPrice = 99999999999999999;
@@ -125,7 +125,8 @@ class UserController extends Controller
                     $maxPrice = $req->input('max');
                 }
                 $skip = $req->page * 12;
-                $query->whereHas('foodItems', function ($query) use ($minPrice, $maxPrice, $foodType, $spicy, $allergies) {
+                $query = chef::where('postal_code', strtolower($req->postal_code))->where('rating', '<=', $rating);
+                $query->whereHas('foodItems', function ($query) use ($minPrice, $maxPrice, $foodType, $spicy, $allergies, $rating) {
                     $query->where('price', '>=', $minPrice)->where('price', '<=', $maxPrice);
                     if ($foodType) {
                         $query->whereIn('foodTypeId', $foodType);
@@ -140,16 +141,14 @@ class UserController extends Controller
                 $total = $query->count();
                 $data = $query->skip($skip)->limit(12)->get();
                 return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
-
-
             } else {
-                $total = chef::where('postal_code', strtolower($req->postal_code))->count();
+                $total = chef::where('postal_code', strtolower($req->postal_code))->has('foodItems')->count();
                 if ($req->refresh) {
                     $skip = ($req->page + 1) * 12;
-                    $data = chef::where('postal_code', strtolower($req->postal_code))->limit($skip)->get();
+                    $data = chef::where('postal_code', strtolower($req->postal_code))->limit($skip)->has('foodItems')->get();
                 } else {
                     $skip = $req->page * 12;
-                    $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->limit(12)->get();
+                    $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->limit(12)->has('foodItems')->get();
                 }
                 return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
             }
@@ -449,20 +448,15 @@ class UserController extends Controller
         $validator = Validator::make(
             $req->all(),
             [
+                "user_id" => 'required',
                 "chef_id" => 'required',
                 "images" => 'required',
                 "star_rating" => "required|integer|min:1|max:5",
                 "message" => 'required',
-            ],
-            [
-                "chef_id.required" => "please fill chef_id",
-                "images.required" => "please select images",
-                "star_rating.required" => "please select star_rating",
-                "message.required" => "please fill message",
             ]
         );
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => 'please fill all the details', "success" => false], 400);
         }
         if ($req->hasFile('images')) {
             $images = $req->file('images');
@@ -473,26 +467,41 @@ class UserController extends Controller
             }
         }
         try {
-            $review = new ChefReview();
-            $review->full_name = $req->full_name;
-            $review->chef_id = $req->chef_id;
-            $review->images = json_encode($imagePaths); //Encode Array into String to store it in database
-            $review->star_rating = $req->star_rating;
-            $review->message = $req->message;
-            $result = $review->save();
-
-            if ($result) {
-                $allReview = ChefReview::select('star_rating')->where('chef_id', $req->chef_id)->get();
-                $totalNoReview = ChefReview::where('chef_id', $req->chef_id)->count();
-                $totalStars = 0;
-                foreach ($allReview as $value) {
-                    $totalStars = $totalStars + $value['star_rating'];
+            $reviewExist = ChefReview::where('user_id', $req->user_id)->where('chef_id', $req->chef_id)->first();
+            if ($reviewExist) {
+                $images = json_decode($reviewExist->images);
+                foreach ($images as $value) {
+                    $path = str_replace(url('storage'), 'public', $value);
+                    if (File::exists($path)) {
+                        unlink($path);
+                    }
                 }
-                $rating = $totalStars / $totalNoReview;
-                Log::info($rating);
-                chef::where('id', $req->chef_id)->update(['rating' => $rating]);
-                return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+
+                $update = [
+                    'images' => json_encode($imagePaths),
+                    'star_rating' => $req->star_rating,
+                    "message" => $req->message
+                ];
+                ChefReview::where('user_id', $req->user_id)->where('chef_id', $req->chef_id)->update($update);
+            } else {
+                $review = new ChefReview();
+                $review->user_id = $req->user_id;
+                $review->chef_id = $req->chef_id;
+                $review->images = json_encode($imagePaths); //Encode Array into String to store it in database
+                $review->star_rating = $req->star_rating;
+                $review->message = $req->message;
+                $review->save();
             }
+
+            $allReview = ChefReview::select('star_rating')->where('chef_id', $req->chef_id)->get();
+            $totalNoReview = ChefReview::where('chef_id', $req->chef_id)->count();
+            $totalStars = 0;
+            foreach ($allReview as $value) {
+                $totalStars = $totalStars + $value['star_rating'];
+            }
+            $rating = $totalStars / $totalNoReview;
+            chef::where('id', $req->chef_id)->update(['rating' => $rating]);
+            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -540,9 +549,9 @@ class UserController extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
-            $totalRecords = ChefReview::count();
+            $totalRecords = ChefReview::where('chef_id', $req->chef_id)->count();
             $skip = $req->page * 10;
-            $data = ChefReview::where('chef_id', $req->chef_id)->skip($skip)->take(10)->get();
+            $data = ChefReview::where('chef_id', $req->chef_id)->skip($skip)->take(10)->with('user:fullname,id')->get();
             foreach ($data as $value) {
                 $value->images = json_decode($value->images);
             }

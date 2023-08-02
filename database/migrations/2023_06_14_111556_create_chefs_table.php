@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -51,7 +52,7 @@ return new class extends Migration {
             $table->string("transit_number")->nullable();
             $table->string("account_number")->nullable();
             $table->string("institution_number")->nullable();
-            $table->string("rating")->default(0);
+            $table->decimal("rating", 2, 1)->default(0);
             $table->tinyinteger("new_to_canada")->default(0)->comment('1 - Yes, 0 - No');
             $table->tinyinteger('status')->default(0)->comment('1-Active,0-Inactive,2-Inreview');
             $table->rememberToken();

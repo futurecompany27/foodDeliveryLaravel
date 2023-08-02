@@ -21,10 +21,3 @@ class ChefDocument extends Model
 
 }
 
-
-
-// [
-//     "food safety certificate"=>[
-//         "licence number"=>"jdsjd"
-//     ]
-// ]

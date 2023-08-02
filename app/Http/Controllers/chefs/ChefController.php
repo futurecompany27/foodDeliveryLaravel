@@ -65,7 +65,7 @@ class ChefController extends Controller
                 $UserController = new UserController;
                 $request = new Request();
                 $request->merge([
-                    "fullname" => ucfirst($req->first_name) . " " . ucfirst($req->last_name),
+                    "fullname" => (ucfirst($req->first_name) . " " . ucfirst($req->last_name)),
                     "mobile" => $req->mobile,
                     "email" => $req->email,
                     "password" => $req->password
@@ -224,7 +224,7 @@ class ChefController extends Controller
                 // For example, set a default value for $updateData['status']:
                 $updateData['status'] = "0";
             }
-            
+
             // $updateData = $req->status;
             chef::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
@@ -695,7 +695,8 @@ class ChefController extends Controller
                 $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays,'\"$req->day\"')");
             }
             $data = $query->get();
-            return response()->json(["data" => $data, "success" => true], 200);
+            $chefData = chef::select('rating')->where('id', $req->chef_id)->first();
+            return response()->json(["data" => $data, 'rating' => $chefData->rating, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

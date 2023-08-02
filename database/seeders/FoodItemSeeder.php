@@ -35,7 +35,7 @@ class FoodItemSeeder extends Seeder
             'expiresIn' => "0.632620",
             'serving_unit' => 'Pieces',
             'serving_person' => 'Serving 2-3',
-            'price' => '545',
+            'price' => '10',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
@@ -60,7 +60,7 @@ class FoodItemSeeder extends Seeder
             'expiresIn' => "0.632620",
             'serving_unit' => 'Pieces',
             'serving_person' => 'Serving 2-3',
-            'price' => '545',
+            'price' => '100',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
