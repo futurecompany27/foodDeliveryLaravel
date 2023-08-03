@@ -11,6 +11,7 @@ use App\Models\ShippingAddresse;
 use App\Models\User;
 use App\Models\chef;
 use App\Models\ChefReview;
+use App\Models\Pincode;
 use App\Models\UserContact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -113,44 +114,53 @@ class UserController extends Controller
         }
 
         try {
-            if ($req->filter) {
-                $foodType = $req->input('foodType');
-                $spicy = $req->input('spicyLevel');
-                $allergies = $req->input('allergies');
-                $rating = $req->input('rating');
-                $minPrice = $req->input('min');
-                if ($req->input('max') > 300) {
-                    $maxPrice = 99999999999999999;
-                } else {
-                    $maxPrice = $req->input('max');
-                }
-                $skip = $req->page * 12;
-                $query = chef::where('postal_code', strtolower($req->postal_code))->where('rating', '<=', $rating);
-                $query->whereHas('foodItems', function ($query) use ($minPrice, $maxPrice, $foodType, $spicy, $allergies, $rating) {
-                    $query->where('price', '>=', $minPrice)->where('price', '<=', $maxPrice);
-                    if ($foodType) {
-                        $query->whereIn('foodTypeId', $foodType);
+            $serviceExist = Pincode::where('pincode', $req->postal_code)->where('status', 1)->first();
+            if ($serviceExist) {
+                if ($req->filter) {
+                    $minPrice = $req->input('max');
+                    if ($req->input('max') > 300) {
+                        $maxPrice = 99999999999999999;
+                    } else {
+                        $maxPrice = $req->input('max');
                     }
-                    if ($spicy) {
-                        $query->whereIn('spicyLevel', $spicy);
-                    }
-                    if ($allergies) {
-                        $query->whereIn('allergies', $allergies);
-                    }
-                });
-                $total = $query->count();
-                $data = $query->skip($skip)->limit(12)->get();
-                return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
-            } else {
-                $total = chef::where('postal_code', strtolower($req->postal_code))->has('foodItems')->count();
-                if ($req->refresh) {
-                    $skip = ($req->page + 1) * 12;
-                    $data = chef::where('postal_code', strtolower($req->postal_code))->limit($skip)->has('foodItems')->get();
-                } else {
                     $skip = $req->page * 12;
-                    $data = chef::where('postal_code', strtolower($req->postal_code))->skip($skip)->limit(12)->has('foodItems')->get();
+                    $query = chef::where('postal_code', strtolower($req->postal_code));
+                    if ($req->rating) {
+                        $query->where('rating', '<=', $req->rating);
+                    }
+                    $query->whereHas('foodItems', function ($query) use ($maxPrice, $minPrice, $req) {
+                        $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+                        $query->where('price', '>=', $minPrice)->where('price', '<=', $maxPrice);
+                        if ($req->foodType) {
+                            $query->whereIn('foodTypeId', $req->foodType);
+                        }
+                        if ($req->spicyLevel) {
+                            $query->whereIn('spicyLevel', $req->spicyLevel);
+                        }
+                        if ($req->allergies) {
+                            $query->whereIn('allergies', $req->allergies);
+                        }
+                    });
+                    $total = $query->count();
+                    $data = $query->skip($skip)->limit(12)->get();
+                    return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
+                } else {
+
+                    $query = chef::where('postal_code', strtolower($req->postal_code))->whereHas('foodItems', function ($query) use ($req) {
+                        $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+                    });
+                    if ($req->refresh) {
+                        $skip = ($req->page + 1) * 12;
+                        $data = $query->limit($skip)->get();
+                    } else {
+                        $skip = $req->page * 12;
+                        $data = $query->skip($skip)->limit(12)->get();
+                    }
+                    $total = $query->count();
+                    return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
                 }
-                return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
+            } else {
+                return response()->json(['message' => 'Service not availbale now', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

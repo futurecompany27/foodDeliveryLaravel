@@ -694,6 +694,10 @@ class ChefController extends Controller
             if ($req->day) {
                 $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays,'\"$req->day\"')");
             }
+            if ($req->todaysWeekDay) {
+                $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+            }
+                
             $data = $query->get();
             $chefData = chef::select('rating')->where('id', $req->chef_id)->first();
             return response()->json(["data" => $data, 'rating' => $chefData->rating, "success" => true], 200);
