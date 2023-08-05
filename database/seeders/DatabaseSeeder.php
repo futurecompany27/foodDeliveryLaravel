@@ -16,10 +16,12 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             AllergiesSeeder::class,
             BankNameSeeder::class,
-            ChefSeeder::class,
+            DietarysSeeder::class,
             CountrySeeder::class,
             StatesSeeder::class,
-            DietarysSeeder::class,
+            citySeeeder::class,
+            postalCodeSeeeder::class,
+            ChefSeeder::class,
             DocumetItemListSeeder::class,
             DocumetItemFieldsSeeder::class,
             FoodCategorySeeder::class,
@@ -31,6 +33,7 @@ class DatabaseSeeder extends Seeder
             ShefSubTypeSeeder::class,
             SitesettingSeeder::class,
             UnitSeeder::class,
+            taxSeeeder::class
         ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\users;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
+use App\Models\chef;
 use App\Models\FoodItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,41 +17,25 @@ class cartController extends Controller
     {
         $validator = Validator::make($req->all(), [
             'user_id' => 'required',
-            'chef_id' => 'required',
-            'food' => 'required',
+            'cartData' => 'required',
         ], [
             'user_id.required' => 'please fill user_id',
-            'chef_id.required' => 'please fill chef_id',
-            'food.required' => 'please fill food data'
+            'cartData.required' => 'please fill food data'
         ]);
         if ($validator->fails()) {
             return response()->json(["error" => $validator->errors(), "success" => false], 400);
         }
         try {
-            $DataExistWithSameChef = Cart::where(["user_id" => $req->user_id, 'chef_id' => $req->chef_id])->first();
-            $DataExistWithDifferentChef = Cart::where(["user_id" => $req->user_id])->first();
-            if ($DataExistWithSameChef) {
-                $foodItemsArray = $DataExistWithSameChef->foodItems;
-                $foodItemAlreadyInCart = false;
-                foreach ($foodItemsArray as &$value) {
-                    if ($req->food['food_id'] == $value['food_id']) {
-                        $foodItemAlreadyInCart = true;
-                        $value['quantity'] = $req->food['quantity'];
-                    }
-                }
-                if (!$foodItemAlreadyInCart) {
-                    array_push($foodItemsArray, $req->food);
-                }
-                Cart::where("user_id", $req->user_id)->update(["foodItems" => $foodItemsArray]);
-            } elseif ($DataExistWithDifferentChef) {
-                Cart::where("user_id", $req->user_id)->update(['chef_id' => $req->chef_id, "foodItems" => [$req->food]]);
+            $mycart = Cart::where("user_id", $req->user_id)->first();
+            if ($mycart) {
+                Cart::where("user_id", $req->user_id)->update(['cartData' => $req->cartData]);
             } else {
                 $cart = new Cart();
                 $cart->user_id = $req->user_id;
-                $cart->chef_id = $req->chef_id;
-                $cart->foodItems = [$req->food];
+                $cart->cartData = $req->cartData;
                 $cart->save();
             }
+
             return response()->json(["msg" => "added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -65,18 +50,24 @@ class cartController extends Controller
             return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
         }
         try {
-            $myCart = Cart::where('user_id', $req->user_id)->first();
-            if ($myCart) {
-                $foodItems = $myCart->foodItems;
-                foreach ($foodItems as &$value) {
-                    $data = FoodItem::select('dish_name', 'dishImage', 'price')->where('id', $value['food_id'])->first();
-                    $value['dish_name'] = $data->dish_name;
-                    $value['dishImage'] = $data->dishImage;
-                    $value['price'] = $data->price;
+            $data = Cart::where('user_id', $req->user_id)->first();
+            if ($data) {
+                $myCart = $data->cartData;
+                foreach ($myCart as &$chefData) {
+                    $chef = chef::with('foodItems')->find($chefData['chef_id']);
+                    $foodItems = $chef['foodItems'];
+                    foreach ($chefData['foodItems'] as &$food) {
+                        $foodItem = $foodItems->firstWhere('id', $food['food_id']);
+                        if ($foodItem) {
+                            $food['price'] = $foodItem['price'];
+                            $food['dish_name'] = $foodItem['dish_name'];
+                            $food['dishImage'] = $foodItem['dishImage'];
+                        }
+                    }
                 }
-                $myCart->foodItems = $foodItems;
+                return response()->json(["data" => $myCart, "success" => true], 200);
             }
-            return response()->json(["data" => $myCart, "success" => true], 200);
+            return response()->json(["data" => [], "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -89,11 +80,13 @@ class cartController extends Controller
         $validator = Validator::make($req->all(), [
             'user_id' => 'required',
             'food_id' => 'required',
+            'chef_id' => 'required',
             'type' => 'required',
             'quantity' => 'required'
         ], [
             'user_id.required' => 'please fill user_id',
-            'food.required' => 'please fill food_id',
+            'food_id.required' => 'please fill food_id',
+            'chef_id.required' => 'please fill chef_id',
             'type.required' => 'please fill type',
             'quantity.required' => 'please fill type',
         ]);
@@ -101,25 +94,27 @@ class cartController extends Controller
             return response()->json(["error" => $validator->errors(), "success" => false], 400);
         }
         try {
-            $cart = Cart::where("user_id", $req->user_id)->first();
-            if ($cart) {
-                $foodItemsArray = $cart->foodItems;
-                foreach ($foodItemsArray as &$value) {
-                    if ($req->food_id == $value['food_id']) {
-                        if ($req->type == 'increase') {
-                            $value['quantity'] = ($value['quantity'] + $req->quantity);
-                        }
-                        if ($req->type == 'decrease') {
-                            $value['quantity'] = ($value['quantity'] - $req->quantity);
+            $cartData = Cart::where("user_id", $req->user_id)->first()->cartData;
+            if ($cartData) {
+                foreach ($cartData as &$cartItem) {
+                    if ($cartItem['chef_id'] == $req->chef_id) {
+                        foreach ($cartItem['foodItems'] as &$foodItem) {
+                            if ($foodItem['food_id'] == $req->food_id) {
+                                if ($req->type == 'increase') {
+                                    $foodItem['quantity'] = ($foodItem['quantity'] + $req->quantity);
+                                }
+                                if ($req->type == 'decrease') {
+                                    $foodItem['quantity'] = ($foodItem['quantity'] - $req->quantity);
+                                }
+                            }
                         }
                     }
                 }
-                Cart::where("user_id", $req->user_id)->update(["foodItems" => $foodItemsArray]);
+                Cart::where("user_id", $req->user_id)->update(["cartData" => $cartData]);
                 return response()->json(["msg" => "updated successfully", "success" => true], 200);
             } else {
                 return response()->json(["msg" => "updated successfully", "success" => true], 200);
             }
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -129,21 +124,30 @@ class cartController extends Controller
 
     function removeItemFromCart(Request $req)
     {
-        if (!$req->user_id || !$req->food_id) {
+        if (!$req->user_id || !$req->food_id || !$req->chef_id) {
             return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
         }
         try {
-            $cart = Cart::where("user_id", $req->user_id)->first();
-            $foodItemsArray = $cart->foodItems;
+            $cartData = Cart::where("user_id", $req->user_id)->first()->cartData;
             $food_id = $req->food_id;
-            $filteredFoods = array_filter($foodItemsArray, function ($food) use ($food_id) {
-                return $food['food_id'] !== $food_id;
+            foreach ($cartData as &$value) {
+                if ($value['chef_id'] == $req->chef_id) {
+                    $value['foodItems'] = array_filter($value['foodItems'], function ($food) use ($food_id) {
+                        return $food['food_id'] !== $food_id;
+                    });
+                    $value['foodItems'] = array_values($value['foodItems']);
+                }
+            }
+
+            $filteredcartData = array_filter($cartData, function ($item) {
+                return count($item['foodItems']) > 0;
             });
 
-            $filteredFoods = array_values($filteredFoods);
-            if (count($filteredFoods) > 0) {
-                Cart::where("user_id", $req->user_id)->update(["foodItems" => $filteredFoods]);
-            }else{
+            $cartData = array_values($filteredcartData); // Re-index the collection after removing elements
+
+            if (count($cartData) > 0) {
+                Cart::where("user_id", $req->user_id)->update(["cartData" => $cartData]);
+            } else {
                 Cart::where("user_id", $req->user_id)->delete();
             }
             return response()->json(['msg' => 'removed successfully', 'success' => true], 200);

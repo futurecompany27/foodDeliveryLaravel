@@ -98,8 +98,8 @@ class regionController extends Controller
         $validator = Validator::make($req->all(), [
             'country_id' => 'required',
             'name' => 'required',
-            'tax_type.*' => 'required',
-            'tax_value.*' => 'required'
+            'tax_type' => 'required',
+            'tax_value' => 'required'
         ], [
             'country_id.required' => 'Please select a country',
             'name.required' => 'Please mention name of sate',
@@ -117,8 +117,8 @@ class regionController extends Controller
                 return response()->json(["message" => 'State is already exist!', "success" => false], 400);
             }
             $state = new State;
-            $state->name = $req->name;
             $state->country_id = $req->country_id;
+            $state->name = $req->name;
             $state->tax_type = json_encode($req->tax_type);
             $state->tax_value = json_encode($req->tax_value);
             $state->save();
@@ -154,7 +154,6 @@ class regionController extends Controller
             $updateData['tax_value'] = json_encode($req->tax_value);
         }
         try {
-            $data = State::where('id', $req->id)->first();
             State::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
@@ -191,7 +190,13 @@ class regionController extends Controller
             if ($req->country_id) {
                 $data = State::where('country_id', $req->country_id)->get();
             } else {
-                $data = State::with('country:id,name')->get();
+                $data = State::with('country')->get();
+                Log::info($data);
+                for ($i=0; $i < count($data); $i++) {
+                    Log::info($data[$i]);
+                    $data[$i]['tax_type'] = json_decode($data[$i]['tax_type']);
+                    $data[$i]['tax_value'] = json_decode($data[$i]['tax_value']);   
+                }
             }
             return response()->json(['data' => $data, "success" => true], 200);
         } catch (\Throwable $th) {

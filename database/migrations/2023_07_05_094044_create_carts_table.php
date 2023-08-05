@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
             $table->string('user_id');
-            $table->string('chef_id');
-            $table->json('foodItems');
+            $table->json('cartData');
             $table->timestamps();
         });
     }
