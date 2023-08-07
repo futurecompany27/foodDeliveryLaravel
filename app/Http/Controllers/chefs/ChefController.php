@@ -5,6 +5,7 @@ namespace App\Http\Controllers\chefs;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\users\UserController;
 use App\Mail\HomeshefChefEmailVerification;
+use App\Models\Allergy;
 use App\Models\chef;
 use App\Models\ChefAlternativeContact;
 use App\Models\ChefDocument;
@@ -14,6 +15,8 @@ use App\Models\RequestForUpdateDetails;
 use App\Models\ScheduleCall;
 use App\Models\User;
 use App\Models\Contact;
+use App\Models\Dietary;
+use App\Models\Ingredient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -690,15 +693,43 @@ class ChefController extends Controller
             if ($req->approved) {
                 $where['approved_status'] = $req->approved;
             }
-            $query = FoodItem::where($where);
+            $query = FoodItem::with('category', 'heatingInstruction:id,title,description')->where($where);
             if ($req->day) {
                 $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays,'\"$req->day\"')");
             }
             if ($req->todaysWeekDay) {
                 $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
             }
-                
+
             $data = $query->get();
+            foreach ($data as &$value) {
+                // Allergy
+                if ($value['allergies']) {
+                    $AllergyArr = $value['allergies'];
+                    foreach ($AllergyArr as &$val) {
+                        $val = Allergy::select('id', 'image', 'allergy_name')->find($val);
+                    }
+                    $value['allergies'] = $AllergyArr;
+                }
+
+                // dietary 
+                if ($value['dietary']) {
+                    $DieatryArr = $value['dietary'];
+                    foreach ($DieatryArr as &$val) {
+                        $val = Dietary::select('id', 'image', 'diet_name')->find($val);
+                    }
+                    $value['dietary'] = $DieatryArr;
+                }
+
+                // Ingredient
+                if ($value['ingredients']) {
+                    $IngredientArr = $value['ingredients'];
+                    foreach ($IngredientArr as &$val) {
+                        $val = Ingredient::select('ing_name')->find($val);
+                    }
+                    $value['ingredients'] = $IngredientArr;
+                }
+            }
             $chefData = chef::select('rating')->where('id', $req->chef_id)->first();
             return response()->json(["data" => $data, 'rating' => $chefData->rating, "success" => true], 200);
         } catch (\Throwable $th) {

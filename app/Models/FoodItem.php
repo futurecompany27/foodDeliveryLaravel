@@ -48,7 +48,7 @@ class FoodItem extends Model
         'otherCuisine' => 'array',
         'ingredients' => 'array',
         'otherIngredients' => 'array',
-        'allergens' => 'array',
+        'allergies' => 'array',
         'dietary' => 'array',
     ];
 
@@ -60,5 +60,10 @@ class FoodItem extends Model
     public function category()
     {
         return $this->belongsTo(FoodCategory::class, 'foodTypeId', 'id');
+    }
+
+    public function heatingInstruction()
+    {
+        return $this->belongsTo(HeatingInstruction::class, 'heating_instruction_id', 'id');
     }
 }
