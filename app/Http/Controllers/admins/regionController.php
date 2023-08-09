@@ -191,12 +191,6 @@ class regionController extends Controller
                 $data = State::where('country_id', $req->country_id)->get();
             } else {
                 $data = State::with('country')->get();
-                Log::info($data);
-                for ($i=0; $i < count($data); $i++) {
-                    Log::info($data[$i]);
-                    $data[$i]['tax_type'] = json_decode($data[$i]['tax_type']);
-                    $data[$i]['tax_value'] = json_decode($data[$i]['tax_value']);   
-                }
             }
             return response()->json(['data' => $data, "success" => true], 200);
         } catch (\Throwable $th) {
