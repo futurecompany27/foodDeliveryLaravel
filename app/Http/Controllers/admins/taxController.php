@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admins;
 
 use App\Http\Controllers\Controller;
+use App\Models\State;
 use App\Models\Tax;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -64,7 +65,8 @@ class taxController extends Controller
         }
     }
 
-    public function deleteTaxType(Request $req){
+    public function deleteTaxType(Request $req)
+    {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
@@ -87,14 +89,15 @@ class taxController extends Controller
     public function getTaxType(Request $req)
     {
         try {
-            $totalRecords = Tax::count();
-            $skip = $req->page * 10;
-            $data = Tax::skip($skip)->take(10)->get();
-
-            return response()->json([
-                'data' => $data,
-                'TotalRecords' => $totalRecords,
-            ]);
+            if ($req->state) {
+                $data = State::where('name',  $req->state)->first();
+                return response()->json(['data' => $data, 'success' => true], 200);
+            } else {
+                $totalRecords = Tax::count();
+                $skip = $req->page * 10;
+                $data = Tax::skip($skip)->take(10)->get();
+                return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
+            }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

@@ -9,6 +9,10 @@ class State extends Model
 {
     use HasFactory;
     protected $fillable = ['country_id', 'name', 'status', 'tax_type', 'tax_value'];
+    protected $casts = [
+        'tax_type' => 'array',
+        'tax_value' => 'array',
+    ];
     public function cities()
     {
         return $this->hasMany(City::class); //fk on City  Model is state_id
