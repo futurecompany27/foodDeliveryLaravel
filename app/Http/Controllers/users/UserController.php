@@ -116,8 +116,8 @@ class UserController extends Controller
         try {
             $serviceExist = Pincode::where('pincode', $req->postal_code)->where('status', 1)->first();
             if ($serviceExist) {
-                if ($req->filter) {
-                    $minPrice = $req->input('max');
+                if ($req->filter == 'true') {
+                    $minPrice = $req->input('min');
                     if ($req->input('max') > 300) {
                         $maxPrice = 99999999999999999;
                     } else {
@@ -141,11 +141,12 @@ class UserController extends Controller
                             $query->whereIn('allergies', $req->allergies);
                         }
                     });
+
+                    Log::info($skip);
                     $total = $query->count();
                     $data = $query->skip($skip)->limit(12)->get();
                     return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
                 } else {
-
                     $query = chef::where('postal_code', strtolower($req->postal_code))->whereHas('foodItems', function ($query) use ($req) {
                         $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
                     });
