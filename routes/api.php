@@ -52,6 +52,8 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/deleteChefReview', 'deleteChefReview');
     Route::get('/getUserContact', 'getUserContact');
     Route::post('/getChefReview', 'getChefReview');
+
+    Route::get('/getCountOftheChefAvailableForNext14Days', 'getCountOftheChefAvailableForNext14Days');
 });
 
 Route::controller(cartController::class)->group(function () {
