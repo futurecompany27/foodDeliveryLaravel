@@ -148,7 +148,7 @@ class UserController extends Controller
                     $data = $query->skip($skip)->limit(12)->get();
                     return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
                 } else {
-                    $query = chef::where('postal_code', strtolower($req->postal_code))->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
+                    $query = chef::where('postal_code', strtolower($req->postal_code))->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
                         $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
                     });
                     if ($req->refresh) {

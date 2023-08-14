@@ -27,7 +27,7 @@ class ChefSeeder extends Seeder
             "kitchen_name" => "Ravindra's Kitchen",
             "about_kitchen" => "We have 1 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
-            "chefAvailibilityWeek" => json_encode(['Su', 'M', 'T', 'W', 'Th', 'F', 'S']),
+            "chefAvailibilityWeek" => json_encode(['T', 'W']),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
@@ -43,7 +43,7 @@ class ChefSeeder extends Seeder
             "kitchen_name" => "Ravi's Kitchen",
             "about_kitchen" => "We have 1 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
-            "chefAvailibilityWeek" => json_encode(['Su', 'M', 'T', 'W', 'Th', 'F', 'S']),
+            "chefAvailibilityWeek" => json_encode([ 'T', 'W']),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
@@ -59,7 +59,7 @@ class ChefSeeder extends Seeder
             "kitchen_name" => "Sarita's Kitchen",
             "about_kitchen" => "We have 10 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
-            "chefAvailibilityWeek" => json_encode(['Su', 'M', 'T', 'W', 'Th', 'F', 'S']),
+            "chefAvailibilityWeek" => json_encode(['Th', 'F', 'S']),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
@@ -75,7 +75,7 @@ class ChefSeeder extends Seeder
             "kitchen_name" => "Himanta's Kitchen",
             "about_kitchen" => "We have 10 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
-            "chefAvailibilityWeek" => json_encode(['Su', 'M', 'T', 'W', 'Th', 'F', 'S']),
+            "chefAvailibilityWeek" => json_encode(['Su']),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
