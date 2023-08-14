@@ -119,8 +119,8 @@ class regionController extends Controller
             $state = new State;
             $state->country_id = $req->country_id;
             $state->name = $req->name;
-            $state->tax_type = json_encode($req->tax_type);
-            $state->tax_value = json_encode($req->tax_value);
+            $state->tax_type = $req->tax_type;
+            $state->tax_value = $req->tax_value;
             $state->save();
             DB::commit();
             return response()->json(["message" => "State added successfully", "success" => true], 200);

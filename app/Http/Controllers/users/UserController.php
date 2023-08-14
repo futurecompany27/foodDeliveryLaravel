@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 
@@ -107,6 +108,7 @@ class UserController extends Controller
 
     function getChefsByPostalCode(Request $req)
     {
+        Log::info("//////");
         $validator = Validator::make($req->all(), [
             'postal_code' => "required",
         ]);
@@ -462,7 +464,6 @@ class UserController extends Controller
             [
                 "user_id" => 'required',
                 "chef_id" => 'required',
-                "images" => 'required',
                 "star_rating" => "required|integer|min:1|max:5",
                 "message" => 'required',
             ]
@@ -470,9 +471,9 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => 'please fill all the details', "success" => false], 400);
         }
+        $imagePaths = [];
         if ($req->hasFile('images')) {
             $images = $req->file('images');
-            $imagePaths = [];
             foreach ($images as $image) {
                 $imagePath = $image->store('chef_reviews/' . $req->chef_id . '/', "public");
                 array_push($imagePaths, asset('storage/' . $imagePath));
@@ -481,27 +482,34 @@ class UserController extends Controller
         try {
             $reviewExist = ChefReview::where('user_id', $req->user_id)->where('chef_id', $req->chef_id)->first();
             if ($reviewExist) {
-                $images = json_decode($reviewExist->images);
+                $images = isset($reviewExist->images) ? json_decode($reviewExist->images) : [];
                 foreach ($images as $value) {
-                    $path = str_replace(url('storage'), 'public', $value);
-                    if (File::exists($path)) {
-                        unlink($path);
+                    Log::info($value);
+                    Log::info(str_replace('http://127.0.0.1:8000/', '', $value));
+                    if (file_exists(str_replace('http://127.0.0.1:8000/', '', $value))) {
+                        unlink(str_replace('http://127.0.0.1:8000/', '', $value));
                     }
                 }
 
                 $update = [
-                    'images' => json_encode($imagePaths),
                     'star_rating' => $req->star_rating,
                     "message" => $req->message
                 ];
+                if (count($imagePaths) > 0) {
+                    $update['images'] = json_encode($imagePaths);
+                } else {
+                    $update['images'] = json_encode([]);
+                }
                 ChefReview::where('user_id', $req->user_id)->where('chef_id', $req->chef_id)->update($update);
             } else {
                 $review = new ChefReview();
                 $review->user_id = $req->user_id;
                 $review->chef_id = $req->chef_id;
-                $review->images = json_encode($imagePaths); //Encode Array into String to store it in database
                 $review->star_rating = $req->star_rating;
                 $review->message = $req->message;
+                if (count($imagePaths) > 0) {
+                    $review->images = json_encode($imagePaths); //Encode Array into String to store it in database
+                }
                 $review->save();
             }
 
@@ -606,7 +614,7 @@ class UserController extends Controller
         // getting counts of the available shefs for next 14 days
         foreach ($dateList as &$val) {
             $query = chef::where('postal_code', strtolower($req->postal_code));
-            $query->where('chefAvailibilityStatus', 1)->whereJsonContains('chefAvailibilityWeek',$val['weekdayShort'])->whereHas('foodItems', function ($query) use ($val) {
+            $query->where('chefAvailibilityStatus', 1)->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->whereHas('foodItems', function ($query) use ($val) {
                 $query->whereJsonContains('foodAvailibiltyOnWeekdays', $val['weekdayShort']);
             });
             $val['total'] = $query->count();

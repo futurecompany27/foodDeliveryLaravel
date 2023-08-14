@@ -31,6 +31,11 @@ class chef extends Model
         'remember_token',
     ];
 
+    protected $casts = [
+        'kitchen_types'=>'array',
+        'chefAvailibilityWeek'=>'array'
+    ];
+
 
     public function chefDocuments()
     {
