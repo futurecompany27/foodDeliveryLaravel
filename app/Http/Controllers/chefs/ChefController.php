@@ -954,7 +954,22 @@ class ChefController extends Controller
                 'chefAvailibilityToTime' => $req->chefAvailibilityToTime,
                 'chefAvailibilityStatus' => $req->chefAvailibilityStatus
             ]);
-            return response()->json(['message' => 'current password is invalid', 'success' => false], 500);
+            return response()->json(['message' => 'Availibilty updated successfully', 'success' => false], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function getChefAvailibilty(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(["message" => 'please fill all required fields', "success" => false], 400);
+        }
+        try {
+            $data = chef::select('chefAvailibilityWeek', 'chefAvailibilityFromTime', 'chefAvailibilityToTime', 'chefAvailibilityStatus')->find($req->chef_id);
+            return response()->json(['data' => $data, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

@@ -95,6 +95,8 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/requestForUpdate', 'requestForUpdate');
     Route::post('/getApprovedUpdaterequest', 'getApprovedUpdaterequest');
     Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
+    Route::post('/updateChefAvailibilty', 'updateChefAvailibilty');
+    Route::post('/getChefAvailibilty', 'getChefAvailibilty');
 });
 
 // Route for admin

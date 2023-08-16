@@ -31,21 +31,16 @@ class commonFunctions extends Controller
     {
         try {
             $postalCode = str_replace(" ", "", $req->postalCode);
-
             $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postalCode . ",canada&sensor=false&key=" . env('GOOGLE_MAP_KEY');
-
             $result = Http::get($url);
             $xml = simplexml_load_string($result->body());
-
             if ($xml->status == 'OK') {
                 $latitude = (float) $xml->result->geometry->location->lat;
                 $longitude = (float) $xml->result->geometry->location->lng;
-
                 $data = [
                     'lat' => $latitude,
                     'long' => $longitude
                 ];
-
                 return response()->json(['data' => $data, 'success' => true], 200);
             } else {
                 return response()->json(['message' => 'Please check the Postal Code',], 400);
