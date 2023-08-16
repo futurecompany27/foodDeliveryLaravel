@@ -127,7 +127,7 @@ class UserController extends Controller
                         $maxPrice = $req->input('max');
                     }
                     $skip = $req->page * 12;
-                    $query = chef::where('postal_code', strtolower($req->postal_code))->where('chefAvailibilityStatus', 1);
+                    $query = chef::where('postal_code', strtolower($req->postal_code))->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1);
                     if ($req->rating) {
                         $query->where('rating', '<=', $req->rating);
                     }

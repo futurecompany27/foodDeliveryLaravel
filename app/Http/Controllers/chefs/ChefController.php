@@ -36,7 +36,7 @@ class ChefController extends Controller
             DB::beginTransaction();
             // $checkPinCode = Pincode::where('pincode', str_replace(" ", "", strtolower($req->pincode)))->first();
             // if (!$checkPinCode) {
-            //     return response()->json(["msg" => 'we are not offering our services in this region', 'success' => false], 400);
+            //     return response()->json([message => 'we are not offering our services in this region', 'success' => false], 400);
             // }
 
             $chefExist = chef::where("email", $req->email)->first();
@@ -153,7 +153,7 @@ class ChefController extends Controller
                 "state" => isset($req->state) ? $req->state : '',
                 'status' => 0
             ]);
-            return response()->json(["msg" => "profile updated successfully", "success" => true], 200);
+            return response()->json(["message" => "profile updated successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -189,7 +189,7 @@ class ChefController extends Controller
     function getChefDetails(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(["msg" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
         }
         try {
             $data = chef::whereId($req->chef_id)->with([
@@ -241,7 +241,7 @@ class ChefController extends Controller
     function updateChefPrimaryEmail(Request $req)
     {
         if (!$req->chef_id || !$req->new_email) {
-            return response()->json(["msg" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
         }
         try {
             $chefDetails = chef::find($req->chef_id);
@@ -271,7 +271,7 @@ class ChefController extends Controller
     function updateSocialMediaLinks(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(["msg" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
         }
         try {
             $chef = chef::find($req->chef_id);
@@ -454,7 +454,7 @@ class ChefController extends Controller
             ];
             chef::where('id', $req->chef_id)->update($update);
             DB::commit();
-            return response()->json(["msg" => "updated successfully", "success" => true], 200);
+            return response()->json(["message" => "updated successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -476,9 +476,9 @@ class ChefController extends Controller
                 }
                 $storedPath = $req->file('are_you_a_file_path')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["are_you_a_file_path" => asset('storage/' . $storedPath), "are_you_a" => $req->are_you_a, 'status' => 0]);
-                return response()->json(["msg" => "updated successfully", "success" => true], 200);
+                return response()->json(["message" => "updated successfully", "success" => true], 200);
             } else {
-                return response()->json(["msg" => "please upload proof of " . $req->are_you_a, "success" => false], 500);
+                return response()->json(["message" => "please upload proof of " . $req->are_you_a, "success" => false], 500);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -509,7 +509,7 @@ class ChefController extends Controller
     function chefScheduleAnCall(Request $req)
     {
         if (!$req->chef_id || !$req->date || !$req->slot) {
-            return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
+            return response()->json(["message" => 'Please fill all the details', 'success' => false]);
         }
         try {
             $slotNotAvailable = ScheduleCall::where(['date' => $req->date, 'slot' => $req->slot])->first();
@@ -527,7 +527,7 @@ class ChefController extends Controller
             $scheduleNewCall->slot = $req->slot;
             $scheduleNewCall->save();
             DB::commit();
-            return response()->json(["msg" => 'Call has been scheduled successfully', 'success' => true]);
+            return response()->json(["message" => 'Call has been scheduled successfully', 'success' => true]);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -683,7 +683,7 @@ class ChefController extends Controller
     function getMyFoodItems(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
+            return response()->json(["message" => 'Please fill all the details', 'success' => false]);
         }
         try {
             $where = ["chef_id" => $req->chef_id];
@@ -742,7 +742,7 @@ class ChefController extends Controller
     function getFoodItem(Request $req)
     {
         if (!$req->food_id) {
-            return response()->json(["msg" => 'Please fill all the details', 'success' => false]);
+            return response()->json(["message" => 'Please fill all the details', 'success' => false]);
         }
         try {
             $data = FoodItem::where('id', $req->food_id)->first();
@@ -848,7 +848,7 @@ class ChefController extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
             if ($req->newPassword !== $req->confirmPassword) {
@@ -924,6 +924,37 @@ class ChefController extends Controller
         try {
             $data = RequestForUpdateDetails::where('chef_id', $req->chef_id)->where('status', 1)->first();
             return response()->json(['data' => $data, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function updateChefAvailibilty(Request $req)
+    {
+        $validator = Validator::make(
+            $req->all(),
+            [
+                'chef_id' => 'required',
+                'chefAvailibilityWeek' => 'required',
+                'chefAvailibilityFromTime' => 'required',
+                'chefAvailibilityToTime' => 'required',
+                'chefAvailibilityStatus' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(["message" => 'please fill all required fields', "success" => false], 400);
+        }
+
+        try {
+            chef::where('id', $req->chef_id)->update([
+                'chefAvailibilityWeek' => $req->chefAvailibilityWeek,
+                'chefAvailibilityFromTime' => $req->chefAvailibilityFromTime,
+                'chefAvailibilityToTime' => $req->chefAvailibilityToTime,
+                'chefAvailibilityStatus' => $req->chefAvailibilityStatus
+            ]);
+            return response()->json(['message' => 'current password is invalid', 'success' => false], 500);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

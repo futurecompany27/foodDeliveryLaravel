@@ -36,7 +36,7 @@ class cartController extends Controller
                 $cart->save();
             }
 
-            return response()->json(["msg" => "added successfully", "success" => true], 200);
+            return response()->json(["message" => "added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -111,9 +111,9 @@ class cartController extends Controller
                     }
                 }
                 Cart::where("user_id", $req->user_id)->update(["cartData" => $cartData]);
-                return response()->json(["msg" => "updated successfully", "success" => true], 200);
+                return response()->json(["message" => "updated successfully", "success" => true], 200);
             } else {
-                return response()->json(["msg" => "updated successfully", "success" => true], 200);
+                return response()->json(["message" => "updated successfully", "success" => true], 200);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

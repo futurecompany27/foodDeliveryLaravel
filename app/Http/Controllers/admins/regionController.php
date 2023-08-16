@@ -216,7 +216,7 @@ class regionController extends Controller
             $City->state_id = $req->state_id;
             $City->save();
             DB::commit();
-            return response()->json(["msg" => "City added successfully", "success" => true], 200);
+            return response()->json([message => "City added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
