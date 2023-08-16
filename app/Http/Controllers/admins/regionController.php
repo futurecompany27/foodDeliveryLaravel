@@ -361,7 +361,14 @@ class regionController extends Controller
     public function getPincode(Request $req)
     {
         try {
-            $data = Pincode::with('city:id,name')->get();
+            $data = Pincode::with([
+                'city' => function ($query) {
+                    $query->select('id', 'state_id');
+                },
+                'city.state' => function ($query) {
+                    $query->select('id', 'country_id');
+                }
+            ])->get();
             return response()->json(['data' => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

@@ -138,7 +138,7 @@ class shefTypesController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors(), "success" => false], 400);
+            return response()->json(['message' => $validator->errors()->first(), "success" => false], 400);
         }
 
         try {
