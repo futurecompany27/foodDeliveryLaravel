@@ -212,7 +212,7 @@ class shefTypesController extends Controller
     public function getAllShefSubTypes()
     {
         try {
-            $data = ShefSubType::all();
+            $data = ShefSubType::with('shef_type:id,name')->get();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

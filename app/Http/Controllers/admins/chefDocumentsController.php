@@ -19,12 +19,12 @@ class chefDocumentsController extends Controller
     {
         $validator = Validator::make($req->all(), [
             'state_id' => 'required',
-            'doc_item_name' => 'bail|required',
-            'shef_type' => 'required'
+            'document_item_name' => 'bail|required',
+            'chef_type' => 'required'
         ], [
             'state_id.required' => 'Please select a state',
-            'shef_type.required' => 'Please select a shef type',
-            'doc_item_name.required' => 'Document item name is required',
+            'document_item_name.required' => 'Document item name is required',
+            'chef_type.required' => 'Please select a shef type',
         ]);
 
         if ($validator->fails()) {
@@ -35,11 +35,11 @@ class chefDocumentsController extends Controller
             DocumentItemList::create([
                 //all these fields has to be mass assignable;
                 'state_id' => $req->state_id,
-                'document_item_name' => strtolower($req->doc_item_name),
+                'document_item_name' => strtolower($req->document_item_name),
                 'reference_links' => $req->reference_link,
-                'additional_links' => $req->additional_link,
-                'detail_information' => htmlspecialchars($req->detail_info),
-                'chef_type' => trim($req->shef_type)
+                'additional_links' => $req->additional_links,
+                'detail_information' => htmlspecialchars($req->detail_information),
+                'chef_type' => trim($req->chef_type)
             ]);
             DB::commit();
             return response()->json(["message" => "added successfully", "success" => true], 200);
@@ -64,17 +64,17 @@ class chefDocumentsController extends Controller
             if ($req->state_id) {
                 $updateData['state_id'] = $req->state_id;
             }
-            if ($req->doc_item_name) {
+            if ($req->document_item_name) {
                 $updateData['document_item_name'] = strtolower($req->doc_item_name);
             }
             if ($req->reference_link) {
-                $updateData['reference_links'] = $req->reference_link;
+                $updateData['reference_links'] = $req->reference_links;
             }
             if ($req->additional_link) {
-                $updateData['additional_links'] = $req->additional_link;
+                $updateData['additional_links'] = $req->additional_links;
             }
             if ($req->detail_info) {
-                $updateData['detail_information'] = htmlspecialchars($req->detail_info);
+                $updateData['detail_information'] = htmlspecialchars($req->detail_information);
             }
             if ($req->shef_type) {
                 $updateData['chef_type'] = $req->shef_type;
@@ -113,7 +113,14 @@ class chefDocumentsController extends Controller
         try {
             $totalRecords = DocumentItemList::count();
             $skip = $req->page * 10;
-            $data = DocumentItemList::skip($skip)->take(10)->get();
+            $data = DocumentItemList::with([
+                'state' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'shef_type' => function ($query) {
+                    $query->select('id', 'name');
+                }
+            ])->skip($skip)->take(10)->get();
             return response()->json([
                 'data' => $data,
                 'TotalRecords' => $totalRecords,
