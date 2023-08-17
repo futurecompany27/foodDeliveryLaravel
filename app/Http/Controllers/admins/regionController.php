@@ -148,10 +148,10 @@ class regionController extends Controller
             $updateData['name'] = $req->name;
         }
         if ($req->tax_type) {
-            $updateData['tax_type'] = json_encode($req->tax_type);
+            $updateData['tax_type'] = $req->tax_type;
         }
         if ($req->tax_value) {
-            $updateData['tax_value'] = json_encode($req->tax_value);
+            $updateData['tax_value'] = $req->tax_value;
         }
         try {
             State::where('id', $req->id)->update($updateData);
