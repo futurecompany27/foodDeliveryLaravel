@@ -17,6 +17,6 @@ class ShefSubType extends Model
 
     public function shef_type()
     {
-        return $this->belongsTo(ShefType::class);
+        return $this->belongsTo(ShefType::class,'type_id','id');
     }
 }

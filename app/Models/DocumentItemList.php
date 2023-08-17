@@ -15,6 +15,10 @@ class DocumentItemList extends Model
     {
         return $this->belongsTo(State::class);
     }
+    public function shef_type()
+    {
+        return $this->belongsTo(ShefType::class, 'chef_type','id');
+    }
 
     public function documentItemFields()
     {
