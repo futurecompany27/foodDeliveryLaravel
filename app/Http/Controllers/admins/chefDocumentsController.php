@@ -111,7 +111,6 @@ class chefDocumentsController extends Controller
     function getDocumentListAccToChefType(Request $req)
     {
         try {
-            $totalRecords = DocumentItemList::count();
             $data = DocumentItemList::with([
                 'state' => function ($query) {
                     $query->select('id', 'name');
@@ -120,10 +119,7 @@ class chefDocumentsController extends Controller
                     $query->select('id', 'name');
                 }
             ])->get();
-            return response()->json([
-                'data' => $data,
-                'TotalRecords' => $totalRecords,
-            ]);
+            return response()->json(['data' => $data, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
