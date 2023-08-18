@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\Adminsetting;
 use App\Models\Allergy;
+use App\Models\chef;
 use App\Models\Contact;
 use App\Models\Dietary;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
 use App\Models\Sitesetting;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -342,7 +344,7 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         if ($req->hasFile('image')) {
-            $file = $req->file('image')->store("food_categories", "public");
+            $file = $req->file('image')->store("admin/food_category/", "public");
             $filename = asset('storage/' . $file);
         }
         try {
@@ -384,7 +386,7 @@ class AdminController extends Controller
                 if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
                     unlink(str_replace('http://127.0.0.1:8000/', '', $images));
                 }
-                $file = $req->file('image')->store("food_categories", "public");
+                $file = $req->file('image')->store("admin/food_category/", "public");
                 $filename = asset('storage/' . $file);
                 $updateData['image'] = $filename;
             }
@@ -941,7 +943,44 @@ class AdminController extends Controller
             return response()->json([
                 'data' => $data,
                 'TotalRecords' => $totalRecords,
-            ]);
+                'success' => true
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+        }
+    }
+
+    function getAllUsers(Request $req)
+    {
+        try {
+            $totalRecords = User::count();
+            $skip = $req->page * 10;
+            $data = User::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
+            return response()->json([
+                'data' => $data,
+                'TotalRecords' => $totalRecords,
+                'success' => true
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+        }
+    }
+
+    function getAllChefs(Request $req)
+    {
+        try {
+            $totalRecords = chef::count();
+            $skip = $req->page * 10;
+            $data = chef::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
+            return response()->json([
+                'data' => $data,
+                'TotalRecords' => $totalRecords,
+                'success' => true
+            ], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

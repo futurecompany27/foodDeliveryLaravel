@@ -141,6 +141,9 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/updateMessageToChef', 'updateMessageToChef');
     Route::post('/deleteMessageToChef', 'deleteMessageToChef');
     Route::get('/getMessageToChef', 'getMessageToChef');
+
+    Route::get('/getAllUsers', 'getAllUsers');
+    Route::get('/getAllChefs', 'getAllChefs');
 });
 
 Route::controller(regionController::class)->group(function () {

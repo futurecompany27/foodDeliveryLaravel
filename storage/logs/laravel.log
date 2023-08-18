@@ -1,0 +1,8 @@
+[2023-08-18 07:08:21] local.INFO: array (
+  'id' => 2,
+  'document_item_list_id' => 2,
+  'field_name' => 'new fields hai',
+  'type' => 'file',
+  'mandatory' => 1,
+  'allows_as_kitchen_name' => 0,
+)  

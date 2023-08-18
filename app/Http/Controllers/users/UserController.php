@@ -202,6 +202,7 @@ class UserController extends Controller
                 $user->email = $req->email;
                 $user->social_id = $req->id;
                 $user->social_type = $req->provider;
+                $user->email_verified_at = Carbon::now();
                 $user->save();
                 $userDetail = User::find($user->id);
                 Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
@@ -389,7 +390,19 @@ class UserController extends Controller
             return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
         }
         try {
-            $recordToUpdate = User::where('id', $req->user_id)->update(['fullname' => $req->fullname, 'email' => $req->email, 'mobile' => str_replace('-', '', $req->mobile)]);
+            $user = User::where('id', $req->user_id)->first();
+            $update = [
+                'fullname' => $req->fullname,
+                'email' => $req->email,
+                'mobile' => str_replace('-', '', $req->mobile)
+            ];
+            if ($req->mobile && !$user->mobile_verified_at) {
+                $update['mobile_verified_at'] = Carbon::now();
+            }
+            if ($req->email != $user->email) {
+                $update['email_verified_at'] = Carbon::now();
+            }
+            $recordToUpdate = User::where('id', $req->user_id)->update($update);
             if ($recordToUpdate) {
                 return response()->json(['message' => 'User updated successfully', 'success' => true], 200);
             } else {
@@ -585,7 +598,6 @@ class UserController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
-
 
     function getCountOftheChefAvailableForNext14Days(Request $req)
     {
