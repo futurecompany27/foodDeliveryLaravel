@@ -349,7 +349,7 @@ class AdminController extends Controller
             $foodcategory = new FoodCategory();
             $foodcategory->category = $req->category;
             $foodcategory->commission = $req->commission;
-            $foodcategory->image = json_encode($filename);
+            $foodcategory->image = $filename;
             $foodcategory->save();
             return response()->json(["message" => "Submitted successfully", "success" => true], 200);
         } catch (\Throwable $th) {
@@ -438,7 +438,7 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
-            $path = "storage/admin/allergies/";
+            $path = "storage/admin/allergen_icons/";
             if (!File::exists($path)) {
                 File::makeDirectory($path, $mode = 0777, true, true);
             }
@@ -453,9 +453,9 @@ class AdminController extends Controller
                 $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
                 $big_img = Image::make($req->file('image'))
                     ->resize(200, 200)
-                    ->save('storage/admin/allergies/' . $name_gen);
+                    ->save('storage/admin/allergen_icons/' . $name_gen);
 
-                $filename = asset("storage/admin/allergies/" . $name_gen);
+                $filename = asset("storage/admin/allergen_icons/" . $name_gen);
             }
             Allergy::insert([
                 'image' => $filename,
@@ -483,8 +483,8 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
-        if (!File::exists("storage/admin/allergies/")) {
-            File::makeDirectory("storage/admin/allergies/", $mode = 0777, true, true);
+        if (!File::exists("storage/admin/allergen_icons/")) {
+            File::makeDirectory("storage/admin/allergen_icons/", $mode = 0777, true, true);
         }
         try {
             $data = Allergy::where('id', $req->id)->first();
@@ -503,8 +503,8 @@ class AdminController extends Controller
                     $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
                     $big_img = Image::make($req->file('image'))
                         ->resize(200, 200)
-                        ->save('storage/admin/allergies/' . $name_gen);
-                    $filename = asset("storage/admin/allergies/" . $name_gen);
+                        ->save('storage/admin/allergen_icons/' . $name_gen);
+                    $filename = asset("storage/admin/allergen_icons/" . $name_gen);
                     $updateData['image'] = $filename;
                 }
             }
@@ -564,7 +564,7 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
-            $path = "storage/admin/dietaries/";
+            $path = "storage/admin/dietaries_icons/";
             if (!File::exists($path)) {
                 File::makeDirectory($path, $mode = 0777, true, true);
             }
@@ -579,9 +579,9 @@ class AdminController extends Controller
                 $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
                 $big_img = Image::make($req->file('image'))
                     ->resize(200, 200)
-                    ->save('storage/admin/dietaries/' . $name_gen);
+                    ->save('storage/admin/dietaries_icons/' . $name_gen);
 
-                $filename = asset("storage/admin/dietaries/" . $name_gen);
+                $filename = asset("storage/admin/dietaries_icons/" . $name_gen);
             }
             Dietary::insert([
                 'diet_name' => strtolower($req->diet_name),
@@ -609,8 +609,8 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
-        if (!File::exists("storage/admin/dietaries/")) {
-            File::makeDirectory("storage/admin/dietaries/", $mode = 0777, true, true);
+        if (!File::exists("storage/admin/dietaries_icons/")) {
+            File::makeDirectory("storage/admin/dietaries_icons/", $mode = 0777, true, true);
         }
         try {
             $data = Dietary::where('id', $req->id)->first();
@@ -628,8 +628,8 @@ class AdminController extends Controller
                     $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
                     $big_img = Image::make($req->file('image'))
                         ->resize(200, 200)
-                        ->save('storage/admin/dietaries/' . $name_gen);
-                    $filename = asset("storage/admin/dietaries/" . $name_gen);
+                        ->save('storage/admin/dietaries_icons/' . $name_gen);
+                    $filename = asset("storage/admin/dietaries_icons/" . $name_gen);
                     $updateData['image'] = $filename;
                 }
             }
