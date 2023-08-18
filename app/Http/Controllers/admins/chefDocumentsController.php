@@ -112,7 +112,6 @@ class chefDocumentsController extends Controller
     {
         try {
             $totalRecords = DocumentItemList::count();
-            $skip = $req->page * 10;
             $data = DocumentItemList::with([
                 'state' => function ($query) {
                     $query->select('id', 'name');
@@ -120,7 +119,7 @@ class chefDocumentsController extends Controller
                 'shef_type' => function ($query) {
                     $query->select('id', 'name');
                 }
-            ])->skip($skip)->take(10)->get();
+            ])->get();
             return response()->json([
                 'data' => $data,
                 'TotalRecords' => $totalRecords,
@@ -161,8 +160,8 @@ class chefDocumentsController extends Controller
     function addDynamicFieldsForChef(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'doc_item_id' => 'required',
-            'name' => 'bail|required',
+            'document_item_list_id' => 'required',
+            'field_name' => 'bail|required',
             'type' => 'required',
 
         ], [
@@ -173,16 +172,16 @@ class chefDocumentsController extends Controller
 
         /*------- if has error----------*/
         if ($validator->fails()) {
-            return response()->json(['message' => validator()->errors(), "success" => false], 400);
+            return response()->json(['message' => validator()->errors()->first(), "success" => false], 400);
         }
         try {
             DB::beginTransaction();
             DocumentItemField::insert([
-                'document_item_list_id' => $req->doc_item_id,
-                'field_name' => strtolower($req->name),
+                'document_item_list_id' => $req->document_item_list_id,
+                'field_name' => strtolower($req->field_name),
                 'type' => $req->type,
                 'mandatory' => isset($req->mandatory) ? $req->mandatory : 0,
-                'allows_as_kitchen_name' => isset($req->allow_as_kitchen) ? $req->allow_as_kitchen : 0,
+                'allows_as_kitchen_name' => isset($req->allows_as_kitchen_name) ? $req->allows_as_kitchen_name : 0,
                 'created_at' => Carbon::now()->format('d-m-y h:m:i'),
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
@@ -208,10 +207,10 @@ class chefDocumentsController extends Controller
         try {
             Log::info($req);
             if ($req->doc_item_id) {
-                $updateData['document_item_list_id'] = $req->doc_item_id;
+                $updateData['document_item_list_id'] = $req->document_item_list_id;
             }
             if ($req->name) {
-                $updateData['field_name'] = strtolower($req->name);
+                $updateData['field_name'] = strtolower($req->field_name);
             }
             if ($req->type) {
                 $updateData['type'] = $req->type;
@@ -219,8 +218,8 @@ class chefDocumentsController extends Controller
             if ($req->mandatory == "0" || $req->mandatory == "1") {
                 $updateData['mandatory'] = isset($req->mandatory) ? $req->mandatory : 0;
             }
-            if ($req->allow_as_kitchen == "0" || $req->allow_as_kitchen == "1") {
-                $updateData['allows_as_kitchen_name'] = isset($req->allow_as_kitchen) ? $req->allow_as_kitchen : 0;
+            if ($req->allows_as_kitchen_name == "0" || $req->allows_as_kitchen_name == "1") {
+                $updateData['allows_as_kitchen_name'] = isset($req->allows_as_kitchen_name) ? $req->allows_as_kitchen_name : 0;
             }
             DocumentItemField::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
@@ -254,13 +253,9 @@ class chefDocumentsController extends Controller
     public function getDynamicFieldsForChef(Request $req)
     {
         try {
-            $totalRecords = DocumentItemField::count();
-            $skip = $req->page * 10;
-            $data = DocumentItemField::skip($skip)->take(10)->get();
-            return response()->json([
-                'data' => $data,
-                'TotalRecords' => $totalRecords,
-            ]);
+            $totalRecords = DocumentItemField::where('document_item_list_id', $req->document_item_list_id)->count();
+            $data = DocumentItemField::where('document_item_list_id', $req->document_item_list_id)->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
