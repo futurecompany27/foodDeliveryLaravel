@@ -13,6 +13,7 @@ use App\Models\Feedback;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
+use App\Models\ScheduleCall;
 use App\Models\Sitesetting;
 use App\Models\State;
 use App\Models\UserContact;
@@ -221,4 +222,73 @@ class commonFunctions extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
+
+    public function updateSiteFeedbackStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->status == "0" || $req->status == "1") {
+                $updateData['status'] = $req->status;
+            }
+            // $updateData = $req->status;
+            Feedback::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function getAllScheduleCall(Request $req)
+    {
+        try {
+            $totalRecords = ScheduleCall::count();
+            $skip = $req->page * 10;
+            $data = ScheduleCall::with('chef')->skip($skip)->take(10)->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    public function updateScheduleCallStatus(Request $req)
+    {
+
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->status == "0" || $req->status == "1" || $req->status == "2") {
+                $updateData['status'] = $req->status;
+            }
+            // $updateData = $req->status;
+            Feedback::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    
 }

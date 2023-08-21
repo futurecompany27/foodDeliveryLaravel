@@ -9,5 +9,5 @@ class Feedback extends Model
 {
     use HasFactory;
     protected $table = "feedbacks";
-    protected $fillable = ['id', 'images', 'radio', 'name', 'email', 'profession', 'message', 'star_rating'];
+    protected $fillable = ['id', 'images', 'radio', 'name', 'email', 'profession', 'message', 'status', 'star_rating'];
 }

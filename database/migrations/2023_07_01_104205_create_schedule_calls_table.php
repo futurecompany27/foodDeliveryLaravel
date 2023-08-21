@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('chef_id');
             $table->string('date');
             $table->string('slot');
-            $table->string('status')->default('pending');
+            $table->tinyinteger('status')->default(1)->comment('1- Pending, 0-Call Made, 2-No Response');
             $table->timestamps();
         });
     }
