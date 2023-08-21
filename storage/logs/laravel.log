@@ -6,3 +6,11 @@
   'mandatory' => 1,
   'allows_as_kitchen_name' => 0,
 )  
+[2023-08-21 06:44:48] local.INFO: //////  
+[2023-08-21 07:48:57] local.INFO: //////  
+[2023-08-21 09:57:01] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
+[2023-08-21 09:57:57] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
+[2023-08-21 10:31:33] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
+[2023-08-21 12:01:02] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
+[2023-08-21 12:02:00] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
+[2023-08-21 12:59:08] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  

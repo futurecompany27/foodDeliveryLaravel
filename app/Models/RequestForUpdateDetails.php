@@ -19,4 +19,9 @@ class RequestForUpdateDetails extends Model
     protected $casts = [
         'request_for' => 'array'
     ];
+
+    public function chef()
+    {
+        return $this->belongsTo(Chef::class, 'chef_id', 'id');
+    }
 }

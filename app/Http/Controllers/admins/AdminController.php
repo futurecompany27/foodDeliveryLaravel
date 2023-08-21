@@ -381,7 +381,7 @@ class AdminController extends Controller
                 $updateData['commission'] = $req->commission;
             }
             if ($req->hasFile('image')) {
-                $images = json_decode($data->image);
+                $images = $data->image;
                 str_replace('http://127.0.0.1:8000/', '', $images);
                 if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
                     unlink(str_replace('http://127.0.0.1:8000/', '', $images));
@@ -974,13 +974,21 @@ class AdminController extends Controller
     {
         try {
             $totalRecords = chef::count();
+
+            $query = chef::orderBy('created_at', 'desc')->withCount([
+                'foodItems as active_food_items_count' => function ($query) {
+                    $query->where('approved_status', 'active');
+                },
+                'foodItems as pending_food_items_count' => function ($query) {
+                    $query->where('approved_status', 'pending');
+                }
+            ])->with('chefDocuments');
+
             $skip = $req->page * 10;
-            $data = chef::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
-            return response()->json([
-                'data' => $data,
-                'TotalRecords' => $totalRecords,
-                'success' => true
-            ], 200);
+
+            $data = $query->skip($skip)->take(10)->get();
+
+            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

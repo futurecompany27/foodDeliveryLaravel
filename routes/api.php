@@ -93,6 +93,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/changePasswordForChef', 'changePasswordForChef');
     Route::post('/sendProfileForReview', 'sendProfileForReview');
     Route::post('/requestForUpdate', 'requestForUpdate');
+    Route::post('/getAllPendingRequest', 'getAllPendingRequest');
     Route::post('/getApprovedUpdaterequest', 'getApprovedUpdaterequest');
     Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
     Route::post('/updateChefAvailibilty', 'updateChefAvailibilty');

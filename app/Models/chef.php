@@ -46,4 +46,9 @@ class chef extends Model
     {
         return $this->hasMany(FoodItem::class, 'chef_id', 'id');
     }
+
+    public function alternativeContacts()
+    {
+        return $this->hasMany(ChefAlternativeContact::class,'chef_id','id');
+    }
 }

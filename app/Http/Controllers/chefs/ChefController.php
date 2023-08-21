@@ -683,7 +683,7 @@ class ChefController extends Controller
     function getMyFoodItems(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(["message" => 'Please fill all the details', 'success' => false]);
+            return response()->json(["message" => 'Please fill all the details', 'success' => false], 400);
         }
         try {
             $where = ["chef_id" => $req->chef_id];
@@ -916,13 +916,30 @@ class ChefController extends Controller
         }
     }
 
+    function getAllPendingRequest(Request $req)
+    {
+        try {
+            $totalRecords = RequestForUpdateDetails::where('status', 0)->count();
+            $skip = $req->page * 10;
+            $data = RequestForUpdateDetails::with(['chef', 'chef.alternativeContacts'])->where('status', 0)->skip($skip)->take(10)->get();
+            return response()->json([
+                'data' => $data,
+                'TotalRecords' => $totalRecords,
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again after sometime !', 'success' => false], 500);
+        }
+    }
+
     function getApprovedUpdaterequest(Request $req)
     {
         if (!$req->chef_id) {
             return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
         }
         try {
-            $data = RequestForUpdateDetails::where('chef_id', $req->chef_id)->where('status', 1)->first();
+            $data = RequestForUpdateDetails::orederBy('desc')->where('chef_id', $req->chef_id)->where('status', 1)->first();
             return response()->json(['data' => $data, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

@@ -66,4 +66,5 @@ class FoodItem extends Model
     {
         return $this->belongsTo(HeatingInstruction::class, 'heating_instruction_id', 'id');
     }
+
 }
