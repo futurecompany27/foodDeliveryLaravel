@@ -6,3 +6,25 @@
   'mandatory' => 1,
   'allows_as_kitchen_name' => 0,
 )  
+[2023-08-19 06:35:28] local.ERROR: Command "optimize:fresh" is not defined.
+
+Did you mean one of these?
+    migrate:fresh
+    migrate:refresh
+    optimize
+    optimize:clear {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"optimize:fresh\" is not defined.
+
+Did you mean one of these?
+    migrate:fresh
+    migrate:refresh
+    optimize
+    optimize:clear at D:\\fo9_final\\vendor\\symfony\\console\\Application.php:725)
+[stacktrace]
+#0 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(262): Symfony\\Component\\Console\\Application->find('optimize:fresh')
+#1 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(174): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#2 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(201): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#3 D:\\fo9_final\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#4 {main}
+"} 
+[2023-08-19 10:20:01] local.INFO: //////  
+[2023-08-19 10:20:28] local.INFO: //////  

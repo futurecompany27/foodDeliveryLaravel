@@ -381,7 +381,7 @@ class AdminController extends Controller
                 $updateData['commission'] = $req->commission;
             }
             if ($req->hasFile('image')) {
-                $images = json_decode($data->image);
+                $images = $data->image;
                 str_replace('http://127.0.0.1:8000/', '', $images);
                 if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
                     unlink(str_replace('http://127.0.0.1:8000/', '', $images));
@@ -985,6 +985,46 @@ class AdminController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+        }
+    }
+
+    public function getAllContactData(Request $req)
+    {
+        try {
+            $totalRecords = Contact::count();
+            $skip = $req->page * 10;
+            $data = Contact::with('chef')->skip($skip)->take(10)->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    public function updateContactDataStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            if ($req->status == "0" || $req->status == "1") {
+                $updateData['status'] = $req->status;
+            }
+            // $updateData = $req->status;
+            Contact::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
 }

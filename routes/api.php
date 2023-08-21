@@ -48,6 +48,8 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/changeDefaultShippingAddress', 'changeDefaultShippingAddress');
     Route::post('/deleteShippingAddress', 'deleteShippingAddress');
 
+    Route::post('/addUserContacts', 'addUserContacts');
+    Route::post('/updateContactStatus', 'updateContactStatus');
     Route::post('/ChefReview', 'ChefReview');
     Route::post('/deleteChefReview', 'deleteChefReview');
     Route::get('/getUserContact', 'getUserContact');
@@ -109,6 +111,8 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/updateSiteSettings', 'updateSiteSettings');
     Route::post('/deleteSiteSettings', 'deleteSiteSettings');
     Route::get('/getSiteSettings', 'getSiteSettings');
+    Route::get('/getAllContactData', 'getAllContactData');
+    Route::post('/updateContactDataStatus', 'updateContactDataStatus');
 
     Route::post('/addAdminSettings', 'addAdminSettings');
     Route::post('/updateAdminSettings', 'updateAdminSettings');
@@ -227,6 +231,9 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::post("/giveSiteFeedback", "giveSiteFeedback");
     Route::get("/getSiteFeedback", 'getSiteFeedback');
     Route::post("/get_lat_long", 'get_lat_long');
+    Route::post("/updateSiteFeedbackStatus", 'updateSiteFeedbackStatus');
+    Route::post("/updateScheduleCallStatus", 'updateScheduleCallStatus');
+    Route::get("/getAllScheduleCall", 'getAllScheduleCall');
 });
 
 
