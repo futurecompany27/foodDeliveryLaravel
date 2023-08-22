@@ -328,7 +328,11 @@ class regionController extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
-            $updateData = $req->all();
+            $updateData = [];
+            $updateData['pincode'] = str_replace(" ", "", (strtolower($req->pincode)));
+            $updateData['city_id'] = $req->city_id;
+            $updateData['latitude'] = $req->lat;
+            $updateData['longitude'] = $req->long;
             Pincode::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
@@ -361,14 +365,25 @@ class regionController extends Controller
     public function getPincode(Request $req)
     {
         try {
-            $data = Pincode::with([
-                'city' => function ($query) {
-                    $query->select('id', 'state_id');
-                },
-                'city.state' => function ($query) {
-                    $query->select('id', 'country_id');
-                }
-            ])->get();
+            if ($req->city_id) {
+                $data = Pincode::where('city_id',$req->city_id)->with([
+                    'city' => function ($query) {
+                        $query->select('id', 'state_id');
+                    },
+                    'city.state' => function ($query) {
+                        $query->select('id', 'country_id');
+                    }
+                ])->get();
+            }else{
+                $data = Pincode::with([
+                    'city' => function ($query) {
+                        $query->select('id', 'state_id');
+                    },
+                    'city.state' => function ($query) {
+                        $query->select('id', 'country_id');
+                    }
+                ])->get();
+            }
             return response()->json(['data' => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

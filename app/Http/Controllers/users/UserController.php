@@ -179,7 +179,7 @@ class UserController extends Controller
             return response()->json(['message' => 'please fill all th required fields', "success" => false], 400);
         }
         try {
-            $data = chef::find($req->chef_id);
+            $data = chef::with(['chefDocuments', 'alternativeContacts'])->find($req->chef_id);
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

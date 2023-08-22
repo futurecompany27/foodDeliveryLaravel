@@ -65,19 +65,19 @@ class chefDocumentsController extends Controller
                 $updateData['state_id'] = $req->state_id;
             }
             if ($req->document_item_name) {
-                $updateData['document_item_name'] = strtolower($req->doc_item_name);
+                $updateData['document_item_name'] = strtolower($req->document_item_name);
             }
-            if ($req->reference_link) {
+            if ($req->reference_links) {
                 $updateData['reference_links'] = $req->reference_links;
             }
-            if ($req->additional_link) {
+            if ($req->additional_links) {
                 $updateData['additional_links'] = $req->additional_links;
             }
-            if ($req->detail_info) {
+            if ($req->detail_information) {
                 $updateData['detail_information'] = htmlspecialchars($req->detail_information);
             }
-            if ($req->shef_type) {
-                $updateData['chef_type'] = $req->shef_type;
+            if ($req->chef_type) {
+                $updateData['chef_type'] = $req->chef_type;
             }
             DocumentItemList::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);

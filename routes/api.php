@@ -149,6 +149,8 @@ Route::controller(AdminController::class)->group(function () {
 
     Route::get('/getAllUsers', 'getAllUsers');
     Route::get('/getAllChefs', 'getAllChefs');
+
+    Route::post('/sendMailToChef', 'sendMailToChef');
 });
 
 Route::controller(regionController::class)->group(function () {

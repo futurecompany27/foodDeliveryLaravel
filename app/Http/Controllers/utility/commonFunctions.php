@@ -106,7 +106,11 @@ class commonFunctions extends Controller
     function getAllHeatingInstructions(Request $req)
     {
         try {
-            return response()->json(["data" => HeatingInstruction::all(), "success" => true], 200);
+            if ($req->admin) {
+                return response()->json(["data" => HeatingInstruction::all(), "success" => true], 200);
+            } else {
+                return response()->json(["data" => HeatingInstruction::where('status', 1)->get(), "success" => true], 200);
+            }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -289,6 +293,4 @@ class commonFunctions extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
-
-    
 }

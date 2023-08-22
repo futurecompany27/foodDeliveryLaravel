@@ -62,10 +62,14 @@ class kitchentypeController extends Controller
         }
     }
 
-    function getKitchenTypes()
+    function getKitchenTypes(Request $req)
     {
         try {
-            $kitchenTyepData = Kitchentype::all();
+            if ($req->admin) {
+                $kitchenTyepData = Kitchentype::all();
+            } else {
+                $kitchenTyepData = Kitchentype::where('status', 1)->get();
+            }
             return response()->json(["data" => $kitchenTyepData, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

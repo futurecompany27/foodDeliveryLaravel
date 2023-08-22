@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admins;
 
 use App\Http\Controllers\Controller;
+use App\Mail\messageFromAdminToChef;
 use App\Models\Admin;
 use App\Models\Adminsetting;
 use App\Models\Allergy;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\ImageManagerStatic as Image;
 // use Intervention\Image\Image; //Intervention Image
@@ -781,10 +783,15 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
-            $ingredient = new Ingredient();
-            $ingredient->ing_name = $req->ing_name;
-            $ingredient->save();
-            return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+            $data = Ingredient::where('ing_name', $req->ing_name)->first();
+            if ($data) {
+                return response()->json(["message" => "Ingredient Already exist", "success" => false], 500);
+            } else {
+                $ingredient = new Ingredient();
+                $ingredient->ing_name = $req->ing_name;
+                $ingredient->save();
+                return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+            }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -982,7 +989,11 @@ class AdminController extends Controller
                 'foodItems as pending_food_items_count' => function ($query) {
                     $query->where('approved_status', 'pending');
                 }
-            ])->with('chefDocuments');
+            ])->with([
+                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+                    'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                ])
+            ]);
 
             $skip = $req->page * 10;
 
@@ -1026,13 +1037,38 @@ class AdminController extends Controller
             if ($req->status == "0" || $req->status == "1") {
                 $updateData['status'] = $req->status;
             }
-            // $updateData = $req->status;
             Contact::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function sendMailToChef(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "chef_id" => 'required',
+            "subject" => 'required',
+            "body" => 'required',
+        ], [
+            "chef_id.required" => "please fill chef id",
+            "subject.required" => "please fill subject",
+            "body.required" => "please fill body of mail",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $chefDetail = chef::select('email')->where('id', $req->chef_id)->first();
+            Log::info($chefDetail);
+            $mail = ['subject' => $req->subject, 'body' => $req->body];
+            Mail::to(trim($chefDetail->email))->send(new messageFromAdminToChef($mail));
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again after sometime !', 'success' => false], 500);
         }
     }
 }

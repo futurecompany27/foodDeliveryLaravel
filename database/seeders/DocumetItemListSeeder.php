@@ -14,6 +14,6 @@ class DocumetItemListSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('document_item_lists')->insert(["state_id" => 1, "document_item_name" => 'food safety certificate', 'chef_type' => 'Individual', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        DB::table('document_item_lists')->insert(["state_id" => 1, "document_item_name" => 'food safety certificate', 'chef_type' => 1, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
     }
 }

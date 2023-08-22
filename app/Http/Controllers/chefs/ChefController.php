@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Models\Contact;
 use App\Models\Dietary;
 use App\Models\Ingredient;
+use App\Models\Kitchentype;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -193,12 +194,10 @@ class ChefController extends Controller
         }
         try {
             $data = chef::whereId($req->chef_id)->with([
-                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')
-                    ->with([
-                        'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
-                    ])
-            ])
-                ->first();
+                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+                    'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                ])
+            ])->first();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -729,6 +728,15 @@ class ChefController extends Controller
                     }
                     $value['ingredients'] = $IngredientArr;
                 }
+
+                // geographical cuisines
+                if ($value['geographicalCuisine']) {
+                    $geographicalCuisine = $value['geographicalCuisine'];
+                    foreach ($geographicalCuisine as &$val) {
+                        $val = Kitchentype::select('kitchentype')->find($val);
+                    }
+                    $value['geographicalCuisine'] = $geographicalCuisine;
+                }
             }
             $chefData = chef::select('rating')->where('id', $req->chef_id)->first();
             return response()->json(["data" => $data, 'rating' => $chefData->rating, "success" => true], 200);
@@ -939,7 +947,7 @@ class ChefController extends Controller
             return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
         }
         try {
-            $data = RequestForUpdateDetails::orederBy('desc')->where('chef_id', $req->chef_id)->where('status', 1)->first();
+            $data = RequestForUpdateDetails::orderBy('created_at', 'desc')->where(['chef_id' => $req->chef_id, 'status' => 1])->first();
             return response()->json(['data' => $data, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

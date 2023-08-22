@@ -1,16 +1,8 @@
-[2023-08-18 07:08:21] local.INFO: array (
-  'id' => 2,
-  'document_item_list_id' => 2,
-  'field_name' => 'new fields hai',
-  'type' => 'file',
-  'mandatory' => 1,
-  'allows_as_kitchen_name' => 0,
-)  
-[2023-08-21 06:44:48] local.INFO: //////  
-[2023-08-21 07:48:57] local.INFO: //////  
-[2023-08-21 09:57:01] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
-[2023-08-21 09:57:57] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
-[2023-08-21 10:31:33] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
-[2023-08-21 12:01:02] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
-[2023-08-21 12:02:00] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
-[2023-08-21 12:59:08] local.INFO: Call to undefined method App\Models\RequestForUpdateDetails::orederBy()  
+[2023-08-22 13:34:20] local.INFO: {"email":"ravindra@gmail.com"}  
+[2023-08-22 13:34:20] local.INFO: Undefined variable $fullname (View: D:\fo9_final\resources\views\UserEmailVerification.blade.php)  
+[2023-08-22 13:35:08] local.INFO: {"email":"ravindra@gmail.com"}  
+[2023-08-22 13:35:08] local.INFO: View [messageFromAdminToChef] not found.  
+[2023-08-22 13:35:49] local.INFO: {"email":"ravindra@gmail.com"}  
+[2023-08-22 13:35:50] local.INFO: htmlspecialchars(): Argument #1 ($string) must be of type string, Illuminate\Mail\Message given (View: D:\fo9_final\resources\views\messageToChef.blade.php)  
+[2023-08-22 13:40:40] local.INFO: {"email":"ravindra@gmail.com"}  
+[2023-08-22 13:40:40] local.INFO: htmlspecialchars(): Argument #1 ($string) must be of type string, Illuminate\Mail\Message given (View: D:\fo9_final\resources\views\messageToChef.blade.php)  
