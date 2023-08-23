@@ -49,7 +49,7 @@ class regionController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $updateData = $req->all();
@@ -70,7 +70,7 @@ class regionController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             Country::where('id', $req->id)->delete();
@@ -139,7 +139,7 @@ class regionController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         if ($req->country_id) {
             $updateData['country_id'] = $req->country_id;
@@ -171,7 +171,7 @@ class regionController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = State::where('id', $req->id)->first();
@@ -232,7 +232,7 @@ class regionController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = City::where('id', $req->id)->first();
@@ -254,7 +254,7 @@ class regionController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = City::where('id', $req->id)->first();
@@ -325,7 +325,7 @@ class regionController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $updateData = [];
@@ -350,7 +350,7 @@ class regionController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             Pincode::where('id', $req->id)->delete();
@@ -402,7 +402,7 @@ class regionController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {
@@ -427,7 +427,7 @@ class regionController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {
@@ -452,7 +452,7 @@ class regionController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {

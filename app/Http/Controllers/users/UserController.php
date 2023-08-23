@@ -90,7 +90,7 @@ class UserController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {
@@ -463,7 +463,7 @@ class UserController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             UserContact::where('id', $req->id)->update(['status' => $req->status]);
@@ -570,7 +570,7 @@ class UserController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = ChefReview::where('id', $req->id)->first();
@@ -599,7 +599,7 @@ class UserController extends Controller
             "chef_id.required" => "please fill chef_id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $totalRecords = ChefReview::where('chef_id', $req->chef_id)->count();

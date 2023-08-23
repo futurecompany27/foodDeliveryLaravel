@@ -28,7 +28,7 @@ class chefDocumentsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -58,7 +58,7 @@ class chefDocumentsController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->state_id) {
@@ -96,7 +96,7 @@ class chefDocumentsController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             DocumentItemList::where('id', $req->id)->delete();
@@ -137,7 +137,7 @@ class chefDocumentsController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {
@@ -198,7 +198,7 @@ class chefDocumentsController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             Log::info($req);
@@ -234,7 +234,7 @@ class chefDocumentsController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             DocumentItemField::where('id', $req->id)->delete();

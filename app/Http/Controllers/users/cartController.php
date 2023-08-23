@@ -23,7 +23,7 @@ class cartController extends Controller
             'cartData.required' => 'please fill food data'
         ]);
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $mycart = Cart::where("user_id", $req->user_id)->first();
@@ -91,7 +91,7 @@ class cartController extends Controller
             'quantity.required' => 'please fill type',
         ]);
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $cartData = Cart::where("user_id", $req->user_id)->first()->cartData;

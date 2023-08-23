@@ -187,7 +187,7 @@ class commonFunctions extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         if (!File::exists("storage/feedback_profiles/")) {
             File::makeDirectory("storage/feedback_profiles/", $mode = 0777, true, true);
@@ -237,7 +237,7 @@ class commonFunctions extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             Feedback::where('id', $req->id)->update(['status' => $req->status]);
@@ -274,7 +274,7 @@ class commonFunctions extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             ScheduleCall::where('id', $req->id)->update(['status' => $req->status]);

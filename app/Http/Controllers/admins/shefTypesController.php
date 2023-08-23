@@ -53,7 +53,7 @@ class shefTypesController extends Controller
             'name.min' => 'Tag name should be atleast 4 letters longs',
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->name) {
@@ -77,7 +77,7 @@ class shefTypesController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             ShefType::where('id', $req->id)->delete();
@@ -111,7 +111,7 @@ class shefTypesController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {
@@ -170,7 +170,7 @@ class shefTypesController extends Controller
             'name.unique' => 'Subtype already exists'
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->name) {
@@ -197,7 +197,7 @@ class shefTypesController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             ShefSubType::where('id', $req->id)->delete();
@@ -231,7 +231,7 @@ class shefTypesController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {

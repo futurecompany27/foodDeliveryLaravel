@@ -44,7 +44,7 @@ class AdminController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -134,7 +134,7 @@ class AdminController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -175,7 +175,7 @@ class AdminController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Sitesetting::where('id', $req->id)->first();
@@ -198,7 +198,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Sitesetting::where('id', $req->id)->first();
@@ -250,7 +250,7 @@ class AdminController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $adminSetting = new Adminsetting();
@@ -279,7 +279,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Adminsetting::where('id', $req->id)->first();
@@ -302,7 +302,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Adminsetting::where('id', $req->id)->first();
@@ -344,7 +344,7 @@ class AdminController extends Controller
             "image.required" => "please fill image",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         if ($req->hasFile('image')) {
             $file = $req->file('image')->store("admin/food_category/", "public");
@@ -372,7 +372,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = FoodCategory::where('id', $req->id)->first();
@@ -410,7 +410,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = FoodCategory::where('id', $req->id)->first();
@@ -440,7 +440,7 @@ class AdminController extends Controller
             "allergy_name.required" => "please fill allergy_name",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $path = "storage/admin/allergen_icons/";
@@ -486,7 +486,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         if (!File::exists("storage/admin/allergen_icons/")) {
             File::makeDirectory("storage/admin/allergen_icons/", $mode = 0777, true, true);
@@ -536,7 +536,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Allergy::where('id', $req->id)->first();
@@ -566,7 +566,7 @@ class AdminController extends Controller
             "image.required" => "please fill image",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $path = "storage/admin/dietaries_icons/";
@@ -612,7 +612,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         if (!File::exists("storage/admin/dietaries_icons/")) {
             File::makeDirectory("storage/admin/dietaries_icons/", $mode = 0777, true, true);
@@ -661,7 +661,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Dietary::where('id', $req->id)->first();
@@ -689,7 +689,7 @@ class AdminController extends Controller
             "description.required" => "please fill description",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $heating = new HeatingInstruction();
@@ -712,7 +712,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = HeatingInstruction::where('id', $req->id)->first();
@@ -734,7 +734,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = HeatingInstruction::where('id', $req->id)->first();
@@ -757,7 +757,7 @@ class AdminController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {
@@ -781,7 +781,7 @@ class AdminController extends Controller
             "ing_name.required" => "please fill ing_name",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Ingredient::where('ing_name', $req->ing_name)->first();
@@ -808,7 +808,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Ingredient::where('id', $req->id)->first();
@@ -830,7 +830,7 @@ class AdminController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Ingredient::where('id', $req->id)->first();
@@ -853,7 +853,7 @@ class AdminController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {
@@ -881,7 +881,7 @@ class AdminController extends Controller
     //         "message.required" => "please fill message",
     //     ]);
     //     if ($validator->fails()) {
-    //         return response()->json(["message" => $validator->errors(), "success" => false], 400);
+    //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
     //     }
     //     try {
     //         $contact = new Contact();
@@ -909,7 +909,7 @@ class AdminController extends Controller
     //         "id.required" => "please fill id",
     //     ]);
     //     if ($validator->fails()) {
-    //         return response()->json(["message" => $validator->errors(), "success" => false], 400);
+    //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
     //     }
     //     try {
     //         $updateData = $req->all();
@@ -930,7 +930,7 @@ class AdminController extends Controller
     //         "id.required" => "please fill id",
     //     ]);
     //     if ($validator->fails()) {
-    //         return response()->json(["message" => $validator->errors(), "success" => false], 400);
+    //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
     //     }
     //     try {
     //         Contact::where('id', $req->id)->delete();
@@ -1032,7 +1032,7 @@ class AdminController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             Contact::where('id', $req->id)->update(['status' => $req->status]);
@@ -1056,7 +1056,7 @@ class AdminController extends Controller
             "body.required" => "please fill body of mail",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $chefDetail = chef::select('email')->where('id', $req->chef_id)->first();
@@ -1081,7 +1081,7 @@ class AdminController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             RequestForUpdateDetails::where('id', $req->id)->update(['status' => $req->status]);

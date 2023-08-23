@@ -119,7 +119,7 @@ class ChefController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
 
         try {
@@ -216,7 +216,7 @@ class ChefController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1" || $req->status == "2") {
@@ -310,7 +310,7 @@ class ChefController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $chef = chef::find($req->chef_id);
@@ -617,7 +617,7 @@ class ChefController extends Controller
                 );
 
                 if ($validator->fails()) {
-                    return response()->json(["error" => $validator->errors(), "success" => false], 400);
+                    return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
                 }
 
                 $OGfilePath = "";
@@ -777,7 +777,7 @@ class ChefController extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             Log::info($req->weekAvailibilty);
@@ -856,7 +856,7 @@ class ChefController extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->newPassword !== $req->confirmPassword) {

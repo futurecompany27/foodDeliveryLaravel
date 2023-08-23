@@ -49,7 +49,7 @@ class taxController extends Controller
             'tax_type.string' => 'Only letters allowed',
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->tax_type) {
@@ -73,7 +73,7 @@ class taxController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Tax::where('id', $req->id)->first();

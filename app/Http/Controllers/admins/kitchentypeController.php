@@ -86,7 +86,7 @@ class kitchentypeController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         if (!File::exists("storage/admin/kitchentype/")) {
             File::makeDirectory("storage/admin/kitchentype/", $mode = 0777, true, true);
@@ -133,7 +133,7 @@ class kitchentypeController extends Controller
             "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Kitchentype::where('id', $req->id)->first();
@@ -161,7 +161,7 @@ class kitchentypeController extends Controller
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             if ($req->status == "0" || $req->status == "1") {
