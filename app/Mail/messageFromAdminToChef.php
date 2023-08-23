@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class messageFromAdminToChef extends Mailable
+class MessageFromAdminToChef extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -30,6 +30,9 @@ class messageFromAdminToChef extends Mailable
      */
     public function build()
     {
-        return $this->view('messageToChef')->with(['subject' => $this->mail['subject'], 'body' => $this->mail['body']]);
+        return $this->view('MessageToChef', [
+            'subject' => $this->mail['subject'],
+            'body' => $this->mail['body']
+        ]);
     }
 }

@@ -435,7 +435,7 @@ class UserController extends Controller
             ]
         );
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $contact = new UserContact();
@@ -445,11 +445,11 @@ class UserController extends Controller
             $contact->subject = $req->subject;
             $contact->message = $req->message;
             $contact->save();
-            return response()->json(['msg' => "Submitted successfully", "success" => true], 200);
+            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
@@ -466,11 +466,7 @@ class UserController extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
-            if ($req->status == "0" || $req->status == "1") {
-                $updateData['status'] = $req->status;
-            }
-            // $updateData = $req->status;
-            UserContact::where('id', $req->id)->update($updateData);
+            UserContact::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -484,11 +480,8 @@ class UserController extends Controller
         try {
             $totalRecords = UserContact::count();
             $skip = $req->page * 10;
-            $items = UserContact::skip($skip)->take(10)->get();
-            return response()->json([
-                'data' => $items,
-                'TotalRecords' => $totalRecords,
-            ]);
+            $items = UserContact::orderBy('created_at','desc')->skip($skip)->take(10)->get();
+            return response()->json(['data' => $items, 'TotalRecords' => $totalRecords], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

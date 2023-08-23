@@ -112,6 +112,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/updateSiteSettings', 'updateSiteSettings');
     Route::post('/deleteSiteSettings', 'deleteSiteSettings');
     Route::get('/getSiteSettings', 'getSiteSettings');
+
     Route::get('/getAllContactData', 'getAllContactData');
     Route::post('/updateContactDataStatus', 'updateContactDataStatus');
 
@@ -142,15 +143,17 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/deleteIngredient', 'deleteIngredient');
     Route::post('/updateIngredientStatus', 'updateIngredientStatus');
 
-    Route::post('/sendMessageToChef', 'sendMessageToChef');
-    Route::post('/updateMessageToChef', 'updateMessageToChef');
-    Route::post('/deleteMessageToChef', 'deleteMessageToChef');
-    Route::get('/getMessageToChef', 'getMessageToChef');
+    // Route::post('/sendMessageToChef', 'sendMessageToChef');
+    // Route::post('/updateMessageToChef', 'updateMessageToChef');
+    // Route::post('/deleteMessageToChef', 'deleteMessageToChef');
+    // Route::get('/getMessageToChef', 'getMessageToChef');
 
     Route::get('/getAllUsers', 'getAllUsers');
     Route::get('/getAllChefs', 'getAllChefs');
 
     Route::post('/sendMailToChef', 'sendMailToChef');
+
+    Route::post('/updateChnageRequestStatus', 'updateChnageRequestStatus');
 });
 
 Route::controller(regionController::class)->group(function () {

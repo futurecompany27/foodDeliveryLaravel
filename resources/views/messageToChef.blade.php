@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <p>{{$message}}</p>
+    <p>{{$body}}</p>
 </body>
 
 </html>

@@ -187,7 +187,7 @@ class commonFunctions extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors(), "success" => false], 400);
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         if (!File::exists("storage/feedback_profiles/")) {
             File::makeDirectory("storage/feedback_profiles/", $mode = 0777, true, true);
@@ -218,7 +218,7 @@ class commonFunctions extends Controller
         try {
             $totalRecords = Feedback::count();
             $skip = $req->page * 10;
-            $data = Feedback::skip($skip)->take(10)->get();
+            $data = Feedback::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -240,11 +240,7 @@ class commonFunctions extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
-            if ($req->status == "0" || $req->status == "1") {
-                $updateData['status'] = $req->status;
-            }
-            // $updateData = $req->status;
-            Feedback::where('id', $req->id)->update($updateData);
+            Feedback::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -281,11 +277,7 @@ class commonFunctions extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
-            if ($req->status == "0" || $req->status == "1" || $req->status == "2") {
-                $updateData['status'] = $req->status;
-            }
-            // $updateData = $req->status;
-            Feedback::where('id', $req->id)->update($updateData);
+            ScheduleCall::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

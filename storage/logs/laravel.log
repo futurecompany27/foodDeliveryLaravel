@@ -1,8 +1,0 @@
-[2023-08-22 13:34:20] local.INFO: {"email":"ravindra@gmail.com"}  
-[2023-08-22 13:34:20] local.INFO: Undefined variable $fullname (View: D:\fo9_final\resources\views\UserEmailVerification.blade.php)  
-[2023-08-22 13:35:08] local.INFO: {"email":"ravindra@gmail.com"}  
-[2023-08-22 13:35:08] local.INFO: View [messageFromAdminToChef] not found.  
-[2023-08-22 13:35:49] local.INFO: {"email":"ravindra@gmail.com"}  
-[2023-08-22 13:35:50] local.INFO: htmlspecialchars(): Argument #1 ($string) must be of type string, Illuminate\Mail\Message given (View: D:\fo9_final\resources\views\messageToChef.blade.php)  
-[2023-08-22 13:40:40] local.INFO: {"email":"ravindra@gmail.com"}  
-[2023-08-22 13:40:40] local.INFO: htmlspecialchars(): Argument #1 ($string) must be of type string, Illuminate\Mail\Message given (View: D:\fo9_final\resources\views\messageToChef.blade.php)  

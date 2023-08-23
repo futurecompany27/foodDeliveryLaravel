@@ -907,9 +907,9 @@ class ChefController extends Controller
             return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
         }
         try {
-            $alreadyPending = RequestForUpdateDetails::where('chef_id', $req->chef_id)->whereNotIn('status', [1, 2])->first();
+            $alreadyPending = RequestForUpdateDetails::orderBy('created_at', 'desc')->where('chef_id', $req->chef_id)->whereIn('status', [0, 1])->first();
             if ($alreadyPending) {
-                return response()->json(['message' => 'you have a pending request for update', 'success' => false], 500);
+                return response()->json(['message' => 'you already have pending or approved request for update', 'success' => false], 500);
             }
             $newRequest = new RequestForUpdateDetails();
             $newRequest->chef_id = $req->chef_id;

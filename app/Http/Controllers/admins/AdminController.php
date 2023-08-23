@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\admins;
 
 use App\Http\Controllers\Controller;
-use App\Mail\messageFromAdminToChef;
+use App\Mail\MessageFromAdminToChef;
 use App\Models\Admin;
 use App\Models\Adminsetting;
 use App\Models\Allergy;
@@ -13,6 +13,7 @@ use App\Models\Dietary;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
+use App\Models\RequestForUpdateDetails;
 use App\Models\Sitesetting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -868,96 +869,96 @@ class AdminController extends Controller
         }
     }
 
-    public function sendMessageToChef(Request $req)
-    {
-        $validator = Validator::make($req->all(), [
-            "chef_id" => 'required',
-            "subject" => 'required',
-            "message" => 'required',
-        ], [
-            "chef_id.required" => "please fill chef_id",
-            "subject.required" => "please fill subject",
-            "message.required" => "please fill message",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
-        }
-        try {
-            $contact = new Contact();
-            $contact->chef_id = $req->chef_id;
-            $contact->subject = $req->subject;
-            $contact->message = $req->message;
-            $contact->save();
+    // public function sendMessageToChef(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         "chef_id" => 'required',
+    //         "subject" => 'required',
+    //         "message" => 'required',
+    //     ], [
+    //         "chef_id.required" => "please fill chef_id",
+    //         "subject.required" => "please fill subject",
+    //         "message.required" => "please fill message",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" => $validator->errors(), "success" => false], 400);
+    //     }
+    //     try {
+    //         $contact = new Contact();
+    //         $contact->chef_id = $req->chef_id;
+    //         $contact->subject = $req->subject;
+    //         $contact->message = $req->message;
+    //         $contact->save();
 
-            // $data = Chef::where('chef_id', $req->chef_id)->first();
-            // $email = $data->email;
-            // $mobile = $data->mobile;
-            return response()->json(['message' => 'Message Sent Successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
-        }
-    }
+    //         // $data = Chef::where('chef_id', $req->chef_id)->first();
+    //         // $email = $data->email;
+    //         // $mobile = $data->mobile;
+    //         return response()->json(['message' => 'Message Sent Successfully', "success" => true], 200);
+    //     } catch (\Throwable $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+    //     }
+    // }
 
-    public function updateMessageToChef(Request $req)
-    {
-        $validator = Validator::make($req->all(), [
-            "id" => 'required',
-        ], [
-            "id.required" => "please fill id",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
-        }
-        try {
-            $updateData = $req->all();
-            Contact::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
-        }
-    }
+    // public function updateMessageToChef(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         "id" => 'required',
+    //     ], [
+    //         "id.required" => "please fill id",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" => $validator->errors(), "success" => false], 400);
+    //     }
+    //     try {
+    //         $updateData = $req->all();
+    //         Contact::where('id', $req->id)->update($updateData);
+    //         return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+    //     } catch (\Throwable $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+    //     }
+    // }
 
-    public function deleteMessageToChef(Request $req)
-    {
-        $validator = Validator::make($req->all(), [
-            "id" => 'required',
-        ], [
-            "id.required" => "please fill id",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors(), "success" => false], 400);
-        }
-        try {
-            Contact::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
-        }
-    }
+    // public function deleteMessageToChef(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         "id" => 'required',
+    //     ], [
+    //         "id.required" => "please fill id",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" => $validator->errors(), "success" => false], 400);
+    //     }
+    //     try {
+    //         Contact::where('id', $req->id)->delete();
+    //         return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+    //     } catch (\Throwable $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+    //     }
+    // }
 
-    public function getMessageToChef(Request $req)
-    {
-        try {
-            $totalRecords = Contact::count();
-            $skip = $req->page * 10;
-            $data = Contact::skip($skip)->take(10)->get();
-            return response()->json([
-                'data' => $data,
-                'TotalRecords' => $totalRecords,
-                'success' => true
-            ], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
-        }
-    }
+    // public function getMessageToChef(Request $req)
+    // {
+    //     try {
+    //         $totalRecords = Contact::count();
+    //         $skip = $req->page * 10;
+    //         $data = Contact::skip($skip)->take(10)->get();
+    //         return response()->json([
+    //             'data' => $data,
+    //             'TotalRecords' => $totalRecords,
+    //             'success' => true
+    //         ], 200);
+    //     } catch (\Throwable $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+    //     }
+    // }
 
     function getAllUsers(Request $req)
     {
@@ -1034,10 +1035,7 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors(), "success" => false], 400);
         }
         try {
-            if ($req->status == "0" || $req->status == "1") {
-                $updateData['status'] = $req->status;
-            }
-            Contact::where('id', $req->id)->update($updateData);
+            Contact::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -1065,10 +1063,33 @@ class AdminController extends Controller
             Log::info($chefDetail);
             $mail = ['subject' => $req->subject, 'body' => $req->body];
             Mail::to(trim($chefDetail->email))->send(new messageFromAdminToChef($mail));
+            return response()->json(['message' => "Mail has been sent to chef's register email", 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function updateChnageRequestStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            RequestForUpdateDetails::where('id', $req->id)->update(['status' => $req->status]);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
 }

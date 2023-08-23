@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('subject');
             $table->text('message');
-            $table->tinyinteger('status')->default(1)->comment('1- Not Read Yet,0-Read');
+            $table->tinyinteger('status')->default(1)->comment('0 - Not Read Yet, 1 -Read');
             $table->timestamps();
         });
     }
