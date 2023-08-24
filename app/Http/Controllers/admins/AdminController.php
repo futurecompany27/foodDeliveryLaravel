@@ -991,10 +991,10 @@ class AdminController extends Controller
                     $query->where('approved_status', 'pending');
                 }
             ])->with([
-                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-                    'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
-                ])
-            ]);
+                        'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+                            'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                        ])
+                    ]);
 
             $skip = $req->page * 10;
 

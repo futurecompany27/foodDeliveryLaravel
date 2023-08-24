@@ -7,12 +7,7 @@
 <body>
  
  <b>Hi {{ucfirst($full_name)}}</b>
- <p>Your account has been created successfully.</p>
- <p>You may access your account only after the verification of your documents and details.</p> 
-
- <p>Kindly verify your email by clicking on the link below</p>
-
- <a class="btn btn-primary">Email Verification<a>
+ <p>Your Email has been verified successfully by Homeshef.</p> 
 
  <p>Regards,</p>
  <p>Homeshef Team</p>

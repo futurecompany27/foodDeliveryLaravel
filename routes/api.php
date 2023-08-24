@@ -56,6 +56,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/getChefReview', 'getChefReview');
 
     Route::get('/getCountOftheChefAvailableForNext14Days', 'getCountOftheChefAvailableForNext14Days');
+    Route::post('/VerifyUserEmail', 'VerifyUserEmail')->name('VerifyUserEmail');
 });
 
 Route::controller(cartController::class)->group(function () {
@@ -100,6 +101,8 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
     Route::post('/updateChefAvailibilty', 'updateChefAvailibilty');
     Route::post('/getChefAvailibilty', 'getChefAvailibilty');
+
+    Route::post('/VerifyChefEmail', 'VerifyChefEmail')->name('VerifyChefEmail');
 });
 
 // Route for admin

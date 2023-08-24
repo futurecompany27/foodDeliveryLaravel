@@ -4,7 +4,10 @@ namespace App\Http\Controllers\chefs;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\users\UserController;
+use App\Mail\HomeshefChefChangeEmailVerificationLink;
 use App\Mail\HomeshefChefEmailVerification;
+use App\Mail\HomeshefChefEmailVerifiedSuccessfully;
+use App\Mail\HomeshefChefStatusChangeMail;
 use App\Models\Admin;
 use App\Models\Allergy;
 use App\Models\chef;
@@ -24,6 +27,7 @@ use App\Notifications\Chef\ChefContactUsNotification;
 use App\Notifications\Chef\ChefFoodItemNotification;
 use App\Notifications\Chef\ChefScheduleCallNotification;
 use App\Notifications\Chef\ChefStatusUpdateNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -233,6 +237,7 @@ class ChefController extends Controller
             chef::where('id', $req->id)->update(['status' => $req->status]);
             $chefDetail = chef::find($req->id);
             $chefDetail->notify(new ChefStatusUpdateNotification($chefDetail));
+            Mail::to(trim($chefDetail->email))->send(new HomeshefChefStatusChangeMail($chefDetail));
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -259,7 +264,7 @@ class ChefController extends Controller
                 $chefDetails->email_verified_at = null;
                 $chefDetails->status = 0;
                 $chefDetails->save();
-                Mail::to(trim($req->new_email))->send(new HomeshefChefEmailVerification($chefDetails));
+                Mail::to(trim($req->new_email))->send(new HomeshefChefChangeEmailVerificationLink($chefDetails));
                 return response()->json(['message' => "Updated sucessfully", "success" => true], 200);
             } else {
                 return response()->json(["error" => "This email is already registerd with Homeshef", "success" => false], 500);
@@ -1044,6 +1049,23 @@ class ChefController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function VerifyChefEmail(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(["message" => 'please fill all the details', "success" => false], 400);
+        }
+        try {
+            chef::where('id', $req->chef_id)->update(['email_verified_at' => Carbon::now()]);
+            $chefDetails = chef::find($req->chef_id);
+            Mail::to(trim($chefDetails->email))->send(new HomeshefChefEmailVerifiedSuccessfully($chefDetails));
+            return response()->json(['message' => 'Email has been verified successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
         }
     }
 }

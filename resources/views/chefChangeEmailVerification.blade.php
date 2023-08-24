@@ -6,8 +6,9 @@
 </head>
 <body>
  
+ 
  <b>Hi {{ucfirst($full_name)}}</b>
- <p>Your account has been created successfully.</p>
+ <p>Your email address has been updated successfully.</p>
  <p>You may access your account only after the verification of your documents and details.</p> 
 
  <p>Kindly verify your email by clicking on the link below</p>

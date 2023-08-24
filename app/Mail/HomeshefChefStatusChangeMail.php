@@ -9,12 +9,11 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class HomeshefChefEmailVerification extends Mailable
+class HomeshefChefStatusChangeMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $chefDetail;
-
+    public $chefDetail;
     /**
      * Create a new message instance.
      */
@@ -23,13 +22,8 @@ class HomeshefChefEmailVerification extends Mailable
         $this->chefDetail = $chefDetail;
     }
 
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
     public function build()
     {
-        return $this->view('ChefEmailVerification')->with(['id' => $this->chefDetail->id, 'fullname' => (ucfirst($this->chefDetail->first_name) . " " . ucfirst($this->chefDetail->last_name))]);
+        return $this->view('chefChangeStatusMail')->with(['id' => $this->chefDetail->id, 'full_name' => (ucfirst($this->chefDetail->first_name) . " " . ucfirst($this->chefDetail->last_name))]);
     }
 }

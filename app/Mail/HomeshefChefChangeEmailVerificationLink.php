@@ -9,18 +9,17 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class HomeshefChefEmailVerification extends Mailable
+class HomeshefChefChangeEmailVerificationLink extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $chefDetail;
-
+    public $chefDetails;
     /**
      * Create a new message instance.
      */
-    public function __construct($chefDetail)
+    public function __construct($chefDetails)
     {
-        $this->chefDetail = $chefDetail;
+        $this->chefDetails = $chefDetails;
     }
 
     /**
@@ -30,6 +29,6 @@ class HomeshefChefEmailVerification extends Mailable
      */
     public function build()
     {
-        return $this->view('ChefEmailVerification')->with(['id' => $this->chefDetail->id, 'fullname' => (ucfirst($this->chefDetail->first_name) . " " . ucfirst($this->chefDetail->last_name))]);
+        return $this->view('chefChangeEmailVerification')->with(['id' => $this->chefDetails->id, 'fullname' => (ucfirst($this->chefDetails->first_name) . " " . ucfirst($this->chefDetail->last_name))]);
     }
 }
