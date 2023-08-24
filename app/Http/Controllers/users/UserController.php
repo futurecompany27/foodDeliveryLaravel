@@ -4,6 +4,7 @@ namespace App\Http\Controllers\users;
 
 use App\Http\Controllers\Controller;
 use App\Mail\HomeshefUserEmailVerificationMail;
+use App\Models\Admin;
 use App\Models\NoRecordFound;
 use App\Models\PaymentCredentialsCardData;
 use App\Models\PaymentCredentialsPayPalData;
@@ -13,15 +14,21 @@ use App\Models\chef;
 use App\Models\ChefReview;
 use App\Models\Pincode;
 use App\Models\UserContact;
+use App\Notifications\Chef\NewChefReviewNotification;
+use App\Notifications\Chef\NewReviewNotification;
+use App\Notifications\Customer\CustomerContactUsNotification;
+use App\Notifications\Customer\CustomerProfileUpdateNotification;
+use App\Notifications\Customer\CustomerRegisterationNotification;
+use App\Notifications\Customer\CustomerSearchNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
+use Stripe\Customer;
 
 class UserController extends Controller
 {
@@ -46,6 +53,10 @@ class UserController extends Controller
             $user->save();
             $userDetail = User::find($user->id);
             Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new CustomerRegisterationNotification($userDetail));
+            }
             DB::commit();
             return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
         } catch (\Throwable $th) {
@@ -206,11 +217,15 @@ class UserController extends Controller
                 $user->save();
                 $userDetail = User::find($user->id);
                 Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
+                $admins = Admin::all();
+                foreach ($admins as $admin) {
+                    $admin->notify(new CustomerRegisterationNotification($userDetail));
+                }
                 DB::commit();
                 return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
             }
         } catch (\Throwable $th) {
-            Log::info($th);
+            Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
@@ -247,6 +262,11 @@ class UserController extends Controller
                     $newData->email = $req->email;
                     $newData->save();
                 }
+            }
+            $search = NoRecordFound::orderBy('created_at', 'desc')->where(['email' => $newData->email, 'postal_code' => $newData->postal_code])->first();
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new CustomerSearchNotification($search));
             }
             return response()->json(['message' => 'added successfull', 'success' => true], 200);
         } catch (\Throwable $th) {
@@ -402,12 +422,14 @@ class UserController extends Controller
             if ($req->email != $user->email) {
                 $update['email_verified_at'] = Carbon::now();
             }
-            $recordToUpdate = User::where('id', $req->user_id)->update($update);
-            if ($recordToUpdate) {
-                return response()->json(['message' => 'User updated successfully', 'success' => true], 200);
-            } else {
-                return response()->json(['message' => 'User not found', 'success' => false], 404);
+            User::where('id', $req->user_id)->update($update);
+            $customer = User::find($req->user_id);
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new CustomerProfileUpdateNotification($customer));
             }
+            return response()->json(['message' => 'User updated successfully', 'success' => true], 200);
+
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -445,6 +467,13 @@ class UserController extends Controller
             $contact->subject = $req->subject;
             $contact->message = $req->message;
             $contact->save();
+
+            $contactUSDetails = UserContact::orderBy('created_at', 'desc')->where('email', $req->email)->first();
+
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new CustomerContactUsNotification($contactUSDetails));
+            }
             return response()->json(['message' => "Submitted successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -480,7 +509,7 @@ class UserController extends Controller
         try {
             $totalRecords = UserContact::count();
             $skip = $req->page * 10;
-            $items = UserContact::orderBy('created_at','desc')->skip($skip)->take(10)->get();
+            $items = UserContact::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
             return response()->json(['data' => $items, 'TotalRecords' => $totalRecords], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -544,6 +573,15 @@ class UserController extends Controller
                     $review->images = json_encode($imagePaths); //Encode Array into String to store it in database
                 }
                 $review->save();
+            }
+
+            $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
+            $reviewDetails['date'] = Carbon::now();
+            $chef = chef::find($req->chef_id);
+            $chef->notify(new NewChefReviewNotification($reviewDetails));
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new NewReviewNotification($reviewDetails));
             }
 
             $allReview = ChefReview::select('star_rating')->where('chef_id', $req->chef_id)->get();

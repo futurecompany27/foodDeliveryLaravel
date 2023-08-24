@@ -5,6 +5,7 @@ namespace App\Http\Controllers\chefs;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\users\UserController;
 use App\Mail\HomeshefChefEmailVerification;
+use App\Models\Admin;
 use App\Models\Allergy;
 use App\Models\chef;
 use App\Models\ChefAlternativeContact;
@@ -18,12 +19,18 @@ use App\Models\Contact;
 use App\Models\Dietary;
 use App\Models\Ingredient;
 use App\Models\Kitchentype;
+use App\Notifications\admin\RequestQueryNotification;
+use App\Notifications\Chef\ChefContactUsNotification;
+use App\Notifications\Chef\ChefFoodItemNotification;
+use App\Notifications\Chef\ChefScheduleCallNotification;
+use App\Notifications\Chef\ChefStatusUpdateNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Pincode;
+use App\Notifications\Chef\ChefRegisterationNotification;
 use Illuminate\Support\Facades\Validator;
 // use Image; //Intervention Image
 use Intervention\Image\Facades\Image;
@@ -78,6 +85,10 @@ class ChefController extends Controller
             }
 
             Mail::to(trim($req->email))->send(new HomeshefChefEmailVerification($chefDetail));
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new ChefRegisterationNotification($chefDetail));
+            }
 
             DB::commit();
             return response()->json(['message' => 'Register successfully!', "data" => $chefDetail, 'success' => true], 200);
@@ -194,8 +205,8 @@ class ChefController extends Controller
         }
         try {
             $data = chef::whereId($req->chef_id)->with([
-                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-                    'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+                    'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
                 ])
             ])->first();
             return response()->json(["data" => $data, "success" => true], 200);
@@ -219,16 +230,9 @@ class ChefController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            if ($req->status == "0" || $req->status == "1" || $req->status == "2") {
-                $updateData['status'] = $req->status;
-            } else {
-                // Default action when $req->status is not "0", "1", or "2"
-                // For example, set a default value for $updateData['status']:
-                $updateData['status'] = "0";
-            }
-
-            // $updateData = $req->status;
-            chef::where('id', $req->id)->update($updateData);
+            chef::where('id', $req->id)->update(['status' => $req->status]);
+            $chefDetail = chef::find($req->id);
+            $chefDetail->notify(new ChefStatusUpdateNotification($chefDetail));
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -497,6 +501,11 @@ class ChefController extends Controller
             $contact->subject = $req->subject;
             $contact->message = $req->message;
             $contact->save();
+            $contactUs = contact::orderBy('created_at', 'desc')->where('chef_id', $req->chef_id)->with('chef')->first();
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new ChefContactUsNotification($contactUs));
+            }
             return response()->json(['message' => 'Submitted successfully', "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -508,7 +517,7 @@ class ChefController extends Controller
     function chefScheduleAnCall(Request $req)
     {
         if (!$req->chef_id || !$req->date || !$req->slot) {
-            return response()->json(["message" => 'Please fill all the details', 'success' => false]);
+            return response()->json(["message" => 'Please fill all the details', 'success' => false], 400);
         }
         try {
             $slotNotAvailable = ScheduleCall::where(['date' => $req->date, 'slot' => $req->slot])->first();
@@ -517,16 +526,20 @@ class ChefController extends Controller
             }
             $SameChefSameSlot = ScheduleCall::where(['chef_id' => $req->chef_id, 'slot' => $req->slot])->first();
             if ($SameChefSameSlot) {
-                return response()->json(['message' => 'Already booked on same slot', 'success' => false]);
+                return response()->json(['message' => 'Already booked on same slot', 'success' => false], 500);
             }
-            DB::beginTransaction();
             $scheduleNewCall = new ScheduleCall();
             $scheduleNewCall->chef_id = $req->chef_id;
             $scheduleNewCall->date = $req->date;
             $scheduleNewCall->slot = $req->slot;
             $scheduleNewCall->save();
-            DB::commit();
-            return response()->json(["message" => 'Call has been scheduled successfully', 'success' => true]);
+
+            $ScheduleCall = ScheduleCall::orderBy('created_at', 'desc')->where('chef_id', $req->chef_id)->with('chef')->first();
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new ChefScheduleCallNotification($ScheduleCall));
+            }
+            return response()->json(["message" => 'Call has been scheduled successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -540,9 +553,22 @@ class ChefController extends Controller
             if ($req->food_id && $req->chef_id) {
 
                 $foodData = FoodItem::find($req->food_id);
-                Log::info($req->foodAvailibiltyOnWeekdays);
                 $foodData->fill($req->all());
-
+                $foodData['foodAvailibiltyOnWeekdays'] = json_decode($req->foodAvailibiltyOnWeekdays);
+                $foodData['geographicalCuisine'] = json_decode($req->geographicalCuisine);
+                if ($req->otherCuisine) {
+                    $foodData['otherCuisine'] = json_decode($req->otherCuisine);
+                }
+                $foodData['ingredients'] = json_decode($req->ingredients);
+                if ($req->otherIngredients) {
+                    $foodData['otherIngredients'] = json_decode($req->otherIngredients);
+                }
+                if ($req->allergies) {
+                    $foodData['allergies'] = json_decode($req->allergies);
+                }
+                if ($req->dietary) {
+                    $foodData['dietary'] = json_decode($req->dietary);
+                }
                 $OGfilePath = "";
                 $filename_thumb = "";
                 if ($req->hasFile('foodImage')) {
@@ -568,8 +594,13 @@ class ChefController extends Controller
                     $foodData->dishImage = asset($OGfilePath);
                     $foodData->dishImageThumbnail = asset($filename_thumb);
                 }
-
                 $foodData->save();
+                $chefDetail = chef::find($req->chef_id);
+                $chefDetail['flag'] = 2;
+                $admins = Admin::all();
+                foreach ($admins as $admin) {
+                    $admin->notify(new ChefFoodItemNotification($chefDetail));
+                }
                 return response()->json(['message' => 'updated successfully', 'success' => true], 200);
             } else {
                 $validator = Validator::make(
@@ -649,16 +680,16 @@ class ChefController extends Controller
                 $foodItem->regularDishAvailabilty = $req->regularDishAvailabilty;
                 $foodItem->from = $req->from;
                 $foodItem->to = $req->to;
-                $foodItem->foodAvailibiltyOnWeekdays = $req->foodAvailibiltyOnWeekdays;
+                $foodItem->foodAvailibiltyOnWeekdays = json_decode($req->foodAvailibiltyOnWeekdays);
                 $foodItem->orderLimit = $req->orderLimit;
                 $foodItem->foodTypeId = $req->foodTypeId;
                 $foodItem->spicyLevel = $req->spicyLevel;
-                $foodItem->geographicalCuisine = $req->geographicalCuisine;
-                $foodItem->otherCuisine = $req->otherCuisine;
-                $foodItem->ingredients = $req->ingredients;
-                $foodItem->otherIngredients = $req->otherIngredients;
-                $foodItem->allergies = $req->allergies;
-                $foodItem->dietary = $req->dietary;
+                $foodItem->geographicalCuisine = json_decode($req->geographicalCuisine);
+                $foodItem->otherCuisine = json_decode($req->otherCuisine);
+                $foodItem->ingredients = json_decode($req->ingredients);
+                $foodItem->otherIngredients = json_decode($req->otherIngredients);
+                $foodItem->allergies = json_decode($req->allergies);
+                $foodItem->dietary = json_decode($req->dietary);
                 $foodItem->heating_instruction_id = $req->heating_instruction_id;
                 $foodItem->heating_instruction_description = $req->heating_instruction_description;
                 $foodItem->package = $req->package;
@@ -670,6 +701,13 @@ class ChefController extends Controller
                 $foodItem->comments = $req->comments;
                 $foodItem->save();
                 DB::commit();
+                $chefDetail = chef::find($req->chef_id);
+                $chefDetail['flag'] = 1;
+                $chefDetail['food_name'] = $req->dish_name;
+                $admins = Admin::all();
+                foreach ($admins as $admin) {
+                    $admin->notify(new ChefFoodItemNotification($chefDetail));
+                }
                 return response()->json(['message' => "Food Item Added Successfully", "success" => true], 200);
             }
         } catch (\Throwable $th) {
@@ -916,6 +954,13 @@ class ChefController extends Controller
             $newRequest->request_for = $req->request_for;
             $newRequest->message = $req->message;
             $newRequest->save();
+
+            $request_query = RequestForUpdateDetails::orderBy('created_at', 'desc')->where('chef_id', $req->chef_id)->first();
+
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new RequestQueryNotification($request_query));
+            }
             return response()->json(['message' => 'Request Submitted successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

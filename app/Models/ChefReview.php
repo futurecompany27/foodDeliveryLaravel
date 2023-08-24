@@ -13,11 +13,11 @@ class ChefReview extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function chef()
     {
-        return $this->belongsTo(chef::class);
+        return $this->belongsTo(chef::class, 'chef_id', 'id');
     }
 }

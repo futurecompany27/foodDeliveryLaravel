@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\utility;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\Allergy;
 use App\Models\BankName;
 use App\Models\chef;
@@ -17,6 +18,7 @@ use App\Models\ScheduleCall;
 use App\Models\Sitesetting;
 use App\Models\State;
 use App\Models\UserContact;
+use App\Notifications\Customer\NewFeedback;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -196,15 +198,22 @@ class commonFunctions extends Controller
         $imagePath = $req->file('images')->store("feedback_profiles", "public");
 
         try {
-            $feedback = new Feedback();
-            $feedback->images = asset('storage/' . $imagePath);
-            $feedback->are_you_a = $req->are_you_a;
-            $feedback->name = $req->name;
-            $feedback->email = $req->email;
-            $feedback->profession = $req->profession;
-            $feedback->message = $req->message;
-            $feedback->star_rating = $req->star_rating;
-            $feedback->save();
+            $newFeedback = new Feedback();
+            $newFeedback->images = asset('storage/' . $imagePath);
+            $newFeedback->are_you_a = $req->are_you_a;
+            $newFeedback->name = $req->name;
+            $newFeedback->email = $req->email;
+            $newFeedback->profession = $req->profession;
+            $newFeedback->message = $req->message;
+            $newFeedback->star_rating = $req->star_rating;
+            $newFeedback->save();
+
+            $feedback = Feedback::orderBy('created_at', 'desc')->where(['are_you_a' => $req->are_you_a, 'email' => $req->email, 'profession' => $req->profession])->first();
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new NewFeedback($feedback));
+            }
+
             return response()->json(['message' => "Feedback submitted successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
