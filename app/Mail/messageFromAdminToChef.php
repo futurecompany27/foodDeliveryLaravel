@@ -30,9 +30,6 @@ class MessageFromAdminToChef extends Mailable
      */
     public function build()
     {
-        return $this->view('MessageToChef', [
-            'subject' => $this->mail['subject'],
-            'body' => $this->mail['body']
-        ]);
+        return $this->view('MessageToChef', ['subject' => $this->mail['subject'], 'body' => $this->mail['body']]);
     }
 }
