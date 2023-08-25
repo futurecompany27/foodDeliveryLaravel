@@ -29,6 +29,6 @@ class HomeshefChefChangeEmailVerificationLink extends Mailable
      */
     public function build()
     {
-        return $this->view('chefChangeEmailVerification', ['id' => $this->chefDetails->id, 'fullname' => (ucfirst($this->chefDetails->first_name) . " " . ucfirst($this->chefDetail->last_name))]);
+        return $this->view('chefChangeEmailVerification', ['id' => $this->chefDetails->id, 'full_name' => (ucfirst($this->chefDetails->first_name) . " " . ucfirst($this->chefDetails->last_name))]);
     }
 }

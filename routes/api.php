@@ -12,6 +12,7 @@ use App\Http\Controllers\users\cartController;
 use App\Http\Controllers\users\otpController;
 use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
+use App\Http\Controllers\utility\notificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -245,7 +246,10 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::get("/getAllScheduleCall", 'getAllScheduleCall');
 });
 
-
+/////////////// Notification Controller //////////////
+Route::controller(notificationController::class)->group(function () {
+    Route::post('/getUnreadNotificationAccordingToUserTypes', 'getUnreadNotificationAccordingToUserTypes');
+});
 
 ////////////// Routes for stripe ///////////
 Route::post('/makePayment', [StripeController::class, 'makePayment']);

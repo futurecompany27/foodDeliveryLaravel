@@ -22,5 +22,12 @@ class AdminSeeder extends Seeder
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
+        DB::table('admins')->insert([
+            'name' => 'admin',
+            'email' => 'admin1@gmail.com',
+            'password' => Hash::make('password'),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
     }
 }

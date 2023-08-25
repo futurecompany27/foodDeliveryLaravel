@@ -83,7 +83,7 @@ class AdminController extends Controller
             if ($adminDetail) {
                 $adminDetail->makeVisible('password');
                 if (Hash::check($req->password, $adminDetail['password'])) {
-                    return response()->json(["message" => "Logged In successfully", "success" => true], 200);
+                    return response()->json(["message" => "Logged In successfully", 'admin_id' => $adminDetail->id, "success" => true], 200);
                 } else {
                     return response()->json(['message' => 'Invalid Credentials!', 'success' => false], 500);
                 }

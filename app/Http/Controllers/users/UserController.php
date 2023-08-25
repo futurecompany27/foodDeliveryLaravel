@@ -246,29 +246,33 @@ class UserController extends Controller
             }
         }
         try {
+            $admins = Admin::all();
             $newData = new NoRecordFound();
             if ($req->user_id) {
                 $userDetail = User::find($req->user_id);
-                $ifSameData = NoRecordFound::where(['postal_code' => $req->postal_code, 'email' => $userDetail->email])->first();
+                $ifSameData = NoRecordFound::orderBy('created_at', 'desc')->where(['postal_code' => strtolower($req->postal_code), 'email' => $userDetail->email])->first();
                 if (!$ifSameData) {
-                    $newData->postal_code = $req->postal_code;
+                    $newData->postal_code = strtolower($req->postal_code);
                     $newData->full_name = $userDetail->fullname;
                     $newData->email = $userDetail->email;
                     $newData->save();
+                    $search = NoRecordFound::orderBy('created_at', 'desc')->where(['email' => $userDetail->email, 'postal_code' => strtolower($req->postal_code)])->first();
+                    foreach ($admins as $admin) {
+                        $admin->notify(new CustomerSearchNotification($search));
+                    }
                 }
             } else {
-                $ifSameData = NoRecordFound::where(['postal_code' => $req->postal_code, 'email' => $req->email])->first();
+                $ifSameData = NoRecordFound::orderBy('created_at', 'desc')->where(['postal_code' => strtolower($req->postal_code), 'email' => $req->email])->first();
                 if (!$ifSameData) {
-                    $newData->postal_code = $req->postal_code;
+                    $newData->postal_code = strtolower($req->postal_code);
                     $newData->full_name = $req->fullname;
                     $newData->email = $req->email;
                     $newData->save();
+                    $search = NoRecordFound::orderBy('created_at', 'desc')->where(['email' => $req->email, 'postal_code' => strtolower($req->postal_code)])->first();
+                    foreach ($admins as $admin) {
+                        $admin->notify(new CustomerSearchNotification($search));
+                    }
                 }
-            }
-            $search = NoRecordFound::orderBy('created_at', 'desc')->where(['email' => $newData->email, 'postal_code' => $newData->postal_code])->first();
-            $admins = Admin::all();
-            foreach ($admins as $admin) {
-                $admin->notify(new CustomerSearchNotification($search));
             }
             return response()->json(['message' => 'added successfull', 'success' => true], 200);
         } catch (\Throwable $th) {
@@ -585,7 +589,6 @@ class UserController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new NewReviewNotification($reviewDetails));
             }
-
             $allReview = ChefReview::select('star_rating')->where('chef_id', $req->chef_id)->get();
             $totalNoReview = ChefReview::where('chef_id', $req->chef_id)->count();
             $totalStars = 0;

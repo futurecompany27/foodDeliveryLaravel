@@ -24,6 +24,6 @@ class HomeshefChefStatusChangeMail extends Mailable
 
     public function build()
     {
-        return $this->view('chefChangeStatusMail', ['id' => $this->chefDetail->id, 'full_name' => (ucfirst($this->chefDetail->first_name) . " " . ucfirst($this->chefDetail->last_name))]);
+        return $this->view('chefChangeStatusMail', ['id' => $this->chefDetail->id, 'full_name' => (ucfirst($this->chefDetail->first_name) . " " . ucfirst($this->chefDetail->last_name)), 'status'=> $this->chefDetail->status]);
     }
 }

@@ -41,7 +41,7 @@ class CustomerSearchNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            'id' => $this->search->id,
+            // 'id' => $this->search->id,
             'full_name' => $this->search->full_name,
             'postal_code' => $this->search->postal_code,
             'message' => $this->search->email . ' search shef in ' . $this->search->postal_code . ' postal code',
