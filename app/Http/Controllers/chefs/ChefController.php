@@ -350,8 +350,8 @@ class ChefController extends Controller
 
             // store address proof 
             if (isset($req->address_proof) && $req->hasFile('address_proof_path')) {
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->address_proof_path))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->address_proof_path));
+                if (file_exists(str_replace(env('filePath'), '', $chef->address_proof_path))) {
+                    unlink(str_replace(env('filePath'), '', $chef->address_proof_path));
                 }
                 $storedPath = $req->file('address_proof_path')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["address_proof_path" => asset('storage/' . $storedPath), "address_proof" => $req->address_proof, 'status' => 0]);
@@ -359,8 +359,8 @@ class ChefController extends Controller
 
             // store ID proof 1
             if ($req->hasFile('id_proof_path1')) {
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1));
+                if (file_exists(str_replace(env('filePath'), '', $chef->id_proof_path1))) {
+                    unlink(str_replace(env('filePath'), '', $chef->id_proof_path1));
                 }
                 $storedPath = $req->file('id_proof_path1')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["id_proof_path1" => asset('storage/' . $storedPath), 'status' => 0]);
@@ -368,8 +368,8 @@ class ChefController extends Controller
 
             // store ID proof 2
             if ($req->hasFile('id_proof_path2')) {
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->id_proof_path1));
+                if (file_exists(str_replace(env('filePath'), '', $chef->id_proof_path1))) {
+                    unlink(str_replace(env('filePath'), '', $chef->id_proof_path1));
                 }
                 $storedPath = $req->file('id_proof_path2')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["id_proof_path2" => asset('storage/' . $storedPath), 'status' => 0]);
@@ -439,16 +439,16 @@ class ChefController extends Controller
             $chef = chef::find($req->chef_id);
 
             if ($req->hasFile('chef_banner_image')) {
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->chef_banner_image))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->chef_banner_image));
+                if (file_exists(str_replace(env('filePath'), '', $chef->chef_banner_image))) {
+                    unlink(str_replace(env('filePath'), '', $chef->chef_banner_image));
                 }
                 $storedPath = $req->file('chef_banner_image')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["chef_banner_image" => asset('storage/' . $storedPath)]);
             }
 
             if ($req->hasFile('chef_card_image')) {
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->chef_card_image))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->chef_card_image));
+                if (file_exists(str_replace(env('filePath'), '', $chef->chef_card_image))) {
+                    unlink(str_replace(env('filePath'), '', $chef->chef_card_image));
                 }
                 $storedPath = $req->file('chef_card_image')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["chef_card_image" => asset('storage/' . $storedPath)]);
@@ -479,8 +479,8 @@ class ChefController extends Controller
             $path = 'chef/' . $req->chef_id;
             $chef = chef::find($req->chef_id);
             if ($req->hasFile('are_you_a_file_path')) {
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $chef->are_you_a_file_path))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $chef->are_you_a_file_path));
+                if (file_exists(str_replace(env('filePath'), '', $chef->are_you_a_file_path))) {
+                    unlink(str_replace(env('filePath'), '', $chef->are_you_a_file_path));
                 }
                 $storedPath = $req->file('are_you_a_file_path')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["are_you_a_file_path" => asset('storage/' . $storedPath), "are_you_a" => $req->are_you_a, 'status' => 0]);
@@ -579,13 +579,13 @@ class ChefController extends Controller
                 if ($req->hasFile('foodImage')) {
                     $directoryPath = 'storage/foodItem/';
                     $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
-                    if (file_exists(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImage))) {
-                        unlink(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImage));
+                    if (file_exists(str_replace(env('filePath'), '', $foodData->dishImage))) {
+                        unlink(str_replace(env('filePath'), '', $foodData->dishImage));
                         $foodData->dishImage = '';
                     }
 
-                    if (file_exists(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImageThumbnail))) {
-                        unlink(str_replace('http://127.0.0.1:8000/', '', $foodData->dishImageThumbnail));
+                    if (file_exists(str_replace(env('filePath'), '', $foodData->dishImageThumbnail))) {
+                        unlink(str_replace(env('filePath'), '', $foodData->dishImageThumbnail));
                         $foodData->dishImageThumbnail = '';
                     }
 

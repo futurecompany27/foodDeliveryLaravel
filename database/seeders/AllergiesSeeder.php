@@ -14,8 +14,8 @@ class AllergiesSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('allergies')->insert(['allergy_name' => 'Contains gluten', 'small_description' => 'Has gluten, wheat or grain proteins', 'image' => 'http://127.0.0.1:8000/storage/admin/allergen_icons/gluten.svg', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-        DB::table('allergies')->insert(['allergy_name' => 'Contains dairy', 'small_description' => 'Has milk, Ghee,etc', 'image' => 'http://127.0.0.1:8000/storage/admin/allergen_icons/dairy.svg', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-        DB::table('allergies')->insert(['allergy_name' => 'Contains nuts', 'small_description' => 'Has nuts', 'image' => 'http://127.0.0.1:8000/storage/admin/allergen_icons/nuts.svg', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        DB::table('allergies')->insert(['allergy_name' => 'Contains gluten', 'small_description' => 'Has gluten, wheat or grain proteins', 'image' => (env('filePath').'storage/admin/allergen_icons/gluten.svg'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        DB::table('allergies')->insert(['allergy_name' => 'Contains dairy', 'small_description' => 'Has milk, Ghee,etc', 'image' => (env('filePath').'storage/admin/allergen_icons/dairy.svg'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        DB::table('allergies')->insert(['allergy_name' => 'Contains nuts', 'small_description' => 'Has nuts', 'image' => (env('filePath') . 'storage/admin/allergen_icons/nuts.svg'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
     }
 }

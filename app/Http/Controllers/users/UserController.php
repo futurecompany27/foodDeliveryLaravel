@@ -553,9 +553,9 @@ class UserController extends Controller
                 $images = isset($reviewExist->images) ? json_decode($reviewExist->images) : [];
                 foreach ($images as $value) {
                     Log::info($value);
-                    Log::info(str_replace('http://127.0.0.1:8000/', '', $value));
-                    if (file_exists(str_replace('http://127.0.0.1:8000/', '', $value))) {
-                        unlink(str_replace('http://127.0.0.1:8000/', '', $value));
+                    Log::info(str_replace(env('filePath'), '', $value));
+                    if (file_exists(str_replace(env('filePath'), '', $value))) {
+                        unlink(str_replace(env('filePath'), '', $value));
                     }
                 }
 
@@ -620,9 +620,9 @@ class UserController extends Controller
             $images = json_decode($data->images);
 
             foreach ($images as $image) {
-                str_replace('http://127.0.0.1:8000/', '', $image);
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $image))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $image));
+                str_replace(env('filePath'), '', $image);
+                if (file_exists(str_replace(env('filePath'), '', $image))) {
+                    unlink(str_replace(env('filePath'), '', $image));
                 }
             }
             ChefReview::where('id', $req->id)->delete();

@@ -99,9 +99,9 @@ class kitchentypeController extends Controller
             }
             if ($req->hasFile('image')) {
                 $images = $data->image;
-                str_replace('http://127.0.0.1:8000/', '', $images);
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+                str_replace(env('filePath'), '', $images);
+                if (file_exists(str_replace(env('filePath'), '', $images))) {
+                    unlink(str_replace(env('filePath'), '', $images));
                 }
                 if ($req->file('image') && isset($req->image)) {
 
@@ -138,9 +138,9 @@ class kitchentypeController extends Controller
         try {
             $data = Kitchentype::where('id', $req->id)->first();
             $images = $data->image;
-            str_replace('http://127.0.0.1:8000/', '', $images);
-            if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
-                unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+            str_replace(env('filePath'), '', $images);
+            if (file_exists(str_replace(env('filePath'), '', $images))) {
+                unlink(str_replace(env('filePath'), '', $images));
             }
             Kitchentype::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);

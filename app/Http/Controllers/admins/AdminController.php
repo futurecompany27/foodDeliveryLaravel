@@ -385,9 +385,9 @@ class AdminController extends Controller
             }
             if ($req->hasFile('image')) {
                 $images = $data->image;
-                str_replace('http://127.0.0.1:8000/', '', $images);
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+                str_replace(env('filePath'), '', $images);
+                if (file_exists(str_replace(env('filePath'), '', $images))) {
+                    unlink(str_replace(env('filePath'), '', $images));
                 }
                 $file = $req->file('image')->store("admin/food_category/", "public");
                 $filename = asset('storage/' . $file);
@@ -415,9 +415,9 @@ class AdminController extends Controller
         try {
             $data = FoodCategory::where('id', $req->id)->first();
             $images = json_decode($data->image);
-            str_replace('http://127.0.0.1:8000/', '', $images);
-            if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
-                unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+            str_replace(env('filePath'), '', $images);
+            if (file_exists(str_replace(env('filePath'), '', $images))) {
+                unlink(str_replace(env('filePath'), '', $images));
             }
             FoodCategory::where('id', $req->id)->delete();
             return response()->json(['msg' => 'Deleted successfully', "success" => true], 200);
@@ -496,9 +496,9 @@ class AdminController extends Controller
             $updateData = [];
             if ($req->hasFile('image')) {
                 $images = $data->image;
-                str_replace('http://127.0.0.1:8000/', '', $images);
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+                str_replace(env('filePath'), '', $images);
+                if (file_exists(str_replace(env('filePath'), '', $images))) {
+                    unlink(str_replace(env('filePath'), '', $images));
                 }
                 if ($req->file('image') && isset($req->image)) {
 
@@ -541,9 +541,9 @@ class AdminController extends Controller
         try {
             $data = Allergy::where('id', $req->id)->first();
             $images = $data->image;
-            str_replace('http://127.0.0.1:8000/', '', $images);
-            if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
-                unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+            str_replace(env('filePath'), '', $images);
+            if (file_exists(str_replace(env('filePath'), '', $images))) {
+                unlink(str_replace(env('filePath'), '', $images));
             }
             Allergy::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
@@ -622,9 +622,9 @@ class AdminController extends Controller
             $updateData = [];
             if ($req->hasFile('image')) {
                 $images = $data->image;
-                str_replace('http://127.0.0.1:8000/', '', $images);
-                if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
-                    unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+                str_replace(env('filePath'), '', $images);
+                if (file_exists(str_replace(env('filePath'), '', $images))) {
+                    unlink(str_replace(env('filePath'), '', $images));
                 }
                 if ($req->file('image') && isset($req->image)) {
                     $big_image = $req->file('image');
@@ -666,9 +666,9 @@ class AdminController extends Controller
         try {
             $data = Dietary::where('id', $req->id)->first();
             $images = $data->image;
-            str_replace('http://127.0.0.1:8000/', '', $images);
-            if (file_exists(str_replace('http://127.0.0.1:8000/', '', $images))) {
-                unlink(str_replace('http://127.0.0.1:8000/', '', $images));
+            str_replace(env('filePath'), '', $images);
+            if (file_exists(str_replace(env('filePath'), '', $images))) {
+                unlink(str_replace(env('filePath'), '', $images));
             }
             Dietary::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);

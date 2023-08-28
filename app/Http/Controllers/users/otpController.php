@@ -16,18 +16,15 @@ class otpController extends Controller
         try {
             $otp = mt_rand(1000, 9999);
             if ($req->mobile) {
-                // $otp_msg = $otp . "+is+your+one+time+verification+code+for+HomeShef";
-                // $url = "https://platform.clickatell.com/messages/http/send?apiKey=WzKPQFifSAe-c5nFp7SynQ==&to=1" . $req->mobile . "&content=" . $otp_msg;
-                // $response = Http::get($url);
+                $otp_msg = $otp . "+is+your+one+time+verification+code+for+HomeShef";
+                $url = "https://platform.clickatell.com/messages/http/send?apiKey=WzKPQFifSAe-c5nFp7SynQ==&to=1" . $req->mobile . "&content=" . $otp_msg;
+                $response = Http::get($url);
                 Otp::updateOrCreate(
                     ['mobile' => str_replace("-", "", $req->mobile)],
                     ['otp_number' => $otp]
                 );
             } elseif ($req->email) {
-                Otp::updateOrCreate(
-                    ['email' => $req->email],
-                    ['otp_number' => $otp]
-                );
+                Otp::updateOrCreate(['email' => $req->email], ['otp_number' => $otp]);
             }
             return response()->json(['msg' => "Otp has been sent successfully", "otp" => $otp, "success" => true], 200);
         } catch (\Throwable $th) {
