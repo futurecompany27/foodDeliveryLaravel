@@ -13,6 +13,8 @@ use App\Models\ShippingAddresse;
 use App\Models\User;
 use App\Models\chef;
 use App\Models\ChefReview;
+use App\Models\FoodItem;
+use App\Models\FoodItemReview;
 use App\Models\Pincode;
 use App\Models\UserContact;
 use App\Notifications\Chef\NewChefReviewNotification;
@@ -121,7 +123,6 @@ class UserController extends Controller
 
     function getChefsByPostalCode(Request $req)
     {
-        Log::info("//////");
         $validator = Validator::make($req->all(), [
             'postal_code' => "required",
         ]);
@@ -157,8 +158,6 @@ class UserController extends Controller
                             $query->whereIn('allergies', $req->allergies);
                         }
                     });
-
-                    Log::info($skip);
                     $total = $query->count();
                     $data = $query->skip($skip)->limit(12)->get();
                     return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
@@ -539,47 +538,11 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => 'please fill all the details', "success" => false], 400);
         }
-        $imagePaths = [];
-        if ($req->hasFile('images')) {
-            $images = $req->file('images');
-            foreach ($images as $image) {
-                $imagePath = $image->store('chef_reviews/' . $req->chef_id . '/', "public");
-                array_push($imagePaths, asset('storage/' . $imagePath));
-            }
-        }
         try {
-            $reviewExist = ChefReview::where('user_id', $req->user_id)->where('chef_id', $req->chef_id)->first();
-            if ($reviewExist) {
-                $images = isset($reviewExist->images) ? json_decode($reviewExist->images) : [];
-                foreach ($images as $value) {
-                    Log::info($value);
-                    Log::info(str_replace(env('filePath'), '', $value));
-                    if (file_exists(str_replace(env('filePath'), '', $value))) {
-                        unlink(str_replace(env('filePath'), '', $value));
-                    }
-                }
-
-                $update = [
-                    'star_rating' => $req->star_rating,
-                    "message" => $req->message
-                ];
-                if (count($imagePaths) > 0) {
-                    $update['images'] = json_encode($imagePaths);
-                } else {
-                    $update['images'] = json_encode([]);
-                }
-                ChefReview::where('user_id', $req->user_id)->where('chef_id', $req->chef_id)->update($update);
-            } else {
-                $review = new ChefReview();
-                $review->user_id = $req->user_id;
-                $review->chef_id = $req->chef_id;
-                $review->star_rating = $req->star_rating;
-                $review->message = $req->message;
-                if (count($imagePaths) > 0) {
-                    $review->images = json_encode($imagePaths); //Encode Array into String to store it in database
-                }
-                $review->save();
-            }
+            ChefReview::updateOrCreate(
+                ['user_id' => $req->user_id, 'chef_id' => $req->chef_id],
+                ['star_rating' => $req->star_rating, 'message' => $req->message]
+            );
 
             $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
             $reviewDetails['date'] = Carbon::now();
@@ -616,15 +579,6 @@ class UserController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $data = ChefReview::where('id', $req->id)->first();
-            $images = json_decode($data->images);
-
-            foreach ($images as $image) {
-                str_replace(env('filePath'), '', $image);
-                if (file_exists(str_replace(env('filePath'), '', $image))) {
-                    unlink(str_replace(env('filePath'), '', $image));
-                }
-            }
             ChefReview::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
         } catch (\Throwable $th) {
@@ -648,13 +602,11 @@ class UserController extends Controller
             $totalRecords = ChefReview::where('chef_id', $req->chef_id)->count();
             $skip = $req->page * 10;
             $data = ChefReview::where('chef_id', $req->chef_id)->skip($skip)->take(10)->with('user:fullname,id')->get();
-            foreach ($data as $value) {
-                $value->images = json_decode($value->images);
-            }
             return response()->json([
                 'data' => $data,
                 'TotalRecords' => $totalRecords,
-            ]);
+                'success' => true
+            ], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -717,6 +669,127 @@ class UserController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+        }
+    }
+
+    function addOrUpdateFoodReview(Request $req)
+    {
+        try {
+            $validator = Validator::make(
+                $req->all(),
+                [
+                    "user_id" => 'required',
+                    "food_id" => 'required',
+                    "rating" => "required|integer|min:1|max:5",
+                    "review" => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                return response()->json(["message" => 'please fill all the details', "success" => false], 400);
+            }
+
+            $imagePaths = [];
+            if ($req->hasFile('images')) {
+                $images = $req->file('images');
+                foreach ($images as $image) {
+                    $imagePath = $image->store('food_reviews/' . $req->chef_id . '/', "public");
+                    array_push($imagePaths, asset('storage/' . $imagePath));
+                }
+            }
+            $reviewExist = FoodItemReview::where(['user_id' => $req->user_id, 'food_id' => $req->food_id])->first();
+            if ($reviewExist) {
+
+                foreach ($reviewExist as $image) {
+                    if (file_exists(str_replace(env('filePath'), '', $image))) {
+                        unlink(str_replace(env('filePath'), '', $image));
+                    }
+                }
+
+                FoodItemReview::where(['user_id' => $req->user_id, 'food_id' => $req->food_id])->update(
+                    [
+                        'user_id' => $req->user_id,
+                        'food_id' => $req->food_id,
+                        'rating' => $req->rating,
+                        'review' => $req->review,
+                        'reviewImages' => $imagePaths,
+                    ]
+                );
+            } else {
+                $review = new FoodItemReview();
+                $review->user_id = $req->user_id;
+                $review->food_id = $req->food_id;
+                $review->rating = $req->rating;
+                $review->review = $req->review;
+                $review->reviewImages = $imagePaths;
+                $review->save();
+            }
+
+
+            $allReview = FoodItemReview::select('rating')->where('food_id', $req->food_id)->get();
+            $totalNoReview = FoodItemReview::where('food_id', $req->food_id)->count();
+            $totalStars = 0;
+            foreach ($allReview as $value) {
+                $totalStars = $totalStars + $value['rating'];
+            }
+            $rating = $totalStars / $totalNoReview;
+            FoodItem::where('id', $req->food_id)->update(['rating' => $rating]);
+
+            if ($reviewExist) {
+                return response()->json(['message' => 'Review updated successfully', 'success' => true], 200);
+            } else {
+                return response()->json(['message' => 'Added successfully', 'success' => true], 200);
+            }
+
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+        }
+    }
+
+    function getAllFoodReview(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "food_id" => 'required',
+        ], [
+            "food_id.required" => "please fill chef_id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $totalRecords = FoodItemReview::where('chef_id', $req->chef_id)->count();
+            $skip = $req->page * 10;
+            $data = FoodItemReview::where('food_id', $req->food_id)->skip($skip)->take(10)->with('user:fullname,id')->get();
+            return response()->json([
+                'data' => $data,
+                'TotalRecords' => $totalRecords,
+                'success' => true
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+        }
+    }
+
+    function deleteFoodReview(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            FoodItemReview::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
         }
     }
 }

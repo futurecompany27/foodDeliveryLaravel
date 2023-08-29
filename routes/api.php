@@ -51,6 +51,7 @@ Route::controller(UserController::class)->group(function () {
 
     Route::post('/addUserContacts', 'addUserContacts');
     Route::post('/updateContactStatus', 'updateContactStatus');
+
     Route::post('/ChefReview', 'ChefReview');
     Route::post('/deleteChefReview', 'deleteChefReview');
     Route::get('/getUserContact', 'getUserContact');
@@ -58,6 +59,11 @@ Route::controller(UserController::class)->group(function () {
 
     Route::get('/getCountOftheChefAvailableForNext14Days', 'getCountOftheChefAvailableForNext14Days');
     Route::post('/VerifyUserEmail', 'VerifyUserEmail');
+
+    Route::post('/addOrUpdateFoodReview', 'addOrUpdateFoodReview');
+    Route::post('/getAllFoodReview', 'getAllFoodReview');
+    Route::post('/deleteFoodReview', 'deleteFoodReview');
+
 });
 
 Route::controller(cartController::class)->group(function () {

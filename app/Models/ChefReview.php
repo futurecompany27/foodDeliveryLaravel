@@ -9,7 +9,7 @@ class ChefReview extends Model
 {
     use HasFactory;
     protected $table = "chef_reviews";
-    protected $fillable = ['id', 'full_name', 'images', 'chef_id', 'star_rating', 'message'];
+    protected $fillable = ['id', 'full_name', 'chef_id', 'star_rating', 'message'];
 
     public function user()
     {
