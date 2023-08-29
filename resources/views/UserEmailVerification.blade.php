@@ -12,7 +12,7 @@
 
  <p>Kindly verify your email by clicking on the link below</p>
 
- <a class="btn btn-primary">Email Verification<a>
+ <a class="btn btn-primary" href="{{ env('domain') . 'verified-mail?id=' . $id . '&type=user' }}">Email Verification<a>
 
  <p>Regards,</p>
  <p>Homeshef Team</p>

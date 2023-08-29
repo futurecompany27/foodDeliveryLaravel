@@ -700,14 +700,19 @@ class UserController extends Controller
 
     function VerifyUserEmail(Request $req)
     {
-        if (!$req->user_id) {
+        if (!$req->id) {
             return response()->json(["message" => 'please fill all the details', "success" => false], 400);
         }
         try {
-            User::where('id', $req->user_id)->update(['email_verified_at' => Carbon::now()]);
-            $userDetails = User::find($req->user_id);
-            Mail::to(trim($userDetails->email))->send(new HomeshefCustomerEmailVerifiedSuccessfully($userDetails));
-            return response()->json(['message' => 'Email has been verified successfully', 'success' => true], 200);
+            $checkVerification = User::find($req->id);
+            if ($checkVerification->email_verified_at) {
+                return response()->json(['message' => 'Email has been already verified successfully', 'status' => 1, 'success' => true], 200);
+            } else {
+                User::where('id', $req->id)->update(['email_verified_at' => Carbon::now()]);
+                $userDetails = User::find($req->id);
+                Mail::to(trim($userDetails->email))->send(new HomeshefCustomerEmailVerifiedSuccessfully($userDetails));
+                return response()->json(['message' => 'Email has been verified successfully', 'success' => true], 200);
+            }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
