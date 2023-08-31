@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\HomeshefCustomerEmailVerifiedSuccessfully;
 use App\Mail\HomeshefUserEmailVerificationMail;
 use App\Models\Admin;
+use App\Models\Kitchentype;
 use App\Models\NoRecordFound;
 use App\Models\PaymentCredentialsCardData;
 use App\Models\PaymentCredentialsPayPalData;
@@ -95,7 +96,7 @@ class UserController extends Controller
         }
     }
 
-    public function updateUserDetailStatus(Request $req)
+    function updateUserDetailStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -183,6 +184,38 @@ class UserController extends Controller
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
+    }
+
+    function getChefsByPostalCodeAndCuisineTypes(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'postal_code' => "required",
+            'kitchen_type_id' => "required",
+            'todaysWeekDay' => "required",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->all(), 'success' => false], 400);
+        }
+        try {
+            $cuisine = Kitchentype::find($req->kitchen_type_id);
+            $query = chef::where('postal_code', strtolower($req->postal_code))->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->whereJsonContains('kitchen_types', $cuisine->kitchentype)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
+                $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+            });
+            if ($req->refresh) {
+                $skip = ($req->page + 1) * 12;
+                $data = $query->limit($skip)->get();
+            } else {
+                $skip = $req->page * 12;
+                $data = $query->skip($skip)->limit(12)->get();
+            }
+            $total = $query->count();
+            return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+        }
+
     }
 
     function getChefDetails(Request $req)
@@ -616,38 +649,44 @@ class UserController extends Controller
 
     function getCountOftheChefAvailableForNext14Days(Request $req)
     {
-        $dateList = [];
+        try {
+            $dateList = [];
 
-        for ($i = 1; $i <= 14; $i++) {
-            $date = now()->addDays($i);
-            $dayName = $date->shortDayName;
+            for ($i = 1; $i <= 14; $i++) {
+                $date = now()->addDays($i);
+                $dayName = $date->shortDayName;
 
-            if ($dayName == 'Sun') {
-                $weekdayShort = 'Su';
-            } elseif ($dayName == 'Thu') {
-                $weekdayShort = 'Th';
-            } else {
-                $weekdayShort = substr($dayName, 0, 1);
+                if ($dayName == 'Sun') {
+                    $weekdayShort = 'Su';
+                } elseif ($dayName == 'Thu') {
+                    $weekdayShort = 'Th';
+                } else {
+                    $weekdayShort = substr($dayName, 0, 1);
+                }
+
+                $dateList[] = [
+                    'weekday' => $dayName,
+                    'weekdayShort' => $weekdayShort,
+                    'formatted_date' => $date->format('M d'),
+                    'iso_date' => $date->toDateString(),
+                ];
             }
 
-            $dateList[] = [
-                'weekday' => $dayName,
-                'weekdayShort' => $weekdayShort,
-                'formatted_date' => $date->format('M d'),
-                'iso_date' => $date->toDateString(),
-            ];
-        }
+            // getting counts of the available shefs for next 14 days
+            foreach ($dateList as &$val) {
+                $query = chef::where('postal_code', strtolower($req->postal_code));
+                $query->where('chefAvailibilityStatus', 1)->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->whereHas('foodItems', function ($query) use ($val) {
+                    $query->whereJsonContains('foodAvailibiltyOnWeekdays', $val['weekdayShort']);
+                });
+                $val['total'] = $query->count();
+            }
 
-        // getting counts of the available shefs for next 14 days
-        foreach ($dateList as &$val) {
-            $query = chef::where('postal_code', strtolower($req->postal_code));
-            $query->where('chefAvailibilityStatus', 1)->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->whereHas('foodItems', function ($query) use ($val) {
-                $query->whereJsonContains('foodAvailibiltyOnWeekdays', $val['weekdayShort']);
-            });
-            $val['total'] = $query->count();
+            return response()->json(['data' => $dateList, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
         }
-
-        return response()->json(['data' => $dateList, 'success' => true], 200);
     }
 
     function VerifyUserEmail(Request $req)

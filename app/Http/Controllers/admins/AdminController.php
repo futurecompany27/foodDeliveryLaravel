@@ -97,75 +97,6 @@ class AdminController extends Controller
         }
     }
 
-    public function addSiteSettings(Request $req)
-    {
-        $validator = Validator::make($req->all(), [
-            "phone_one" => 'required',
-            "phone_two" => 'required',
-            'email' => 'required|email',
-            'company_name' => 'required',
-            "company_address" => 'required',
-            "copyright" => 'required',
-            "facebook" => 'required',
-            "facebookIcon" => 'required',
-            "instagram" => 'required',
-            "instagramIcon" => 'required',
-            "twitter" => 'required',
-            "twitterIcon" => 'required',
-            "youtube" => 'required',
-            "youtubeIcon" => 'required',
-        ], [
-            "phone_one.required" => "please fill phone_one",
-            "phone_two.required" => "please fill phone_two",
-            "email.required" => "please fill email",
-            "company_name.required" => "please fill company_name",
-            "company_address.required" => "please fill company_address",
-            "copyright.required" => "please fill copyright",
-            "facebook.required" => "please fill facebook",
-            "facebookIcon.required" => "please fill facebookIcon",
-            "instagram.required" => "please fill instagram",
-            "instagramIcon.required" => "please fill instagramIcon",
-            "twitter.required" => "please fill twitter",
-            "twitterIcon.required" => "please fill twitterIcon",
-            "youtube.required" => "please fill youtube",
-            "youtubeIcon.required" => "please fill youtubeIcon",
-            "created_by_company_link.required" => "please fill created_by_company_link",
-            "created_by_company.required" => "please fill created_by_company",
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
-        }
-        try {
-            DB::beginTransaction();
-
-            $siteSetting = new Sitesetting();
-            $siteSetting->phone_one = $req->phone_one;
-            $siteSetting->phone_two = $req->phone_two;
-            $siteSetting->email = $req->email;
-            $siteSetting->company_name = $req->company_name;
-            $siteSetting->company_address = $req->company_address;
-            $siteSetting->copyright = $req->copyright;
-            $siteSetting->facebook = $req->facebook;
-            $siteSetting->facebookIcon = $req->facebookIcon;
-            $siteSetting->instagram = $req->instagram;
-            $siteSetting->instagramIcon = $req->instagramIcon;
-            $siteSetting->twitter = $req->twitter;
-            $siteSetting->twitterIcon = $req->twitterIcon;
-            $siteSetting->youtube = $req->youtube;
-            $siteSetting->youtubeIcon = $req->youtubeIcon;
-            $siteSetting->created_by_company_link = $req->created_by_company_link;
-            $siteSetting->created_by_company = $req->created_by_company;
-            $siteSetting->save();
-            DB::commit();
-            return response()->json(["message" => "Submitted successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
-        }
-    }
-
     public function updateSiteSettings(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -179,10 +110,27 @@ class AdminController extends Controller
         }
         try {
             $data = Sitesetting::where('id', $req->id)->first();
-            $updateData = $req->all();
-
-            Sitesetting::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            if ($data) {
+                $updateData = $req->all();
+                Sitesetting::where('id', $req->id)->update($updateData);
+                return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            } else {
+                $siteSeting = new Sitesetting();
+                $siteSeting->phone_one = $req->phone_one;
+                $siteSeting->phone_two = $req->phone_two;
+                $siteSeting->email = $req->email;
+                $siteSeting->company_name = $req->company_name;
+                $siteSeting->company_address = $req->company_address;
+                $siteSeting->copyright = $req->copyright;
+                $siteSeting->facebook = $req->facebook;
+                $siteSeting->instagram = $req->instagram;
+                $siteSeting->twitter = $req->twitter;
+                $siteSeting->youtube = $req->youtube;
+                $siteSeting->created_by_company_link = $req->created_by_company_link;
+                $siteSeting->created_by_company = $req->created_by_company;
+                $siteSeting->save();
+                return response()->json(['message' => "Added Successfully", "success" => true], 200);
+            }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

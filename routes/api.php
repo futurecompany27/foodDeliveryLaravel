@@ -40,6 +40,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/updateUserDetailStatus', 'updateUserDetailStatus');
 
     Route::post('/getChefsByPostalCode', 'getChefsByPostalCode');
+    Route::post('/getChefsByPostalCodeAndCuisineTypes', 'getChefsByPostalCodeAndCuisineTypes');
     Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/googleSigin', 'googleSigin');
     Route::post('/recordNotFoundSubmit', 'recordNotFoundSubmit');
@@ -71,6 +72,7 @@ Route::controller(cartController::class)->group(function () {
     Route::post('/getMyCart', 'getMyCart');
     Route::post('/changeQuantity', 'changeQuantity');
     Route::post('/removeItemFromCart', 'removeItemFromCart');
+    Route::post('/getnext14DaysOfAvailibiltyForChefsAndFoodInCart', 'getnext14DaysOfAvailibiltyForChefsAndFoodInCart');
 });
 
 Route::controller(otpController::class)->group(function () {
@@ -107,18 +109,15 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/getApprovedUpdaterequest', 'getApprovedUpdaterequest');
     Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
     Route::post('/updateChefAvailibilty', 'updateChefAvailibilty');
-    Route::post('/getChefAvailibilty', 'getChefAvailibilty');
 
     Route::post('/VerifyChefEmail', 'VerifyChefEmail');
 });
 
 // Route for admin
-
 Route::controller(AdminController::class)->group(function () {
     Route::post('/adminRegistration', 'adminRegistration');
     Route::post('/adminLogin', 'adminLogin');
 
-    Route::post('/addSiteSettings', 'addSiteSettings');
     Route::post('/updateSiteSettings', 'updateSiteSettings');
     Route::post('/deleteSiteSettings', 'deleteSiteSettings');
     Route::get('/getSiteSettings', 'getSiteSettings');

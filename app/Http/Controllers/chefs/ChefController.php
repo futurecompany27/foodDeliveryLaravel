@@ -1037,21 +1037,6 @@ class ChefController extends Controller
         }
     }
 
-    function getChefAvailibilty(Request $req)
-    {
-        if (!$req->chef_id) {
-            return response()->json(["message" => 'please fill all required fields', "success" => false], 400);
-        }
-        try {
-            $data = chef::select('chefAvailibilityWeek', 'chefAvailibilityFromTime', 'chefAvailibilityToTime', 'chefAvailibilityStatus')->find($req->chef_id);
-            return response()->json(['data' => $data, 'success' => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
-        }
-    }
-
     function VerifyChefEmail(Request $req)
     {
         if (!$req->id) {
@@ -1061,7 +1046,7 @@ class ChefController extends Controller
             $checkVerification = chef::find($req->id);
             if ($checkVerification->email_verified_at) {
                 return response()->json(['message' => 'Email has been already verified successfully', 'status' => 1, 'success' => true], 200);
-            }else{
+            } else {
                 chef::where('id', $req->id)->update(['email_verified_at' => Carbon::now()]);
                 $chefDetails = chef::find($req->id);
                 Mail::to(trim($chefDetails->email))->send(new HomeshefChefEmailVerifiedSuccessfully($chefDetails));
