@@ -9,7 +9,10 @@ class UserFoodReview extends Model
 {
     use HasFactory;
     protected $table = "user_food_reviews";
-    protected $fillable = ['id', 'foodimage', 'chef_id', 'user_id',  'food_id', 'star_rating', 'message', 'status'];
+    protected $fillable = ['id', 'foodimage', 'chef_id', 'user_id', 'food_id', 'star_rating', 'message', 'status'];
+    protected $casts = [
+        'foodimage' => 'array'
+    ];
 
     public function chef()
     {

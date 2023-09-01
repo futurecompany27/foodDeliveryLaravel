@@ -67,7 +67,8 @@ class UserController extends Controller
             DB::commit();
             return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
         } catch (\Throwable $th) {
-            Log::info($th->getMessage());;
+            Log::info($th->getMessage());
+            ;
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
@@ -855,15 +856,15 @@ class UserController extends Controller
         if (!File::exists("storage/user/food_reviews/")) {
             File::makeDirectory("storage/user/food_reviews/", $mode = 0777, true, true);
         }
-        $images = $req->file('foodimage');
-        $imagePaths = [];          // Used Array to store multiple image paths
-        foreach ($images as $image) {
-            $imagePath = $image->store("user/food_reviews/", "public");
-            array_push($imagePaths, asset('storage/' . $imagePath));
-        }
         try {
             $userfoodreview = new UserFoodReview();
-            $userfoodreview->foodimage = json_encode($imagePaths);
+            $images = $req->file('foodimage');
+            $imagePaths = []; // Used Array to store multiple image paths
+            foreach ($images as $image) {
+                $imagePath = $image->store("user/food_reviews/", "public");
+                array_push($imagePaths, asset('storage/' . $imagePath));
+            }
+            $userfoodreview->foodimage = $imagePaths;
             $userfoodreview->chef_id = $req->chef_id;
             $userfoodreview->user_id = $req->user_id;
             $userfoodreview->food_id = $req->food_id;
@@ -891,11 +892,7 @@ class UserController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            if ($req->status == "0" || $req->status == "1") {
-                $updateData['status'] = $req->status;
-            }
-            // $updateData = $req->status;
-            UserFoodReview::where('id', $req->id)->update($updateData);
+            UserFoodReview::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
