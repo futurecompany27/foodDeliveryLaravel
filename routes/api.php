@@ -58,7 +58,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/getUserContact', 'getUserContact');
     Route::post('/getChefReview', 'getChefReview');
 
-    Route::get('/getCountOftheChefAvailableForNext14Days', 'getCountOftheChefAvailableForNext14Days');
+    Route::post('/getCountOftheChefAvailableForNext30Days', 'getCountOftheChefAvailableForNext30Days');
     Route::post('/VerifyUserEmail', 'VerifyUserEmail');
 
     Route::post('/addOrUpdateFoodReview', 'addOrUpdateFoodReview');

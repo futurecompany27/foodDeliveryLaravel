@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\HomeshefCustomerEmailVerifiedSuccessfully;
 use App\Mail\HomeshefUserEmailVerificationMail;
 use App\Models\Admin;
+use App\Models\Cart;
 use App\Models\Kitchentype;
 use App\Models\NoRecordFound;
 use App\Models\PaymentCredentialsCardData;
@@ -649,12 +650,20 @@ class UserController extends Controller
         }
     }
 
-    function getCountOftheChefAvailableForNext14Days(Request $req)
+    function getCountOftheChefAvailableForNext30Days(Request $req)
     {
+        $validator = Validator::make($req->all(), [
+            "postal_code" => 'required',
+        ], [
+            "postal_code.required" => "please fill postal_code",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
         try {
             $dateList = [];
 
-            for ($i = 1; $i <= 14; $i++) {
+            for ($i = 1; $i <= 30; $i++) {
                 $date = now()->addDays($i);
                 $dayName = $date->shortDayName;
 
@@ -667,11 +676,27 @@ class UserController extends Controller
                 }
 
                 $dateList[] = [
+                    // Full weekday name
+                    'dayName' => $date->englishDayOfWeek,
+                    // Full month name
+                    'monthName' => $date->englishMonth,
+                    // Day number
+                    'dayNumber' => $date->day,
+
                     'weekday' => $dayName,
                     'weekdayShort' => $weekdayShort,
                     'formatted_date' => $date->format('M d'),
                     'iso_date' => $date->toDateString(),
                 ];
+            }
+
+            $myCart = [];
+            if ($req->user_id) {
+                $data = Cart::where('user_id', $req->user_id)->first();
+                $myCart = isset($data) ? $data->cartData : [];
+            }
+            if ($req->cartData) {
+                $myCart = $req->cartData;
             }
 
             // getting counts of the available shefs for next 14 days
@@ -681,6 +706,37 @@ class UserController extends Controller
                     $query->whereJsonContains('foodAvailibiltyOnWeekdays', $val['weekdayShort']);
                 });
                 $val['total'] = $query->count();
+
+                if ($val['total'] > 0 && count($myCart) > 0) {
+                    $val['message'] = '';
+                    $ChefNotCount = 0;
+                    $FoodNotCount = 0;
+
+                    foreach ($myCart as &$chefData) {
+                        $chef = chef::where(['id' => $chefData['chef_id'], 'status' => 0])->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->first();
+                        Log::info($chef);
+                        if (!$chef) {
+                            $ChefNotCount = $ChefNotCount + 1;
+                            $FoodNotCount = $FoodNotCount + count($chefData['foodItems']);
+                        }
+
+                        if ($chef) {
+                            foreach ($chefData['foodItems'] as $value) {
+                                $food = FoodItem::where('id', $value['food_id'])->whereJsonContains('foodAvailibiltyOnWeekdays', $val['weekdayShort'])->first();
+                                if (!$food) {
+                                    $FoodNotCount = $FoodNotCount + 1;
+                                }
+                            }
+                        }
+                    }
+                    if ($ChefNotCount > 0) {
+                        $val['message'] = ($ChefNotCount . ' chef and ' . $FoodNotCount . ' item unavailable.');
+                    } elseif ($ChefNotCount == 0 && $FoodNotCount == 0) {
+                        $val['message'] = 'All items are available';
+                    } elseif ($FoodNotCount > 0) {
+                        $val['message'] = ($FoodNotCount . ' items are available');
+                    }
+                }
             }
 
             return response()->json(['data' => $dateList, 'success' => true], 200);
