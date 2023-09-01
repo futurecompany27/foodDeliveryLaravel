@@ -17,11 +17,13 @@ use App\Models\ChefProfileReviewByAdmin;
 use App\Models\FoodItem;
 use App\Models\RequestForUpdateDetails;
 use App\Models\ScheduleCall;
+use App\Models\ShefRegisterationRequest;
 use App\Models\User;
 use App\Models\Contact;
 use App\Models\Dietary;
 use App\Models\Ingredient;
 use App\Models\Kitchentype;
+use App\Notifications\admin\ChefRegisterationRequest;
 use App\Notifications\admin\RequestQueryNotification;
 use App\Notifications\Chef\ChefContactUsNotification;
 use App\Notifications\Chef\ChefFoodItemNotification;
@@ -46,10 +48,10 @@ class ChefController extends Controller
     {
         try {
             DB::beginTransaction();
-            // $checkPinCode = Pincode::where('pincode', str_replace(" ", "", strtolower($req->pincode)))->first();
-            // if (!$checkPinCode) {
-            //     return response()->json([message => 'we are not offering our services in this region', 'success' => false], 400);
-            // }
+            $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtolower($req->pincode)), 'status' => 1])->first();
+            if (!$checkPinCode) {
+                return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 200);
+            }
 
             $chefExist = chef::where("email", $req->email)->first();
             if ($chefExist) {
@@ -89,7 +91,7 @@ class ChefController extends Controller
             }
 
             Mail::to(trim($req->email))->send(new HomeshefChefEmailVerification($chefDetail));
-            $admins = Admin::all();
+            $admins = Admin::all(['*']);
             foreach ($admins as $admin) {
                 $admin->notify(new ChefRegisterationNotification($chefDetail));
             }
@@ -221,7 +223,7 @@ class ChefController extends Controller
         }
     }
 
-    public function updateChefDetailsStatus(Request $req)
+    function updateChefDetailsStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -1056,6 +1058,59 @@ class ChefController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+        }
+    }
+
+    function chefRegisterationRequest(Request $req)
+    {
+        try {
+            $chefRequestExist = ShefRegisterationRequest::where("email", $req->email)->first();
+            if ($chefRequestExist) {
+                return response()->json(['message' => "This email has already rerquest for register please use another email!", "success" => false], 400);
+            }
+            $chefRequestExist = ShefRegisterationRequest::where('mobile', str_replace("-", "", $req->mobile))->first();
+            if ($chefRequestExist) {
+                return response()->json(['message' => "This mobileno has already rerquest for register please use another mobileno!", "success" => false], 400);
+            }
+            $chef = new ShefRegisterationRequest();
+            $chef->first_name = ucfirst($req->first_name);
+            $chef->last_name = ucfirst($req->last_name);
+            $chef->date_of_birth = $req->date_of_birth;
+            $chef->mobile = str_replace("-", "", $req->mobile);
+            $chef->email = $req->email;
+            $chef->address_line = $req->address_line;
+            $chef->latitude = $req->latitude;
+            $chef->longitude = $req->longitude;
+            $chef->longitude = $req->longitude;
+            $chef->state = $req->state;
+            $chef->city = $req->city;
+            $chef->kitchen_types = $req->kitchen_types;
+            $chef->postal_code = str_replace(" ", "", ($req->postal_code));
+            $chef->save();
+            $chefDetail = ShefRegisterationRequest::find($chef->id);
+            $admins = Admin::all(['*']);
+            foreach ($admins as $admin) {
+                $admin->notify(new ChefRegisterationRequest($chefDetail));
+            }
+            return response()->json(['message' => 'Requested successfully!', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function getChefRegisterationRequest(Request $req)
+    {
+        try {
+            $totalRecords = ShefRegisterationRequest::count();
+            $skip = $req->page * 10;
+            $data = ShefRegisterationRequest::skip($skip)->take(10)->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again after sometime !', 'success' => false], 500);
         }
     }
 }

@@ -28,7 +28,7 @@ class otpController extends Controller
             }
             return response()->json(['msg' => "Otp has been sent successfully", "otp" => $otp, "success" => true], 200);
         } catch (\Throwable $th) {
-            Log::info($th);
+            Log::info($th->getMessage());;
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
@@ -52,7 +52,7 @@ class otpController extends Controller
                 return response()->json(['msg' => "Invalid OTP", "success" => false], 500);
             }
         } catch (\Throwable $th) {
-            Log::info($th);
+            Log::info($th->getMessage());;
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }

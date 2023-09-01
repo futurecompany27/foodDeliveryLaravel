@@ -85,6 +85,9 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/ChefRegisteration', 'ChefRegisteration');
     Route::post('/ChefLogin', 'ChefLogin');
 
+    Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
+    Route::post('/getChefRegisterationRequest', 'getChefRegisterationRequest');
+
     Route::post('/EditPersonalInfo', 'EditPersonalInfo');
     Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/updateChefPrimaryEmail', 'updateChefPrimaryEmail');

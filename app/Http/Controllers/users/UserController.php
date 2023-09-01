@@ -65,7 +65,7 @@ class UserController extends Controller
             DB::commit();
             return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
         } catch (\Throwable $th) {
-            Log::info($th);
+            Log::info($th->getMessage());;
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
@@ -194,7 +194,7 @@ class UserController extends Controller
             'todaysWeekDay' => "required",
         ]);
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()->all(), 'success' => false], 400);
+            return response()->json(['message' => $validator->errors()->first(), 'success' => false], 400);
         }
         try {
             $cuisine = Kitchentype::find($req->kitchen_type_id);
