@@ -42,4 +42,14 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function UserChefReview()
+    {
+        return $this->hasMany(UserChefReview::class);
+    }
+
+    public function UserFoodReview()
+    {
+        return $this->hasMany(UserFoodReview::class);
+    }
 }

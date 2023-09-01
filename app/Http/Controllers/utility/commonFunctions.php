@@ -294,4 +294,18 @@ class commonFunctions extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
+
+    public function getAllChefs(Request $req)
+    {
+        try {
+            $totalRecords = chef::count();
+            $skip = $req->page * 10;
+            $data = chef::skip($skip)->take(10)->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
 }

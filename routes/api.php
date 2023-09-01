@@ -65,6 +65,16 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/getAllFoodReview', 'getAllFoodReview');
     Route::post('/deleteFoodReview', 'deleteFoodReview');
 
+    Route::post('/addUserFoodReview', 'addUserFoodReview');
+    Route::get('/getAllUserFoodReviews', 'getAllUserFoodReviews');
+    Route::post('/updateUserFoodReviewStatus', 'updateUserFoodReviewStatus');
+    Route::post('/deleteUserFoodReview', 'deleteUserFoodReview');
+    Route::post('/getAllUserFoodReviewsbyStatus', 'getAllUserFoodReviewsbyStatus');
+
+    Route::post('/addUserChefReview', 'addUserChefReview');
+    Route::post('/updateUserChefReviewStatus', 'updateUserChefReviewStatus');
+    Route::post('/deleteUserChefReview', 'deleteUserChefReview');
+    Route::post('/getAllUserChefReviewsbyStatus', 'getAllUserChefReviewsbyStatus');
 });
 
 Route::controller(cartController::class)->group(function () {
@@ -252,6 +262,7 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::post("/updateSiteFeedbackStatus", 'updateSiteFeedbackStatus');
     Route::post("/updateScheduleCallStatus", 'updateScheduleCallStatus');
     Route::get("/getAllScheduleCall", 'getAllScheduleCall');
+    Route::get("/getAllChefs", 'getAllChefs');
 });
 
 /////////////// Notification Controller //////////////
