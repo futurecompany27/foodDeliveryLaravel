@@ -813,26 +813,6 @@ class UserController extends Controller
         }
     }
 
-    function deleteFoodReview(Request $req)
-    {
-        $validator = Validator::make($req->all(), [
-            "id" => 'required',
-        ], [
-            "id.required" => "please fill id",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
-        }
-        try {
-            FoodItemReview::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
-        }
-    }
-
     public function addUserFoodReview(Request $req)
     {
         $validator = Validator::make($req->all(), [
