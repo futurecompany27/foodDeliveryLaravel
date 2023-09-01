@@ -16,7 +16,9 @@ use App\Models\ChefReview;
 use App\Models\FoodItem;
 use App\Models\FoodItemReview;
 use App\Models\Pincode;
+use App\Models\UserChefReview;
 use App\Models\UserContact;
+use App\Models\UserFoodReview;
 use App\Notifications\Chef\NewChefReviewNotification;
 use App\Notifications\Chef\NewReviewNotification;
 use App\Notifications\Customer\CustomerContactUsNotification;
@@ -434,7 +436,6 @@ class UserController extends Controller
                 $admin->notify(new CustomerProfileUpdateNotification($customer));
             }
             return response()->json(['message' => 'User updated successfully', 'success' => true], 200);
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -739,7 +740,6 @@ class UserController extends Controller
             } else {
                 return response()->json(['message' => 'Added successfully', 'success' => true], 200);
             }
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -790,6 +790,277 @@ class UserController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+        }
+    }
+
+    public function addUserFoodReview(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "foodimage" => 'required',
+            "chef_id" => 'required',
+            "user_id" => 'required',
+            "food_id" => 'required',
+            "star_rating" => "required|integer|min:1|max:5",
+            "message" => 'required',
+        ], [
+            "foodimage.required" => "please fill foodimage",
+            "chef_id.required" => "please fill chef_id",
+            "user_id.required" => "please fill user_id",
+            "food_id.required" => "please fill food_id",
+            "star_rating.required" => "please fill star_rating",
+            "message.required" => "please fill message",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        if (!File::exists("storage/user/food_reviews/")) {
+            File::makeDirectory("storage/user/food_reviews/", $mode = 0777, true, true);
+        }
+        $images = $req->file('foodimage');
+        $imagePaths = [];          // Used Array to store multiple image paths
+        foreach ($images as $image) {
+            $imagePath = $image->store("user/food_reviews/", "public");
+            array_push($imagePaths, asset('storage/' . $imagePath));
+        }
+        try {
+            $userfoodreview = new UserFoodReview();
+            $userfoodreview->foodimage = json_encode($imagePaths);
+            $userfoodreview->chef_id = $req->chef_id;
+            $userfoodreview->user_id = $req->user_id;
+            $userfoodreview->food_id = $req->food_id;
+            $userfoodreview->star_rating = $req->star_rating;
+            $userfoodreview->message = $req->message;
+            $userfoodreview->save();
+            return response()->json(['message' => 'Food Review Added successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+        }
+    }
+
+    public function updateUserFoodReviewStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            if ($req->status == "0" || $req->status == "1") {
+                $updateData['status'] = $req->status;
+            }
+            // $updateData = $req->status;
+            UserFoodReview::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function deleteUserFoodReview(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $data = UserFoodReview::where('id', $req->id)->first();
+            $images = json_decode($data->foodimage);
+            foreach ($images as $image) {
+                str_replace(env('filePath'), '', $image);
+                if (file_exists(str_replace(env('filePath'), '', $image))) {
+                    unlink(str_replace(env('filePath'), '', $image));
+                }
+            }
+            UserFoodReview::where('id', $req->id)->delete();
+            return response()->json(['msg' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+        }
+    }
+
+    public function getAllUserFoodReviews(Request $req)
+    {
+        try {
+            $totalRecords = UserFoodReview::count();
+            $skip = $req->page * 10;
+            $data = UserFoodReview::orderBy('created_at', 'desc')->with('chef')->skip($skip)->take(10)->get();
+            return response()->json([
+                'data' => $data,
+                'TotalRecords' => $totalRecords,
+                'success' => true
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+        }
+    }
+
+    public function getAllUserFoodReviewsbyStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "status" => 'required',
+        ], [
+            "status.required" => "please fill status",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $skip = $req->input('page', 0) * 10;
+            $query = UserFoodReview::orderBy('created_at', 'desc')->with(['chef', 'user', 'food']);
+            if ($req->input('status') === '0') {
+                $query->where('status', 0);
+            } elseif ($req->input('status') === '1') {
+                $query->where('status', 1);
+            }
+            $foodReviews = $query->skip($skip)->take(10)->get();
+            $totalRecords = $foodReviews->count();
+            return response()->json(['data' => $foodReviews, 'TotalRecords' => $totalRecords, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+        }
+    }
+
+    public function addUserChefReview(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "chef_id" => 'required',
+            "user_id" => 'required',
+            "star_rating" => "required|integer|min:1|max:5",
+            "message" => 'required',
+        ], [
+            "chef_id.required" => "please fill chef_id",
+            "user_id.required" => "please fill user_id",
+            "star_rating.required" => "please fill star_rating",
+            "message.required" => "please fill message",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $userchefreview = new UserChefReview();
+            $userchefreview->chef_id = $req->chef_id;
+            $userchefreview->user_id = $req->user_id;
+            $userchefreview->star_rating = $req->star_rating;
+            $userchefreview->message = $req->message;
+            $userchefreview->save();
+            return response()->json(['message' => 'Chef Review Added successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+        }
+    }
+
+    public function updateUserChefReviewStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            if ($req->status == "0" || $req->status == "1") {
+                $updateData['status'] = $req->status;
+            }
+            // $updateData = $req->status;
+            UserChefReview::where('id', $req->id)->update($updateData);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function deleteUserChefReview(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            UserChefReview::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+        }
+    }
+
+    public function getAllUserChefReviews(Request $req)
+    {
+        try {
+            $totalRecords = UserChefReview::count();
+            $skip = $req->page * 10;
+            $data = UserChefReview::orderBy('created_at', 'desc')->with(['chef', 'user'])->skip($skip)->take(10)->get();
+            return response()->json([
+                'data' => $data,
+                'TotalRecords' => $totalRecords,
+                'success' => true
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+        }
+    }
+
+    public function getAllUserChefReviewsbyStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "status" => 'required',
+        ], [
+            "status.required" => "please fill status",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $skip = $req->input('page', 0) * 10;
+            $query = UserChefReview::orderBy('created_at', 'desc')->with(['chef', 'user']);
+            if ($req->input('status') === '0') {
+                $query->where('status', 0);
+            } elseif ($req->input('status') === '1') {
+                $query->where('status', 1);
+            }
+            $chefReviews = $query->skip($skip)->take(10)->get();
+            $totalRecords = $chefReviews->count();
+            return response()->json(['data' => $chefReviews, 'TotalRecords' => $totalRecords, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
         }
     }
 }

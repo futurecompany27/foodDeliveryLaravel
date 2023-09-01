@@ -54,4 +54,14 @@ class chef extends Model
     {
         return $this->hasMany(ChefAlternativeContact::class,'chef_id','id');
     }
+
+    public function UserFoodReview()
+    {
+        return $this->hasMany(UserFoodReview::class, 'chef_id', 'id');
+    }
+
+    public function UserChefReview()
+    {
+        return $this->hasMany(UserChefReview::class,'chef_id','id');
+    }
 }
