@@ -63,9 +63,6 @@ Route::controller(UserController::class)->group(function () {
 
     Route::post('/addOrUpdateFoodReview', 'addOrUpdateFoodReview');
     Route::post('/getAllFoodReview', 'getAllFoodReview');
-
-    Route::post('/addUserFoodReview', 'addUserFoodReview');
-    Route::get('/getAllUserFoodReviews', 'getAllUserFoodReviews');
     Route::post('/updateUserFoodReviewStatus', 'updateUserFoodReviewStatus');
     Route::post('/deleteUserFoodReview', 'deleteUserFoodReview');
     Route::post('/getAllUserFoodReviewsbyStatus', 'getAllUserFoodReviewsbyStatus');
