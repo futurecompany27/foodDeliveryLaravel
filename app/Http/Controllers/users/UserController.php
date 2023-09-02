@@ -869,51 +869,53 @@ class UserController extends Controller
         }
     }
 
-    public function addUserFoodReview(Request $req)
-    {
-        $validator = Validator::make($req->all(), [
-            "foodimage" => 'required',
-            "chef_id" => 'required',
-            "user_id" => 'required',
-            "food_id" => 'required',
-            "star_rating" => "required|integer|min:1|max:5",
-            "message" => 'required',
-        ], [
-            "foodimage.required" => "please fill foodimage",
-            "chef_id.required" => "please fill chef_id",
-            "user_id.required" => "please fill user_id",
-            "food_id.required" => "please fill food_id",
-            "star_rating.required" => "please fill star_rating",
-            "message.required" => "please fill message",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
-        }
-        if (!File::exists("storage/user/food_reviews/")) {
-            File::makeDirectory("storage/user/food_reviews/", $mode = 0777, true, true);
-        }
-        try {
-            $userfoodreview = new UserFoodReview();
-            $images = $req->file('foodimage');
-            $imagePaths = []; // Used Array to store multiple image paths
-            foreach ($images as $image) {
-                $imagePath = $image->store("user/food_reviews/", "public");
-                array_push($imagePaths, asset('storage/' . $imagePath));
-            }
-            $userfoodreview->foodimage = $imagePaths;
-            $userfoodreview->chef_id = $req->chef_id;
-            $userfoodreview->user_id = $req->user_id;
-            $userfoodreview->food_id = $req->food_id;
-            $userfoodreview->star_rating = $req->star_rating;
-            $userfoodreview->message = $req->message;
-            $userfoodreview->save();
-            return response()->json(['message' => 'Food Review Added successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
-        }
-    }
+    // public function addUserFoodReview(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+            
+    //         "chef_id" => 'required',
+    //         "user_id" => 'required',
+    //         "food_id" => 'required',
+    //         "star_rating" => "required|integer|min:1|max:5",
+    //         "message" => 'required',
+    //     ], [
+    //         "chef_id.required" => "please fill chef_id",
+    //         "user_id.required" => "please fill user_id",
+    //         "food_id.required" => "please fill food_id",
+    //         "star_rating.required" => "please fill star_rating",
+    //         "message.required" => "please fill message",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+    //     }
+    //     if (!File::exists("storage/user/food_reviews/")) {
+    //         File::makeDirectory("storage/user/food_reviews/", $mode = 0777, true, true);
+    //     }
+    //     try {
+    //         if ($req->file) {
+    //             # code...
+    //         }
+    //         $userfoodreview = new UserFoodReview();
+    //         $images = $req->file('foodimage');
+    //         $imagePaths = []; // Used Array to store multiple image paths
+    //         foreach ($images as $image) {
+    //             $imagePath = $image->store("user/food_reviews/", "public");
+    //             array_push($imagePaths, asset('storage/' . $imagePath));
+    //         }
+    //         $userfoodreview->foodimage = $imagePaths;
+    //         $userfoodreview->chef_id = $req->chef_id;
+    //         $userfoodreview->user_id = $req->user_id;
+    //         $userfoodreview->food_id = $req->food_id;
+    //         $userfoodreview->star_rating = $req->star_rating;
+    //         $userfoodreview->message = $req->message;
+    //         $userfoodreview->save();
+    //         return response()->json(['message' => 'Food Review Added successfully', "success" => true], 200);
+    //     } catch (\Throwable $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+    //     }
+    // }
 
     public function updateUserFoodReviewStatus(Request $req)
     {
@@ -1009,37 +1011,6 @@ class UserController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
-        }
-    }
-
-    public function addUserChefReview(Request $req)
-    {
-        $validator = Validator::make($req->all(), [
-            "chef_id" => 'required',
-            "user_id" => 'required',
-            "star_rating" => "required|integer|min:1|max:5",
-            "message" => 'required',
-        ], [
-            "chef_id.required" => "please fill chef_id",
-            "user_id.required" => "please fill user_id",
-            "star_rating.required" => "please fill star_rating",
-            "message.required" => "please fill message",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
-        }
-        try {
-            $userchefreview = new UserChefReview();
-            $userchefreview->chef_id = $req->chef_id;
-            $userchefreview->user_id = $req->user_id;
-            $userchefreview->star_rating = $req->star_rating;
-            $userchefreview->message = $req->message;
-            $userchefreview->save();
-            return response()->json(['message' => 'Chef Review Added successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
         }
     }
 

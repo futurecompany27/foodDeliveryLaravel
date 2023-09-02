@@ -52,10 +52,10 @@ Route::controller(UserController::class)->group(function () {
 
     Route::post('/addUserContacts', 'addUserContacts');
     Route::post('/updateContactStatus', 'updateContactStatus');
+    Route::get('/getUserContact', 'getUserContact');
 
     Route::post('/ChefReview', 'ChefReview');
     Route::post('/deleteChefReview', 'deleteChefReview');
-    Route::get('/getUserContact', 'getUserContact');
     Route::post('/getChefReview', 'getChefReview');
 
     Route::post('/getCountOftheChefAvailableForNext30Days', 'getCountOftheChefAvailableForNext30Days');
@@ -70,7 +70,6 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/deleteUserFoodReview', 'deleteUserFoodReview');
     Route::post('/getAllUserFoodReviewsbyStatus', 'getAllUserFoodReviewsbyStatus');
 
-    Route::post('/addUserChefReview', 'addUserChefReview');
     Route::post('/updateUserChefReviewStatus', 'updateUserChefReviewStatus');
     Route::post('/deleteUserChefReview', 'deleteUserChefReview');
     Route::post('/getAllUserChefReviewsbyStatus', 'getAllUserChefReviewsbyStatus');
@@ -81,7 +80,6 @@ Route::controller(cartController::class)->group(function () {
     Route::post('/getMyCart', 'getMyCart');
     Route::post('/changeQuantity', 'changeQuantity');
     Route::post('/removeItemFromCart', 'removeItemFromCart');
-    Route::post('/getnext14DaysOfAvailibiltyForChefsAndFoodInCart', 'getnext14DaysOfAvailibiltyForChefsAndFoodInCart');
 });
 
 Route::controller(otpController::class)->group(function () {
