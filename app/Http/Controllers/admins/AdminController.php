@@ -1008,7 +1008,6 @@ class AdminController extends Controller
         }
         try {
             $chefDetail = chef::select('email')->where('id', $req->chef_id)->first();
-            Log::info($chefDetail);
             $mail = ['subject' => $req->subject, 'body' => $req->body];
             Mail::to(trim($chefDetail->email))->send(new messageFromAdminToChef($mail));
             return response()->json(['message' => "Mail has been sent to chef's register email", 'success' => true], 200);

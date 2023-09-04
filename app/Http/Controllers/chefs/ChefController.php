@@ -401,7 +401,6 @@ class ChefController extends Controller
             if (isset($req->files) && isset($req->id)) {
                 $fieldsArray = $req->input('id');
                 $filesArray = $req->file('files');
-                Log::info($fieldsArray);
                 foreach ($fieldsArray as $index => $value) {
                     if (isset($filesArray[$index])) {
 
@@ -829,7 +828,6 @@ class ChefController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            Log::info($req->weekAvailibilty);
             FoodItem::where('id', $req->food_id)->update(['foodAvailibiltyOnWeekdays' => $req->weekAvailibilty]);
             return response()->json(['message' => 'updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {

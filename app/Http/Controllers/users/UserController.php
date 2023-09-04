@@ -714,7 +714,6 @@ class UserController extends Controller
 
                     foreach ($myCart as &$chefData) {
                         $chef = chef::where(['id' => $chefData['chef_id'], 'status' => 0])->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->first();
-                        Log::info($chef);
                         if (!$chef) {
                             $ChefNotCount = $ChefNotCount + 1;
                             $FoodNotCount = $FoodNotCount + count($chefData['foodItems']);

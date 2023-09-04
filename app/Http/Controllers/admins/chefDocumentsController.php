@@ -201,7 +201,6 @@ class chefDocumentsController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            Log::info($req);
             if ($req->doc_item_id) {
                 $updateData['document_item_list_id'] = $req->document_item_list_id;
             }

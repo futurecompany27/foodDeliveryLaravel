@@ -76,7 +76,6 @@ class commonFunctions extends Controller
             $stateDetail = State::where('name', $chefDetail->state)->first();
             if ($stateDetail) {
                 $documentList = DocumentItemList::where(["state_id" => $stateDetail->id])->get();
-                Log::info($documentList);
                 if (count($documentList) > 0) {
                     foreach ($documentList as $value) {
                         $docFeilds = DocumentItemField::where('document_item_list_id', $value->id)->get();
