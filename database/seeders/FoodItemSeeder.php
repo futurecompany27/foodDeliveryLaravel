@@ -93,7 +93,7 @@ class FoodItemSeeder extends Seeder
             'chef_id' => 3,
             'dish_name' => 'pasta',
             'description' => 'ye pasta ka description hai',
-            'dishImage' => (env('filePath') . 'storage/foodItem/pasta.jpeg'),
+            'dishImage' => (env('filePath') . 'storage/foodItem/pasta.jpg'),
             'dishImageThumbnail' => (env('filePath') . 'storage/foodItem/thumbnail/pasta.jpg'),
             'regularDishAvailabilty' => 'No Limits',
             "foodAvailibiltyOnWeekdays" => json_encode(['Su', 'M', 'T', 'W', 'Th', 'F', 'S']),
