@@ -368,7 +368,7 @@ class AdminController extends Controller
                 unlink(str_replace(env('filePath'), '', $images));
             }
             FoodCategory::where('id', $req->id)->delete();
-            return response()->json(['msg' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

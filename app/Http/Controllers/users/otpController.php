@@ -14,11 +14,12 @@ class otpController extends Controller
     function sendOTP(Request $req)
     {
         try {
-            $otp = mt_rand(1000, 9999);
+            // $otp = mt_rand(1000, 9999);
+            $otp = 1111;
             if ($req->mobile) {
-                $otp_msg = $otp . "+is+your+one+time+verification+code+for+HomeShef";
-                $url = "https://platform.clickatell.com/messages/http/send?apiKey=WzKPQFifSAe-c5nFp7SynQ==&to=1" . $req->mobile . "&content=" . $otp_msg;
-                $response = Http::get($url);
+                // $otp_msg = $otp . "+is+your+one+time+verification+code+for+HomeShef";
+                // $url = "https://platform.clickatell.com/messages/http/send?apiKey=WzKPQFifSAe-c5nFp7SynQ==&to=1" . $req->mobile . "&content=" . $otp_msg;
+                // $response = Http::get($url);
                 Otp::updateOrCreate(
                     ['mobile' => str_replace("-", "", $req->mobile)],
                     ['otp_number' => $otp]
@@ -26,9 +27,10 @@ class otpController extends Controller
             } elseif ($req->email) {
                 Otp::updateOrCreate(['email' => $req->email], ['otp_number' => $otp]);
             }
-            return response()->json(['msg' => "Otp has been sent successfully", "otp" => $otp, "success" => true], 200);
+            return response()->json(['message' => "Otp has been sent successfully", "otp" => $otp, "success" => true], 200);
         } catch (\Throwable $th) {
-            Log::info($th->getMessage());;
+            Log::info($th->getMessage());
+            ;
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
@@ -47,12 +49,13 @@ class otpController extends Controller
                 $verified = Otp::where(["email" => $req->email, "otp_number" => $req->otp])->first();
             }
             if ($verified) {
-                return response()->json(['msg' => "verified successfully", "success" => true], 200);
+                return response()->json(['message' => "verified successfully", "success" => true], 200);
             } else {
-                return response()->json(['msg' => "Invalid OTP", "success" => false], 500);
+                return response()->json(['message' => "Invalid OTP", "success" => false], 500);
             }
         } catch (\Throwable $th) {
-            Log::info($th->getMessage());;
+            Log::info($th->getMessage());
+            ;
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }

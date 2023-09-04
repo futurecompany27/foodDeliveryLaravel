@@ -37,7 +37,7 @@ class cartController extends Controller
                 $cart->save();
             }
 
-            return response()->json(["message" => "added successfully", "success" => true], 200);
+            return response()->json(["message" => "Added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -130,11 +130,10 @@ class cartController extends Controller
         }
         try {
             $cartData = Cart::where("user_id", $req->user_id)->first()->cartData;
-            $food_id = $req->food_id;
             foreach ($cartData as &$value) {
                 if ($value['chef_id'] == $req->chef_id) {
-                    $value['foodItems'] = array_filter($value['foodItems'], function ($food) use ($food_id) {
-                        return $food['food_id'] !== $food_id;
+                    $value['foodItems'] = array_filter($value['foodItems'], function ($food) use ($req) {
+                        return $food['food_id'] !== $req->food_id;
                     });
                     $value['foodItems'] = array_values($value['foodItems']);
                 }
@@ -151,7 +150,7 @@ class cartController extends Controller
             } else {
                 Cart::where("user_id", $req->user_id)->delete();
             }
-            return response()->json(['msg' => 'removed successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Removed successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
