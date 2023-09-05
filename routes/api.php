@@ -77,6 +77,7 @@ Route::controller(cartController::class)->group(function () {
     Route::post('/getMyCart', 'getMyCart');
     Route::post('/changeQuantity', 'changeQuantity');
     Route::post('/removeItemFromCart', 'removeItemFromCart');
+    Route::post('/addBeforeLoginCartData', 'addBeforeLoginCartData');
 });
 
 Route::controller(otpController::class)->group(function () {

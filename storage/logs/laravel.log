@@ -1,0 +1,42 @@
+[2023-09-05 11:44:14] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '1',
+    'chefName' => 'Ravindra\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 10,
+        'food_id' => 1,
+        'quantity' => 1,
+        'dishImage' => 'storage/foodItem/samosa.jpeg',
+        'dish_name' => 'samosa',
+      ),
+      1 => 
+      array (
+        'price' => 100,
+        'food_id' => 2,
+        'quantity' => 1,
+        'dishImage' => 'storage/foodItem/pizza.jpeg',
+        'dish_name' => 'pizza',
+      ),
+    ),
+  ),
+  1 => 
+  array (
+    'chef_id' => '2',
+    'chefName' => 'Ravi\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 3,
+        'quantity' => 1,
+        'dishImage' => 'storage/foodItem/pizza.jpeg',
+        'dish_name' => 'pizza',
+      ),
+    ),
+  ),
+)  

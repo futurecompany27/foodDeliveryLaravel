@@ -17,9 +17,11 @@ class cartController extends Controller
     {
         $validator = Validator::make($req->all(), [
             'user_id' => 'required',
+            'cartDeliveryDate' => 'required',
             'cartData' => 'required',
         ], [
             'user_id.required' => 'please fill user_id',
+            'cartDeliveryDate.required' => 'please fill delivery date',
             'cartData.required' => 'please fill food data'
         ]);
         if ($validator->fails()) {
@@ -54,6 +56,7 @@ class cartController extends Controller
             $data = Cart::where('user_id', $req->user_id)->first();
             if ($data) {
                 $myCart = $data->cartData;
+                Log::info($myCart);
                 foreach ($myCart as &$chefData) {
                     $chef = chef::with('foodItems')->find($chefData['chef_id']);
                     $foodItems = $chef['foodItems'];
@@ -66,7 +69,7 @@ class cartController extends Controller
                         }
                     }
                 }
-                return response()->json(["data" => $myCart, "success" => true], 200);
+                return response()->json(["data" => $myCart, "cartDeliveryDate" => $data->cartDeliveryDate, "success" => true], 200);
             }
             return response()->json(["data" => [], "success" => true], 200);
         } catch (\Throwable $th) {
@@ -155,6 +158,79 @@ class cartController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+        }
+    }
+
+    function addBeforeLoginCartData(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'user_id' => 'required',
+            'cartDeliveryDate' => 'required',
+            'cartData' => 'required',
+        ], [
+            'user_id.required' => 'please fill user_id',
+            'cartDeliveryDate.required' => 'please fill delivery date',
+            'cartData.required' => 'please fill food data'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $mycart = Cart::where("user_id", $req->user_id)->first();
+            if ($mycart) {
+                $oldCartData = $mycart->cartData;
+                $newCartData = $req->cartData;
+
+                // Create an associative array to store the merged data
+                $mergedData = [];
+
+                // Merge $oldCartData and $newCartData
+                foreach (array_merge($oldCartData, $newCartData) as $item) {
+                    $chefId = $item['chef_id'];
+
+                    if (!isset($mergedData[$chefId])) {
+                        // If chef_id doesn't exist in the mergedData, add it
+                        $mergedData[$chefId] = [
+                            'chef_id' => $chefId,
+                            'chefName' => $item['chefName'],
+                            'foodItems' => $item['foodItems'],
+                        ];
+                    } else {
+                        // If chef_id already exists, merge the foodItems
+                        foreach ($item['foodItems'] as $newFoodItem) {
+                            $found = false;
+                            foreach ($mergedData[$chefId]['foodItems'] as &$mergedFoodItem) {
+                                if ($newFoodItem['food_id'] == $mergedFoodItem['food_id']) {
+                                    // Update the price from $newCartData
+                                    $mergedFoodItem['price'] = $newFoodItem['price'];
+                                    $mergedFoodItem['quantity'] = $newFoodItem['quantity'];
+                                    $mergedFoodItem['dishImage'] = $newFoodItem['dishImage'];
+                                    $found = true;
+                                    break;
+                                }
+                            }
+                            if (!$found) {
+                                // Add the new food item to the mergedData
+                                $mergedData[$chefId]['foodItems'][] = $newFoodItem;
+                            }
+                        }
+                    }
+                }
+                // Convert the associative array back to indexed array
+                $finalMergedData = array_values($mergedData);
+                Cart::where("user_id", $req->user_id)->update(['cartData' => $finalMergedData, 'cartDeliveryDate' => $req->cartDeliveryDate], 200);
+                return response()->json(['message' => 'Successfully merged data', 'success' => true], 200);
+            } else {
+                $cart = new Cart();
+                $cart->user_id = $req->user_id;
+                $cart->cartDeliveryDate = $req->cartDeliveryDate;
+                $cart->cartData = $req->cartData;
+                $cart->save();
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
 }
