@@ -1,0 +1,1001 @@
+[2023-09-06 05:06:16] local.INFO: 1  
+[2023-09-06 05:06:16] local.INFO: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value (Connection: mysql, SQL: insert into `chef_reviews` (`chef_id`, `star_rating`, `message`, `updated_at`, `created_at`) values (3, 4, asdasd, 2023-09-06 05:06:16, 2023-09-06 05:06:16))  
+[2023-09-06 05:08:20] local.INFO: 1  
+[2023-09-06 05:08:20] local.INFO: SQLSTATE[HY000]: General error: 1364 Field 'user_id' doesn't have a default value (Connection: mysql, SQL: insert into `chef_reviews` (`chef_id`, `star_rating`, `message`, `updated_at`, `created_at`) values (3, 4, asdasd, 2023-09-06 05:08:20, 2023-09-06 05:08:20))  
+[2023-09-06 05:17:16] local.INFO: 1  
+[2023-09-06 05:17:51] local.INFO: 1  
+[2023-09-06 05:17:58] local.INFO: 1  
+[2023-09-06 05:41:14] local.INFO: 1  
+[2023-09-06 05:41:17] local.INFO: 1  
+[2023-09-06 05:41:17] local.INFO: 1  
+[2023-09-06 06:09:57] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => NULL,
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 06:10:30] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => NULL,
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 06:11:08] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 06:13:59] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 06:14:25] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 5,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 06:14:32] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 5,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 06:15:33] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 5,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 06:15:53] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 5,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:18:58] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:21:44] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:32:44] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:38:38] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:40:14] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:40:52] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:42:38] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:43:07] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:44:00] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:44:27] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:45:19] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:45:35] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:46:33] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:47:26] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:47:55] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 07:48:08] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 08:02:10] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 08:04:11] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 08:07:36] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 08:08:29] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 08:11:13] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 08:11:35] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:25:24] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:27:34] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:27:50] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:29:21] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:30:00] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:30:18] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:32:44] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:32:49] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:33:20] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:34:06] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:36:01] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:36:50] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:37:25] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:37:50] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 09:38:29] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:00:43] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:01:36] local.INFO: Attempt to read property "cartData" on null  
+[2023-09-06 11:09:33] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:10:56] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:11:27] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:20:47] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:21:31] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:22:40] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:24:57] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:47:59] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  
+[2023-09-06 11:49:07] local.INFO: array (
+  0 => 
+  array (
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+      ),
+    ),
+  ),
+)  

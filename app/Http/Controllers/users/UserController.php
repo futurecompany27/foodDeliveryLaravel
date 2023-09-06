@@ -328,8 +328,6 @@ class UserController extends Controller
             'postal_code' => "required",
             'city' => "required",
             'state' => "required",
-            'landmark' => "required",
-            'locality' => "required",
             'full_address' => "required",
             'address_type' => "required",
         ]);
@@ -356,8 +354,8 @@ class UserController extends Controller
                 $newAdrees->postal_code = $req->postal_code;
                 $newAdrees->city = $req->city;
                 $newAdrees->state = $req->state;
-                $newAdrees->landmark = $req->postal_code;
-                $newAdrees->locality = $req->locality;
+                // $newAdrees->landmark = $req->landmark;
+                // $newAdrees->locality = $req->locality;
                 $newAdrees->full_address = $req->full_address;
                 $newAdrees->address_type = $req->address_type;
 
@@ -575,11 +573,18 @@ class UserController extends Controller
             return response()->json(["message" => 'please fill all the details', "success" => false], 400);
         }
         try {
-            ChefReview::updateOrCreate(
-                ['user_id' => $req->user_id, 'chef_id' => $req->chef_id],
-                ['star_rating' => $req->star_rating, 'message' => $req->message]
-            );
-
+            Log::info($req->user_id);
+            $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
+            if ($reviewExist) {
+                ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);
+            } else {
+                $newReview = new ChefReview();
+                $newReview->user_id = $req->user_id;
+                $newReview->chef_id = $req->chef_id;
+                $newReview->star_rating = $req->star_rating;
+                $newReview->message = $req->message;
+                $newReview->save();
+            }
             $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
             $reviewDetails['date'] = Carbon::now();
             $chef = chef::find($req->chef_id);
@@ -687,6 +692,7 @@ class UserController extends Controller
                     'weekdayShort' => $weekdayShort,
                     'formatted_date' => $date->format('M d'),
                     'iso_date' => $date->toDateString(),
+                    'custom_date_format' => $date->format('d/m/Y')
                 ];
             }
 

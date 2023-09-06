@@ -1081,9 +1081,6 @@ class ChefController extends Controller
             $chef->mobile = str_replace("-", "", $req->mobile);
             $chef->email = $req->email;
             $chef->address_line = $req->address_line;
-            $chef->latitude = $req->latitude;
-            $chef->longitude = $req->longitude;
-            $chef->longitude = $req->longitude;
             $chef->state = $req->state;
             $chef->city = $req->city;
             $chef->kitchen_types = $req->kitchen_types;

@@ -10,6 +10,7 @@ class Cart extends Model
     use HasFactory;
     protected $fillable = ['user_id', 'cartData'];
     protected $casts = [
-        'cartData' => 'array'
+        'cartData' => 'array',
+        'cartDeliveryDate' => 'object'
     ];
 }

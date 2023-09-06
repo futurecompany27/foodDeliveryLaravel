@@ -18,12 +18,10 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->string('mobile')->unique();
             $table->text("address_line")->nullable();
-            $table->string('latitude')->nullable();
-            $table->string('longitude')->nullable();
-            $table->text("state")->nullable();
-            $table->text("city")->nullable();
+            $table->text("state");
+            $table->text("city");
             $table->string('postal_code');
-            $table->json("kitchen_types")->nullable();
+            $table->json("kitchen_types");
             $table->timestamps();
         });
     }

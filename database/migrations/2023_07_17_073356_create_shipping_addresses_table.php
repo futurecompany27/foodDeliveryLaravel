@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('postal_code');
             $table->string('city');
             $table->string('state');
-            $table->string('landmark');
-            $table->string('locality');
+            $table->string('landmark')->nullable();
+            $table->string('locality')->nullable();
             $table->string('full_address');
             $table->string('address_type');
             $table->string('default_address')->default(0)->comment('1 - default, 0 - not default');
