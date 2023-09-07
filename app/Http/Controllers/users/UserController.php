@@ -718,11 +718,15 @@ class UserController extends Controller
                     $ChefNotCount = 0;
                     $FoodNotCount = 0;
 
+                    $val['food_idNotAvailable'] = [];
+
                     foreach ($myCart as &$chefData) {
                         $chef = chef::where(['id' => $chefData['chef_id'], 'status' => 0])->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->first();
                         if (!$chef) {
                             $ChefNotCount = $ChefNotCount + 1;
                             $FoodNotCount = $FoodNotCount + count($chefData['foodItems']);
+                            Log::info($chefData['foodItems']);
+                            // array_push($val['food_idNotAvailable'], $chefData['foodItems']['food_id']);
                         }
 
                         if ($chef) {

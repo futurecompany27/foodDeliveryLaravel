@@ -740,11 +740,10 @@ class ChefController extends Controller
             if ($req->day) {
                 $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays,'\"$req->day\"')");
             }
-            // if ($req->todaysWeekDay) {
-            //     $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
-            // }
 
             $data = $query->get(['*']);
+            $chefData = chef::where('id', $req->chef_id)->first(['chefAvailibilityWeek']);
+            Log::info($chefData);
             foreach ($data as &$value) {
                 // Allergy
                 if ($value['allergies']) {
@@ -782,8 +781,12 @@ class ChefController extends Controller
                     $value['geographicalCuisine'] = $geographicalCuisine;
                 }
 
-                // Determine availability based on the condition
-                $value['available'] = $req->todaysWeekDay ? in_array($req->todaysWeekDay, $value->foodAvailibiltyOnWeekdays) : false;
+                if (in_array($req->todaysWeekDay, $chefData->chefAvailibilityWeek)) {
+                    // Determine availability based on the condition
+                    $value['available'] = $req->todaysWeekDay ? in_array($req->todaysWeekDay, $value->foodAvailibiltyOnWeekdays) : false;
+                }else{
+                    $value['available'] = false;    
+                }
 
             }
             $chefData = chef::select('rating')->where('id', $req->chef_id)->first();
