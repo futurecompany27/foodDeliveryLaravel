@@ -1,132 +1,213 @@
-[2023-09-07 06:15:11] local.INFO: array (
+[2023-09-07 10:23:03] local.INFO: {"id":1,"country_id":1,"name":"Ontario","status":1,"tax_type":["GST","PST"],"tax_value":[25,50],"created_at":"2023-09-07T04:33:18.000000Z","updated_at":"2023-09-07T04:33:18.000000Z"}  
+[2023-09-07 10:25:22] local.INFO: array (
+  0 => 'GST',
+  1 => 'PST',
+)  
+[2023-09-07 10:26:50] local.INFO: array (
+  0 => 'GST',
+  1 => 'PST',
+)  
+[2023-09-07 10:27:00] local.INFO: array (
+  0 => 'GST',
+  1 => 'PST',
+)  
+[2023-09-07 10:27:00] local.INFO: array (
   0 => 
   array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+        'availableToday' => true,
+      ),
+    ),
+  ),
+  1 => 
+  array (
+    'chef_id' => '1',
+    'chefName' => 'Ravindra\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 10,
+        'food_id' => 1,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/samosa.jpeg',
+        'dish_name' => 'samosa',
+        'availableToday' => true,
+      ),
+      1 => 
+      array (
+        'price' => 100,
+        'food_id' => 2,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pizza.jpeg',
+        'dish_name' => 'pizza',
+        'availableToday' => true,
+      ),
+    ),
   ),
 )  
-[2023-09-07 06:15:11] local.INFO: array (
+[2023-09-07 10:38:46] local.INFO: array (
+  0 => 'GST',
+  1 => 'PST',
+)  
+[2023-09-07 10:38:46] local.INFO: array (
   0 => 
   array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+        'availableToday' => true,
+      ),
+    ),
+  ),
+  1 => 
+  array (
+    'chef_id' => '1',
+    'chefName' => 'Ravindra\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 10,
+        'food_id' => 1,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/samosa.jpeg',
+        'dish_name' => 'samosa',
+        'availableToday' => true,
+      ),
+      1 => 
+      array (
+        'price' => 100,
+        'food_id' => 2,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pizza.jpeg',
+        'dish_name' => 'pizza',
+        'availableToday' => true,
+      ),
+    ),
   ),
 )  
-[2023-09-07 06:15:11] local.INFO: array (
+[2023-09-07 10:40:10] local.INFO: array (
+  0 => 'GST',
+  1 => 'PST',
+)  
+[2023-09-07 10:40:10] local.INFO: array (
   0 => 
   array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+        'availableToday' => true,
+      ),
+    ),
+  ),
+  1 => 
+  array (
+    'chef_id' => '1',
+    'chefName' => 'Ravindra\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 10,
+        'food_id' => 1,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/samosa.jpeg',
+        'dish_name' => 'samosa',
+        'availableToday' => true,
+      ),
+      1 => 
+      array (
+        'price' => 100,
+        'food_id' => 2,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pizza.jpeg',
+        'dish_name' => 'pizza',
+        'availableToday' => true,
+      ),
+    ),
   ),
 )  
-[2023-09-07 06:15:11] local.INFO: array (
+[2023-09-07 10:47:28] local.INFO: array (
+  0 => 'GST',
+  1 => 'PST',
+)  
+[2023-09-07 10:47:28] local.INFO: array (
   0 => 
   array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
+    'chef_id' => '3',
+    'chefName' => 'Sarita\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 545,
+        'food_id' => 4,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
+        'dish_name' => 'pasta',
+        'availableToday' => true,
+      ),
+    ),
   ),
-)  
-[2023-09-07 06:15:11] local.INFO: array (
-  0 => 
+  1 => 
   array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
+    'chef_id' => '1',
+    'chefName' => 'Ravindra\'s Kitchen',
+    'foodItems' => 
+    array (
+      0 => 
+      array (
+        'price' => 10,
+        'food_id' => 1,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/samosa.jpeg',
+        'dish_name' => 'samosa',
+        'availableToday' => true,
+      ),
+      1 => 
+      array (
+        'price' => 100,
+        'food_id' => 2,
+        'quantity' => 1,
+        'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pizza.jpeg',
+        'dish_name' => 'pizza',
+        'availableToday' => true,
+      ),
+    ),
   ),
 )  
-[2023-09-07 06:15:11] local.INFO: array (
-  0 => 
-  array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
-  ),
-)  
-[2023-09-07 06:15:12] local.INFO: array (
-  0 => 
-  array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
-  ),
-)  
-[2023-09-07 06:15:12] local.INFO: array (
-  0 => 
-  array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
-  ),
-)  
-[2023-09-07 06:15:12] local.INFO: array (
-  0 => 
-  array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
-  ),
-)  
-[2023-09-07 06:15:12] local.INFO: array (
-  0 => 
-  array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
-  ),
-)  
-[2023-09-07 06:15:12] local.INFO: array (
-  0 => 
-  array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
-  ),
-)  
-[2023-09-07 06:15:12] local.INFO: array (
-  0 => 
-  array (
-    'price' => 545,
-    'food_id' => 4,
-    'quantity' => 1,
-    'dishImage' => 'http://127.0.0.1:8000/storage/foodItem/pasta.jpg',
-    'dish_name' => 'pasta',
-    'availableToday' => true,
-  ),
-)  
+[2023-09-07 10:57:29] local.INFO: {"chefAvailibilityWeek":["Th","F","S"]}  
+[2023-09-07 10:58:11] local.INFO: {"chefAvailibilityWeek":["Th","F","S"]}  
+[2023-09-07 10:58:24] local.INFO: {"chefAvailibilityWeek":["Th","F","S"]}  
+[2023-09-07 10:58:52] local.INFO: {"chefAvailibilityWeek":["Th","F","S"]}  
+[2023-09-07 10:59:46] local.INFO: {"chefAvailibilityWeek":["Th","F","S"]}  
+[2023-09-07 11:00:33] local.INFO: {"chefAvailibilityWeek":["Th","F","S"]}  
+[2023-09-07 11:00:54] local.INFO: {"chefAvailibilityWeek":["Th","F","S"]}  
+[2023-09-07 11:03:59] local.INFO: {"chefAvailibilityWeek":["Th","F","S"]}  

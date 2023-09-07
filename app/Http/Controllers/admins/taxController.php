@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admins;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pincode;
 use App\Models\State;
 use App\Models\Tax;
 use Illuminate\Http\Request;
@@ -89,9 +90,11 @@ class taxController extends Controller
     public function getTaxType(Request $req)
     {
         try {
-            if ($req->state) {
-                $data = State::where('name',  $req->state)->first();
-                return response()->json(['data' => $data, 'success' => true], 200);
+            if ($req->postal_code) {
+                $postal_codeData = Pincode::where('pincode', str_replace(" ", "", $req->postal_code))->with('city.state')->first();
+                Log::info($postal_codeData['city']['state']['tax_type']);
+                $tax = ['tax_type' => $postal_codeData['city']['state']['tax_type'], 'tax_value' => $postal_codeData['city']['state']['tax_value']];
+                return response()->json(['data' => $tax, 'success' => true], 200);
             } else {
                 $totalRecords = Tax::count();
                 $skip = $req->page * 10;

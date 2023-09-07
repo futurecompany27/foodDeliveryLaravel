@@ -718,15 +718,16 @@ class UserController extends Controller
                     $ChefNotCount = 0;
                     $FoodNotCount = 0;
 
-                    $val['food_idNotAvailable'] = [];
+                    $val['food_ids_NotAvailable'] = [];
 
                     foreach ($myCart as &$chefData) {
                         $chef = chef::where(['id' => $chefData['chef_id'], 'status' => 0])->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->first();
                         if (!$chef) {
                             $ChefNotCount = $ChefNotCount + 1;
                             $FoodNotCount = $FoodNotCount + count($chefData['foodItems']);
-                            Log::info($chefData['foodItems']);
-                            // array_push($val['food_idNotAvailable'], $chefData['foodItems']['food_id']);
+                            foreach ($chefData['foodItems'] as $value) {
+                                array_push($val['food_ids_NotAvailable'], $value['food_id']);
+                            }
                         }
 
                         if ($chef) {
@@ -734,6 +735,7 @@ class UserController extends Controller
                                 $food = FoodItem::where('id', $value['food_id'])->whereJsonContains('foodAvailibiltyOnWeekdays', $val['weekdayShort'])->first();
                                 if (!$food) {
                                     $FoodNotCount = $FoodNotCount + 1;
+                                    array_push($val['food_ids_NotAvailable'], $value['food_id']);
                                 }
                             }
                         }
