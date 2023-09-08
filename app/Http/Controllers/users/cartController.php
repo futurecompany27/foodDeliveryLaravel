@@ -56,7 +56,6 @@ class cartController extends Controller
             $data = Cart::where('user_id', $req->user_id)->first();
             if ($data) {
                 $myCart = $data->cartData;
-                Log::info($myCart);
                 foreach ($myCart as &$chefData) {
                     $chef = chef::with('foodItems')->find($chefData['chef_id']);
                     $foodItems = $chef['foodItems'];

@@ -8,6 +8,7 @@ use App\Mail\HomeshefChefChangeEmailVerificationLink;
 use App\Mail\HomeshefChefEmailVerification;
 use App\Mail\HomeshefChefEmailVerifiedSuccessfully;
 use App\Mail\HomeshefChefStatusChangeMail;
+use App\Mail\HomeshefFoodItemStatusChange;
 use App\Models\Admin;
 use App\Models\Allergy;
 use App\Models\chef;
@@ -37,6 +38,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Pincode;
 use App\Notifications\Chef\ChefRegisterationNotification;
+use App\Notifications\chef\foodItemstatusChangeMail;
 use Illuminate\Support\Facades\Validator;
 // use Image; //Intervention Image
 use Intervention\Image\Facades\Image;
@@ -229,7 +231,7 @@ class ChefController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
+            "id.required" => "please fill chef id",
             "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
@@ -743,7 +745,6 @@ class ChefController extends Controller
 
             $data = $query->get(['*']);
             $chefData = chef::where('id', $req->chef_id)->first(['chefAvailibilityWeek']);
-            Log::info($chefData);
             foreach ($data as &$value) {
                 // Allergy
                 if ($value['allergies']) {
@@ -784,8 +785,8 @@ class ChefController extends Controller
                 if (in_array($req->todaysWeekDay, $chefData->chefAvailibilityWeek)) {
                     // Determine availability based on the condition
                     $value['available'] = $req->todaysWeekDay ? in_array($req->todaysWeekDay, $value->foodAvailibiltyOnWeekdays) : false;
-                }else{
-                    $value['available'] = false;    
+                } else {
+                    $value['available'] = false;
                 }
 
             }
@@ -1113,6 +1114,41 @@ class ChefController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function updateFoodItemAppprovedStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "approved_status" => 'required',
+        ], [
+            "id.required" => "please fill food id",
+            "approved_status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            FoodItem::where('id', $req->id)->update(['approved_status' => $req->approved_status, 'approvedAt' => Carbon::now()->toDateTimeString()]);
+            $foodItem = FoodItem::with('chef:first_name,last_name,email,id')->find($req->id);
+            $chef = chef::find($foodItem->chef['id']);
+            $chefDetail = [
+                'food_id' => $foodItem['id'],
+                'id' => $foodItem['chef']['id'],
+                'email' => $foodItem['chef']->email,
+                'full_name' => (ucfirst($foodItem['chef']->first_name) . ' ' . ucfirst($foodItem['chef']->last_name)),
+                'food_name' => $foodItem['dish_name'],
+            ];
+            if ($foodItem['approved_status'] == 'approved') {
+                Mail::to(trim($chefDetail['email']))->send(new HomeshefFoodItemStatusChange($chefDetail));
+            }
+            $chef->notify(new foodItemstatusChangeMail($chefDetail));
+            return response()->json(["message" => 'Updated successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
 }

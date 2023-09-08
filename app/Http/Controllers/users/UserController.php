@@ -573,7 +573,6 @@ class UserController extends Controller
             return response()->json(["message" => 'please fill all the details', "success" => false], 400);
         }
         try {
-            Log::info($req->user_id);
             $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
             if ($reviewExist) {
                 ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);

@@ -92,9 +92,9 @@ Route::controller(ChefController::class)->group(function () {
 
     Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
     Route::get('/getChefRegisterationRequest', 'getChefRegisterationRequest');
+    Route::post('/getChefDetails', 'getChefDetails');
 
     Route::post('/EditPersonalInfo', 'EditPersonalInfo');
-    Route::post('/getChefDetails', 'getChefDetails');
     Route::post('/updateChefPrimaryEmail', 'updateChefPrimaryEmail');
     Route::post('/updateSocialMediaLinks', 'updateSocialMediaLinks');
     Route::post('/updateBankDetails', 'updateBankDetails');
@@ -102,13 +102,20 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateKitchen', 'updateKitchen');
     Route::post('/updateSpecialBenifits', 'updateSpecialBenifits');
     Route::post('/chefScheduleAnCall', 'chefScheduleAnCall');
+
     Route::post('/AddContactData', 'AddContactData');
+
     Route::post('/chefAddNewOrUpdateFoodItem', 'chefAddNewOrUpdateFoodItem');
     Route::post('/getMyFoodItems', 'getMyFoodItems');
     Route::post('/getFoodItem', 'getFoodItem');
-    Route::post('/updateWeekAvailibilty', 'updateWeekAvailibilty');
+    Route::post('/updateFoodItemAppprovedStatus', 'updateFoodItemAppprovedStatus');
+    
+    Route::post('/updateWeekAvailibilty', 'updateWeekAvailibilty'); // for foodItems
+    Route::post('/updateChefAvailibilty', 'updateChefAvailibilty'); // for chef
+    
     Route::post('/addNewAlternativeContact', 'addNewAlternativeContact');
     Route::post('/updateStatusOfAlternativeContact', 'updateStatusOfAlternativeContact');
+    
     Route::post('/getAllAlternativeContacts', 'getAllAlternativeContacts');
     Route::post('/changePasswordForChef', 'changePasswordForChef');
     Route::post('/sendProfileForReview', 'sendProfileForReview');
@@ -116,9 +123,10 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/getAllPendingRequest', 'getAllPendingRequest');
     Route::post('/getApprovedUpdaterequest', 'getApprovedUpdaterequest');
     Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
-    Route::post('/updateChefAvailibilty', 'updateChefAvailibilty');
 
     Route::post('/VerifyChefEmail', 'VerifyChefEmail');
+
+
 });
 
 // Route for admin
