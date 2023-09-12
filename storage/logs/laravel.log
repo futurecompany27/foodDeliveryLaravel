@@ -1,2 +1,0 @@
-[2023-09-12 12:28:56] local.INFO: in_array(): Argument #2 ($haystack) must be of type array, null given  
-[2023-09-12 12:31:16] local.INFO: in_array(): Argument #2 ($haystack) must be of type array, string given  
