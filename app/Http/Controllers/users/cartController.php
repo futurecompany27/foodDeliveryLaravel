@@ -58,10 +58,16 @@ class cartController extends Controller
                 $myCart = $data->cartData;
                 foreach ($myCart as &$chefData) {
                     $chef = chef::with('foodItems')->find($chefData['chef_id']);
+                    if (in_array($data->cartDeliveryDate['weekdayShort'], $chef->chefAvailibilityWeek)) {
+                        $chefData['chefAvailable'] = true;
+                    } else {
+                        $chefData['chefAvailable'] = false;
+                    }
                     $foodItems = $chef['foodItems'];
                     foreach ($chefData['foodItems'] as &$food) {
                         $foodItem = $foodItems->firstWhere('id', $food['food_id']);
                         if ($foodItem) {
+                            $food['availableToday'] = in_array($data->cartDeliveryDate['weekdayShort'],$foodItem['foodAvailibiltyOnWeekdays']) ? true : false;
                             $food['price'] = $foodItem['price'];
                             $food['dish_name'] = $foodItem['dish_name'];
                             $food['dishImage'] = $foodItem['dishImage'];
@@ -226,6 +232,21 @@ class cartController extends Controller
                 $cart->cartData = $req->cartData;
                 $cart->save();
             }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+        }
+    }
+
+    function updateCartDeliveryDate(Request $req)
+    {
+        if (!$req->user_id || !$req->cartDeliveryDate) {
+            return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            Cart::where("user_id", $req->user_id)->update(['cartDeliveryDate' => $req->cartDeliveryDate]);
+            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

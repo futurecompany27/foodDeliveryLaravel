@@ -46,7 +46,7 @@ class FoodItemSeeder extends Seeder
             'dishImage' => (env('filePath') . 'storage/foodItem/pizza.jpeg'),
             'dishImageThumbnail' => (env('filePath') . 'storage/foodItem/thumbnail/pizza.jpeg'),
             'regularDishAvailabilty' => 'No Limits',
-            "foodAvailibiltyOnWeekdays" => json_encode(['Su', 'M', 'T', 'W', 'Th', 'F', 'S']),
+            "foodAvailibiltyOnWeekdays" => json_encode(['Su', 'T', 'Th', 'S']),
             'orderLimit' => "10",
             'foodTypeId' => '1',
             'spicyLevel' => 'Mild Spicy',

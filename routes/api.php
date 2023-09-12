@@ -9,6 +9,7 @@ use App\Http\Controllers\admins\taxController;
 use App\Http\Controllers\chefs\ChefController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\users\cartController;
+use App\Http\Controllers\users\OrderController;
 use App\Http\Controllers\users\otpController;
 use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
@@ -78,6 +79,7 @@ Route::controller(cartController::class)->group(function () {
     Route::post('/changeQuantity', 'changeQuantity');
     Route::post('/removeItemFromCart', 'removeItemFromCart');
     Route::post('/addBeforeLoginCartData', 'addBeforeLoginCartData');
+    Route::post('/updateCartDeliveryDate', 'updateCartDeliveryDate');
 });
 
 Route::controller(otpController::class)->group(function () {
@@ -109,13 +111,13 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/getMyFoodItems', 'getMyFoodItems');
     Route::post('/getFoodItem', 'getFoodItem');
     Route::post('/updateFoodItemAppprovedStatus', 'updateFoodItemAppprovedStatus');
-    
+
     Route::post('/updateWeekAvailibilty', 'updateWeekAvailibilty'); // for foodItems
     Route::post('/updateChefAvailibilty', 'updateChefAvailibilty'); // for chef
-    
+
     Route::post('/addNewAlternativeContact', 'addNewAlternativeContact');
     Route::post('/updateStatusOfAlternativeContact', 'updateStatusOfAlternativeContact');
-    
+
     Route::post('/getAllAlternativeContacts', 'getAllAlternativeContacts');
     Route::post('/changePasswordForChef', 'changePasswordForChef');
     Route::post('/sendProfileForReview', 'sendProfileForReview');
@@ -247,6 +249,10 @@ Route::controller(shefTypesController::class)->group(function () {
     Route::post('/deleteShefSubType', 'deleteShefSubType');
     Route::get('/getAllShefSubTypes', 'getAllShefSubTypes');
     Route::post('/updateShefSubTypeStatus', 'updateShefSubTypeStatus');
+});
+
+Route::controller(OrderController::class)->group(function () {
+    Route::post('/placeOrders', 'placeOrders');
 });
 
 /////////////// common api's ///////////////
