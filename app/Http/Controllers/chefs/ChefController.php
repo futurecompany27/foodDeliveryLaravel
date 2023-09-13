@@ -40,7 +40,6 @@ use App\Models\Pincode;
 use App\Notifications\Chef\ChefRegisterationNotification;
 use App\Notifications\chef\foodItemstatusChangeMail;
 use Illuminate\Support\Facades\Validator;
-// use Image; //Intervention Image
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\File;
 

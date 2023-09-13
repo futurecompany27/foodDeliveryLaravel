@@ -7,10 +7,11 @@ use App\Http\Controllers\admins\regionController;
 use App\Http\Controllers\admins\shefTypesController;
 use App\Http\Controllers\admins\taxController;
 use App\Http\Controllers\chefs\ChefController;
+use App\Http\Controllers\drivers\DriverController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\users\cartController;
 use App\Http\Controllers\users\OrderController;
-use App\Http\Controllers\users\otpController;
+use App\Http\Controllers\utility\otpController;
 use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
 use App\Http\Controllers\utility\notificationController;
@@ -30,6 +31,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Route for driver
+Route::controller(DriverController::class)->group(function () {
+    Route::post('/driverRegisteraion', 'driverRegisteraion');
+    Route::post('/driverLogin', 'driverLogin');
+    Route::post('/driverForgetPassword', 'driverForgetPassword');
 });
 
 // Routes for users
