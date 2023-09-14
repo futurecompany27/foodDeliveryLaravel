@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\users;
+namespace App\Http\Controllers\utility;
 
 use App\Http\Controllers\Controller;
 use App\Models\Otp;

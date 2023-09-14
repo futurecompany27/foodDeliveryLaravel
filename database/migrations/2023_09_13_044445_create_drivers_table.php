@@ -29,7 +29,7 @@ return new class extends Migration {
             $table->string('taxation_no')->nullable();
             $table->string('taxation_proof')->nullable();
             $table->string('criminal_report')->nullable();
-            $table->timestamp('status')->default(0);
+            $table->tinyInteger('status')->default(0);
             $table->timestamps();
         });
     }

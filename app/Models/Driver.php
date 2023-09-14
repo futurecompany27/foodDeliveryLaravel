@@ -24,4 +24,9 @@ class Driver extends Model
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function driverScheduleCall()
+    {
+        return $this->hasMany(DriverScheduleCall::class, 'driver_id', 'id');
+    }
 }

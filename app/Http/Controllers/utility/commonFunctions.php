@@ -10,6 +10,7 @@ use App\Models\chef;
 use App\Models\Dietary;
 use App\Models\DocumentItemField;
 use App\Models\DocumentItemList;
+use App\Models\DriverScheduleCall;
 use App\Models\Feedback;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
@@ -293,6 +294,44 @@ class commonFunctions extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
+
+    function getAllDriverScheduleCall(Request $req)
+    {
+        try {
+            $totalRecords = DriverScheduleCall::count();
+            $skip = $req->page * 10;
+            $data = DriverScheduleCall::with('driver')->skip($skip)->take(10)->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    public function updateDriverScheduleCallStatus(Request $req)
+    {
+
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "id.required" => "please fill status",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            DriverScheduleCall::where('id', $req->id)->update(['status' => $req->status]);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
 
     public function getAllChefs(Request $req)
     {
