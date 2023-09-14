@@ -48,7 +48,7 @@ class DriverController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $driverExist = Driver::where('email    ', $req->email)->first();
+            $driverExist = Driver::where('email', $req->email)->first();
             if ($driverExist) {
                 return response()->json(["message" => 'Email already registered', "success" => false], 500);
             } else {
@@ -56,7 +56,7 @@ class DriverController extends Controller
                 $driver->first_name = $req->first_name;
                 $driver->last_name = $req->last_name;
                 $driver->email = $req->email;
-                $driver->mobileNo = $req->mobileNo;
+                $driver->mobileNo = str_replace("-", "", $req->mobileNo);
                 $driver->are_you_a = $req->are_you_a;
                 $driver->password = Hash::make($req->password);
                 $driver->full_address = $req->full_address;
@@ -92,9 +92,12 @@ class DriverController extends Controller
         }
         try {
             $driver = Driver::where('email', $req->userName)->first();
+            Log::info('................................................................', $driver);
             if (!$driver) {
-                $driver = Driver::where('mobileNo', $req->userName)->first();
+                Log::info('////////////////////////////////////////////////////////////////', $driver);
+                $driver = Driver::where('mobileNo', str_replace("-", "", $req->userName))->first();
             }
+            Log::info($driver);
             $driver->makeVisible('password');
             if ($driver && Hash::check($req->password, $driver->password)) {
                 $driver->makeHidden('password');
