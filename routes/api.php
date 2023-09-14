@@ -38,6 +38,11 @@ Route::controller(DriverController::class)->group(function () {
     Route::post('/driverRegisteraion', 'driverRegisteraion');
     Route::post('/driverLogin', 'driverLogin');
     Route::post('/driverForgetPassword', 'driverForgetPassword');
+    Route::post('/updateDrivingLicence', 'updateDrivingLicence');
+    Route::post('/updateTaxationNo', 'updateTaxationNo');
+    Route::post('/updateAddress', 'updateAddress');
+    Route::post('/updateCriminialReport', 'updateCriminialReport');
+    Route::post('/updateBankDetails', 'updateBankDetails');
 });
 
 // Routes for users
@@ -280,6 +285,11 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::post("/updateScheduleCallStatus", 'updateScheduleCallStatus');
     Route::get("/getAllScheduleCall", 'getAllScheduleCall');
     Route::get("/getAllChefs", 'getAllChefs');
+
+    Route::post('/sendPasswordResetLink', 'sendPasswordResetLink');
+    Route::post('/verifyToken', 'verifyToken');
+    Route::post('/changePasswordwithToken', 'changePasswordwithToken');
+
 });
 
 /////////////// Notification Controller //////////////

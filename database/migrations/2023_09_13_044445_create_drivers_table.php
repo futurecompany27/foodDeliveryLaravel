@@ -29,7 +29,12 @@ return new class extends Migration {
             $table->string('taxation_no')->nullable();
             $table->string('taxation_proof')->nullable();
             $table->string('criminal_report')->nullable();
+            $table->string("bank_name")->nullable();
+            $table->string("transit_number")->nullable();
+            $table->string("account_number")->nullable();
+            $table->string("institution_number")->nullable();
             $table->timestamp('status')->default(0);
+            $table->text('resetToken')->nullable();
             $table->timestamps();
         });
     }

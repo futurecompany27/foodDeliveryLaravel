@@ -59,6 +59,7 @@ return new class extends Migration
             $table->json('chefAvailibilityWeek')->nullable();
             $table->string('chefAvailibilityFromTime')->nullable();
             $table->string('chefAvailibilityToTime')->nullable();
+            $table->text('resetToken')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

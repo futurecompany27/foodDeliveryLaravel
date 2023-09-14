@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\utility;
 
 use App\Http\Controllers\Controller;
+use App\Mail\HomeshefPasswordResetLink;
 use App\Models\Admin;
 use App\Models\Allergy;
 use App\Models\BankName;
@@ -10,6 +11,7 @@ use App\Models\chef;
 use App\Models\Dietary;
 use App\Models\DocumentItemField;
 use App\Models\DocumentItemList;
+use App\Models\Driver;
 use App\Models\Feedback;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
@@ -17,13 +19,17 @@ use App\Models\Ingredient;
 use App\Models\ScheduleCall;
 use App\Models\Sitesetting;
 use App\Models\State;
+use App\Models\User;
 use App\Models\UserContact;
 use App\Notifications\Customer\NewFeedback;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Intervention\Image\Image; //Intervention Image
 use Illuminate\Support\Facades\File;
 
@@ -301,6 +307,143 @@ class commonFunctions extends Controller
             $skip = $req->page * 10;
             $data = chef::skip($skip)->take(10)->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function sendPasswordResetLink(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "user_type" => 'required',
+            "email" => 'required',
+        ], [
+            "user_type.required" => "please fill user_type",
+            "email.required" => "please fill user_type",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $token = Str::random(40); // Generates a random token with 40 characters
+            $userDetail = [];
+            if ($req->user_type == 'User') {
+
+                User::where('email', $req->email)->update(['resetToken' => $token]);
+                $data = User::where('email', $req->email)->first();
+                $userDetail['full_name'] = $data->fullname;
+
+            } else if ($req->user_type == 'Admin') {
+
+                Admin::where('email', $req->email)->update(['resetToken' => $token]);
+                $data = Admin::where('email', $req->email)->first();
+                $userDetail['full_name'] = $data->name;
+
+            } else if ($req->user_type == 'chef') {
+
+                chef::where('email', $req->email)->update(['resetToken' => $token]);
+                $data = chef::where('email', $req->email)->first();
+                $userDetail['full_name'] = (ucfirst($data->first_name) . ' ' . ucfirst($data->last_name));
+
+            } else if ($req->user_type == 'Driver') {
+
+                Driver::where('email', $req->email)->update(['resetToken' => $token]);
+                $data = Driver::where('email', $req->email)->first();
+                $userDetail['full_name'] = (ucfirst($data->first_name) . ' ' . ucfirst($data->last_name));
+
+            }
+
+            $userDetail['id'] = $data->id;
+            $userDetail['user_type'] = $req->user_type;
+            $userDetail['token'] = $token;
+            Mail::to(trim($req->email))->send(new HomeshefPasswordResetLink($userDetail));
+            return response()->json(['message' => 'Password reset link has been send on mail', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function verifyToken(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "user_type" => 'required',
+            "email" => 'required',
+        ], [
+            "user_type.required" => "please fill user_type",
+            "email.required" => "please fill user_type",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            if ($req->user_type == 'User') {
+                $data = User::where(['email' => $req->email, 'token' => $req->token])->first();
+            } else if ($req->user_type == 'Admin') {
+                $data = Admin::where(['email' => $req->email, 'token' => $req->token])->first();
+            } else if ($req->user_type == 'chef') {
+                $data = chef::where(['email' => $req->email, 'token' => $req->token])->first();
+            } else if ($req->user_type == 'Driver') {
+                $data = Driver::where(['email' => $req->email, 'token' => $req->token])->first();
+            }
+
+            if ($data) {
+                return response()->json(['message' => 'token is valid', 'success' => true], 200);
+            } else {
+                return response()->json(['message' => 'token is expired', 'success' => false], 200);
+            }
+
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function changePasswordwithToken(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "user_type" => 'required',
+            "email" => 'required',
+            "token" => 'required',
+            "password" => 'required',
+        ], [
+            "user_type.required" => "please fill user_type",
+            "email.required" => "please fill user_type",
+            "token.required" => "please fill user_type",
+            "password.required" => "please fill user_type",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            if ($req->user_type == 'User') {
+                $data = User::where(['email' => $req->email, 'token' => $req->token])->first();
+                if ($data) {
+                    User::where('email', $req->email)->update(['password' => Hash::make($req->password)]);
+                }
+            } else if ($req->user_type == 'Admin') {
+                $data = Admin::where(['email' => $req->email, 'token' => $req->token])->first();
+                if ($data) {
+                    Admin::where('email', $req->email)->update(['password' => Hash::make($req->password)]);
+                }
+            } else if ($req->user_type == 'chef') {
+                $data = chef::where(['email' => $req->email, 'token' => $req->token])->first();
+                if ($data) {
+                    chef::where('email', $req->email)->update(['password' => Hash::make($req->password)]);
+                }
+            } else if ($req->user_type == 'Driver') {
+                $data = Driver::where(['email' => $req->email, 'token' => $req->token])->first();
+                if ($data) {
+                    Driver::where('email', $req->email)->update(['password' => Hash::make($req->password)]);
+                }
+            }
+            return response()->json(['message' => 'Password has been changed', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

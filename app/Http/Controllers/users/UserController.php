@@ -476,7 +476,7 @@ class UserController extends Controller
         }
     }
 
-    public function addUserContacts(Request $req)
+    function addUserContacts(Request $req)
     {
         $validator = Validator::make(
             $req->all(),
@@ -521,7 +521,7 @@ class UserController extends Controller
         }
     }
 
-    public function updateContactStatus(Request $req)
+    function updateContactStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -543,7 +543,7 @@ class UserController extends Controller
         }
     }
 
-    public function getUserContact(Request $req)
+    function getUserContact(Request $req)
     {
         try {
             $totalRecords = UserContact::count();
@@ -557,7 +557,7 @@ class UserController extends Controller
         }
     }
 
-    public function ChefReview(Request $req)
+    function ChefReview(Request $req)
     {
 
         $validator = Validator::make(
@@ -608,7 +608,7 @@ class UserController extends Controller
         }
     }
 
-    public function deleteChefReview(Request $req)
+    function deleteChefReview(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -628,7 +628,7 @@ class UserController extends Controller
         }
     }
 
-    public function getChefReview(Request $req)
+    function getChefReview(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "chef_id" => 'required',
@@ -879,7 +879,7 @@ class UserController extends Controller
         }
     }
 
-    public function updateUserFoodReviewStatus(Request $req)
+    function updateUserFoodReviewStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -901,7 +901,7 @@ class UserController extends Controller
         }
     }
 
-    public function deleteUserFoodReview(Request $req)
+    function deleteUserFoodReview(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -929,7 +929,7 @@ class UserController extends Controller
         }
     }
 
-    public function getAllUserFoodReviewsbyStatus(Request $req)
+    function getAllUserFoodReviewsbyStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "status" => 'required',
@@ -958,7 +958,7 @@ class UserController extends Controller
         }
     }
 
-    public function updateUserChefReviewStatus(Request $req)
+    function updateUserChefReviewStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -984,7 +984,7 @@ class UserController extends Controller
         }
     }
 
-    public function deleteUserChefReview(Request $req)
+    function deleteUserChefReview(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -1004,7 +1004,7 @@ class UserController extends Controller
         }
     }
 
-    public function getAllUserChefReviewsbyStatus(Request $req)
+    function getAllUserChefReviewsbyStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "status" => 'required',
@@ -1032,4 +1032,6 @@ class UserController extends Controller
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
         }
     }
+
+    
 }

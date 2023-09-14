@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->string('social_type')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->tinyinteger('status')->default(1)->comment('1 - active, 0 - inactive');
+            $table->text('resetToken')->nullable();
             $table->timestamps();
         });
     }

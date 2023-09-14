@@ -131,7 +131,8 @@ class DriverController extends Controller
         }
     }
 
-    function updateDrivingLicence(Request $req) {
+    function updateDrivingLicence(Request $req)
+    {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
             "driving_licence_no" => 'required',
@@ -143,18 +144,155 @@ class DriverController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $path = 'chef/' . $req->chef_id;
+            $path = 'driver/' . $req->id;
             if ($req->hasFile('driving_licence_proof')) {
                 $driver = Driver::find($req->id);
                 if (file_exists(str_replace(env('filePath'), '', $driver->driving_licence_proof))) {
                     unlink(str_replace(env('filePath'), '', $driver->driving_licence_proof));
                 }
-                $storedPath = $req->file('address_proof_path')->store($path, 'public');
+                $storedPath = $req->file('driving_licence_proof')->store($path, 'public');
+                Driver::where('id', $req->id)->update(['driving_licence_proof' => asset('storage/' . $storedPath), 'status' => 0]);
             }
+            Driver::where('id', $req->id)->update(['driving_licence_no' => $req->driving_licence_no]);
+            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
         }
     }
+
+    function updateTaxationNo(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "taxation_no" => 'required',
+        ], [
+            "id.required" => "please fill password",
+            "taxation_no.required" => "please fill driving licence no",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $path = 'driver/' . $req->id;
+            if ($req->hasFile('taxation_proof')) {
+                $driver = Driver::find($req->id);
+                if (file_exists(str_replace(env('filePath'), '', $driver->taxation_proof))) {
+                    unlink(str_replace(env('filePath'), '', $driver->taxation_proof));
+                }
+                $storedPath = $req->file('taxation_proof')->store($path, 'public');
+                Driver::where('id', $req->id)->update(['taxation_proof' => asset('storage/' . $storedPath), 'status' => 0]);
+            }
+            Driver::where('id', $req->id)->update(['taxation_no' => $req->taxation_no]);
+            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+        }
+    }
+    function updateAddress(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "full_address" => 'required',
+            "province" => 'required',
+            "city" => 'required',
+            "postal_code" => 'required',
+        ], [
+            "id.required" => "please fill password",
+            "full_address.required" => "please fill driving licence no",
+            "province.required" => "please fill driving licence no",
+            "city.required" => "please fill driving licence no",
+            "postal_code.required" => "please fill driving licence no",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $path = 'driver/' . $req->id;
+            if ($req->hasFile('address_proof')) {
+                $driver = Driver::find($req->id);
+                if (file_exists(str_replace(env('filePath'), '', $driver->address_proof))) {
+                    unlink(str_replace(env('filePath'), '', $driver->address_proof));
+                }
+                $storedPath = $req->file('address_proof')->store($path, 'public');
+                Driver::where('id', $req->id)->update(['address_proof' => asset('storage/' . $storedPath), 'status' => 0]);
+            }
+            Driver::where('id', $req->id)->update([
+                'full_address' => $req->full_address,
+                'province' => $req->province,
+                'city' => $req->city,
+                'postal_code' => $req->postal_code
+            ]);
+            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+        }
+    }
+
+    function updateCriminialReport(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "criminal_report" => 'required',
+        ], [
+            "criminal_report.required" => "please fill criminal report",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $path = 'driver/' . $req->id;
+            if ($req->hasFile('criminal_report')) {
+                $driver = Driver::find($req->id);
+                if (file_exists(str_replace(env('filePath'), '', $driver->criminal_report))) {
+                    unlink(str_replace(env('filePath'), '', $driver->criminal_report));
+                }
+                $storedPath = $req->file('criminal_report')->store($path, 'public');
+                Driver::where('id', $req->id)->update(['criminal_report' => asset('storage/' . $storedPath), 'status' => 0]);
+            }
+            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+    }
+
+    function updateBankDetails(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+            "bank_name" => 'required',
+            "transit_number" => 'required',
+            "account_number" => 'required',
+            "institution_number" => 'required',
+        ], [
+            "id.required" => "please fill password",
+            "bank_name.required" => "please fill bank name",
+            "transit_number.required" => "please fill driving transit number",
+            "account_number.required" => "please fill driving account number",
+            "institution_number.required" => "please fill driving institution number",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $update = [
+                'bank_name' => $req->bank_name,
+                'transit_number' => $req->transit_number,
+                'account_number' => $req->account_number,
+                'institution_number' => $req->institution_number,
+            ];
+            Driver::where('id', $req->id)->update($update);
+            return response()->json(["message" => 'updated successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+        }
+    }
+
+
 }
