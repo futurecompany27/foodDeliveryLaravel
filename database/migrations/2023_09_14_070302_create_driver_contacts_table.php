@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('driver_schedule_calls', function (Blueprint $table) {
+        Schema::create('driver_contacts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('driver_id');
-            $table->string('date');
-            $table->string('slot');
-            $table->tinyinteger('status')->default(1)->comment('1- Pending, 0-Call Made, 2-No Response');
+            $table->unsignedBigInteger("driver_id");
+            $table->String("subject");
+            $table->text("message");
+            $table->tinyinteger('status')->default(1)->comment('1-Pending 0-Replied');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('driver_schedule_calls');
+        Schema::dropIfExists('driver_contacts');
     }
 };

@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Mail\HomeshefDriverEmailVerificationLink;
 use App\Models\Admin;
 use App\Models\Driver;
+use App\Models\DriverContact;
 use App\Models\DriverScheduleCall;
 use App\Notifications\Driver\driverRegisterationNotification;
 use App\Notifications\Driver\DriverScheduleCallNotification;
+use App\Notifications\DriverContactUsNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -48,7 +50,7 @@ class DriverController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $driverExist = Driver::where('email    ', $req->email)->first();
+            $driverExist = Driver::where('email', $req->email)->first();
             if ($driverExist) {
                 return response()->json(["message" => 'Email already registered', "success" => false], 500);
             } else {
@@ -305,14 +307,19 @@ class DriverController extends Controller
             return response()->json(["message" => 'Please fill all the details', 'success' => false], 400);
         }
         try {
+            // Log::info($req);
             $slotNotAvailable = DriverScheduleCall::where(['date' => $req->date, 'slot' => $req->slot])->first();
             if ($slotNotAvailable) {
                 return response()->json(['message' => 'Slot not available select another slot', 'success' => false], 500);
             }
-            $SameChefSameSlot = DriverScheduleCall::where(['driver_id' => $req->chef_id, 'slot' => $req->slot])->first();
+            // Log::info($req);
+            
+            $SameChefSameSlot = DriverScheduleCall::where(['driver_id' => $req->driver_id, 'slot' => $req->slot])->first();
             if ($SameChefSameSlot) {
                 return response()->json(['message' => 'Already booked on same slot', 'success' => false], 500);
             }
+            // Log::info($req->driver_id);
+
             $scheduleNewCall = new DriverScheduleCall();
             $scheduleNewCall->driver_id = $req->driver_id;
             $scheduleNewCall->date = $req->date;
@@ -321,14 +328,42 @@ class DriverController extends Controller
 
             $ScheduleCall = DriverScheduleCall::orderBy('created_at', 'desc')->where('driver_id', $req->driver_id)->with('driver')->first();
             $admins = Admin::all();
+            Log::info($ScheduleCall);
             foreach ($admins as $admin) {
                 $admin->notify(new DriverScheduleCallNotification($ScheduleCall));
             }
+
             return response()->json(["message" => 'Call has been scheduled successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function AddDriverContactData(Request $req)
+    {
+        if (!$req->driver_id) {
+            return response()->json(["message" => "please fill all the required fields ", "success" => false], 400);
+        }
+
+        try {
+            Log::info($req);
+            $contact = new DriverContact();
+            $contact->driver_id = $req->driver_id;
+            $contact->subject = $req->subject;
+            $contact->message = $req->message;
+            $contact->save();
+            $contactUs = DriverContact::orderBy('created_at', 'desc')->where('driver_id', $req->driver_id)->with('driver')->first();
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new DriverContactUsNotification($contactUs));
+            }
+            return response()->json(['message' => 'Submitted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 }

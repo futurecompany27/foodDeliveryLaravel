@@ -45,7 +45,7 @@ Route::controller(DriverController::class)->group(function () {
     Route::post('/updateCriminialReport', 'updateCriminialReport');
     Route::post('/updateBankDetails', 'updateBankDetails');
     Route::post('/driverScheduleAnCall', 'driverScheduleAnCall');
-
+    Route::post('/AddDriverContactData', 'AddDriverContactData');
 });
 
 // Routes for users
@@ -287,6 +287,10 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::post("/updateSiteFeedbackStatus", 'updateSiteFeedbackStatus');
     Route::post("/updateScheduleCallStatus", 'updateScheduleCallStatus');
     Route::get("/getAllScheduleCall", 'getAllScheduleCall');
+
+    Route::post("/updateDriverScheduleCallStatus", 'updateDriverScheduleCallStatus');
+    Route::get("/getAllDriverScheduleCall", 'getAllDriverScheduleCall');
+
     Route::get("/getAllChefs", 'getAllChefs');
 
     Route::post('/sendPasswordResetLink', 'sendPasswordResetLink');

@@ -1,23 +1,24 @@
 <?php
 
-namespace App\Notifications\Driver;
+namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class DriverScheduleCallNotification extends Notification
+class DriverContactUsNotification extends Notification
 {
     use Queueable;
+    public $contactUs;
 
-    public $ScheduleCall;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct($ScheduleCall)
+    public function __construct($contactUs)
     {
-        $this->ScheduleCall = $ScheduleCall;
+        $this->contactUs = $contactUs;
     }
 
     /**
@@ -38,10 +39,10 @@ class DriverScheduleCallNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'id' => $this->ScheduleCall['id'],
-            'driver_id' => $this->ScheduleCall['driver_id'],
-            'message' => ($this->ScheduleCall->first_name . ' ' . $this->ScheduleCall->last_name) . ' has requested for call on ' . date('d M Y', strtotime($this->ScheduleCall['date'])) . ' between ' . $this->ScheduleCall['slot'] . '.',
-            'url' => '/admin/shef-call-request'
+            'id' => $this->contactUs['id'],
+            'driver_id'=>$this->contactUs['driver_id'],
+            'message' => ($this->contactUs->first_name . ' ' . $this->contactUs->last_name) . ' has query regarding ' . $this->contactUs['needHelpFor'] . '.',
+            'url' => '/admin/driver-contact-us'
         ];
     }
 }
