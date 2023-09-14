@@ -33,7 +33,7 @@ return new class extends Migration {
             $table->string("transit_number")->nullable();
             $table->string("account_number")->nullable();
             $table->string("institution_number")->nullable();
-            $table->timestamp('status')->default(0);
+            $table->tinyinteger('status')->default(0);
             $table->text('resetToken')->nullable();
             $table->timestamps();
         });
