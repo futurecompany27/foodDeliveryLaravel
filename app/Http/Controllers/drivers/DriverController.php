@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Mail\HomeshefDriverEmailVerificationLink;
 use App\Models\Admin;
 use App\Models\Driver;
+use App\Models\DriverScheduleCall;
 use App\Notifications\Driver\driverRegisterationNotification;
+use App\Notifications\Driver\DriverScheduleCallNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -256,7 +258,9 @@ class DriverController extends Controller
             }
             return response()->json(['message' => 'updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
-            //throw $th;
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
         }
     }
 
@@ -295,4 +299,36 @@ class DriverController extends Controller
     }
 
 
+    function driverScheduleAnCall(Request $req)
+    {
+        if (!$req->driver_id || !$req->date || !$req->slot) {
+            return response()->json(["message" => 'Please fill all the details', 'success' => false], 400);
+        }
+        try {
+            $slotNotAvailable = DriverScheduleCall::where(['date' => $req->date, 'slot' => $req->slot])->first();
+            if ($slotNotAvailable) {
+                return response()->json(['message' => 'Slot not available select another slot', 'success' => false], 500);
+            }
+            $SameChefSameSlot = DriverScheduleCall::where(['driver_id' => $req->chef_id, 'slot' => $req->slot])->first();
+            if ($SameChefSameSlot) {
+                return response()->json(['message' => 'Already booked on same slot', 'success' => false], 500);
+            }
+            $scheduleNewCall = new DriverScheduleCall();
+            $scheduleNewCall->driver_id = $req->driver_id;
+            $scheduleNewCall->date = $req->date;
+            $scheduleNewCall->slot = $req->slot;
+            $scheduleNewCall->save();
+
+            $ScheduleCall = DriverScheduleCall::orderBy('created_at', 'desc')->where('driver_id', $req->driver_id)->with('driver')->first();
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new DriverScheduleCallNotification($ScheduleCall));
+            }
+            return response()->json(["message" => 'Call has been scheduled successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
 }

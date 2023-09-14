@@ -11,6 +11,7 @@ use App\Http\Controllers\drivers\DriverController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\users\cartController;
 use App\Http\Controllers\users\OrderController;
+use App\Http\Controllers\users\otpController as UsersOtpController;
 use App\Http\Controllers\utility\otpController;
 use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
@@ -43,6 +44,8 @@ Route::controller(DriverController::class)->group(function () {
     Route::post('/updateAddress', 'updateAddress');
     Route::post('/updateCriminialReport', 'updateCriminialReport');
     Route::post('/updateBankDetails', 'updateBankDetails');
+    Route::post('/driverScheduleAnCall', 'driverScheduleAnCall');
+
 });
 
 // Routes for users
