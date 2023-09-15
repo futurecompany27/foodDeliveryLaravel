@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\drivers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\HomeshefDriverChangeEmailLink;
 use App\Mail\HomeshefDriverEmailVerificationLink;
 use App\Models\Admin;
 use App\Models\Driver;
@@ -65,7 +66,7 @@ class DriverController extends Controller
                 $driver->full_address = $req->full_address;
                 $driver->province = $req->province;
                 $driver->city = $req->city;
-                $driver->postal_code = $req->postal_code;
+                $driver->postal_code = strtoupper($req->postal_code);
                 $driver->save();
                 Mail::to(trim($req->email))->send(new HomeshefDriverEmailVerificationLink($driver));
                 $admins = Admin::all();
@@ -142,35 +143,55 @@ class DriverController extends Controller
             "driver_id" => 'required',
             "first_name" => 'required',
             "last_name" => 'required',
+            "full_address" => 'required',
+            "province" => 'required',
+            "city" => 'required',
+            "postal_code" => 'required',
         ], [
             "driver_id.required" => "please fill driver_id",
             "first_name.required" => "please fill email",
             "last_name.required" => "please fill email",
+            "full_address.required" => "please fill driving licence no",
+            "province.required" => "please fill driving licence no",
+            "city.required" => "please fill driving licence no",
+            "postal_code.required" => "please fill driving licence no",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            $path = "driver/" . $req->driver_id . '/';
+            if (!File::exists($path)) {
+                File::makeDirectory($path, $mode = 0777, true, true);
+            }
             $update = [
                 'first_name' => $req->first_name,
                 'last_name' => $req->last_name,
+                'full_address' => $req->full_address,
+                'province' => $req->province,
+                'city' => $req->city,
+                'postal_code' => strtoupper($req->postal_code),
             ];
-            if ($req->hasFile('profile_pic')) {
+            if ($req->hasFile('profile_pic') || $req->hasFile('address_proof')) {
                 $driver = Driver::find($req->driver_id);
-                $path = str_replace(url('storage'), 'public', $driver->profile_pic);
+            }
+            if ($req->hasFile('profile_pic')) {
 
-                if (isset($driver->profile_pic) && File::exists($path)) {
-                    unlink($path);
+                if (file_exists(str_replace(env('filePath'), '', $driver->profile_pic))) {
+                    unlink(str_replace(env('filePath'), '', $driver->profile_pic));
                 }
-                $name_gen = hexdec(uniqid()) . '.' . $req->file('profile_pic')->getClientOriginalExtension();
-                if (!File::exists("storage/driver/")) {
-                    File::makeDirectory("storage/driver/", $mode = 0777, true, true);
+                $storedPath = $req->file('profile_pic')->store($path, 'public');
+
+                $update['profile_pic'] = asset('storage/' . $storedPath);
+            }
+
+            if ($req->hasFile('address_proof')) {
+                if (file_exists(str_replace(env('filePath'), '', $driver->address_proof))) {
+                    unlink(str_replace(env('filePath'), '', $driver->address_proof));
                 }
-                $small_image = Image::make($req->file('profile_pic'))
-                    ->resize(100, 100)
-                    ->save("storage/driver/" . $name_gen);
-                $profile = asset('storage/driver/' . $name_gen);
-                $update['profile_pic'] = $profile;
+                $storedPath = $req->file('address_proof')->store($path, 'public');
+
+                $update['address_proof'] = asset('storage/' . $storedPath);
             }
             Driver::where('id', $req->driver_id)->update($update);
             return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
@@ -195,6 +216,9 @@ class DriverController extends Controller
         }
         try {
             $path = 'driver/' . $req->id;
+            if (!File::exists($path)) {
+                File::makeDirectory($path, $mode = 0777, true, true);
+            }
             if ($req->hasFile('driving_licence_proof')) {
                 $driver = Driver::find($req->id);
                 if (file_exists(str_replace(env('filePath'), '', $driver->driving_licence_proof))) {
@@ -226,6 +250,9 @@ class DriverController extends Controller
         }
         try {
             $path = 'driver/' . $req->id;
+            if (!File::exists($path)) {
+                File::makeDirectory($path, $mode = 0777, true, true);
+            }
             if ($req->hasFile('taxation_proof')) {
                 $driver = Driver::find($req->id);
                 if (file_exists(str_replace(env('filePath'), '', $driver->taxation_proof))) {
@@ -242,47 +269,48 @@ class DriverController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
         }
     }
-    function updateAddress(Request $req)
-    {
-        $validator = Validator::make($req->all(), [
-            "id" => 'required',
-            "full_address" => 'required',
-            "province" => 'required',
-            "city" => 'required',
-            "postal_code" => 'required',
-        ], [
-            "id.required" => "please fill password",
-            "full_address.required" => "please fill driving licence no",
-            "province.required" => "please fill driving licence no",
-            "city.required" => "please fill driving licence no",
-            "postal_code.required" => "please fill driving licence no",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
-        }
-        try {
-            $path = 'driver/' . $req->id;
-            if ($req->hasFile('address_proof')) {
-                $driver = Driver::find($req->id);
-                if (file_exists(str_replace(env('filePath'), '', $driver->address_proof))) {
-                    unlink(str_replace(env('filePath'), '', $driver->address_proof));
-                }
-                $storedPath = $req->file('address_proof')->store($path, 'public');
-                Driver::where('id', $req->id)->update(['address_proof' => asset('storage/' . $storedPath), 'status' => 0]);
-            }
-            Driver::where('id', $req->id)->update([
-                'full_address' => $req->full_address,
-                'province' => $req->province,
-                'city' => $req->city,
-                'postal_code' => $req->postal_code
-            ]);
-            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
-        }
-    }
+
+    // function updateAddress(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         "id" => 'required',
+    //         "full_address" => 'required',
+    //         "province" => 'required',
+    //         "city" => 'required',
+    //         "postal_code" => 'required',
+    //     ], [
+    //         "id.required" => "please fill password",
+    //         "full_address.required" => "please fill driving licence no",
+    //         "province.required" => "please fill driving licence no",
+    //         "city.required" => "please fill driving licence no",
+    //         "postal_code.required" => "please fill driving licence no",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+    //     }
+    //     try {
+    //         $path = 'driver/' . $req->id;
+    //         if ($req->hasFile('address_proof')) {
+    //             $driver = Driver::find($req->id);
+    //             if (file_exists(str_replace(env('filePath'), '', $driver->address_proof))) {
+    //                 unlink(str_replace(env('filePath'), '', $driver->address_proof));
+    //             }
+    //             $storedPath = $req->file('address_proof')->store($path, 'public');
+    //             Driver::where('id', $req->id)->update(['address_proof' => asset('storage/' . $storedPath), 'status' => 0]);
+    //         }
+    //         Driver::where('id', $req->id)->update([
+    //             'full_address' => $req->full_address,
+    //             'province' => $req->province,
+    //             'city' => $req->city,
+    //             'postal_code' => $req->postal_code
+    //         ]);
+    //         return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+    //     } catch (\Throwable $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+    //     }
+    // }
 
     function updateCriminialReport(Request $req)
     {
@@ -345,7 +373,6 @@ class DriverController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
         }
     }
-
 
     function driverScheduleAnCall(Request $req)
     {
@@ -420,6 +447,24 @@ class DriverController extends Controller
         try {
             $driver = Driver::find($req->driver_id);
             return response()->json(['data' => $driver, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function driverUpdateEmail(Request $req)
+    {
+        if (!$req->driver_id || !$req->email) {
+            return response()->json(["message" => "please fill all the required fields ", "success" => false], 400);
+        }
+        try {
+            Driver::where('id', $req->driver_id)->update(['email' => $req->email,'status' => 0]);
+            $driver = Driver::find($req->driver_id);
+
+            Mail::to(trim($req->email))->send(new HomeshefDriverChangeEmailLink($driver));
+            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

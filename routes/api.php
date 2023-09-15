@@ -42,12 +42,13 @@ Route::controller(DriverController::class)->group(function () {
     Route::post('/updatePersonalDetails', 'updatePersonalDetails');
     Route::post('/updateDrivingLicence', 'updateDrivingLicence');
     Route::post('/updateTaxationNo', 'updateTaxationNo');
-    Route::post('/updateAddress', 'updateAddress');
+    // Route::post('/updateAddress', 'updateAddress');
     Route::post('/updateCriminialReport', 'updateCriminialReport');
     Route::post('/updateDriverBankDetails', 'updateDriverBankDetails');
     Route::post('/driverScheduleAnCall', 'driverScheduleAnCall');
     Route::post('/AddDriverContactData', 'AddDriverContactData');
     Route::post('/getMyDetails', 'getMyDetails');
+    Route::post('/driverUpdateEmail', 'driverUpdateEmail');
 });
 
 // Routes for users
