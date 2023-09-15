@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Mail\HomeshefDriverEmailVerificationLink;
 use App\Models\Admin;
 use App\Models\Driver;
+use App\Models\DriverContact;
 use App\Models\DriverScheduleCall;
+use App\Notifications\Driver\DriverContactUsNotification;
 use App\Notifications\Driver\driverRegisterationNotification;
 use App\Notifications\Driver\DriverScheduleCallNotification;
 use Illuminate\Http\Request;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
+use Intervention\Image\Facades\Image;
 
 class DriverController extends Controller
 {
@@ -92,12 +95,9 @@ class DriverController extends Controller
         }
         try {
             $driver = Driver::where('email', $req->userName)->first();
-            Log::info('................................................................', $driver);
             if (!$driver) {
-                Log::info('////////////////////////////////////////////////////////////////', $driver);
                 $driver = Driver::where('mobileNo', str_replace("-", "", $req->userName))->first();
             }
-            Log::info($driver);
             $driver->makeVisible('password');
             if ($driver && Hash::check($req->password, $driver->password)) {
                 $driver->makeHidden('password');
@@ -133,6 +133,51 @@ class DriverController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+        }
+    }
+
+    function updatePersonalDetails(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "driver_id" => 'required',
+            "first_name" => 'required',
+            "last_name" => 'required',
+        ], [
+            "driver_id.required" => "please fill driver_id",
+            "first_name.required" => "please fill email",
+            "last_name.required" => "please fill email",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $update = [
+                'first_name' => $req->first_name,
+                'last_name' => $req->last_name,
+            ];
+            if ($req->hasFile('profile_pic')) {
+                $driver = Driver::find($req->driver_id);
+                $path = str_replace(url('storage'), 'public', $driver->profile_pic);
+
+                if (isset($driver->profile_pic) && File::exists($path)) {
+                    unlink($path);
+                }
+                $name_gen = hexdec(uniqid()) . '.' . $req->file('profile_pic')->getClientOriginalExtension();
+                if (!File::exists("storage/driver/")) {
+                    File::makeDirectory("storage/driver/", $mode = 0777, true, true);
+                }
+                $small_image = Image::make($req->file('profile_pic'))
+                    ->resize(100, 100)
+                    ->save("storage/driver/" . $name_gen);
+                $profile = asset('storage/driver/' . $name_gen);
+                $update['profile_pic'] = $profile;
+            }
+            Driver::where('id', $req->driver_id)->update($update);
+            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 
@@ -267,7 +312,7 @@ class DriverController extends Controller
         }
     }
 
-    function updateBankDetails(Request $req)
+    function updateDriverBankDetails(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -276,7 +321,7 @@ class DriverController extends Controller
             "account_number" => 'required',
             "institution_number" => 'required',
         ], [
-            "id.required" => "please fill password",
+            "id.required" => "please fill id",
             "bank_name.required" => "please fill bank name",
             "transit_number.required" => "please fill driving transit number",
             "account_number.required" => "please fill driving account number",
@@ -308,14 +353,19 @@ class DriverController extends Controller
             return response()->json(["message" => 'Please fill all the details', 'success' => false], 400);
         }
         try {
+            // Log::info($req);
             $slotNotAvailable = DriverScheduleCall::where(['date' => $req->date, 'slot' => $req->slot])->first();
             if ($slotNotAvailable) {
                 return response()->json(['message' => 'Slot not available select another slot', 'success' => false], 500);
             }
-            $SameChefSameSlot = DriverScheduleCall::where(['driver_id' => $req->chef_id, 'slot' => $req->slot])->first();
+            // Log::info($req);
+
+            $SameChefSameSlot = DriverScheduleCall::where(['driver_id' => $req->driver_id, 'slot' => $req->slot])->first();
             if ($SameChefSameSlot) {
                 return response()->json(['message' => 'Already booked on same slot', 'success' => false], 500);
             }
+            // Log::info($req->driver_id);
+
             $scheduleNewCall = new DriverScheduleCall();
             $scheduleNewCall->driver_id = $req->driver_id;
             $scheduleNewCall->date = $req->date;
@@ -324,14 +374,56 @@ class DriverController extends Controller
 
             $ScheduleCall = DriverScheduleCall::orderBy('created_at', 'desc')->where('driver_id', $req->driver_id)->with('driver')->first();
             $admins = Admin::all();
+            Log::info($ScheduleCall);
             foreach ($admins as $admin) {
                 $admin->notify(new DriverScheduleCallNotification($ScheduleCall));
             }
+
             return response()->json(["message" => 'Call has been scheduled successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    function AddDriverContactData(Request $req)
+    {
+        if (!$req->driver_id) {
+            return response()->json(["message" => "please fill all the required fields ", "success" => false], 400);
+        }
+
+        try {
+            $contact = new DriverContact();
+            $contact->driver_id = $req->driver_id;
+            $contact->subject = $req->subject;
+            $contact->message = $req->message;
+            $contact->save();
+            $contactUs = DriverContact::orderBy('created_at', 'desc')->where('driver_id', $req->driver_id)->with('driver')->first();
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new DriverContactUsNotification($contactUs));
+            }
+            return response()->json(['message' => 'Submitted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function getMyDetails(Request $req)
+    {
+        if (!$req->driver_id) {
+            return response()->json(["message" => "please fill all the required fields ", "success" => false], 400);
+        }
+        try {
+            $driver = Driver::find($req->driver_id);
+            return response()->json(['data' => $driver, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
 }

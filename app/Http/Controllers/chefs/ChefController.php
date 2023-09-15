@@ -141,6 +141,19 @@ class ChefController extends Controller
         }
 
         try {
+            $update = [
+                "first_name" => ucfirst($req->first_name),
+                "last_name" => ucfirst($req->last_name),
+                "type" => ucfirst($req->type),
+                "sub_type" => ucfirst($req->sub_type),
+                "address_line1" => htmlspecialchars(ucfirst($req->address_line1)),
+                "postal_code" => strtoupper($req->postal_code),
+                "latitude" => isset($req->latitude) ? $req->latitude : '',
+                "longitude" => isset($req->longitude) ? $req->longitude : '',
+                "city" => isset($req->city) ? $req->city : '',
+                "state" => isset($req->state) ? $req->state : '',
+                'status' => 0
+            ];
             if ($req->hasFile('profile_pic')) {
                 $chefDetail = chef::find($req->chef_id);
                 $path = str_replace(url('storage'), 'public', $chefDetail->profile_pic);
@@ -156,22 +169,10 @@ class ChefController extends Controller
                     ->resize(100, 100)
                     ->save("storage/chef/" . $name_gen);
                 $profile = asset('storage/chef/' . $name_gen);
+                $update['profile_pic'] = $profile;
             }
 
-            chef::where('id', $req->chef_id)->update([
-                "first_name" => ucfirst($req->first_name),
-                "last_name" => ucfirst($req->last_name),
-                "type" => ucfirst($req->type),
-                "sub_type" => ucfirst($req->sub_type),
-                "address_line1" => htmlspecialchars(ucfirst($req->address_line1)),
-                "postal_code" => strtoupper($req->postal_code),
-                "profile_pic" => isset($profile) ? $profile : '',
-                "latitude" => isset($req->latitude) ? $req->latitude : '',
-                "longitude" => isset($req->longitude) ? $req->longitude : '',
-                "city" => isset($req->city) ? $req->city : '',
-                "state" => isset($req->state) ? $req->state : '',
-                'status' => 0
-            ]);
+            chef::where('id', $req->chef_id)->update($update);
             return response()->json(["message" => "profile updated successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -1151,5 +1152,5 @@ class ChefController extends Controller
         }
     }
 
-    
+
 }

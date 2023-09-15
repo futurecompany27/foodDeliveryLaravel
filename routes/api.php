@@ -39,13 +39,15 @@ Route::controller(DriverController::class)->group(function () {
     Route::post('/driverRegisteraion', 'driverRegisteraion');
     Route::post('/driverLogin', 'driverLogin');
     Route::post('/driverForgetPassword', 'driverForgetPassword');
+    Route::post('/updatePersonalDetails', 'updatePersonalDetails');
     Route::post('/updateDrivingLicence', 'updateDrivingLicence');
     Route::post('/updateTaxationNo', 'updateTaxationNo');
     Route::post('/updateAddress', 'updateAddress');
     Route::post('/updateCriminialReport', 'updateCriminialReport');
-    Route::post('/updateBankDetails', 'updateBankDetails');
+    Route::post('/updateDriverBankDetails', 'updateDriverBankDetails');
     Route::post('/driverScheduleAnCall', 'driverScheduleAnCall');
-
+    Route::post('/AddDriverContactData', 'AddDriverContactData');
+    Route::post('/getMyDetails', 'getMyDetails');
 });
 
 // Routes for users
@@ -287,6 +289,10 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::post("/updateSiteFeedbackStatus", 'updateSiteFeedbackStatus');
     Route::post("/updateScheduleCallStatus", 'updateScheduleCallStatus');
     Route::get("/getAllScheduleCall", 'getAllScheduleCall');
+
+    Route::post("/updateDriverScheduleCallStatus", 'updateDriverScheduleCallStatus');
+    Route::get("/getAllDriverScheduleCall", 'getAllDriverScheduleCall');
+
     Route::get("/getAllChefs", 'getAllChefs');
 
     Route::post('/sendPasswordResetLink', 'sendPasswordResetLink');

@@ -41,7 +41,7 @@ class driverRegisterationNotification extends Notification
             'id' => $this->driver->id,
             'fullname' => ($this->driver->first_name . ' ' . $this->driver->last_name),
             'email' => $this->driver->email,
-            'message' => ($this->driver->first_name . ' ' . $this->driver->last_name) . ' send Customer request',
+            'message' => ($this->driver->first_name . ' ' . $this->driver->last_name) . ' has registered as delivery partner.',
             'url' => '/admin/new-contact-us'
         ];
     }
