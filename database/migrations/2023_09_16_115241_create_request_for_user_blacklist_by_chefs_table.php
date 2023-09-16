@@ -10,16 +10,13 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('chef_reviews', function (Blueprint $table) {
+        Schema::create('request_for_user_blacklist_by_chefs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('chef_id');
-            $table->unsignedInteger('star_rating');
-            $table->string('message');
-            $table->tinyInteger('requestedForDeletion')->default(0)->comment('0 - Not requested, 1 - Requested for deletion');
-            $table->tinyInteger('status')->default(1)->comment('1 - active, 2 - inactive');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->tinyInteger('status')->default(0)->comment('0 - pending, 1 - Request accepted, 2 - Request declined ');
             $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('chef_reviews');
+        Schema::dropIfExists('request_for_user_blacklist_by_chefs');
     }
 };

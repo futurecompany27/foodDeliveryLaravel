@@ -460,7 +460,7 @@ class DriverController extends Controller
             return response()->json(["message" => "please fill all the required fields ", "success" => false], 400);
         }
         try {
-            Driver::where('id', $req->driver_id)->update(['email' => $req->email,'status' => 0]);
+            Driver::where('id', $req->driver_id)->update(['email' => $req->email, 'status' => 0]);
             $driver = Driver::find($req->driver_id);
 
             Mail::to(trim($req->email))->send(new HomeshefDriverChangeEmailLink($driver));

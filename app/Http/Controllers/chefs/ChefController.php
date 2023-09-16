@@ -17,6 +17,7 @@ use App\Models\ChefDocument;
 use App\Models\ChefProfileReviewByAdmin;
 use App\Models\FoodItem;
 use App\Models\RequestForUpdateDetails;
+use App\Models\RequestForUserBlacklistByChef;
 use App\Models\ScheduleCall;
 use App\Models\ShefRegisterationRequest;
 use App\Models\User;
@@ -37,6 +38,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Pincode;
+use App\Notifications\admin\requestForBlacklistUser;
 use App\Notifications\Chef\ChefRegisterationNotification;
 use App\Notifications\chef\foodItemstatusChangeMail;
 use Illuminate\Support\Facades\Validator;
@@ -1152,5 +1154,36 @@ class ChefController extends Controller
         }
     }
 
+    function sendRequestForUserBlacklist(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "chef_id" => 'required',
+            "user_id" => 'required',
+        ], [
+            "chef_id.required" => "please fill chef id",
+            "user_id.required" => "please fill user id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $request = new RequestForUserBlacklistByChef();
+            $request->chef_id = $req->chef_id;
+            $request->user_id = $req->user_id;
+            $request->save();
+
+            $blacklistRequest = RequestForUserBlacklistByChef::with(['user','chef'])->orderByDesc('created_at')->where(['chef_id' => $req->chef_id, 'user_id' => $req->user_id])->first();
+            Log::info($blacklistRequest);
+            $admins = Admin::all(['*']);
+            foreach ($admins as $admin) {
+                $admin->notify(new requestForBlacklistUser($blacklistRequest));
+            }
+            return response()->json(["message" => 'Request has been raised successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
 
 }

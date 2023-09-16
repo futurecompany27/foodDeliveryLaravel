@@ -146,8 +146,9 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
 
     Route::post('/VerifyChefEmail', 'VerifyChefEmail');
-
-
+    
+    Route::post('/sendRequestForUserBlacklist', 'sendRequestForUserBlacklist');
+    
 });
 
 // Route for admin
