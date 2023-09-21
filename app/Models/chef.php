@@ -35,8 +35,9 @@ class chef extends Model
     ];
 
     protected $casts = [
-        'kitchen_types'=>'array',
-        'chefAvailibilityWeek'=>'array'
+        'kitchen_types' => 'array',
+        'chefAvailibilityWeek' => 'array',
+        'blacklistedUser' => 'array'
     ];
 
 
@@ -52,7 +53,7 @@ class chef extends Model
 
     public function alternativeContacts()
     {
-        return $this->hasMany(ChefAlternativeContact::class,'chef_id','id');
+        return $this->hasMany(ChefAlternativeContact::class, 'chef_id', 'id');
     }
 
     public function UserFoodReview()
@@ -62,6 +63,6 @@ class chef extends Model
 
     public function UserChefReview()
     {
-        return $this->hasMany(UserChefReview::class,'chef_id','id');
+        return $this->hasMany(UserChefReview::class, 'chef_id', 'id');
     }
 }

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -59,6 +58,7 @@ return new class extends Migration
             $table->json('chefAvailibilityWeek')->nullable();
             $table->string('chefAvailibilityFromTime')->nullable();
             $table->string('chefAvailibilityToTime')->nullable();
+            $table->json('blacklistedUser')->nullable();
             $table->text('resetToken')->nullable();
             $table->rememberToken();
             $table->timestamps();

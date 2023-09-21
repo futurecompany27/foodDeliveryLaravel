@@ -15,6 +15,8 @@ use App\Models\chef;
 use App\Models\ChefAlternativeContact;
 use App\Models\ChefDocument;
 use App\Models\ChefProfileReviewByAdmin;
+use App\Models\ChefReview;
+use App\Models\chefReviewDeleteRequest;
 use App\Models\FoodItem;
 use App\Models\RequestForUpdateDetails;
 use App\Models\RequestForUserBlacklistByChef;
@@ -39,6 +41,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Pincode;
 use App\Notifications\admin\requestForBlacklistUser;
+use App\Notifications\admin\requestForChefReviewDelete;
 use App\Notifications\Chef\ChefRegisterationNotification;
 use App\Notifications\chef\foodItemstatusChangeMail;
 use Illuminate\Support\Facades\Validator;
@@ -51,7 +54,7 @@ class ChefController extends Controller
     {
         try {
             DB::beginTransaction();
-            $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtolower($req->pincode)), 'status' => 1])->first();
+            $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtolower($req->postal_code)), 'status' => 1])->first();
             if (!$checkPinCode) {
                 return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
@@ -1154,6 +1157,45 @@ class ChefController extends Controller
         }
     }
 
+    function sendRequestForChefReviewDelete(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "chef_id" => 'required',
+            "user_id" => 'required',
+            "review_id" => 'required',
+            "reason" => 'required',
+        ], [
+            "chef_id.required" => "please fill chef id",
+            "user_id.required" => "please fill user id",
+            "review_id.required" => "please fill review id",
+            "reason.required" => "please fill reason",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $request = new chefReviewDeleteRequest();
+            $request->chef_id = $req->chef_id;
+            $request->user_id = $req->user_id;
+            $request->review_id = $req->review_id;
+            $request->reason = $req->reason;
+            $request->save();
+            ChefReview::where('id', $req->review_id)->update(['requestedForDeletion' => 1]);
+            $chefReviewDeleteRequest = chefReviewDeleteRequest::with('chef')->orderByDesc('created_at')->where(['chef_id' => $req->chef_id, 'user_id' => $req->user_id, 'review_id' => $req->review_id])->first();
+            Log::info($chefReviewDeleteRequest);
+            $admins = Admin::all(['*']);
+            foreach ($admins as $admin) {
+                $admin->notify(new requestForChefReviewDelete($chefReviewDeleteRequest));
+            }
+            return response()->json(["message" => 'Request has been raised successfully', "success" => true], 200);
+
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
     function sendRequestForUserBlacklist(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -1172,7 +1214,7 @@ class ChefController extends Controller
             $request->user_id = $req->user_id;
             $request->save();
 
-            $blacklistRequest = RequestForUserBlacklistByChef::with(['user','chef'])->orderByDesc('created_at')->where(['chef_id' => $req->chef_id, 'user_id' => $req->user_id])->first();
+            $blacklistRequest = RequestForUserBlacklistByChef::with(['user', 'chef'])->orderByDesc('created_at')->where(['chef_id' => $req->chef_id, 'user_id' => $req->user_id])->first();
             Log::info($blacklistRequest);
             $admins = Admin::all(['*']);
             foreach ($admins as $admin) {
@@ -1185,5 +1227,7 @@ class ChefController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
+
+
 
 }

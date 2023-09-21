@@ -573,7 +573,7 @@ class UserController extends Controller
             return response()->json(["message" => 'please fill all the details', "success" => false], 400);
         }
         try {
-            $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
+            $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id, 'status' => 1])->first();
             if ($reviewExist) {
                 ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);
             } else {
@@ -639,9 +639,9 @@ class UserController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $totalRecords = ChefReview::where('chef_id', $req->chef_id)->count();
+            $totalRecords = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->count();
             $skip = $req->page * 10;
-            $data = ChefReview::where('chef_id', $req->chef_id)->skip($skip)->take(10)->with('user:fullname,id')->get();
+            $data = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->skip($skip)->take(10)->with('user:fullname,id')->get();
             return response()->json([
                 'data' => $data,
                 'TotalRecords' => $totalRecords,
@@ -1033,5 +1033,5 @@ class UserController extends Controller
         }
     }
 
-    
+
 }

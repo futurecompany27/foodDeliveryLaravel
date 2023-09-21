@@ -49,7 +49,7 @@ class otpController extends Controller
                 $verified = Otp::where(["email" => $req->email, "otp_number" => $req->otp])->first();
             }
             if ($verified) {
-                return response()->json(['message' => "verified successfully", "success" => true], 200);
+                return response()->json(['message' => "Verified successfully", "success" => true], 200);
             } else {
                 return response()->json(['message' => "Invalid OTP", "success" => false], 500);
             }

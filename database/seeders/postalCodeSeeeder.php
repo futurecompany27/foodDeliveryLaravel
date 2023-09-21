@@ -22,5 +22,13 @@ class postalCodeSeeeder extends Seeder
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
+        DB::table('pincodes')->insert([
+            "city_id" => 1,
+            "pincode" => "J7A4N7",
+            "latitude" => "45.6524509",
+            "longitude" => "-73.7814507",
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
     }
 }

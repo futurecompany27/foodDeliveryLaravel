@@ -147,6 +147,7 @@ Route::controller(ChefController::class)->group(function () {
 
     Route::post('/VerifyChefEmail', 'VerifyChefEmail');
     
+    Route::post('/sendRequestForChefReviewDelete', 'sendRequestForChefReviewDelete');
     Route::post('/sendRequestForUserBlacklist', 'sendRequestForUserBlacklist');
     
 });
@@ -200,7 +201,10 @@ Route::controller(AdminController::class)->group(function () {
 
     Route::post('/sendMailToChef', 'sendMailToChef');
 
-    Route::post('/updateChnageRequestStatus', 'updateChnageRequestStatus');
+    Route::post('/updateChangeRequestStatus', 'updateChangeRequestStatus');
+
+    Route::get('/getAllRequestForChefReviewDeletion', 'getAllRequestForChefReviewDeletion');
+    Route::post('/updateStatusOfChefReviewDeleteRequest', 'updateStatusOfChefReviewDeleteRequest');
 });
 
 Route::controller(regionController::class)->group(function () {

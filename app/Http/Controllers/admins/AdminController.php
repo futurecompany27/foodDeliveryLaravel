@@ -8,6 +8,8 @@ use App\Models\Admin;
 use App\Models\Adminsetting;
 use App\Models\Allergy;
 use App\Models\chef;
+use App\Models\ChefReview;
+use App\Models\chefReviewDeleteRequest;
 use App\Models\Contact;
 use App\Models\Dietary;
 use App\Models\FoodCategory;
@@ -1033,6 +1035,46 @@ class AdminController extends Controller
         try {
             RequestForUpdateDetails::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function getAllRequestForChefReviewDeletion()
+    {
+        try {
+            $TotalRecords = chefReviewDeleteRequest::where(['status' => 0])->count();
+            $data = chefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at')->where(['status' => 0])->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $TotalRecords, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function updateStatusOfChefReviewDeleteRequest(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "review_id" => 'required',
+            "id" => 'required',
+            "status" => 'required',
+        ], [
+            "review_id.required" => "please fill review id",
+            "id.required" => "please fill id",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            chefReviewDeleteRequest::where('id', $req->id)->update(['status' => $req->status]);
+            if ($req->status == 1) {
+                ChefReview::where('id', $req->review_id)->update(['status' => 2]);
+            }
+            return response()->json(["message" => 'Updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('chef_id');
             $table->unsignedInteger('star_rating');
-            $table->string('message');
+            $table->text('message');
             $table->tinyInteger('requestedForDeletion')->default(0)->comment('0 - Not requested, 1 - Requested for deletion');
             $table->tinyInteger('status')->default(1)->comment('1 - active, 2 - inactive');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

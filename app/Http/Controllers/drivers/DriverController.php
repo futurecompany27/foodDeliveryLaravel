@@ -9,6 +9,7 @@ use App\Models\Admin;
 use App\Models\Driver;
 use App\Models\DriverContact;
 use App\Models\DriverScheduleCall;
+use App\Models\Pincode;
 use App\Notifications\Driver\DriverContactUsNotification;
 use App\Notifications\Driver\driverRegisterationNotification;
 use App\Notifications\Driver\DriverScheduleCallNotification;
@@ -25,6 +26,12 @@ class DriverController extends Controller
 {
     function driverRegisteraion(Request $req)
     {
+        Log::info($req->postal_code);
+        $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtolower($req->postal_code)), 'status' => 1])->first();
+        Log::info($checkPinCode);
+        if (!$checkPinCode) {
+            return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 500);
+        }
         $validator = Validator::make($req->all(), [
             "first_name" => 'required',
             "last_name" => 'required',
@@ -55,26 +62,30 @@ class DriverController extends Controller
             $driverExist = Driver::where('email', $req->email)->first();
             if ($driverExist) {
                 return response()->json(["message" => 'Email already registered', "success" => false], 500);
-            } else {
-                $driver = new Driver();
-                $driver->first_name = $req->first_name;
-                $driver->last_name = $req->last_name;
-                $driver->email = $req->email;
-                $driver->mobileNo = str_replace("-", "", $req->mobileNo);
-                $driver->are_you_a = $req->are_you_a;
-                $driver->password = Hash::make($req->password);
-                $driver->full_address = $req->full_address;
-                $driver->province = $req->province;
-                $driver->city = $req->city;
-                $driver->postal_code = strtoupper($req->postal_code);
-                $driver->save();
-                Mail::to(trim($req->email))->send(new HomeshefDriverEmailVerificationLink($driver));
-                $admins = Admin::all();
-                foreach ($admins as $admin) {
-                    $admin->notify(new driverRegisterationNotification($driver));
-                }
-                return response()->json(["message" => 'Registered successfully', "success" => true, "driver_id" => $driver->id], 200);
             }
+            $driverExist = Driver::where('mobileNo', str_replace("-", "", $req->mobileNo))->first();
+            if ($driverExist) {
+                return response()->json(["message" => 'Mobile No already registered', "success" => false], 500);
+            }
+            $driver = new Driver();
+            $driver->first_name = $req->first_name;
+            $driver->last_name = $req->last_name;
+            $driver->email = $req->email;
+            $driver->mobileNo = str_replace("-", "", $req->mobileNo);
+            $driver->are_you_a = $req->are_you_a;
+            $driver->password = Hash::make($req->password);
+            $driver->full_address = $req->full_address;
+            $driver->province = $req->province;
+            $driver->city = $req->city;
+            $driver->postal_code = strtoupper($req->postal_code);
+            $driver->save();
+            Mail::to(trim($req->email))->send(new HomeshefDriverEmailVerificationLink($driver));
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new driverRegisterationNotification($driver));
+            }
+            return response()->json(["message" => 'Registered successfully', "success" => true, "driver_id" => $driver->id], 200);
+
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
