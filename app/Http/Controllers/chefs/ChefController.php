@@ -1201,9 +1201,13 @@ class ChefController extends Controller
         $validator = Validator::make($req->all(), [
             "chef_id" => 'required',
             "user_id" => 'required',
+            "reason" => 'required',
+            "review_id" => 'required',
         ], [
             "chef_id.required" => "please fill chef id",
             "user_id.required" => "please fill user id",
+            "review_id.required" => "please fill review id",
+            "reason.required" => "please fill reason",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1212,10 +1216,19 @@ class ChefController extends Controller
             $request = new RequestForUserBlacklistByChef();
             $request->chef_id = $req->chef_id;
             $request->user_id = $req->user_id;
+            $request->reason = $req->reason;
             $request->save();
 
             $blacklistRequest = RequestForUserBlacklistByChef::with(['user', 'chef'])->orderByDesc('created_at')->where(['chef_id' => $req->chef_id, 'user_id' => $req->user_id])->first();
-            Log::info($blacklistRequest);
+            ChefReview::where('id', $req->review_id)->update(['requestedForBlackList' => 1]);
+            $request = new Request();
+            $request->merge([
+                "chef_id" => $req->chef_id,
+                "user_id" => $req->user_id,
+                "review_id" => $req->review_id,
+                "reason" => $req->reason
+            ]);
+            $this->sendRequestForChefReviewDelete($request);
             $admins = Admin::all(['*']);
             foreach ($admins as $admin) {
                 $admin->notify(new requestForBlacklistUser($blacklistRequest));

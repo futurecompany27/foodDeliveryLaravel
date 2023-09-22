@@ -14,7 +14,8 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('chef_id');
             $table->unsignedBigInteger('user_id');
-            $table->tinyInteger('status')->default(0)->comment('0 - pending, 1 - Request accepted, 2 - Request declined ');
+            $table->text('reason');
+            $table->tinyInteger('status')->default(0)->comment('0 - pending, 1 - Request accepted');
             $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

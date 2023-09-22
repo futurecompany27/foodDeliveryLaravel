@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->unsignedInteger('star_rating');
             $table->text('message');
             $table->tinyInteger('requestedForDeletion')->default(0)->comment('0 - Not requested, 1 - Requested for deletion');
+            $table->tinyInteger('requestedForBlackList')->default(0)->comment('0 - Not requested, 1 - Requested for deletion');
             $table->tinyInteger('status')->default(1)->comment('1 - active, 2 - inactive');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('cascade');

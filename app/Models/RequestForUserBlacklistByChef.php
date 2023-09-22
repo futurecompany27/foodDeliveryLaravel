@@ -24,4 +24,9 @@ class RequestForUserBlacklistByChef extends Model
         return $this->belongsTo(Chef::class, 'chef_id', 'id');
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(ChefReview::class, 'user_id', 'user_id');
+    }
+
 }

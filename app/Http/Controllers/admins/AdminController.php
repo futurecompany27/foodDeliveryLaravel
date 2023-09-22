@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admins;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\users\UserController;
 use App\Mail\MessageFromAdminToChef;
 use App\Models\Admin;
 use App\Models\Adminsetting;
@@ -16,6 +17,7 @@ use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
 use App\Models\RequestForUpdateDetails;
+use App\Models\RequestForUserBlacklistByChef;
 use App\Models\Sitesetting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -1070,10 +1072,13 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            $chefReviewDeleteRequest = chefReviewDeleteRequest::find($req->id);
             chefReviewDeleteRequest::where('id', $req->id)->update(['status' => $req->status]);
             if ($req->status == 1) {
                 ChefReview::where('id', $req->review_id)->update(['status' => 2]);
             }
+            $UserController = new UserController;
+            $UserController->updateChefrating($chefReviewDeleteRequest->chef_id);
             return response()->json(["message" => 'Updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -1081,4 +1086,90 @@ class AdminController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
+
+    function getAllBlackListRequestByChef(Request $req)
+    {
+        try {
+            $TotalRecords = RequestForUserBlacklistByChef::count();
+            $data = RequestForUserBlacklistByChef::with(['user', 'chef', 'reviews'])->orderByDesc('created_at')->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $TotalRecords, 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function blacklistUserOnChefRequest(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "user_id" => 'required',
+            "chef_id" => 'required',
+            "request_id" => 'required',
+        ], [
+            "user_id.required" => "please fill user id",
+            "chef_id.required" => "please fill chef id",
+            "request_id.required" => "please fill chef id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            DB::beginTransaction();
+            $chef = chef::find($req->chef_id);
+
+            $blaclistedArray = isset($chef->blacklistedUser) ? $chef->blacklistedUser : [];
+
+            array_push($blaclistedArray, $req->user_id);
+
+            chef::where('id', $req->chef_id)->update(['blacklistedUser' => $blaclistedArray]);
+
+            chefReviewDeleteRequest::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['status' => 1]);
+
+            ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['status' => 2]);
+
+            RequestForUserBlacklistByChef::where('id', $req->request_id)->update(['status' => 1]);
+
+            $UserController = new UserController;
+            $UserController->updateChefrating($req->chef_id);
+
+            DB::commit();
+            return response()->json(['message' => 'blacklisted successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    function unBlackListUser(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "user_id" => 'required',
+            "chef_id" => 'required',
+        ], [
+            "user_id.required" => "please fill user id",
+            "chef_id.required" => "please fill chef id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $chef = chef::find($req->chef_id);
+
+            $blaclistedArray = $chef->blacklistedUser;
+            $user_id = $req->user_id;
+            $newArray = array_filter($blaclistedArray, function ($value) use ($user_id) {
+                return $value !== $user_id;
+            });
+            chef::where('id', $req->chef_id)->update(['blacklistedUser' => $newArray]);
+
+            return response()->json(['message' => 'Unblocked successfully', 'success' => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
 }

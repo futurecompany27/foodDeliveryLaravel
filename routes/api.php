@@ -205,6 +205,10 @@ Route::controller(AdminController::class)->group(function () {
 
     Route::get('/getAllRequestForChefReviewDeletion', 'getAllRequestForChefReviewDeletion');
     Route::post('/updateStatusOfChefReviewDeleteRequest', 'updateStatusOfChefReviewDeleteRequest');
+
+    Route::get('/getAllBlackListRequestByChef', 'getAllBlackListRequestByChef');
+    Route::post('/blacklistUserOnChefRequest','blacklistUserOnChefRequest');
+    Route::post('/unBlackListUser','unBlackListUser');
 });
 
 Route::controller(regionController::class)->group(function () {

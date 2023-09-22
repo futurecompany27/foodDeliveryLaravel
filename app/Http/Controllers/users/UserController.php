@@ -592,20 +592,24 @@ class UserController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new NewReviewNotification($reviewDetails));
             }
-            $allReview = ChefReview::select('star_rating')->where('chef_id', $req->chef_id)->get();
-            $totalNoReview = ChefReview::where('chef_id', $req->chef_id)->count();
-            $totalStars = 0;
-            foreach ($allReview as $value) {
-                $totalStars = $totalStars + $value['star_rating'];
-            }
-            $rating = $totalStars / $totalNoReview;
-            chef::where('id', $req->chef_id)->update(['rating' => $rating]);
+            $this->updateChefrating($req->chef_id);
             return response()->json(['message' => "Submitted successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
+    }
+
+    function updateChefrating($chef_id){
+        $allReview = ChefReview::select('star_rating')->where(['chef_id' => $chef_id, 'status' => 1])->get();
+        $totalNoReview = ChefReview::where(['chef_id' => $chef_id, 'status' => 1])->count();
+        $totalStars = 0;
+        foreach ($allReview as $value) {
+            $totalStars = $totalStars + $value['star_rating'];
+        }
+        $rating = $totalStars / $totalNoReview;
+        chef::where('id', $chef_id)->update(['rating' => $rating]);
     }
 
     function deleteChefReview(Request $req)
@@ -639,14 +643,45 @@ class UserController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $totalRecords = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->count();
-            $skip = $req->page * 10;
-            $data = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->skip($skip)->take(10)->with('user:fullname,id')->get();
+            // $totalRecords = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->count();
+            // $skip = $req->page * 10;
+            // $data = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->skip($skip)->take(10)->with('user:fullname,id')->get();
+            // return response()->json([
+            //     'data' => $data,
+            //     'TotalRecords' => $totalRecords,
+            //     'success' => true
+            // ], 200);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            $chefId = $req->chef_id;
+
+            // Get the reviews related to the chef where status is 1
+            $reviews = ChefReview::where(['chef_id' => $chefId, 'status' => 1])->with('user:fullname,id')->get();
+
+            // Get user IDs for the reviews
+            $userIds = $reviews->pluck('user_id')->unique();
+
+            // Count the number of reviews with status 2 for each user
+            $userReviewCounts = [];
+            foreach ($userIds as $userId) {
+                $userReviewCounts[$userId] = ChefReview::where(['chef_id' => $chefId, 'user_id' => $userId, 'status' => 2])->count();
+            }
+
+            // Add the IsBlacklistAllowed property to the reviews
+            $reviews->each(function ($review) use ($userReviewCounts) {
+                $userId = $review->user_id;
+                $review->IsBlacklistAllowed = ($userReviewCounts[$userId] >= 2);
+            });
+
+            $totalRecords = $reviews->count(); // Count the total number of reviews
+
             return response()->json([
-                'data' => $data,
+                'data' => $reviews,
                 'TotalRecords' => $totalRecords,
                 'success' => true
             ], 200);
+
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
