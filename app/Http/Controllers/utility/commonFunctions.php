@@ -337,8 +337,7 @@ class commonFunctions extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
-
-
+    
     public function getAllChefs(Request $req)
     {
         try {

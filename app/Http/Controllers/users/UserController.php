@@ -731,10 +731,10 @@ class UserController extends Controller
             }
 
             $myCart = [];
-            if ($req->user_id) {
-                $data = Cart::where('user_id', $req->user_id)->first();
-                $myCart = isset($data) ? $data->cartData : [];
-            }
+            // if ($req->user_id) {
+            //     $data = Cart::where('user_id', $req->user_id)->first();
+            //     $myCart = isset($data) ? $data->cartData : [];
+            // }
             if ($req->cartData) {
                 $myCart = $req->cartData;
             }
