@@ -54,7 +54,7 @@ class ChefController extends Controller
     {
         try {
             DB::beginTransaction();
-            $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtolower($req->postal_code)), 'status' => 1])->first();
+            $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtoupper($req->postal_code)), 'status' => 1])->first();
             if (!$checkPinCode) {
                 return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
@@ -71,7 +71,7 @@ class ChefController extends Controller
             $chef->first_name = ucfirst($req->first_name);
             $chef->last_name = ucfirst($req->last_name);
             $chef->date_of_birth = $req->date_of_birth;
-            $chef->postal_code = str_replace(" ", "", ($req->postal_code));
+            $chef->postal_code = str_replace(" ", "", strtoupper($req->postal_code));
             $chef->mobile = str_replace("-", "", $req->mobile);
             $chef->is_mobile_verified = 0;
             $chef->email = $req->email;
@@ -1093,7 +1093,7 @@ class ChefController extends Controller
             $chef->state = $req->state;
             $chef->city = $req->city;
             $chef->kitchen_types = $req->kitchen_types;
-            $chef->postal_code = str_replace(" ", "", ($req->postal_code));
+            $chef->postal_code = str_replace(" ", "", strtoupper($req->postal_code));
             $chef->save();
             $chefDetail = ShefRegisterationRequest::find($chef->id);
             $admins = Admin::all(['*']);

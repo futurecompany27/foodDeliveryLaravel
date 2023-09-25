@@ -27,7 +27,7 @@ class DriverController extends Controller
     function driverRegisteraion(Request $req)
     {
         Log::info($req->postal_code);
-        $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtolower($req->postal_code)), 'status' => 1])->first();
+        $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtoupper($req->postal_code)), 'status' => 1])->first();
         Log::info($checkPinCode);
         if (!$checkPinCode) {
             return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 500);

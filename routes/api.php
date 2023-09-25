@@ -146,10 +146,10 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
 
     Route::post('/VerifyChefEmail', 'VerifyChefEmail');
-    
+
     Route::post('/sendRequestForChefReviewDelete', 'sendRequestForChefReviewDelete');
     Route::post('/sendRequestForUserBlacklist', 'sendRequestForUserBlacklist');
-    
+
 });
 
 // Route for admin
@@ -207,8 +207,8 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/updateStatusOfChefReviewDeleteRequest', 'updateStatusOfChefReviewDeleteRequest');
 
     Route::get('/getAllBlackListRequestByChef', 'getAllBlackListRequestByChef');
-    Route::post('/blacklistUserOnChefRequest','blacklistUserOnChefRequest');
-    Route::post('/unBlackListUser','unBlackListUser');
+    Route::post('/blacklistUserOnChefRequest', 'blacklistUserOnChefRequest');
+    Route::post('/unBlackListUser', 'unBlackListUser');
 });
 
 Route::controller(regionController::class)->group(function () {

@@ -91,7 +91,7 @@ class taxController extends Controller
     {
         try {
             if ($req->postal_code) {
-                $postal_codeData = Pincode::where('pincode', str_replace(" ", "", $req->postal_code))->with('city.state')->first();
+                $postal_codeData = Pincode::where('pincode', str_replace(" ", "", strtoupper($req->postal_code)))->with('city.state')->first();
                 $tax = ['tax_type' => $postal_codeData['city']['state']['tax_type'], 'tax_value' => $postal_codeData['city']['state']['tax_value']];
                 return response()->json(['data' => $tax, 'success' => true], 200);
             } else {

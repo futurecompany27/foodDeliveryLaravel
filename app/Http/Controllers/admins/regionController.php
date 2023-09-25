@@ -303,7 +303,7 @@ class regionController extends Controller
                 return response()->json(["message" => 'Pincode is already exist!', "success" => false], 400);
             }
             $Pincode = new Pincode;
-            $Pincode->pincode = str_replace(" ", "", (strtolower($req->pincode)));
+            $Pincode->pincode = str_replace(" ", "", (strtoupper($req->pincode)));
             $Pincode->city_id = $req->city_id;
             $Pincode->latitude = $req->lat;
             $Pincode->longitude = $req->long;
@@ -329,7 +329,7 @@ class regionController extends Controller
         }
         try {
             $updateData = [];
-            $updateData['pincode'] = str_replace(" ", "", (strtolower($req->pincode)));
+            $updateData['pincode'] = str_replace(" ", "", (strtoupper($req->pincode)));
             $updateData['city_id'] = $req->city_id;
             $updateData['latitude'] = $req->lat;
             $updateData['longitude'] = $req->long;

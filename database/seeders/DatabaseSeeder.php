@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
+            AdminSettingSeeder::class,
             AllergiesSeeder::class,
             BankNameSeeder::class,
             DietarysSeeder::class,
@@ -21,6 +22,8 @@ class DatabaseSeeder extends Seeder
             StatesSeeder::class,
             citySeeeder::class,
             postalCodeSeeeder::class,
+            DriverSeeder::class,
+            UserSeeder::class,
             ChefSeeder::class,
             DocumetItemListSeeder::class,
             DocumetItemFieldsSeeder::class,

@@ -28,6 +28,7 @@ class ChefSeeder extends Seeder
             "about_kitchen" => "We have 1 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
             "chefAvailibilityWeek" => json_encode(['T', 'W']),
+            "status" => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
@@ -43,7 +44,8 @@ class ChefSeeder extends Seeder
             "kitchen_name" => "Ravi's Kitchen",
             "about_kitchen" => "We have 1 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
-            "chefAvailibilityWeek" => json_encode([ 'T', 'W']),
+            "chefAvailibilityWeek" => json_encode(['T', 'W']),
+            "status" => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
@@ -60,6 +62,7 @@ class ChefSeeder extends Seeder
             "about_kitchen" => "We have 10 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
             "chefAvailibilityWeek" => json_encode(['Th', 'F', 'S']),
+            "status" => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
@@ -76,6 +79,24 @@ class ChefSeeder extends Seeder
             "about_kitchen" => "We have 10 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(['Indian', "American"]),
             "chefAvailibilityWeek" => json_encode(['Su']),
+            "status" => 1,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+        DB::table('chefs')->insert([
+            "first_name" => 'test',
+            "last_name" => "test",
+            "date_of_birth" => "1990-11-04",
+            "postal_code" => 'J7A4N7',
+            "mobile" => "1111111115",
+            "is_mobile_verified" => "0",
+            "email" => "test@gmail.com",
+            "password" => Hash::make('Homeshef@123'),
+            "kitchen_name" => "Test's Kitchen",
+            "about_kitchen" => "We have 15 year of experience in cooking with all type of cuisines",
+            "kitchen_types" => json_encode(['Indian', "American"]),
+            "chefAvailibilityWeek" => json_encode(['Su']),
+            "status" => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);

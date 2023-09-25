@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\users;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\utility\commonFunctions;
 use App\Mail\HomeshefCustomerEmailVerifiedSuccessfully;
 use App\Mail\HomeshefUserEmailVerificationMail;
 use App\Models\Admin;
+use App\Models\Adminsetting;
 use App\Models\Cart;
 use App\Models\Kitchentype;
 use App\Models\NoRecordFound;
@@ -31,6 +33,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -136,6 +139,17 @@ class UserController extends Controller
         }
 
         try {
+
+            $lat_long_result_array = $this->get_lat_long($req->postal_code);
+
+            if ($lat_long_result_array["result"] == 1) {
+                /***** Now from the customer postal code we need to find the ******/
+                $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
+                foreach ($selected_postal_code as &$value) {
+                    $value = str_replace(" ", "", strtoupper($value));
+                }
+            }
+
             $serviceExist = Pincode::where('pincode', $req->postal_code)->where('status', 1)->first();
             if ($serviceExist) {
                 if ($req->filter == 'true') {
@@ -146,7 +160,7 @@ class UserController extends Controller
                         $maxPrice = $req->input('max');
                     }
                     $skip = $req->page * 12;
-                    $query = chef::where('postal_code', strtolower($req->postal_code))->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1);
+                    $query = chef::whereIn('postal_code', $selected_postal_code)->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1);
                     if ($req->rating) {
                         $query->where('rating', '<=', $req->rating);
                     }
@@ -167,7 +181,7 @@ class UserController extends Controller
                     $data = $query->skip($skip)->limit(12)->get();
                     return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
                 } else {
-                    $query = chef::where('postal_code', strtolower($req->postal_code))->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
+                    $query = chef::whereIn('postal_code', $selected_postal_code)->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
                         $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
                     });
                     if ($req->refresh) {
@@ -190,6 +204,73 @@ class UserController extends Controller
         }
     }
 
+    function get_lat_long($val)
+    {
+        try {
+            $postalCode = str_replace(" ", "", strtoupper($val));
+            $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postalCode . ",canada&sensor=false&key=" . env('GOOGLE_MAP_KEY');
+            $result = Http::get($url);
+            $xml = simplexml_load_string($result->body());
+            if ($xml->status == 'OK') {
+                $latitude = (float) $xml->result->geometry->location->lat;
+                $longitude = (float) $xml->result->geometry->location->lng;
+                $data = [
+                    'result' => 1,
+                    'lat' => $latitude,
+                    'long' => $longitude
+                ];
+                return $data;
+            } else {
+                $data = ['result' => 0];
+                return $data;
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again!', 'success' => false], 500);
+        }
+    }
+
+    public function findout_postal_with_radius($cust_pc_lat, $cust_pc_long)
+    {
+
+        $admin_setting = Adminsetting::first();
+        $radius = $admin_setting->radius != "" ? $admin_setting->radius : 1;
+        $postal_codes = Pincode::where('status', 1)->get();
+
+        /*find distance between customer lat/long to the lat/long of the service
+        postal code and store it into the array if its distance is equal or less then the
+         radius
+       */
+
+        //define GMAPIK in contstant file.
+        $gmApiK = env('GOOGLE_MAP_KEY');
+        $origin = $cust_pc_lat . ',' . $cust_pc_long;
+        $selected_postal_code = array();
+        //dd($selected_postal_code);
+        foreach ($postal_codes as $key => $postal_val) {
+            $destination = $postal_val->latitude . ',' . $postal_val->longitude;
+            // dd($destination , $origin);
+            $routes = json_decode(file_get_contents("https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($origin) . "&destination=" . urlencode($destination) . "&alternatives=true&sensor=false&departure_time=now&key=" . $gmApiK))->routes;
+
+            if (count($routes) != 0) {
+                $dist = $routes[0]->legs[0]->distance->text;
+                $distance = explode(" ", $dist)[0];
+
+                if ($distance <= $radius) {
+                    //create a array of selected postal code
+                    array_push($selected_postal_code, $postal_val->pincode);
+                }
+
+            } else {
+                // still add if cant find routes using api
+                array_push($selected_postal_code, $postal_val->pincode);
+            }
+        }
+
+        //return the select postal code to the calling function
+        return $selected_postal_code;
+    }
+
     function getChefsByPostalCodeAndCuisineTypes(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -201,8 +282,19 @@ class UserController extends Controller
             return response()->json(['message' => $validator->errors()->first(), 'success' => false], 400);
         }
         try {
+
+            $lat_long_result_array = $this->get_lat_long($req->postal_code);
+
+            if ($lat_long_result_array["result"] == 1) {
+                /***** Now from the customer postal code we need to find the ******/
+                $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
+                foreach ($selected_postal_code as &$value) {
+                    $value = str_replace(" ", "", strtoupper($value));
+                }
+            }
+
             $cuisine = Kitchentype::find($req->kitchen_type_id);
-            $query = chef::where('postal_code', strtolower($req->postal_code))->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->whereJsonContains('kitchen_types', $cuisine->kitchentype)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
+            $query = chef::whereIn('postal_code', $selected_postal_code)->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->whereJsonContains('kitchen_types', $cuisine->kitchentype)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
                 $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
             });
             if ($req->refresh) {
@@ -601,7 +693,8 @@ class UserController extends Controller
         }
     }
 
-    function updateChefrating($chef_id){
+    function updateChefrating($chef_id)
+    {
         $allReview = ChefReview::select('star_rating')->where(['chef_id' => $chef_id, 'status' => 1])->get();
         $totalNoReview = ChefReview::where(['chef_id' => $chef_id, 'status' => 1])->count();
         $totalStars = 0;

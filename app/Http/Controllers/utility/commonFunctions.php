@@ -40,7 +40,7 @@ class commonFunctions extends Controller
     function get_lat_long(Request $req)
     {
         try {
-            $postalCode = str_replace(" ", "", $req->postalCode);
+            $postalCode = str_replace(" ", "", strtoupper($req->postalCode));
             $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postalCode . ",canada&sensor=false&key=" . env('GOOGLE_MAP_KEY');
             $result = Http::get($url);
             $xml = simplexml_load_string($result->body());
@@ -48,6 +48,7 @@ class commonFunctions extends Controller
                 $latitude = (float) $xml->result->geometry->location->lat;
                 $longitude = (float) $xml->result->geometry->location->lng;
                 $data = [
+                    'result' => 1,
                     'lat' => $latitude,
                     'long' => $longitude
                 ];
