@@ -338,7 +338,7 @@ class commonFunctions extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
-    
+
     public function getAllChefs(Request $req)
     {
         try {
@@ -372,7 +372,9 @@ class commonFunctions extends Controller
             if ($req->user_type == 'User') {
 
                 User::where('email', $req->email)->update(['resetToken' => $token]);
+                Log::info($req->email);
                 $data = User::where('email', $req->email)->first();
+                Log::info($data);
                 $userDetail['full_name'] = $data->fullname;
 
             } else if ($req->user_type == 'Admin') {
@@ -394,7 +396,7 @@ class commonFunctions extends Controller
                 $userDetail['full_name'] = (ucfirst($data->first_name) . ' ' . ucfirst($data->last_name));
 
             }
-
+            Log::info($data->id);
             $userDetail['id'] = $data->id;
             $userDetail['user_type'] = $req->user_type;
             $userDetail['token'] = $token;
@@ -411,10 +413,10 @@ class commonFunctions extends Controller
     {
         $validator = Validator::make($req->all(), [
             "user_type" => 'required',
-            "email" => 'required',
+            "id" => 'required',
         ], [
             "user_type.required" => "please fill user_type",
-            "email.required" => "please fill user_type",
+            "id.required" => "please fill user_id",
         ]);
 
         if ($validator->fails()) {
@@ -422,13 +424,13 @@ class commonFunctions extends Controller
         }
         try {
             if ($req->user_type == 'User') {
-                $data = User::where(['email' => $req->email, 'token' => $req->token])->first();
+                $data = User::where(['id' => $req->id, 'resetToken' => $req->token])->first();
             } else if ($req->user_type == 'Admin') {
-                $data = Admin::where(['email' => $req->email, 'token' => $req->token])->first();
+                $data = Admin::where(['id' => $req->id, 'resetToken' => $req->token])->first();
             } else if ($req->user_type == 'chef') {
-                $data = chef::where(['email' => $req->email, 'token' => $req->token])->first();
+                $data = chef::where(['id' => $req->id, 'resetToken' => $req->token])->first();
             } else if ($req->user_type == 'Driver') {
-                $data = Driver::where(['email' => $req->email, 'token' => $req->token])->first();
+                $data = Driver::where(['id' => $req->id, 'resetToken' => $req->token])->first();
             }
 
             if ($data) {
@@ -448,12 +450,12 @@ class commonFunctions extends Controller
     {
         $validator = Validator::make($req->all(), [
             "user_type" => 'required',
-            "email" => 'required',
+            "id" => 'required',
             "token" => 'required',
             "password" => 'required',
         ], [
             "user_type.required" => "please fill user_type",
-            "email.required" => "please fill user_type",
+            "id.required" => "please fill user_id",
             "token.required" => "please fill user_type",
             "password.required" => "please fill user_type",
         ]);
@@ -462,24 +464,24 @@ class commonFunctions extends Controller
         }
         try {
             if ($req->user_type == 'User') {
-                $data = User::where(['email' => $req->email, 'token' => $req->token])->first();
+                $data = User::where(['id' => $req->id, 'resetToken' => $req->token])->first();
                 if ($data) {
-                    User::where('email', $req->email)->update(['password' => Hash::make($req->password)]);
+                    User::where('id', $req->id)->update(['password' => Hash::make($req->password), 'resetToken' => '']);
                 }
             } else if ($req->user_type == 'Admin') {
-                $data = Admin::where(['email' => $req->email, 'token' => $req->token])->first();
+                $data = Admin::where(['id' => $req->id, 'resetToken' => $req->token])->first();
                 if ($data) {
-                    Admin::where('email', $req->email)->update(['password' => Hash::make($req->password)]);
+                    Admin::where('id', $req->id)->update(['password' => Hash::make($req->password), 'resetToken' => '']);
                 }
             } else if ($req->user_type == 'chef') {
-                $data = chef::where(['email' => $req->email, 'token' => $req->token])->first();
+                $data = chef::where(['id' => $req->id, 'resetToken' => $req->token])->first();
                 if ($data) {
-                    chef::where('email', $req->email)->update(['password' => Hash::make($req->password)]);
+                    chef::where('id', $req->id)->update(['password' => Hash::make($req->password), 'resetToken' => '']);
                 }
             } else if ($req->user_type == 'Driver') {
-                $data = Driver::where(['email' => $req->email, 'token' => $req->token])->first();
+                $data = Driver::where(['id' => $req->id, 'resetToken' => $req->token])->first();
                 if ($data) {
-                    Driver::where('email', $req->email)->update(['password' => Hash::make($req->password)]);
+                    Driver::where('id', $req->id)->update(['password' => Hash::make($req->password), 'resetToken' => '']);
                 }
             }
             return response()->json(['message' => 'Password has been changed', 'success' => true], 200);

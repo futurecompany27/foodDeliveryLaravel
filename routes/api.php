@@ -11,7 +11,6 @@ use App\Http\Controllers\drivers\DriverController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\users\cartController;
 use App\Http\Controllers\users\OrderController;
-use App\Http\Controllers\users\otpController as UsersOtpController;
 use App\Http\Controllers\utility\otpController;
 use App\Http\Controllers\users\UserController;
 use App\Http\Controllers\utility\commonFunctions;
@@ -90,6 +89,8 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/updateUserChefReviewStatus', 'updateUserChefReviewStatus');
     Route::post('/deleteUserChefReview', 'deleteUserChefReview');
     Route::post('/getAllUserChefReviewsbyStatus', 'getAllUserChefReviewsbyStatus');
+
+    Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
 });
 
 Route::controller(cartController::class)->group(function () {

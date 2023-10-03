@@ -139,19 +139,17 @@ class UserController extends Controller
         }
 
         try {
-
-            $lat_long_result_array = $this->get_lat_long($req->postal_code);
-
-            if ($lat_long_result_array["result"] == 1) {
-                /***** Now from the customer postal code we need to find the ******/
-                $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
-                foreach ($selected_postal_code as &$value) {
-                    $value = str_replace(" ", "", strtoupper($value));
-                }
-            }
-
-            $serviceExist = Pincode::where('pincode', $req->postal_code)->where('status', 1)->first();
+            $serviceExist = Pincode::where('pincode', str_replace(" ", "", strtoupper($req->postal_code)))->where('status', 1)->first();
             if ($serviceExist) {
+                $lat_long_result_array = $this->get_lat_long($req->postal_code);
+
+                if ($lat_long_result_array["result"] == 1) {
+                    /***** Now from the customer postal code we need to find the ******/
+                    $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
+                    foreach ($selected_postal_code as &$value) {
+                        $value = str_replace(" ", "", strtoupper($value));
+                    }
+                }
                 if ($req->filter == 'true') {
                     $minPrice = $req->input('min');
                     if ($req->input('max') > 300) {
@@ -242,11 +240,11 @@ class UserController extends Controller
          radius
        */
 
-        //define GMAPIK in contstant file.
+        // define GMAPIK in contstant file.
         $gmApiK = env('GOOGLE_MAP_KEY');
         $origin = $cust_pc_lat . ',' . $cust_pc_long;
         $selected_postal_code = array();
-        //dd($selected_postal_code);
+        // dd($selected_postal_code);
         foreach ($postal_codes as $key => $postal_val) {
             $destination = $postal_val->latitude . ',' . $postal_val->longitude;
             // dd($destination , $origin);
@@ -255,12 +253,11 @@ class UserController extends Controller
             if (count($routes) != 0) {
                 $dist = $routes[0]->legs[0]->distance->text;
                 $distance = explode(" ", $dist)[0];
-
+                Log::info("", [$distance, $radius]);
                 if ($distance <= $radius) {
-                    //create a array of selected postal code
+                    // create a array of selected postal code
                     array_push($selected_postal_code, $postal_val->pincode);
                 }
-
             } else {
                 // still add if cant find routes using api
                 array_push($selected_postal_code, $postal_val->pincode);
@@ -312,6 +309,57 @@ class UserController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
 
+    }
+
+
+    function calculateDistanceUsingTwoLatlong(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'postal_code_1' => "required",
+            'postal_code_2' => "required",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first(), 'success' => false], 400);
+        }
+        try {
+            $admin_setting = Adminsetting::first();
+            $multiChefOrderRadius = $admin_setting->multiChefOrderAllow != "" ? $admin_setting->multiChefOrderAllow : 5;
+            $data = ['success' => true];
+            //define GMAPIK in contstant file.
+            $gmApiK = env('GOOGLE_MAP_KEY');
+
+            $latlongOfPostalCode1 = $this->get_lat_long($req->postal_code_1);
+            $origin = $latlongOfPostalCode1["lat"] . ',' . $latlongOfPostalCode1["long"];
+
+            $latlongOfPostalCode2 = $this->get_lat_long($req->postal_code_2);
+            $destination = $latlongOfPostalCode2["lat"] . ',' . $latlongOfPostalCode2["long"];
+
+            $routes = json_decode(file_get_contents("https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($origin) . "&destination=" . urlencode($destination) . "&alternatives=true&sensor=false&departure_time=now&key=" . $gmApiK))->routes;
+
+            if (count($routes) != 0) {
+                $dist = $routes[0]->legs[0]->distance->text;
+                $distance = explode(" ", $dist)[0];
+                if ($distance <= $multiChefOrderRadius) {
+                    $data['message'] = 'Distance is within the limit and can make multi chef order';
+                    $data['status'] = 1;
+                } else {
+                    $data['message'] = 'Distance is not within the limit multi chef order is not allowed';
+                    $data['status'] = 2;
+                }
+                $data['distance'] = $distance . ' KM';
+
+            } else {
+                $data['message'] = 'Unable to find Routes so allow to add multi chef order';
+                $data['status'] = 1;
+            }
+
+            return response()->json($data);
+
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+        }
     }
 
     function getChefDetails(Request $req)
@@ -823,60 +871,14 @@ class UserController extends Controller
                 ];
             }
 
-            $myCart = [];
-            // if ($req->user_id) {
-            //     $data = Cart::where('user_id', $req->user_id)->first();
-            //     $myCart = isset($data) ? $data->cartData : [];
-            // }
-            if ($req->cartData) {
-                $myCart = $req->cartData;
-            }
-
             // getting counts of the available shefs for next 14 days
             foreach ($dateList as &$val) {
-                $query = chef::where('postal_code', strtolower($req->postal_code));
+                $query = chef::where('postal_code', strtoupper(str_replace(" ", "", $req->postal_code)));
                 $query->where('chefAvailibilityStatus', 1)->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->whereHas('foodItems', function ($query) use ($val) {
                     $query->whereJsonContains('foodAvailibiltyOnWeekdays', $val['weekdayShort']);
                 });
                 $val['total'] = $query->count();
-
-                if ($val['total'] > 0 && count($myCart) > 0) {
-                    $val['message'] = '';
-                    $ChefNotCount = 0;
-                    $FoodNotCount = 0;
-
-                    $val['food_ids_NotAvailable'] = [];
-
-                    foreach ($myCart as &$chefData) {
-                        $chef = chef::where(['id' => $chefData['chef_id'], 'status' => 0])->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->first();
-                        if (!$chef) {
-                            $ChefNotCount = $ChefNotCount + 1;
-                            $FoodNotCount = $FoodNotCount + count($chefData['foodItems']);
-                            foreach ($chefData['foodItems'] as $value) {
-                                array_push($val['food_ids_NotAvailable'], $value['food_id']);
-                            }
-                        }
-
-                        if ($chef) {
-                            foreach ($chefData['foodItems'] as $value) {
-                                $food = FoodItem::where('id', $value['food_id'])->whereJsonContains('foodAvailibiltyOnWeekdays', $val['weekdayShort'])->first();
-                                if (!$food) {
-                                    $FoodNotCount = $FoodNotCount + 1;
-                                    array_push($val['food_ids_NotAvailable'], $value['food_id']);
-                                }
-                            }
-                        }
-                    }
-                    if ($ChefNotCount > 0) {
-                        $val['message'] = ($ChefNotCount . ' chef and ' . $FoodNotCount . ' item unavailable.');
-                    } elseif ($ChefNotCount == 0 && $FoodNotCount == 0) {
-                        $val['message'] = 'All items are available';
-                    } elseif ($FoodNotCount > 0) {
-                        $val['message'] = ($FoodNotCount . ' items are available');
-                    }
-                }
             }
-
             return response()->json(['data' => $dateList, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

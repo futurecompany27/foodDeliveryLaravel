@@ -49,9 +49,9 @@ class cartController extends Controller
 
     function getMyCart(Request $req)
     {
-        // if (!$req->user_id) {
-        //     return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
-        // }
+        if (!$req->user_id) {
+            return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
+        }
         try {
             if ($req->user_id) {
                 $data = Cart::where('user_id', $req->user_id)->first();
@@ -59,47 +59,23 @@ class cartController extends Controller
                     $myCart = $data->cartData;
                     foreach ($myCart as &$chefData) {
                         $chef = chef::with('foodItems')->find($chefData['chef_id']);
-                        if (in_array($data->cartDeliveryDate['weekdayShort'], $chef->chefAvailibilityWeek)) {
-                            $chefData['chefAvailable'] = true;
-                        } else {
-                            $chefData['chefAvailable'] = false;
-                        }
+                        $chefData['chefName'] = $chef->kitchen_name;
+                        $chefData['chefAvailibilityWeek'] = $chef->chefAvailibilityWeek;
+                        $chefData['postal_code'] = $chef->postal_code;
                         $foodItems = $chef['foodItems'];
                         foreach ($chefData['foodItems'] as &$food) {
                             $foodItem = $foodItems->firstWhere('id', $food['food_id']);
                             if ($foodItem) {
-                                $food['availableToday'] = in_array($data->cartDeliveryDate['weekdayShort'], $foodItem['foodAvailibiltyOnWeekdays']) ? true : false;
+                                // $food['availableToday'] = in_array($data->cartDeliveryDate['weekdayShort'], $foodItem['foodAvailibiltyOnWeekdays']) ? true : false;
                                 $food['price'] = $foodItem['price'];
                                 $food['dish_name'] = $foodItem['dish_name'];
                                 $food['dishImage'] = $foodItem['dishImage'];
+                                $food['foodAvailibiltyOnWeekdays'] = $foodItem['foodAvailibiltyOnWeekdays'];
                             }
                         }
                     }
                     return response()->json(["data" => $myCart, "cartDeliveryDate" => $data->cartDeliveryDate, "success" => true], 200);
                 }
-            }
-            if ($req->cartData && $req->cartDeliveryDate) {
-                $myCart = $req->cartData;
-                $cartDeliveryDate = $req->cartDeliveryDate;
-                foreach ($myCart as &$chefData) {
-                    $chef = chef::with('foodItems')->find($chefData['chef_id']);
-                    if (in_array($cartDeliveryDate['weekdayShort'], $chef->chefAvailibilityWeek)) {
-                        $chefData['chefAvailable'] = true;
-                    } else {
-                        $chefData['chefAvailable'] = false;
-                    }
-                    $foodItems = $chef['foodItems'];
-                    foreach ($chefData['foodItems'] as &$food) {
-                        $foodItem = $foodItems->firstWhere('id', $food['food_id']);
-                        if ($foodItem) {
-                            $food['availableToday'] = $chefData['chefAvailable'] ? (in_array($cartDeliveryDate['weekdayShort'], $foodItem['foodAvailibiltyOnWeekdays']) ? true : false) : false;
-                            $food['price'] = $foodItem['price'];
-                            $food['dish_name'] = $foodItem['dish_name'];
-                            $food['dishImage'] = $foodItem['dishImage'];
-                        }
-                    }
-                }
-                return response()->json(["data" => $myCart, "cartDeliveryDate" => $cartDeliveryDate, "success" => true], 200);
             }
             return response()->json(["data" => [], "success" => true], 200);
         } catch (\Throwable $th) {

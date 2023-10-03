@@ -90,7 +90,7 @@ class FoodItemSeeder extends Seeder
             'updated_at' => Carbon::now()
         ]);
         DB::table('food_items')->insert([
-            'chef_id' => 3,
+            'chef_id' => 101,
             'dish_name' => 'pasta',
             'description' => 'ye pasta ka description hai',
             'dishImage' => (env('filePath') . 'storage/foodItem/pasta.jpg'),
@@ -115,7 +115,7 @@ class FoodItemSeeder extends Seeder
             'updated_at' => Carbon::now()
         ]);
         DB::table('food_items')->insert([
-            'chef_id' => 4,
+            'chef_id' => 101,
             'dish_name' => 'sev puri',
             'description' => 'ye sev puri ka description hai',
             'dishImage' => (env('filePath') . 'storage/foodItem/sev puri.jpeg'),

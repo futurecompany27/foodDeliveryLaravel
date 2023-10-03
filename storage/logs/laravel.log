@@ -1,0 +1,6 @@
+[2023-10-03 12:39:06] local.INFO: whizsolutions+test@gmail.com  
+[2023-10-03 12:39:06] local.INFO:   
+[2023-10-03 12:39:06] local.INFO: Attempt to read property "fullname" on null  
+[2023-10-03 12:40:59] local.INFO: whizsolutions0@gmail.com  
+[2023-10-03 12:40:59] local.INFO: {"id":2,"fullname":"ravindra","mobile":"8888888888","mobile_verified_at":null,"email":"whizsolutions0@gmail.com","social_id":null,"social_type":null,"email_verified_at":null,"status":1,"resetToken":"49835fuQK1iRTTEL9eOlKdDMFu7e25gADk3LMNHJ","created_at":"2023-10-03T12:40:39.000000Z","updated_at":"2023-10-03T12:40:59.000000Z"}  
+[2023-10-03 12:40:59] local.INFO: 2  

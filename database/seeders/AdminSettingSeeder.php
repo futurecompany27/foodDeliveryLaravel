@@ -22,6 +22,7 @@ class AdminSettingSeeder extends Seeder
             'student_comm' => 10,
             'food_default_comm' => 10,
             'radius' => 3,
+            'multiChefOrderAllow' => 5,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
