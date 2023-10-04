@@ -1,6 +1,8 @@
-[2023-10-03 12:39:06] local.INFO: whizsolutions+test@gmail.com  
-[2023-10-03 12:39:06] local.INFO:   
-[2023-10-03 12:39:06] local.INFO: Attempt to read property "fullname" on null  
-[2023-10-03 12:40:59] local.INFO: whizsolutions0@gmail.com  
-[2023-10-03 12:40:59] local.INFO: {"id":2,"fullname":"ravindra","mobile":"8888888888","mobile_verified_at":null,"email":"whizsolutions0@gmail.com","social_id":null,"social_type":null,"email_verified_at":null,"status":1,"resetToken":"49835fuQK1iRTTEL9eOlKdDMFu7e25gADk3LMNHJ","created_at":"2023-10-03T12:40:39.000000Z","updated_at":"2023-10-03T12:40:59.000000Z"}  
-[2023-10-03 12:40:59] local.INFO: 2  
+[2023-10-04 11:00:40] local.INFO: H7E  
+[2023-10-04 11:00:40] local.INFO:   
+[2023-10-04 11:01:31] local.INFO: H7A  
+[2023-10-04 11:01:31] local.INFO: {"id":1,"city_id":1,"pincode":"H7A","latitude":"45.678657","longitude":"-73.5894284","status":1,"created_at":"2023-10-04T10:57:52.000000Z","updated_at":"2023-10-04T10:57:52.000000Z"}  
+[2023-10-04 11:04:04] local.INFO: H7E  
+[2023-10-04 11:04:04] local.INFO:   
+[2023-10-04 12:37:53] local.INFO: {"id":1,"driver_id":1,"date":"2024-01-02T18:30:00.000Z","slot":"10:00 AM - 11:00 AM","status":1,"created_at":"2023-10-04T12:37:53.000000Z","updated_at":"2023-10-04T12:37:53.000000Z","driver":{"id":1,"profile_pic":null,"first_name":"test","last_name":"test","email":"test","mobileNo":"9876543210","email_verified_at":null,"are_you_a":"Outsider","full_address":"Test Address","address_proof":null,"province":"Ontario","city":"Toronto","postal_code":"J7A4N7","driving_licence_no":null,"driving_licence_proof":null,"taxation_no":null,"taxation_proof":null,"criminal_report":null,"bank_name":null,"transit_number":null,"account_number":null,"institution_number":null,"status":0,"resetToken":null,"created_at":"2023-10-04T10:57:52.000000Z","updated_at":"2023-10-04T10:57:52.000000Z"}}  
+[2023-10-04 12:41:05] local.INFO: {"id":2,"driver_id":1,"date":"2023-12-28T18:30:00.000Z","slot":"11:00 AM - 12:00 PM","status":1,"created_at":"2023-10-04T12:41:05.000000Z","updated_at":"2023-10-04T12:41:05.000000Z","driver":{"id":1,"profile_pic":null,"first_name":"test","last_name":"test","email":"test","mobileNo":"9876543210","email_verified_at":null,"are_you_a":"Outsider","full_address":"Test Address","address_proof":null,"province":"Ontario","city":"Toronto","postal_code":"J7A4N7","driving_licence_no":null,"driving_licence_proof":null,"taxation_no":null,"taxation_proof":null,"criminal_report":null,"bank_name":null,"transit_number":null,"account_number":null,"institution_number":null,"status":0,"resetToken":null,"created_at":"2023-10-04T10:57:52.000000Z","updated_at":"2023-10-04T10:57:52.000000Z"}}  
