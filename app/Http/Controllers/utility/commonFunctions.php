@@ -436,7 +436,7 @@ class commonFunctions extends Controller
             if ($data) {
                 return response()->json(['message' => 'token is valid', 'success' => true], 200);
             } else {
-                return response()->json(['message' => 'token is expired', 'success' => false], 200);
+                return response()->json(['message' => 'token is expired', 'success' => false], 500);
             }
 
         } catch (\Throwable $th) {

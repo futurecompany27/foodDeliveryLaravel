@@ -48,6 +48,8 @@ Route::controller(DriverController::class)->group(function () {
     Route::post('/AddDriverContactData', 'AddDriverContactData');
     Route::post('/getMyDetails', 'getMyDetails');
     Route::post('/driverUpdateEmail', 'driverUpdateEmail');
+    Route::post('/VerifyDriverEmail', 'VerifyDriverEmail');
+
 });
 
 // Routes for users

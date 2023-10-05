@@ -5,6 +5,7 @@ namespace App\Http\Controllers\drivers;
 use App\Http\Controllers\Controller;
 use App\Mail\HomeshefDriverChangeEmailLink;
 use App\Mail\HomeshefDriverEmailVerificationLink;
+use App\Mail\HomeshefDriverEmailVerrifiedSuccessfully;
 use App\Models\Admin;
 use App\Models\Driver;
 use App\Models\DriverContact;
@@ -14,6 +15,7 @@ use App\Notifications\Driver\DriverContactUsNotification;
 use App\Notifications\Driver\driverRegisterationNotification;
 use App\Notifications\Driver\DriverScheduleCallNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -480,6 +482,28 @@ class DriverController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    function VerifyDriverEmail(Request $req)
+    {
+        if (!$req->id) {
+            return response()->json(["message" => 'please fill all the details', "success" => false], 400);
+        }
+        try {
+            $checkVerification = Driver::find($req->id);
+            if ($checkVerification->email_verified_at) {
+                return response()->json(['message' => 'Email has been already verified successfully', 'status' => 1, 'success' => true], 200);
+            } else {
+                Driver::where('id', $req->id)->update(['email_verified_at' => Carbon::now(), 'is_email_verified' => 1]);
+                $driverDetails = Driver::find($req->id);
+                Mail::to(trim($driverDetails->email))->send(new HomeshefDriverEmailVerrifiedSuccessfully($driverDetails));
+                return response()->json(['message' => 'Email has been verified successfully', 'success' => true], 200);
+            }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
         }
     }
 }

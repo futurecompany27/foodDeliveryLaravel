@@ -1060,7 +1060,7 @@ class ChefController extends Controller
             if ($checkVerification->email_verified_at) {
                 return response()->json(['message' => 'Email has been already verified successfully', 'status' => 1, 'success' => true], 200);
             } else {
-                chef::where('id', $req->id)->update(['email_verified_at' => Carbon::now()]);
+                chef::where('id', $req->id)->update(['email_verified_at' => Carbon::now(), 'is_email_verified' => 1]);
                 $chefDetails = chef::find($req->id);
                 Mail::to(trim($chefDetails->email))->send(new HomeshefChefEmailVerifiedSuccessfully($chefDetails));
                 return response()->json(['message' => 'Email has been verified successfully', 'success' => true], 200);

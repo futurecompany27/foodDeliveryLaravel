@@ -4,3 +4,13 @@
 [2023-10-03 12:40:59] local.INFO: whizsolutions0@gmail.com  
 [2023-10-03 12:40:59] local.INFO: {"id":2,"fullname":"ravindra","mobile":"8888888888","mobile_verified_at":null,"email":"whizsolutions0@gmail.com","social_id":null,"social_type":null,"email_verified_at":null,"status":1,"resetToken":"49835fuQK1iRTTEL9eOlKdDMFu7e25gADk3LMNHJ","created_at":"2023-10-03T12:40:39.000000Z","updated_at":"2023-10-03T12:40:59.000000Z"}  
 [2023-10-03 12:40:59] local.INFO: 2  
+[2023-10-05 09:30:19] local.INFO: Attempt to read property "email_verified_at" on null  
+[2023-10-05 09:32:36] local.INFO: 111  
+[2023-10-05 09:35:11] local.INFO: 111  
+[2023-10-05 09:51:02] local.INFO: h7a  
+[2023-10-05 09:51:02] local.INFO: {"id":1,"city_id":1,"pincode":"H7A","latitude":"45.678657","longitude":"-73.5894284","status":1,"created_at":"2023-10-05T09:29:49.000000Z","updated_at":"2023-10-05T09:29:49.000000Z"}  
+[2023-10-05 09:52:19] local.INFO: Attempt to read property "first_name" on null  
+[2023-10-05 09:52:29] local.INFO: Attempt to read property "first_name" on null  
+[2023-10-05 09:57:04] local.INFO: 2  
+[2023-10-05 10:11:54] local.INFO: 2  
+[2023-10-05 10:13:39] local.INFO: 2  

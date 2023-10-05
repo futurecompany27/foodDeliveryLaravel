@@ -8,9 +8,9 @@
  
  <b>Hi {{ucfirst($fullname)}}</b>
 
- <p>Kindly reset your password by clicking on the link below</p>
+ <p>Kindly reset your {{ucfirst($user_type)}}'s password by clicking on the link below</p>
 
- <a class="btn btn-primary" href="{{ env('domain') . 'reset-password?id=' . $id . '&user_type=' . $user_type . '&token=' . $token }}">Email Verification<a>
+ <a class="btn btn-primary" href="{{ env('domain') . 'reset-password?id=' . $id . '&user_type=' . $user_type . '&token=' . $token }}">Reset password<a>
 
  <p>Regards,</p>
  <p>Homeshef Team</p>
