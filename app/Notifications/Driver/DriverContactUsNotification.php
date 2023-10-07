@@ -42,7 +42,8 @@ class DriverContactUsNotification extends Notification
             'id' => $this->contactUs['id'],
             'driver_id' => $this->contactUs['driver_id'],
             'message' => ($this->contactUs->first_name . ' ' . $this->contactUs->last_name) . ' has query regarding ' . $this->contactUs['needHelpFor'] . '.',
-            'url' => '/admin/driver-contact-us'
+            'url' => '/admin/new-contact-us'
+            // 'url' => '/admin/driver-contact-us'
         ];
     }
 }
