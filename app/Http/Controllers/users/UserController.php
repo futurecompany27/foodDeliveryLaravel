@@ -45,6 +45,7 @@ class UserController extends Controller
 {
     function UserRegisteration(Request $req)
     {
+        Log::info($req);
         $userExist = User::where("email", $req->email)->first();
         if ($userExist) {
             return response()->json(['message' => "This email is already register please use another email!", "success" => false], 400);
@@ -62,6 +63,7 @@ class UserController extends Controller
             $user->email = $req->email;
             $user->password = Hash::make($req->password);
             $user->save();
+            Log::info($user);
             $userDetail = User::find($user->id);
             Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
             $admins = Admin::all();
@@ -71,8 +73,7 @@ class UserController extends Controller
             DB::commit();
             return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
         } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            ;
+            Log::info($th->getMessage());;
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
@@ -308,7 +309,6 @@ class UserController extends Controller
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
-
     }
 
 
@@ -347,14 +347,12 @@ class UserController extends Controller
                     $data['status'] = 2;
                 }
                 $data['distance'] = $distance . ' KM';
-
             } else {
                 $data['message'] = 'Unable to find Routes so allow to add multi chef order';
                 $data['status'] = 1;
             }
 
             return response()->json($data);
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -608,7 +606,8 @@ class UserController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new CustomerProfileUpdateNotification($customer));
             }
-            return response()->json(['message' => 'User updated successfully', 'success' => true], 200);
+            $data = User::where('id', $req->user_id)->first();
+            return response()->json(['message' => 'User updated successfully', 'data' => $data, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -822,7 +821,6 @@ class UserController extends Controller
                 'TotalRecords' => $totalRecords,
                 'success' => true
             ], 200);
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1162,6 +1160,4 @@ class UserController extends Controller
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
         }
     }
-
-
 }

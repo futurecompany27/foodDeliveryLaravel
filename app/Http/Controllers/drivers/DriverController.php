@@ -85,7 +85,6 @@ class DriverController extends Controller
                 $admin->notify(new driverRegisterationNotification($driver));
             }
             return response()->json(["message" => 'Registered successfully', "success" => true, "driver_id" => $driver->id], 200);
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -110,10 +109,17 @@ class DriverController extends Controller
             if (!$driver) {
                 $driver = Driver::where('mobileNo', str_replace("-", "", $req->userName))->first();
             }
-            $driver->makeVisible('password');
-            if ($driver && Hash::check($req->password, $driver->password)) {
-                $driver->makeHidden('password');
-                return response()->json(['message' => 'Logged in successfully!', 'data' => $driver, 'success' => true], 200);
+            // if (!$driver) {
+            //     return response()->json(['message' => 'Driver not found', 'success' => false], 400);
+            // }
+            if ($driver) {
+                $driver->makeVisible('password');
+                if (Hash::check($req->password, $driver->password)) {
+                    $driver->makeHidden('password');
+                    return response()->json(['message' => 'Logged in successfully!', 'data' => $driver, 'success' => true], 200);
+                } else {
+                    return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+                }
             } else {
                 return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
             }
@@ -139,6 +145,9 @@ class DriverController extends Controller
             $driver = Driver::where('email', $req->userName)->first();
             if (!$driver) {
                 $driver = Driver::where('mobileNo', $req->userName)->first();
+            }
+            if (!$driver) {
+                return response()->json(['message' => 'User not found', 'success' => false], 400);
             }
             Driver::where('email', $driver->email)->update(['password' => Hash::make($req->password)]);
         } catch (\Throwable $th) {
@@ -217,10 +226,11 @@ class DriverController extends Controller
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
-            "driving_licence_no" => 'required',
+            "driving_licence_no" => ['required', 'regex:/^[A-Z][0-9]{4} [0-9]{6} [0-9]{2}$/'],
         ], [
             "id.required" => "please fill password",
             "driving_licence_no.required" => "please fill driving licence no",
+            "driving_licence_no.regex" => "Invalid driving licence number format. Please enter a valid format like 'A3567 678907 45'.",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);

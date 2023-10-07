@@ -1,8 +1,55 @@
-[2023-10-04 11:00:40] local.INFO: H7E  
-[2023-10-04 11:00:40] local.INFO:   
-[2023-10-04 11:01:31] local.INFO: H7A  
-[2023-10-04 11:01:31] local.INFO: {"id":1,"city_id":1,"pincode":"H7A","latitude":"45.678657","longitude":"-73.5894284","status":1,"created_at":"2023-10-04T10:57:52.000000Z","updated_at":"2023-10-04T10:57:52.000000Z"}  
-[2023-10-04 11:04:04] local.INFO: H7E  
-[2023-10-04 11:04:04] local.INFO:   
-[2023-10-04 12:37:53] local.INFO: {"id":1,"driver_id":1,"date":"2024-01-02T18:30:00.000Z","slot":"10:00 AM - 11:00 AM","status":1,"created_at":"2023-10-04T12:37:53.000000Z","updated_at":"2023-10-04T12:37:53.000000Z","driver":{"id":1,"profile_pic":null,"first_name":"test","last_name":"test","email":"test","mobileNo":"9876543210","email_verified_at":null,"are_you_a":"Outsider","full_address":"Test Address","address_proof":null,"province":"Ontario","city":"Toronto","postal_code":"J7A4N7","driving_licence_no":null,"driving_licence_proof":null,"taxation_no":null,"taxation_proof":null,"criminal_report":null,"bank_name":null,"transit_number":null,"account_number":null,"institution_number":null,"status":0,"resetToken":null,"created_at":"2023-10-04T10:57:52.000000Z","updated_at":"2023-10-04T10:57:52.000000Z"}}  
-[2023-10-04 12:41:05] local.INFO: {"id":2,"driver_id":1,"date":"2023-12-28T18:30:00.000Z","slot":"11:00 AM - 12:00 PM","status":1,"created_at":"2023-10-04T12:41:05.000000Z","updated_at":"2023-10-04T12:41:05.000000Z","driver":{"id":1,"profile_pic":null,"first_name":"test","last_name":"test","email":"test","mobileNo":"9876543210","email_verified_at":null,"are_you_a":"Outsider","full_address":"Test Address","address_proof":null,"province":"Ontario","city":"Toronto","postal_code":"J7A4N7","driving_licence_no":null,"driving_licence_proof":null,"taxation_no":null,"taxation_proof":null,"criminal_report":null,"bank_name":null,"transit_number":null,"account_number":null,"institution_number":null,"status":0,"resetToken":null,"created_at":"2023-10-04T10:57:52.000000Z","updated_at":"2023-10-04T10:57:52.000000Z"}}  
+[2023-10-06 11:32:58] local.INFO: {"id":1,"fullname":"Test Usertedfygsb","mobile":"9876543210","mobile_verified_at":"2023-10-06 11:32:58","email":"test@gmail.com","social_id":null,"social_type":null,"email_verified_at":null,"status":1,"resetToken":null,"created_at":"2023-10-06T11:28:20.000000Z","updated_at":"2023-10-06T11:32:58.000000Z"}  
+[2023-10-06 11:33:27] local.INFO: {"id":1,"fullname":"Test Usertedfygsb","mobile":"9876543215","mobile_verified_at":"2023-10-06 11:32:58","email":"test@gmail.com","social_id":null,"social_type":null,"email_verified_at":null,"status":1,"resetToken":null,"created_at":"2023-10-06T11:28:20.000000Z","updated_at":"2023-10-06T11:33:27.000000Z"}  
+[2023-10-06 11:36:07] local.INFO: {"id":1,"fullname":"Test Usertedfygsb","mobile":"9876543215","mobile_verified_at":"2023-10-06 11:32:58","email":"test@gmail.com","social_id":null,"social_type":null,"email_verified_at":null,"status":1,"resetToken":null,"created_at":"2023-10-06T11:28:20.000000Z","updated_at":"2023-10-06T11:36:07.000000Z"}  
+[2023-10-06 11:39:55] local.INFO: {"id":1,"fullname":"Test Usertedfygsb","mobile":"9876543215","mobile_verified_at":"2023-10-06 11:32:58","email":"test@gmail.com","social_id":null,"social_type":null,"email_verified_at":null,"status":1,"resetToken":null,"created_at":"2023-10-06T11:28:20.000000Z","updated_at":"2023-10-06T11:39:55.000000Z"}  
+[2023-10-06 12:23:40] local.INFO: {"id":1,"driver_id":1,"date":"2023-10-06T12:23:06.435Z","slot":"10:00 AM - 11:00 AM","status":1,"created_at":"2023-10-06T12:23:39.000000Z","updated_at":"2023-10-06T12:23:39.000000Z","driver":{"id":1,"profile_pic":"http:\/\/127.0.0.1:8000\/storage\/driver\/1\/\/I8Q6UUzFhFG3947S40hwjEqDuuDcGmSKiGKa2GrQ.jpg","first_name":"testh","last_name":"test","email":"test","mobileNo":"9876543210","email_verified_at":null,"are_you_a":"Outsider","full_address":"Test Address","address_proof":"http:\/\/127.0.0.1:8000\/storage\/driver\/1\/\/lX8ZbPagioAEh2ffHE8Womd2uMW7kG5jz8Rp9luB.jpg","province":"Ontario","city":"Toronto","postal_code":"J7A4N7","driving_licence_no":null,"driving_licence_proof":null,"taxation_no":null,"taxation_proof":null,"criminal_report":null,"bank_name":null,"transit_number":null,"account_number":null,"institution_number":null,"status":0,"resetToken":null,"created_at":"2023-10-06T11:28:20.000000Z","updated_at":"2023-10-06T12:21:52.000000Z"}}  
+[2023-10-06 12:26:55] local.INFO: {"id":2,"driver_id":1,"date":"2023-10-06T12:26:46.733Z","slot":"13:00 PM - 14:00 PM","status":1,"created_at":"2023-10-06T12:26:55.000000Z","updated_at":"2023-10-06T12:26:55.000000Z","driver":{"id":1,"profile_pic":"http:\/\/127.0.0.1:8000\/storage\/driver\/1\/\/I8Q6UUzFhFG3947S40hwjEqDuuDcGmSKiGKa2GrQ.jpg","first_name":"testh","last_name":"test","email":"test","mobileNo":"9876543210","email_verified_at":null,"are_you_a":"Outsider","full_address":"Test Address","address_proof":"http:\/\/127.0.0.1:8000\/storage\/driver\/1\/\/lX8ZbPagioAEh2ffHE8Womd2uMW7kG5jz8Rp9luB.jpg","province":"Ontario","city":"Toronto","postal_code":"J7A4N7","driving_licence_no":null,"driving_licence_proof":null,"taxation_no":null,"taxation_proof":null,"criminal_report":null,"bank_name":null,"transit_number":null,"account_number":null,"institution_number":null,"status":0,"resetToken":null,"created_at":"2023-10-06T11:28:20.000000Z","updated_at":"2023-10-06T12:21:52.000000Z"}}  
+[2023-10-07 06:33:05] local.INFO: Call to a member function makeVisible() on null  
+[2023-10-07 06:43:12] local.INFO: H7A  
+[2023-10-07 06:43:12] local.INFO: {"id":1,"city_id":1,"pincode":"H7A","latitude":"45.678657","longitude":"-73.5894284","status":1,"created_at":"2023-10-06T11:28:20.000000Z","updated_at":"2023-10-06T11:28:20.000000Z"}  
+[2023-10-07 06:44:58] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\vendor\\symfony\\mailer\\Transport\\Smtp\\Stream\\AbstractStream.php:77)
+[stacktrace]
+#0 {main}
+"} 
+[2023-10-07 06:44:58] local.INFO: H7A  
+[2023-10-07 06:44:58] local.INFO: {"id":1,"city_id":1,"pincode":"H7A","latitude":"45.678657","longitude":"-73.5894284","status":1,"created_at":"2023-10-06T11:28:20.000000Z","updated_at":"2023-10-06T11:28:20.000000Z"}  
+[2023-10-07 06:48:12] local.INFO: Attempt to read property "first_name" on null  
+[2023-10-07 07:28:32] local.INFO: array (
+  'fullname' => 'Ptatham Jnax',
+  'mobile' => '548-799-9999',
+  'email' => 'sgxvb@gmail.com',
+  'password' => 'Prath@2002',
+)  
+[2023-10-07 07:28:32] local.INFO: {"fullname":"Ptatham Jnax","mobile":"5487999999","email":"sgxvb@gmail.com","updated_at":"2023-10-07T07:28:32.000000Z","created_at":"2023-10-07T07:28:32.000000Z","id":2}  
+[2023-10-07 07:29:59] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\vendor\\symfony\\mailer\\Transport\\Smtp\\Stream\\AbstractStream.php:77)
+[stacktrace]
+#0 {main}
+"} 
+[2023-10-07 07:30:02] local.INFO: array (
+  'fullname' => 'Pratham Utekar',
+  'mobile' => '456-666-6666',
+  'email' => 'pratham@gmail.com',
+  'password' => 'Prath@2002',
+)  
+[2023-10-07 07:30:02] local.INFO: {"fullname":"Pratham Utekar","mobile":"4566666666","email":"pratham@gmail.com","updated_at":"2023-10-07T07:30:02.000000Z","created_at":"2023-10-07T07:30:02.000000Z","id":3}  
+[2023-10-07 07:31:06] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\vendor\\symfony\\mailer\\Transport\\Smtp\\Stream\\AbstractStream.php:77)
+[stacktrace]
+#0 {main}
+"} 
+[2023-10-07 07:32:13] local.INFO: array (
+  'fullname' => 'Pratham Jhcjds',
+  'mobile' => '647-587-4848',
+  'email' => 'shdbc@gmail.com',
+  'password' => 'Pratham@123',
+)  
+[2023-10-07 07:32:13] local.INFO: {"fullname":"Pratham Jhcjds","mobile":"6475874848","email":"shdbc@gmail.com","updated_at":"2023-10-07T07:32:13.000000Z","created_at":"2023-10-07T07:32:13.000000Z","id":4}  
+[2023-10-07 07:33:41] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\vendor\\symfony\\mailer\\Transport\\Smtp\\Stream\\AbstractStream.php:77)
+[stacktrace]
+#0 {main}
+"} 
+[2023-10-07 07:34:19] local.INFO: 2  
+[2023-10-07 07:35:22] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\vendor\\symfony\\mailer\\Transport\\Smtp\\Stream\\AbstractStream.php:77)
+[stacktrace]
+#0 {main}
+"} 
+[2023-10-07 07:36:12] local.INFO: 2  
