@@ -10,12 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('order_track_deatils', function (Blueprint $table) {
+        Schema::create('order_track_details', function (Blueprint $table) {
             $table->id();
-            $table->string('track_id');
-            $table->string('status');
-            $table->string('date');
-            $table->string('time');
+            $table->string('track_id')->nullable();
+            $table->string('status')->default(1);
             $table->timestamps();
         });
     }
@@ -25,6 +23,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_track_deatils');
+        Schema::dropIfExists('order_track_details');
     }
 };

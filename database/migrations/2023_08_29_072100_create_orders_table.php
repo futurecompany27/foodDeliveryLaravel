@@ -30,11 +30,10 @@ return new class extends Migration {
             $table->string('payment_mode');
             $table->string('delivery_date');
             $table->string('delivery_time');
-            $table->string('payment_status');
-            $table->string('transacton_id');
+            $table->string('payment_status')->default(0);
+            $table->string('transacton_id')->nullable();
             $table->string('total_order_item');
             $table->string('tip_total');
-            $table->string('token')->nullable();
             $table->timestamps();
         });
     }
