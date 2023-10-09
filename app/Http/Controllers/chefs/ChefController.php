@@ -17,6 +17,7 @@ use App\Models\ChefDocument;
 use App\Models\ChefProfileReviewByAdmin;
 use App\Models\ChefReview;
 use App\Models\chefReviewDeleteRequest;
+use App\Models\ChefSuggestion;
 use App\Models\FoodItem;
 use App\Models\RequestForUpdateDetails;
 use App\Models\RequestForUserBlacklistByChef;
@@ -25,8 +26,10 @@ use App\Models\ShefRegisterationRequest;
 use App\Models\User;
 use App\Models\Contact;
 use App\Models\Dietary;
+use App\Models\Driver;
 use App\Models\Ingredient;
 use App\Models\Kitchentype;
+use App\Models\Order;
 use App\Notifications\admin\ChefRegisterationRequest;
 use App\Notifications\admin\RequestQueryNotification;
 use App\Notifications\Chef\ChefContactUsNotification;
@@ -218,8 +221,8 @@ class ChefController extends Controller
         }
         try {
             $data = chef::whereId($req->chef_id)->with([
-                'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-                    'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+                    'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
                 ])
             ])->first();
             return response()->json(["data" => $data, "success" => true], 200);
@@ -793,7 +796,6 @@ class ChefController extends Controller
                 } else {
                     $value['available'] = false;
                 }
-
             }
             $chefData = chef::select('rating')->where('id', $req->chef_id)->first();
             return response()->json(["data" => $data, 'rating' => $chefData->rating, "success" => true], 200);
@@ -1188,7 +1190,6 @@ class ChefController extends Controller
                 $admin->notify(new requestForChefReviewDelete($chefReviewDeleteRequest));
             }
             return response()->json(["message" => 'Request has been raised successfully', "success" => true], 200);
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1241,6 +1242,125 @@ class ChefController extends Controller
         }
     }
 
+    public function deleteMyFoodItem(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "id" => 'required',
+        ], [
+            "id.required" => "please fill chef id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $data = FoodItem::where('id', $req->id)->first();
+            $images = json_decode($data->dishImage);
+            str_replace(env('filePath'), '', $images);
+            if (file_exists(str_replace(env('filePath'), '', $images))) {
+                unlink(str_replace(env('filePath'), '', $images));
+            }
 
+            $img = json_decode($data->dishImageThumbnail);
+            str_replace(env('filePath'), '', $img);
+            if (file_exists(str_replace(env('filePath'), '', $img))) {
+                unlink(str_replace(env('filePath'), '', $img));
+            }
+            FoodItem::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
 
+    public function addChefSuggestions(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "chef_id" => 'required',
+        ], [
+            "chef_id.required" => "please fill chef id",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        if (!File::exists("storage/chef/suggestions")) {
+            File::makeDirectory("storage/chef/suggestions", $mode = 0777, true, true);
+        }
+        try {
+            DB::beginTransaction();
+            $storedPath = $req->file('sample_pic')->store('chef/suggestions', 'public');
+            $filename = asset('/storage', $storedPath);
+
+            $chefsuggestion = new ChefSuggestion();
+            $chefsuggestion->related_to = $req->related_to;
+            $chefsuggestion->message = $req->message;
+            $chefsuggestion->sample_pic = $filename;
+            $chefsuggestion->chef_id = $req->chef_id;
+
+            $chefsuggestion->save();
+            DB::commit();
+            return response()->json(['message' => 'Suggestion Added successfully', "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+        }
+    }
+
+    public function updateChefTaxInformation(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "chef_id" => 'required',
+        ], [
+            "chef_id.required" => "please mention chef_id",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        if (!File::exists("storage/chef/TaxInformation")) {
+            File::makeDirectory("storage/chef/TaxInformation", $mode = 0777, true, true);
+        }
+
+        try {
+            DB::beginTransaction();
+            $data = chef::where('chef_id', $req->chef_id)->first();
+
+            if ($req->hasFile('gst_image')) {
+                $images = json_decode($data->gst_image);
+                str_replace(env('filePath'), '', $images);
+                if (file_exists(str_replace(env('filePath'), '', $images))) {
+                    unlink(str_replace(env('filePath'), '', $images));
+                }
+                $storedPath = $req->file('gst_image')->store('chef/TaxInformation', 'public');
+                $filename = asset('/storage', $storedPath);
+            }
+
+            if ($req->file('qst_image')) {
+                $image = json_decode($data->qst_image);
+                str_replace(env('filePath'), '', $image);
+                if (file_exists(str_replace(env('filePath'), '', $image))) {
+                    unlink(str_replace(env('filePath'), '', $image));
+                }
+
+                $storedPaths = $req->file('qst_image')->store('chef/TaxInformation', 'public');
+                $filenames = asset('/storage', $storedPaths);
+            }
+
+            $cheftax = chef::find($req->chef_id);
+            $cheftax->gst_no = $req->gst_no;
+            $cheftax->qst_no = $req->qst_no;
+            $cheftax->gst_image = $filename;
+            $cheftax->qst_image = $filenames;
+            $cheftax->save();
+
+            DB::commit();
+            return response()->json(['message' => "Tax Information Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
 }

@@ -228,6 +228,7 @@ class regionController extends Controller
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
+            
         ], [
             "id.required" => "please fill id",
         ]);

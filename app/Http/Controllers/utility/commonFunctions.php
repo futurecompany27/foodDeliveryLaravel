@@ -360,12 +360,13 @@ class commonFunctions extends Controller
             "email" => 'required',
         ], [
             "user_type.required" => "please fill user_type",
-            "email.required" => "please fill user_type",
+            "email.required" => "please fill email",
         ]);
 
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
         try {
             $token = Str::random(40); // Generates a random token with 40 characters
             $userDetail = [];
@@ -376,25 +377,24 @@ class commonFunctions extends Controller
                 $data = User::where('email', $req->email)->first();
                 Log::info($data);
                 $userDetail['full_name'] = $data->fullname;
-
             } else if ($req->user_type == 'Admin') {
 
                 Admin::where('email', $req->email)->update(['resetToken' => $token]);
                 $data = Admin::where('email', $req->email)->first();
                 $userDetail['full_name'] = $data->name;
-
             } else if ($req->user_type == 'chef') {
 
                 chef::where('email', $req->email)->update(['resetToken' => $token]);
                 $data = chef::where('email', $req->email)->first();
                 $userDetail['full_name'] = (ucfirst($data->first_name) . ' ' . ucfirst($data->last_name));
-
             } else if ($req->user_type == 'Driver') {
-
+                $driver = Driver::where('email', $req->email)->first();
+                if (!$driver) {
+                    return response()->json(['message' => 'Driver not found', 'success' => false], 400);
+                }
                 Driver::where('email', $req->email)->update(['resetToken' => $token]);
                 $data = Driver::where('email', $req->email)->first();
                 $userDetail['full_name'] = (ucfirst($data->first_name) . ' ' . ucfirst($data->last_name));
-
             }
             Log::info($data->id);
             $userDetail['id'] = $data->id;
@@ -438,7 +438,6 @@ class commonFunctions extends Controller
             } else {
                 return response()->json(['message' => 'token is expired', 'success' => false], 500);
             }
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

@@ -11,11 +11,14 @@ use App\Models\Allergy;
 use App\Models\chef;
 use App\Models\ChefReview;
 use App\Models\chefReviewDeleteRequest;
+use App\Models\ChefSuggestion;
 use App\Models\Contact;
 use App\Models\Dietary;
+use App\Models\Driver;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
+use App\Models\Order;
 use App\Models\RequestForUpdateDetails;
 use App\Models\RequestForUserBlacklistByChef;
 use App\Models\Sitesetting;
@@ -943,10 +946,10 @@ class AdminController extends Controller
                     $query->where('approved_status', 'pending');
                 }
             ])->with([
-                        'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-                            'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
-                        ])
-                    ]);
+                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+                    'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                ])
+            ]);
 
             $skip = $req->page * 10;
 
@@ -1172,4 +1175,31 @@ class AdminController extends Controller
         }
     }
 
+    public function getAllChefSuggestions()
+    {
+        try {
+            $data = ChefSuggestion::all();
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    public function getAdminDshboardCount(Request $req)
+    {
+        try {
+            $driver = Driver::count();
+            $chef = chef::count();
+            $order = Order::count();
+            // $canelOrders = Order::where('')->count();
+
+            return response()->json(["driver" => $driver, "chef" => $chef, "order" => $order, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
 }
