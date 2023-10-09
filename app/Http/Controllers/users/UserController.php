@@ -143,6 +143,7 @@ class UserController extends Controller
             $serviceExist = Pincode::where('pincode', str_replace(" ", "", strtoupper($req->postal_code)))->where('status', 1)->first();
             if ($serviceExist) {
                 $lat_long_result_array = $this->get_lat_long($req->postal_code);
+                Log::info($lat_long_result_array);
 
                 if ($lat_long_result_array["result"] == 1) {
                     /***** Now from the customer postal code we need to find the ******/
@@ -244,6 +245,7 @@ class UserController extends Controller
         // define GMAPIK in contstant file.
         $gmApiK = env('GOOGLE_MAP_KEY');
         $origin = $cust_pc_lat . ',' . $cust_pc_long;
+        Log::info($origin);
         $selected_postal_code = array();
         // dd($selected_postal_code);
         foreach ($postal_codes as $key => $postal_val) {

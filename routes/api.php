@@ -151,6 +151,10 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/sendRequestForChefReviewDelete', 'sendRequestForChefReviewDelete');
     Route::post('/sendRequestForUserBlacklist', 'sendRequestForUserBlacklist');
 
+    //new
+    Route::post('/deleteMyFoodItem', 'deleteMyFoodItem');
+    Route::post('/addChefSuggestions', 'addChefSuggestions');
+    Route::post('/updateChefTaxInformation', 'updateChefTaxInformation');
 });
 
 // Route for admin
@@ -210,6 +214,9 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/getAllBlackListRequestByChef', 'getAllBlackListRequestByChef');
     Route::post('/blacklistUserOnChefRequest', 'blacklistUserOnChefRequest');
     Route::post('/unBlackListUser', 'unBlackListUser');
+    //new
+    Route::get('/getAllChefSuggestions', 'getAllChefSuggestions');
+    Route::get('/getAdminDshboardCount', 'getAdminDshboardCount');
 });
 
 Route::controller(regionController::class)->group(function () {
@@ -309,7 +316,6 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::post('/sendPasswordResetLink', 'sendPasswordResetLink');
     Route::post('/verifyToken', 'verifyToken');
     Route::post('/changePasswordwithToken', 'changePasswordwithToken');
-
 });
 
 /////////////// Notification Controller //////////////

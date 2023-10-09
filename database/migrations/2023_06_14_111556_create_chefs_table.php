@@ -47,6 +47,10 @@ return new class extends Migration {
             $table->text("kitchen_types")->nullable();
             $table->text("other_kitchen_types")->nullable();
             $table->text("about_kitchen")->nullable();
+            $table->string("gst_no")->nullable();
+            $table->string("qst_no")->nullable();
+            $table->string("gst_image")->nullable();
+            $table->string("qst_image")->nullable();
             $table->string("bank_name")->nullable();
             $table->string("transit_number")->nullable();
             $table->string("account_number")->nullable();
