@@ -41,7 +41,8 @@ class OrderController extends Controller
                 'delivery_time' => $req->delivery_time,
                 'total_order_item' => $req->total_order_item,
                 'tip_total' => $req->tip_total,
-                'payment_mode' => $req->payment_mode
+                'payment_mode' => $req->payment_mode,
+                'payment_status' => $req->payment_status
             ]);
             $orderID = ('#HP' . str_pad($ID, 8, '0', STR_PAD_LEFT));
             Order::where('id', $ID)->update(['order_number' => $orderID]);
@@ -89,7 +90,9 @@ class OrderController extends Controller
                 }
             }
 
-            Cart::where('user_id', $req->user_id)->delete();
+            if ($req->payment_status == 1) {
+                Cart::where('user_id', $req->user_id)->delete();
+            }
             DB::commit();
             return response()->json(['message' => 'Order placed successfully', 'success' => true], 200);
 

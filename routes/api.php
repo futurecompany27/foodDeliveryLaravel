@@ -328,4 +328,5 @@ Route::controller(notificationController::class)->group(function () {
 ////////////// Routes for stripe ///////////
 Route::controller(stripeController::class)->group(function () {
     Route::post('/create-checkout-session', 'createSession');
+    Route::post('/retriveStripePaymentStatus', 'retriveStripePaymentStatus');
 });

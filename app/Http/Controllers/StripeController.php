@@ -13,31 +13,44 @@ class StripeController extends Controller
 {
     public function createSession(Request $req)
     {
-        if (!$req->user_id) {
-            return response()->json(["message" => 'please fill user_id', "success" => false], 400);
+        if (!$req->cartData) {
+            return response()->json(["message" => 'please fill cartData', "success" => false], 400);
         }
         try {
 
-            $cartData = Cart::where('user_id', $req->user_id)->first()->cartData;
+            $cartData = json_decode($req->cartData);
 
             $line_items = [];
-
             foreach ($cartData as $value) {
-                $foodItems = $value['foodItems'];
+                $foodItems = $value->foodItems;
                 foreach ($foodItems as $food) {
                     $arr = [
                         'price_data' => [
                             'currency' => 'cad',
                             'product_data' => [
-                                'name' => $food['dish_name'],
-                                'images' => [$food['dishImage']]
+                                'name' => $food->dish_name,
+                                'images' => [$food->dishImage]
                             ],
-                            'unit_amount' => $food['price'] * 100,
+                            'unit_amount' => $food->price * 100,
                         ],
-                        'quantity' => $food['quantity'],
+                        'quantity' => $food->quantity,
                     ];
                     array_push($line_items, $arr);
                 }
+            }
+
+            foreach ($cartData as $value) {
+                $arr = [
+                    'price_data' => [
+                        'currency' => 'cad',
+                        'product_data' => [
+                            'name' => $value->chefName . ' tip',
+                        ],
+                        'unit_amount' => $value->fixedTip * 100,
+                    ],
+                    'quantity' => 1,
+                ];
+                array_push($line_items, $arr);
             }
 
             Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -46,10 +59,26 @@ class StripeController extends Controller
                 'line_items' => $line_items,
                 'mode' => 'payment',
                 'success_url' => env("domain") . 'success-transaction',
-                'cancel_url' => env("domain") . 'fail-transaction',
+                'cancel_url' => env("domain") . 'failed-transaction',
             ]);
 
             return response()->json(['id' => $session->id]);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage(), 'success' => false], 500);
+        }
+    }
+
+    public function retriveStripePaymentStatus(Request $req)
+    {
+        if (!$req->user_id && !$req->session_id) {
+            return response()->json(["message" => 'please fill all details', "success" => false], 400);
+        }
+        try {
+            // Set your Stripe secret key
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+
+            $session = Session::retrieve($req->session_id);
+            return response()->json(['session' => $session, 'success' => true], 200);
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage(), 'success' => false], 500);
         }
