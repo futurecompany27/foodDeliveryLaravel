@@ -23,7 +23,7 @@ class shefTypesController extends Controller
             'name.min' => 'Tag name should be atleast 4 letters longs',
         ]);
         if ($validatedData->fails()) {
-            return response()->json(['message' => $validatedData->errors(), "success" => false], 400);
+            return response()->json(['message' => $validatedData->errors()->first(), "success" => false], 400);
         }
 
         try {

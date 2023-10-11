@@ -187,20 +187,26 @@ class AdminController extends Controller
     public function addAdminSettings(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            "default_comm" => 'required|regex:/^\d+(\.\d+)?$/',
-            'refugee_comm' => 'required|regex:/^\d+(\.\d+)?$/',
-            'singlemom_comm' => 'required|regex:/^\d+(\.\d+)?$/',
-            "lostjob_comm" => 'required|regex:/^\d+(\.\d+)?$/',
-            'student_comm' => 'required|regex:/^\d+(\.\d+)?$/',
-            'food_default_comm' => 'required|regex:/^\d+(\.\d+)?$/',
-            "radius" => 'required|regex:/^\d+(\.\d+)?$/',
+            "default_comm" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
+            'refugee_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
+            'singlemom_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
+            "lostjob_comm" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
+            'student_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
+            'food_default_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
+            "radius" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
         ], [
             "default_comm.required" => "please fill default_comm",
+            "default_comm.regex" => "please enter valid default_comm",
             "refugee_comm.required" => "please fill refugee_comm",
+            "refugee_comm.regex" => "please enter valid refugee_comm",
             "singlemom_comm.required" => "please fill singlemom_comm",
+            "singlemom_comm.regex" => "please enter valid singlemom_comm",
             "lostjob_comm.required" => "please fill lostjob_comm",
+            "lostjob_comm.regex" => "please enter valid lostjob_comm",
             "student_comm.required" => "please fill student_comm",
+            "student_comm.regex" => "please enter valid student_comm",
             "food_default_comm.required" => "please fill food_default_comm",
+            "food_default_comm.regex" => "please enter valid food_default_comm",
             "radius.required" => "please fill radius",
         ]);
 
@@ -237,6 +243,10 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            // Check if the value exceeds 500
+            if ($req->all() > 500) {
+                return response()->json(["message" => "The input value must be lower than 500.", "success" => false], 400);
+            }
             $data = Adminsetting::where('id', $req->id)->first();
             $updateData = $req->all();
 
@@ -291,11 +301,10 @@ class AdminController extends Controller
     {
         $validator = Validator::make($req->all(), [
             "category" => 'required',
-            "commission" => 'required|integer|between:1,100',
+            "commission" => 'nullable|integer|between:1,100',
             "image" => 'required',
         ], [
             "category.required" => "please fill category",
-            "commission.required" => "please fill commission",
             "image.required" => "please fill image",
         ]);
         if ($validator->fails()) {
@@ -308,7 +317,9 @@ class AdminController extends Controller
         try {
             $foodcategory = new FoodCategory();
             $foodcategory->category = $req->category;
-            $foodcategory->commission = $req->commission;
+            // Check if 'commission' is provided; if not, set a default value
+            $foodcategory->commission = $req->commission ?? 10;
+
             $foodcategory->image = $filename;
             $foodcategory->save();
             return response()->json(["message" => "Submitted successfully", "success" => true], 200);
@@ -336,7 +347,7 @@ class AdminController extends Controller
                 $updateData['category'] = $req->category;
             }
             if ($req->commission) {
-                $updateData['commission'] = $req->commission;
+                $updateData['commission'] = $req->commission ? $req->commission : 10;
             }
             if ($req->hasFile('image')) {
                 $images = $data->image;

@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('adminsettings', function (Blueprint $table) {
             $table->id();
-            $table->decimal('default_comm')->default(0.0)->nullable();
-            $table->decimal('refugee_comm')->default(0.0)->nullable();
-            $table->decimal('singlemom_comm')->default(0.0)->nullable();
-            $table->decimal('lostjob_comm')->default(0.0)->nullable();
-            $table->decimal('student_comm')->default(0.0)->nullable();
-            $table->decimal('food_default_comm')->default(0.0)->nullable();
-            $table->decimal('radius')->default(1)->comment("shef find with in this range to customer");
-            $table->decimal('multiChefOrderAllow')->default(5)->comment("user can add multi chef order if its under this range");
+            $table->integer('default_comm')->default(0.0)->nullable();
+            $table->integer('refugee_comm')->default(0.0)->nullable();
+            $table->integer('singlemom_comm')->default(0.0)->nullable();
+            $table->integer('lostjob_comm')->default(0.0)->nullable();
+            $table->integer('student_comm')->default(0.0)->nullable();
+            $table->integer('food_default_comm')->default(0.0)->nullable();
+            $table->integer('radius')->default(1)->comment("shef find with in this range to customer");
+            $table->integer('multiChefOrderAllow')->default(5)->comment("user can add multi chef order if its under this range");
             $table->timestamps();
         });
     }

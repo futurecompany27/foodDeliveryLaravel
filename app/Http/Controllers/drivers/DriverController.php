@@ -171,12 +171,12 @@ class DriverController extends Controller
             "postal_code" => 'required',
         ], [
             "driver_id.required" => "please fill driver_id",
-            "first_name.required" => "please fill email",
-            "last_name.required" => "please fill email",
-            "full_address.required" => "please fill driving licence no",
-            "province.required" => "please fill driving licence no",
-            "city.required" => "please fill driving licence no",
-            "postal_code.required" => "please fill driving licence no",
+            "first_name.required" => "please fill first_name",
+            "last_name.required" => "please fill last_name",
+            "full_address.required" => "please fill full_address",
+            "province.required" => "please fill province",
+            "city.required" => "please fill city",
+            "postal_code.required" => "please fill postal_code",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -263,29 +263,66 @@ class DriverController extends Controller
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
-            "taxation_no" => 'required',
         ], [
-            "id.required" => "please fill password",
-            "taxation_no.required" => "please fill driving licence no",
+            "id.required" => "please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+        if (!File::exists("public/storage/driver/TaxInformation")) {
+            File::makeDirectory("public/storage/driver/TaxInformation", $mode = 0777, true, true);
+        }
+
         try {
-            $path = 'driver/' . $req->id;
-            if (!File::exists($path)) {
-                File::makeDirectory($path, $mode = 0777, true, true);
+            DB::beginTransaction();
+            // Retrieve the chef's data
+            $driver = Driver::find($req->id);
+
+            if (!$driver) {
+                return response()->json(['message' => 'Driver not found', 'success' => false], 404);
             }
-            if ($req->hasFile('taxation_proof')) {
-                $driver = Driver::find($req->id);
-                if (file_exists(str_replace(env('filePath'), '', $driver->taxation_proof))) {
-                    unlink(str_replace(env('filePath'), '', $driver->taxation_proof));
+
+            // Delete existing GST image if it exists
+            if ($req->hasFile('gst_image') && $driver->gst_image) {
+                $existingGstImagePath = public_path(str_replace(asset('storage/'), '', $driver->gst_image));
+                if (File::exists($existingGstImagePath)) {
+                    // Attempt to delete the file
+                    if (!unlink($existingGstImagePath)) {
+                        return response()->json(['message' => 'Failed to delete existing GST image', 'success' => false], 500);
+                    }
                 }
-                $storedPath = $req->file('taxation_proof')->store($path, 'public');
-                Driver::where('id', $req->id)->update(['taxation_proof' => asset('storage/' . $storedPath), 'status' => 0]);
             }
-            Driver::where('id', $req->id)->update(['taxation_no' => $req->taxation_no]);
-            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+
+            // Delete existing QST image if it exists
+            if ($req->hasFile('qst_image') && $driver->qst_image) {
+                $existingQstImagePath = public_path(str_replace(asset('storage/'), '', $driver->qst_image));
+                if (File::exists($existingQstImagePath)) {
+                    // Attempt to delete the file
+                    if (!unlink($existingQstImagePath)) {
+                        return response()->json(['message' => 'Failed to delete existing QST image', 'success' => false], 500);
+                    }
+                }
+            }
+
+            // Store new GST image
+            if ($req->hasFile('gst_image')) {
+                $filename = $req->file('gst_image')->store('/driver/TaxInformation');
+                $driver->gst_image = asset('storage/' . $filename);
+            }
+
+            // Store new QST image
+            if ($req->hasFile('qst_image')) {
+                $filenames = $req->file('qst_image')->store('/driver/TaxInformation');
+                $driver->qst_image = asset('storage/' . $filenames);
+            }
+
+            // Update GST and QST numbers
+            $driver->gst_no = $req->gst_no;
+            $driver->qst_no = $req->qst_no;
+            $driver->save();
+
+            DB::commit();
+            return response()->json(['message' => "Tax Information Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

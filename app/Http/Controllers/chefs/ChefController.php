@@ -1313,54 +1313,69 @@ class ChefController extends Controller
         $validator = Validator::make($req->all(), [
             "chef_id" => 'required',
         ], [
-            "chef_id.required" => "please mention chef_id",
+            "chef_id.required" => "Please mention chef_id",
         ]);
 
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
-        if (!File::exists("storage/chef/TaxInformation")) {
-            File::makeDirectory("storage/chef/TaxInformation", $mode = 0777, true, true);
-        }
 
         try {
             DB::beginTransaction();
-            $data = chef::where('chef_id', $req->chef_id)->first();
 
+            // Retrieve the chef's data
+            $chef = Chef::find($req->chef_id);
+
+            if (!$chef) {
+                return response()->json(['message' => 'Chef not found', 'success' => false], 404);
+            }
+
+            // Delete existing GST image if it exists
+            if ($req->hasFile('gst_image') && $chef->gst_image) {
+                $existingGstImagePath = public_path(str_replace(asset('storage/'), '', $chef->gst_image));
+                if (File::exists($existingGstImagePath)) {
+                    // Attempt to delete the file
+                    if (!unlink($existingGstImagePath)) {
+                        return response()->json(['message' => 'Failed to delete existing GST image', 'success' => false], 500);
+                    }
+                }
+            }
+
+            // Delete existing QST image if it exists
+            if ($req->hasFile('qst_image') && $chef->qst_image) {
+                $existingQstImagePath = public_path(str_replace(asset('storage/'), '', $chef->qst_image));
+                if (File::exists($existingQstImagePath)) {
+                    // Attempt to delete the file
+                    if (!unlink($existingQstImagePath)) {
+                        return response()->json(['message' => 'Failed to delete existing QST image', 'success' => false], 500);
+                    }
+                }
+            }
+
+            // Store new GST image
             if ($req->hasFile('gst_image')) {
-                $images = json_decode($data->gst_image);
-                str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
-                    unlink(str_replace(env('filePath'), '', $images));
-                }
-                $storedPath = $req->file('gst_image')->store('chef/TaxInformation', 'public');
-                $filename = asset('/storage', $storedPath);
+                $filename = $req->file('gst_image')->store('/chef/TaxInformation');
+                $chef->gst_image = asset('storage/' . $filename);
             }
 
-            if ($req->file('qst_image')) {
-                $image = json_decode($data->qst_image);
-                str_replace(env('filePath'), '', $image);
-                if (file_exists(str_replace(env('filePath'), '', $image))) {
-                    unlink(str_replace(env('filePath'), '', $image));
-                }
-
-                $storedPaths = $req->file('qst_image')->store('chef/TaxInformation', 'public');
-                $filenames = asset('/storage', $storedPaths);
+            // Store new QST image
+            if ($req->hasFile('qst_image')) {
+                $filenames = $req->file('qst_image')->store('/chef/TaxInformation');
+                $chef->qst_image = asset('storage/' . $filenames);
             }
 
-            $cheftax = chef::find($req->chef_id);
-            $cheftax->gst_no = $req->gst_no;
-            $cheftax->qst_no = $req->qst_no;
-            $cheftax->gst_image = $filename;
-            $cheftax->qst_image = $filenames;
-            $cheftax->save();
+            // Update GST and QST numbers
+            $chef->gst_no = $req->gst_no;
+            $chef->qst_no = $req->qst_no;
+            $chef->save();
 
             DB::commit();
+
             return response()->json(['message' => "Tax Information Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
-            Log::info($th->getMessage());
+            Log::error($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again!', 'success' => false], 500);
         }
     }
 }

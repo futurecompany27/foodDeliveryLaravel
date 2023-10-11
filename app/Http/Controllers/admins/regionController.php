@@ -310,7 +310,7 @@ class regionController extends Controller
             $Pincode->longitude = $req->long;
             $Pincode->save();
             DB::commit();
-            return response()->json(["message" => "pincode added successfully ", "success" => true], 200);
+            return response()->json(["message" => "Postal Code Added Successfully ", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
