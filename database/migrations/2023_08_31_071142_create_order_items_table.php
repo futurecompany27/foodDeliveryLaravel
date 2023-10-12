@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->string('quantity');
             $table->string('price');
             $table->string('total');
+            $table->foreign('sub_order_id')->references('sub_order_id')->on('sub_orders')->onDelete('cascade');
             $table->timestamps();
         });
     }

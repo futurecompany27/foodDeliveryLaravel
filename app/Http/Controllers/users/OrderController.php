@@ -42,10 +42,11 @@ class OrderController extends Controller
                 'total_order_item' => $req->total_order_item,
                 'tip_total' => $req->tip_total,
                 'payment_mode' => $req->payment_mode,
-                'payment_status' => $req->payment_status
+                'payment_status' => $req->payment_status,
+                'transacton_id' => $req->transacton_id
             ]);
             $orderID = ('#HP' . str_pad($ID, 8, '0', STR_PAD_LEFT));
-            Order::where('id', $ID)->update(['order_number' => $orderID]);
+            Order::where('id', $ID)->update(['order_id' => $orderID]);
 
             $cartData = json_decode($req->cartData);
             foreach ($cartData as $value) {

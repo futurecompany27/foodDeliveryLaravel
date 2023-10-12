@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class OrderItems extends Model
 {
     use HasFactory;
+
+    public function subOrder(){
+        return $this->belongsTo(SubOrders::class, 'sub_order_id', 'sub_order_id');
+    }
 }

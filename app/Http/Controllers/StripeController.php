@@ -13,50 +13,25 @@ class StripeController extends Controller
 {
     public function createSession(Request $req)
     {
-        if (!$req->cartData) {
+        if (!$req->totalAmt) {
             return response()->json(["message" => 'please fill cartData', "success" => false], 400);
         }
         try {
-
-            $cartData = json_decode($req->cartData);
-
-            $line_items = [];
-            foreach ($cartData as $value) {
-                $foodItems = $value->foodItems;
-                foreach ($foodItems as $food) {
-                    $arr = [
-                        'price_data' => [
-                            'currency' => 'cad',
-                            'product_data' => [
-                                'name' => $food->dish_name,
-                                'images' => [$food->dishImage]
-                            ],
-                            'unit_amount' => $food->price * 100,
-                        ],
-                        'quantity' => $food->quantity,
-                    ];
-                    array_push($line_items, $arr);
-                }
-            }
-
-            foreach ($cartData as $value) {
-                $arr = [
-                    'price_data' => [
-                        'currency' => 'cad',
-                        'product_data' => [
-                            'name' => $value->chefName . ' tip',
-                        ],
-                        'unit_amount' => $value->fixedTip * 100,
-                    ],
-                    'quantity' => 1,
-                ];
-                array_push($line_items, $arr);
-            }
-
             Stripe::setApiKey(env('STRIPE_SECRET'));
             $session = Session::create([
                 'payment_method_types' => ['card'],
-                'line_items' => $line_items,
+                'line_items' => [
+                    [
+                        'price_data' => [
+                            'currency' => 'cad',
+                            'product_data' => [
+                                'name' => "Total",
+                            ],
+                            'unit_amount' => $req->totalAmt * 100,
+                        ],
+                        'quantity' => 1,
+                    ]
+                ],
                 'mode' => 'payment',
                 'success_url' => env("domain") . 'success-transaction',
                 'cancel_url' => env("domain") . 'failed-transaction',
