@@ -41,4 +41,9 @@ class Order extends Model
     protected $casts = [
         'tax_types' => 'array',
     ];
+
+    public function subOrders()
+    {
+        return $this->hasMany(SubOrders::class, 'order_id', 'order_id');
+    } 
 }

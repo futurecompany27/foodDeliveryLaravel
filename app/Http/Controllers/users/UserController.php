@@ -476,40 +476,45 @@ class UserController extends Controller
         }
 
         try {
-            if ($req->id) {
-                $updateData = $req->all();
-                $recordToUpdate = ShippingAddresse::find($req->id);
-                if ($recordToUpdate) {
-                    $recordToUpdate->update($updateData);
-                    return response()->json(['message' => 'Address updated successfully', 'success' => true], 200);
-                } else {
-                    return response()->json(['message' => 'Address not found', 'success' => false], 404);
-                }
-            } else {
-                $newAdrees = new ShippingAddresse();
-                $newAdrees->user_id = $req->user_id;
-                $newAdrees->first_name = $req->first_name;
-                $newAdrees->last_name = $req->last_name;
-                $newAdrees->mobile_no = str_replace("-", '', $req->mobile_no);
-                $newAdrees->postal_code = $req->postal_code;
-                $newAdrees->city = $req->city;
-                $newAdrees->state = $req->state;
-                // $newAdrees->landmark = $req->landmark;
-                // $newAdrees->locality = $req->locality;
-                $newAdrees->full_address = $req->full_address;
-                $newAdrees->address_type = $req->address_type;
-
-                if ($req->default_address) {
-                    $newAdrees->default_address = 1;
-                    ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
-                } else {
-                    $count = ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->count();
-                    if ($count < 1) {
-                        $newAdrees->default_address = 1;
+            $serviceExist = Pincode::where('pincode', str_replace(" ", "", strtoupper($req->postal_code)))->where('status', 1)->first();
+            if ($serviceExist) {
+                if ($req->id) {
+                    $updateData = $req->all();
+                    $recordToUpdate = ShippingAddresse::find($req->id);
+                    if ($recordToUpdate) {
+                        $recordToUpdate->update($updateData);
+                        return response()->json(['message' => 'Address updated successfully', 'success' => true], 200);
+                    } else {
+                        return response()->json(['message' => 'Address not found', 'success' => false], 404);
                     }
+                } else {
+                    $newAdrees = new ShippingAddresse();
+                    $newAdrees->user_id = $req->user_id;
+                    $newAdrees->first_name = $req->first_name;
+                    $newAdrees->last_name = $req->last_name;
+                    $newAdrees->mobile_no = str_replace("-", '', $req->mobile_no);
+                    $newAdrees->postal_code = $req->postal_code;
+                    $newAdrees->city = $req->city;
+                    $newAdrees->state = $req->state;
+                    // $newAdrees->landmark = $req->landmark;
+                    // $newAdrees->locality = $req->locality;
+                    $newAdrees->full_address = $req->full_address;
+                    $newAdrees->address_type = $req->address_type;
+    
+                    if ($req->default_address) {
+                        $newAdrees->default_address = 1;
+                        ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
+                    } else {
+                        $count = ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->count();
+                        if ($count < 1) {
+                            $newAdrees->default_address = 1;
+                        }
+                    }
+                    $newAdrees->save();
+                    return response()->json(['message' => 'Added successfully', 'success' => true], 200);
                 }
-                $newAdrees->save();
-                return response()->json(['message' => 'Added successfully', 'success' => true], 200);
+            }else{
+                return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

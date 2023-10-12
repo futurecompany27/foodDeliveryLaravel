@@ -13,15 +13,16 @@ return new class extends Migration {
         Schema::create('sub_orders', function (Blueprint $table) {
             $table->id();
             $table->string('order_id');
-            $table->string('sub_order_id')->nullable();
+            $table->string('sub_order_id')->nullable()->unique();
             $table->string('chef_id');
-            $table->string('track_id')->nullable();
+            $table->string('track_id')->nullable()->unique();
             $table->string('item_total');
             $table->string('amount');
             $table->string('tip')->nullable();
             $table->string('tip_type');
             $table->string('tip_amount');
             $table->string('status')->default(1);
+            $table->foreign('order_id')->references('order_id')->on('orders')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -20,4 +20,17 @@ class SubOrders extends Model
         'tip_amount',
         'status'
     ];
+
+    public function Orders()
+    {
+        return $this->belongsTo(Orders::class, 'order_id', 'order_id');
+    }
+    
+    public function OrderItems(){
+        return $this->hasMany(OrderItems::class, 'sub_order_id', 'sub_order_id');
+    }
+
+    public function OrderTrack(){
+        return $this->hasMany(OrderTrackDetails::class, 'track_id', 'track_id');
+    }
 }
