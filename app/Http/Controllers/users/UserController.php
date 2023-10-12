@@ -450,7 +450,7 @@ class UserController extends Controller
                     }
                 }
             }
-            return response()->json(['message' => 'added successfull', 'success' => true], 200);
+            return response()->json(['message' => 'Your information has been securely saved', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
