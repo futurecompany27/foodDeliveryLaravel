@@ -1204,9 +1204,10 @@ class AdminController extends Controller
             $driver = Driver::count();
             $chef = chef::count();
             $order = Order::count();
+            $user = User::count();
             // $canelOrders = Order::where('')->count();
 
-            return response()->json(["driver" => $driver, "chef" => $chef, "order" => $order, "success" => true], 200);
+            return response()->json(["driver" => $driver, "chef" => $chef, "order" => $order, "user" => $user, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
