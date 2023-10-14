@@ -96,11 +96,25 @@ class OrderController extends Controller
             }
             DB::commit();
             return response()->json(['message' => 'Order placed successfully', 'success' => true], 200);
-
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+        }
+    }
+
+    public function getUserOrders(Request $req)
+    {
+        if (!$req->user_id) {
+            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            $data = Order::where($req->user_id)->first();
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
         }
     }
 }

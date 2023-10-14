@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('profession');
             $table->text('message');
-            $table->tinyinteger('status')->default(1)->comment('1-approved 0-unapproved');
+            $table->tinyinteger('status')->default(0)->comment('1-approved 0-unapproved');
             $table->unsignedInteger('star_rating');
             $table->timestamps();
         });

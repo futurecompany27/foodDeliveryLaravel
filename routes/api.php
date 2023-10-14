@@ -49,7 +49,6 @@ Route::controller(DriverController::class)->group(function () {
     Route::post('/getMyDetails', 'getMyDetails');
     Route::post('/driverUpdateEmail', 'driverUpdateEmail');
     Route::post('/VerifyDriverEmail', 'VerifyDriverEmail');
-
 });
 
 // Routes for users
@@ -93,6 +92,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/getAllUserChefReviewsbyStatus', 'getAllUserChefReviewsbyStatus');
 
     Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
+    Route::post('/getUserOrders', 'getUserOrders');
 });
 
 Route::controller(cartController::class)->group(function () {
@@ -157,6 +157,7 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/deleteMyFoodItem', 'deleteMyFoodItem');
     Route::post('/addChefSuggestions', 'addChefSuggestions');
     Route::post('/updateChefTaxInformation', 'updateChefTaxInformation');
+    Route::post('/getChefOrders', 'getChefOrders');
 });
 
 // Route for admin

@@ -1214,4 +1214,6 @@ class AdminController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
         }
     }
+
+
 }

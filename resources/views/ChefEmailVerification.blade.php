@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html>
+
 <head>
- <title>Home Shef Registration </title>
- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>Home Shef Registration </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
+
 <body>
- 
- <b>Hi {{ucfirst($full_name)}}</b>
- <p>Your account has been created successfully.</p>
- <p>You may access your account only after the verification of your documents and details.</p> 
 
- <p>Kindly verify your email by clicking on the link below</p>
- <a class="btn btn-primary" href="{{ env('domain'). 'verified-mail?id=' . $id . '&type=chef' }}">Email Verification</a>
+    <b>Hi {{ucfirst($full_name)}}</b>
+    <p>Your account has been created successfully.</p>
+    <p>You may access your account only after the verification of your documents and details.</p>
 
- <p>Regards,</p>
- <p>Homeshef Team</p>
+    <p>Kindly verify your email by clicking on the link below</p>
+    <a class="btn btn-primary" href="{{ env('domain'). 'verified-mail?id=' . $id . '&type=chef' }}">Email Verification</a>
+    <p>Regards,</p>
+    <img src="{{'/image/mainlogo.png'}}" class="object-fit-cover img-fluid" width="80" alt="">
+    <p>Homeplate Team</p>
+    <p>support@homeplate.ca</p>
 </body>
-</html> 
- 
+
+</html>

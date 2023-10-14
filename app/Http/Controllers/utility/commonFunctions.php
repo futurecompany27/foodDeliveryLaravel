@@ -234,7 +234,11 @@ class commonFunctions extends Controller
         try {
             $totalRecords = Feedback::count();
             $skip = $req->page * 10;
-            $data = Feedback::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
+            $query = Feedback::orderBy('created_at', 'desc');
+            if ($req->status == 1) {
+                $query->where('status', $req->status);
+            }
+            $data = $query->skip($skip)->take(10)->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

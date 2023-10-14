@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -13,6 +14,7 @@ return new class extends Migration {
         Schema::create('sub_orders', function (Blueprint $table) {
             $table->id();
             $table->string('order_id');
+            $table->foreign('order_id')->references('order_id')->on('orders')->onDelete('cascade');
             $table->string('sub_order_id')->nullable()->unique();
             $table->string('chef_id');
             $table->string('track_id')->nullable()->unique();
@@ -22,7 +24,6 @@ return new class extends Migration {
             $table->string('tip_type');
             $table->string('tip_amount');
             $table->string('status')->default(1);
-            $table->foreign('order_id')->references('order_id')->on('orders')->onDelete('cascade');
             $table->timestamps();
         });
     }
