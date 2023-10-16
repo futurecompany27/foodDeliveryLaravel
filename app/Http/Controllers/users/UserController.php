@@ -1182,8 +1182,34 @@ class UserController extends Controller
 
         try {
             $data = Order::where('user_id', $req->user_id)
-                ->with('orderItems')
-                ->with('subOrders')
+                ->with('subOrders.orderItems.foodItem.chef')
+                ->get(); // Use get() to retrieve multiple orders, not just the first one
+
+            if ($data->isEmpty()) {
+                return response()->json(["message" => "No orders found for this user", "success" => true], 200);
+            }
+
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage()); // Log as an error
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
+        }
+    }
+
+    public function getUserOrderDetails(Request $req)
+    {
+        // Validation
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|integer', // Adjust validation rules as needed
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Validation failed", "errors" => $validator->errors(), "success" => false], 400);
+        }
+
+        try {
+            $data = Order::where('id', $req->id)
+                ->with('subOrders.orderItems.foodItem.chef')
                 ->get(); // Use get() to retrieve multiple orders, not just the first one
 
             if ($data->isEmpty()) {
