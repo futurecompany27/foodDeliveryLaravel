@@ -94,7 +94,6 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
     Route::post('/getUserOrders', 'getUserOrders');
     Route::post('/getUserOrderDetails', 'getUserOrderDetails');
-
 });
 
 Route::controller(cartController::class)->group(function () {
@@ -225,7 +224,6 @@ Route::controller(AdminController::class)->group(function () {
 
     Route::get('/getSubOrderDetails', 'getSubOrderDetails');
     Route::get('/getOrderDetails', 'getOrderDetails');
-
 });
 
 Route::controller(regionController::class)->group(function () {
