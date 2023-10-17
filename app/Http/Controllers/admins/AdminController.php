@@ -1216,7 +1216,7 @@ class AdminController extends Controller
         }
     }
 
-    public function getOrderDetails(Request $req)
+    public function getAllOrderDetails(Request $req)
     {
         try {
             $orders = Order::with('subOrders.orderItems.foodItem.chef')
@@ -1229,10 +1229,55 @@ class AdminController extends Controller
         }
     }
 
-    public function getSubOrderDetails(Request $req)
+    public function getAdminOrderDetailsById(Request $req)
+    {
+        // Validation
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|integer', // Adjust validation rules as needed
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Validation failed", "errors" => $validator->errors()->first(), "success" => false], 400);
+        }
+
+        try {
+            $orders = Order::where('id', $req->id)
+                ->with('subOrders.orderItems.foodItem.chef')
+                ->get();
+            return response()->json(["orders" => $orders, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+
+    public function getAllSubOrderDetails(Request $req)
     {
         try {
             $subOrders = SubOrders::with('orderItems.foodItem')->with('Orders')->get();
+            return response()->json(["subOrders" => $subOrders, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    public function getAdminSubOrderDetailsById(Request $req)
+    {
+        // Validation
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|integer', // Adjust validation rules as needed
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Validation failed", "errors" => $validator->errors()->first(), "success" => false], 400);
+        }
+
+        try {
+            $subOrders = SubOrders::where('id', $req->id)->with('orderItems.foodItem')->with('Orders')->get();
             return response()->json(["subOrders" => $subOrders, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

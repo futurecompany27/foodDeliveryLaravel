@@ -222,8 +222,11 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/getAllChefSuggestions', 'getAllChefSuggestions');
     Route::get('/getAdminDshboardCount', 'getAdminDshboardCount');
 
-    Route::get('/getSubOrderDetails', 'getSubOrderDetails');
-    Route::get('/getOrderDetails', 'getOrderDetails');
+    Route::get('/getAllSubOrderDetails', 'getAllSubOrderDetails');
+    Route::get('/getAllOrderDetails', 'getAllOrderDetails');
+    Route::post('/getAdminOrderDetailsById', 'getAdminOrderDetailsById');
+    Route::post('/getAdminSubOrderDetailsById', 'getAdminSubOrderDetailsById');
+
 });
 
 Route::controller(regionController::class)->group(function () {
