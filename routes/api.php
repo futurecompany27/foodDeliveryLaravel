@@ -33,6 +33,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/test', function () {
+    return response()->json(['message' => 'Wlcome to HomePlate', 'success' => true],200);
+});
+
 // Route for driver
 Route::controller(DriverController::class)->group(function () {
     Route::post('/driverRegisteraion', 'driverRegisteraion');
