@@ -19,6 +19,7 @@ use App\Models\chef;
 use App\Models\ChefReview;
 use App\Models\FoodItem;
 use App\Models\FoodItemReview;
+use App\Models\Order;
 use App\Models\Pincode;
 use App\Models\UserChefReview;
 use App\Models\UserContact;
@@ -500,7 +501,7 @@ class UserController extends Controller
                     // $newAdrees->locality = $req->locality;
                     $newAdrees->full_address = $req->full_address;
                     $newAdrees->address_type = $req->address_type;
-    
+
                     if ($req->default_address) {
                         $newAdrees->default_address = 1;
                         ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
@@ -513,7 +514,7 @@ class UserController extends Controller
                     $newAdrees->save();
                     return response()->json(['message' => 'Added successfully', 'success' => true], 200);
                 }
-            }else{
+            } else {
                 return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
         } catch (\Throwable $th) {
@@ -1165,6 +1166,60 @@ class UserController extends Controller
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+        }
+    }
+
+    public function getUserOrders(Request $req)
+    {
+        // Validation
+        $validator = Validator::make($req->all(), [
+            'user_id' => 'required|integer', // Adjust validation rules as needed
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Validation failed", "errors" => $validator->errors(), "success" => false], 400);
+        }
+
+        try {
+            $data = Order::where('user_id', $req->user_id)
+                ->with('subOrders.orderItems.foodItem.chef')
+                ->get(); // Use get() to retrieve multiple orders, not just the first one
+
+            if ($data->isEmpty()) {
+                return response()->json(["message" => "No orders found for this user", "success" => true], 200);
+            }
+
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage()); // Log as an error
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
+        }
+    }
+
+    public function getUserOrderDetails(Request $req)
+    {
+        // Validation
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|integer', // Adjust validation rules as needed
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Validation failed", "errors" => $validator->errors(), "success" => false], 400);
+        }
+
+        try {
+            $data = Order::where('id', $req->id)
+                ->with('subOrders.orderItems.foodItem.chef')
+                ->get(); // Use get() to retrieve multiple orders, not just the first one
+
+            if ($data->isEmpty()) {
+                return response()->json(["message" => "No orders found for this user", "success" => true], 200);
+            }
+
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage()); // Log as an error
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
         }
     }
 }

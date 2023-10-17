@@ -23,7 +23,7 @@ class SubOrders extends Model
 
     public function Orders()
     {
-        return $this->belongsTo(Orders::class, 'order_id', 'order_id');
+        return $this->belongsTo(Order::class, 'order_id', 'order_id');
     }
     
     public function OrderItems(){
@@ -32,5 +32,10 @@ class SubOrders extends Model
 
     public function OrderTrack(){
         return $this->hasMany(OrderTrackDetails::class, 'track_id', 'track_id');
+    }
+
+    public function chefs()
+    {
+        return $this->belongsTo(chef::class, 'chef_id', 'id');
     }
 }

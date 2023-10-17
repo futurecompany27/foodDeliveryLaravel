@@ -22,6 +22,7 @@ use App\Models\Order;
 use App\Models\RequestForUpdateDetails;
 use App\Models\RequestForUserBlacklistByChef;
 use App\Models\Sitesetting;
+use App\Models\SubOrders;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -1208,6 +1209,31 @@ class AdminController extends Controller
             // $canelOrders = Order::where('')->count();
 
             return response()->json(["driver" => $driver, "chef" => $chef, "order" => $order, "user" => $user, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    public function getOrderDetails(Request $req)
+    {
+        try {
+            $orders = Order::with('subOrders.orderItems.foodItem.chef')
+                ->get();
+            return response()->json(["orders" => $orders, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+        }
+    }
+
+    public function getSubOrderDetails(Request $req)
+    {
+        try {
+            $subOrders = SubOrders::with('orderItems.foodItem')->with('Orders')->get();
+            return response()->json(["subOrders" => $subOrders, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

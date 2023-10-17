@@ -43,6 +43,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Pincode;
+use App\Models\SubOrders;
 use App\Notifications\admin\requestForBlacklistUser;
 use App\Notifications\admin\requestForChefReviewDelete;
 use App\Notifications\Chef\ChefRegisterationNotification;
@@ -1376,6 +1377,21 @@ class ChefController extends Controller
             Log::error($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to update again!', 'success' => false], 500);
+        }
+    }
+
+    public function getChefOrders(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            $data = SubOrders::where('chef_id', $req->chef_id)->with('orderItems.foodItem')->with('Orders')->first();
+            return response()->json(["data" => $data, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
         }
     }
 }

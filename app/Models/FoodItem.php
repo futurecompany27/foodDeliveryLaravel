@@ -71,4 +71,9 @@ class FoodItem extends Model
     {
         return $this->hasmany(UserFoodReview::class);
     }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItems::class, 'food_id', 'id');
+    }
 }

@@ -45,5 +45,10 @@ class Order extends Model
     public function subOrders()
     {
         return $this->hasMany(SubOrders::class, 'order_id', 'order_id');
-    } 
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItems::class, 'sub_order_id', 'sub_order_id');
+    }
 }
