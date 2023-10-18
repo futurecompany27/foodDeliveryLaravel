@@ -51,4 +51,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderItems::class, 'sub_order_id', 'sub_order_id');
     }
+
+    public function shippingAddress()
+    {
+        return $this->hasMany(shippingAddress::class, 'user_id', 'user_id');
+    }
 }

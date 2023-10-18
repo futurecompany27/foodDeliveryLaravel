@@ -130,3 +130,6 @@
 [2023-10-17 10:31:57] local.INFO:  ["32.4",3] 
 [2023-10-17 10:31:57] local.INFO:  ["22.6",3] 
 [2023-10-17 10:31:58] local.INFO:  ["23.0",3] 
+[2023-10-18 06:10:57] local.INFO: Call to undefined relationship [shipping_addresses] on model [App\Models\Order].  
+[2023-10-18 06:11:26] local.INFO: Call to undefined relationship [shipping_addresses] on model [App\Models\Order].  
+[2023-10-18 06:11:34] local.INFO: Call to undefined relationship [shipping_addresses] on model [App\Models\Order].  

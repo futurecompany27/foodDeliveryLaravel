@@ -23,4 +23,9 @@ class ShippingAddresse extends Model
         'address_type',
         'default_address',
     ];
+
+    public function orders()
+    {
+        return $this->belongsTo(Order::class, 'user_id', 'user_id');
+    }
 }

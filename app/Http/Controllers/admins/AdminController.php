@@ -1241,10 +1241,15 @@ class AdminController extends Controller
         }
 
         try {
-            $orders = Order::where('id', $req->id)
+            $data = Order::where('id', $req->id)
                 ->with('subOrders.orderItems.foodItem.chef')
-                ->get();
-            return response()->json(["orders" => $orders, "success" => true], 200);
+                ->get(); // Use get() to retrieve multiple orders, not just the first one
+
+            if ($data->isEmpty()) {
+                return response()->json(["message" => "No orders found", "success" => true], 200);
+            }
+
+            return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1256,7 +1261,7 @@ class AdminController extends Controller
     public function getAllSubOrderDetails(Request $req)
     {
         try {
-            $subOrders = SubOrders::with('orderItems.foodItem')->with('Orders')->get();
+            $subOrders = SubOrders::with('orderItems.foodItem.chef')->with('Orders')->get();
             return response()->json(["subOrders" => $subOrders, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -1277,8 +1282,15 @@ class AdminController extends Controller
         }
 
         try {
-            $subOrders = SubOrders::where('id', $req->id)->with('orderItems.foodItem')->with('Orders')->get();
-            return response()->json(["subOrders" => $subOrders, "success" => true], 200);
+            $data = Order::where('id', $req->id)
+                ->with('subOrders.orderItems.foodItem.chef')
+                ->get(); // Use get() to retrieve multiple orders, not just the first one
+
+            if ($data->isEmpty()) {
+                return response()->json(["message" => "No orders found", "success" => true], 200);
+            }
+
+            return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
