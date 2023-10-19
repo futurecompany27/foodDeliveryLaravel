@@ -15,11 +15,8 @@ use Psr\Http\Message\RequestInterface;
  * associative array of curl option constants mapping to values in the
  * **curl** key of the provided request options.
  *
- * @property resource|\CurlMultiHandle $_mh Internal use only. Lazy loaded multi-handle.
- *
  * @final
  */
-#[\AllowDynamicProperties]
 class CurlMultiHandler
 {
     /**
@@ -56,6 +53,9 @@ class CurlMultiHandler
      */
     private $options = [];
 
+    /** @var resource|\CurlMultiHandle */
+    private $_mh;
+
     /**
      * This handler accepts the following options:
      *
@@ -79,6 +79,10 @@ class CurlMultiHandler
         }
 
         $this->options = $options['options'] ?? [];
+
+        // unsetting the property forces the first access to go through
+        // __get().
+        unset($this->_mh);
     }
 
     /**
@@ -227,7 +231,7 @@ class CurlMultiHandler
     private function processMessages(): void
     {
         while ($done = \curl_multi_info_read($this->_mh)) {
-            if ($done['message'] !== \CURLMSG_DONE) {
+            if ($done['msg'] !== \CURLMSG_DONE) {
                 // if it's not done, then it would be premature to remove the handle. ref https://github.com/guzzle/guzzle/pull/2892#issuecomment-945150216
                 continue;
             }
