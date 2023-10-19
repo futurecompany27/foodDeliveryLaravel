@@ -20,7 +20,9 @@ use App\Models\ChefReview;
 use App\Models\FoodItem;
 use App\Models\FoodItemReview;
 use App\Models\Order;
+use App\Models\OrderTrackDetails;
 use App\Models\Pincode;
+use App\Models\SubOrders;
 use App\Models\UserChefReview;
 use App\Models\UserContact;
 use App\Models\UserFoodReview;
@@ -1213,11 +1215,21 @@ class UserController extends Controller
                 ->with('subOrders.orderItems.foodItem.chef')
                 ->get(); // Use get() to retrieve multiple orders, not just the first one
 
+            $trackDetails = [];
+
+            foreach ($data as $order) {
+                foreach ($order->subOrders as $subOrder) {
+                    $trackId = $subOrder->track_id;
+                    $trackDetail = OrderTrackDetails::where('track_id', $trackId)->get();
+                    $trackDetails[$trackId] = $trackDetail;
+                }
+            }
+
             if ($data->isEmpty()) {
                 return response()->json(["message" => "No orders found for this user", "success" => true], 200);
             }
 
-            return response()->json(["data" => $data, "success" => true], 200);
+            return response()->json(["data" => $data, "trackDetails" => $trackDetails, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::error($th->getMessage()); // Log as an error
             return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
