@@ -50,3 +50,21 @@
 [2023-10-16 12:26:17] local.INFO:  ["23.0",3] 
 [2023-10-16 12:40:51] local.INFO: Call to undefined relationship [Orders] on model [App\Models\Order].  
 [2023-10-16 12:43:29] local.INFO: Call to undefined relationship [Orders] on model [App\Models\Order].  
+[2023-10-19 07:36:49] local.ERROR: Command "migrate;fresh" is not defined.
+
+Did you mean one of these?
+    migrate:fresh
+    migrate:refresh
+    migrate:reset {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"migrate;fresh\" is not defined.
+
+Did you mean one of these?
+    migrate:fresh
+    migrate:refresh
+    migrate:reset at D:\\fo9_final\\vendor\\symfony\\console\\Application.php:725)
+[stacktrace]
+#0 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(262): Symfony\\Component\\Console\\Application->find('migrate;fresh')
+#1 D:\\fo9_final\\vendor\\symfony\\console\\Application.php(174): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#2 D:\\fo9_final\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Console\\Kernel.php(201): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#3 D:\\fo9_final\\artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#4 {main}
+"} 
