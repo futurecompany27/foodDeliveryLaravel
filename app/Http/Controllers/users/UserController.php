@@ -530,7 +530,8 @@ class UserController extends Controller
             return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
         }
         try {
-            return response()->json(['data' => ShippingAddresse::where(['user_id' => $req->user_id])->get(), 'success' => true], 200);
+            $data = ShippingAddresse::where('user_id', $req->user_id)->first();
+            return response()->json(['data' => $data, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

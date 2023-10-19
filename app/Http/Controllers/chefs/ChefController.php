@@ -1387,7 +1387,8 @@ class ChefController extends Controller
         }
         try {
             $data = SubOrders::where('chef_id', $req->chef_id)->with('orderItems.foodItem')->with('Orders')->first();
-            return response()->json(["data" => $data, "success" => true], 200);
+            $customer = User::where('id', $data->orders->user_id)->first();
+            return response()->json(["data" => $data, "customer" => $customer, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
