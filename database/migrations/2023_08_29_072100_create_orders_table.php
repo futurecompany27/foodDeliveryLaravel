@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('payment_mode');
             $table->string('delivery_date');
             $table->string('delivery_time');
+            $table->string('delivery_instructions')->nullable();
             $table->string('payment_status')->default(0);
             $table->string('transacton_id')->nullable();
             $table->string('total_order_item');

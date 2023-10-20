@@ -30,4 +30,6 @@ class notificationController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
+
+    
 }

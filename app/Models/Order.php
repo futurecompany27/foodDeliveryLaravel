@@ -31,6 +31,7 @@ class Order extends Model
         'delivery_date',
         'from_time',
         'to_time',
+        'delivery_instructions',
         'payment_status',
         'transacton_id',
         'total_order_item',

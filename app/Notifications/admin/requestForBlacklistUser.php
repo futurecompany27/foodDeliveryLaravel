@@ -40,7 +40,7 @@ class requestForBlacklistUser extends Notification
         return [
             'id' => $this->blacklistRequest->chef_id,
             'message' => 'One Request update profile coming from the chef.',
-            'url' => '/admin/shef-change-request'
+            'url' => '/admin/block-request'
         ];
     }
 }

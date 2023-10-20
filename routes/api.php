@@ -163,6 +163,8 @@ Route::controller(ChefController::class)->group(function () {
     Route::post('/addChefSuggestions', 'addChefSuggestions');
     Route::post('/updateChefTaxInformation', 'updateChefTaxInformation');
     Route::post('/getChefOrders', 'getChefOrders');
+    Route::post('/updateChefOrderStatus', 'updateChefOrderStatus');
+
 });
 
 // Route for admin

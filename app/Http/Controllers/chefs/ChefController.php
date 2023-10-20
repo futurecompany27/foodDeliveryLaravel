@@ -30,6 +30,7 @@ use App\Models\Driver;
 use App\Models\Ingredient;
 use App\Models\Kitchentype;
 use App\Models\Order;
+use App\Models\OrderTrackDetails;
 use App\Notifications\admin\ChefRegisterationRequest;
 use App\Notifications\admin\RequestQueryNotification;
 use App\Notifications\Chef\ChefContactUsNotification;
@@ -1388,11 +1389,39 @@ class ChefController extends Controller
         try {
             $data = SubOrders::where('chef_id', $req->chef_id)->with('orderItems.foodItem')->with('Orders')->first();
             $customer = User::where('id', $data->orders->user_id)->first();
-            return response()->json(["data" => $data, "customer" => $customer, "success" => true], 200);
+            $trackDetails = OrderTrackDetails::where('track_id', $data->track_id)->first();
+            Log::info($trackDetails);
+            return response()->json(["data" => $data, "customer" => $customer, "trackDetails" => $trackDetails,  "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+        }
+    }
+
+    public function updateChefOrderStatus(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "track_id" => 'required',
+            "status" => 'required',
+        ], [
+            "track_id.required" => "please fill track_id",
+            "status.required" => "please fill status",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $data = OrderTrackDetails::where('track_id', $req->track_id)->first();
+            if ($req->status == "1" || $req->status == "2") {
+                $updateStatus['status'] = $req->status;
+            }
+            OrderTrackDetails::where('track_id', $req->track_id)->update($updateStatus);
+            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
         }
     }
 }

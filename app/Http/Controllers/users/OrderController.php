@@ -42,6 +42,7 @@ class OrderController extends Controller
                 'total_order_item' => $req->total_order_item,
                 'tip_total' => $req->tip_total,
                 'payment_mode' => $req->payment_mode,
+                'delivery_instructions' => $req->delivery_instructions,
                 'payment_status' => $req->payment_status,
                 'transacton_id' => $req->transacton_id
             ]);
