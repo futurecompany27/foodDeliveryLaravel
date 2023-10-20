@@ -19,6 +19,7 @@ use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
 use App\Models\Order;
+use App\Models\OrderTrackDetails;
 use App\Models\RequestForUpdateDetails;
 use App\Models\RequestForUserBlacklistByChef;
 use App\Models\Sitesetting;
@@ -1245,11 +1246,21 @@ class AdminController extends Controller
                 ->with('subOrders.orderItems.foodItem.chef')
                 ->get(); // Use get() to retrieve multiple orders, not just the first one
 
+            $trackDetails = [];
+
+            foreach ($data as $order) {
+                foreach ($order->subOrders as $subOrder) {
+                    $trackId = $subOrder->track_id;
+                    $trackDetail = OrderTrackDetails::where('track_id', $trackId)->get();
+                    $trackDetails[$trackId] = $trackDetail;
+                }
+            }
+
             if ($data->isEmpty()) {
                 return response()->json(["message" => "No orders found", "success" => true], 200);
             }
 
-            return response()->json(["data" => $data, "success" => true], 200);
+            return response()->json(["data" => $data, "trackDetails" => $trackDetails, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1286,11 +1297,21 @@ class AdminController extends Controller
                 ->with('subOrders.orderItems.foodItem.chef')
                 ->get(); // Use get() to retrieve multiple orders, not just the first one
 
+            $trackDetails = [];
+
+            foreach ($data as $order) {
+                foreach ($order->subOrders as $subOrder) {
+                    $trackId = $subOrder->track_id;
+                    $trackDetail = OrderTrackDetails::where('track_id', $trackId)->get();
+                    $trackDetails[$trackId] = $trackDetail;
+                }
+            }
+
             if ($data->isEmpty()) {
                 return response()->json(["message" => "No orders found", "success" => true], 200);
             }
 
-            return response()->json(["data" => $data, "success" => true], 200);
+            return response()->json(["data" => $data, "trackDetails" => $trackDetails, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
