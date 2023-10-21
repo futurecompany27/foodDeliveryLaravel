@@ -76,7 +76,8 @@ class UserController extends Controller
             DB::commit();
             return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
         } catch (\Throwable $th) {
-            Log::info($th->getMessage());;
+            Log::info($th->getMessage());
+            ;
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
@@ -315,7 +316,6 @@ class UserController extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
         }
     }
-
 
     function calculateDistanceUsingTwoLatlong(Request $req)
     {
@@ -1174,65 +1174,56 @@ class UserController extends Controller
 
     public function getUserOrders(Request $req)
     {
-        // Validation
-        $validator = Validator::make($req->all(), [
-            'user_id' => 'required|integer', // Adjust validation rules as needed
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(["message" => "Validation failed", "errors" => $validator->errors(), "success" => false], 400);
-        }
 
         try {
-            $data = Order::where('user_id', $req->user_id)
-                ->with('subOrders.orderItems.foodItem.chef')
-                ->get(); // Use get() to retrieve multiple orders, not just the first one
-
-            if ($data->isEmpty()) {
-                return response()->json(["message" => "No orders found for this user", "success" => true], 200);
+            $query = Order::query();
+            if ($req->user_id) {
+                $query->where('user_id', $req->user_id);
             }
+            $data = $query->with('subOrders.OrderTrack', 'subOrders.OrderItems', 'subOrders.chefs', 'subOrders.OrderItems.foodItem')->get();
 
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
-            Log::error($th->getMessage()); // Log as an error
+            Log::error($th->getMessage()); 
             return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
         }
     }
 
-    public function getUserOrderDetails(Request $req)
-    {
-        // Validation
-        $validator = Validator::make($req->all(), [
-            'id' => 'required|integer', // Adjust validation rules as needed
-        ]);
+    // public function getUserOrderDetails(Request $req)
+    // {
+    //     // Validation
+    //     $validator = Validator::make($req->all(), [
+    //         'id' => 'required|integer',
+    //         // Adjust validation rules as needed
+    //     ]);
 
-        if ($validator->fails()) {
-            return response()->json(["message" => "Validation failed", "errors" => $validator->errors(), "success" => false], 400);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" => "Validation failed", "errors" => $validator->errors(), "success" => false], 400);
+    //     }
 
-        try {
-            $data = Order::where('id', $req->id)
-                ->with('subOrders.orderItems.foodItem.chef')
-                ->get(); // Use get() to retrieve multiple orders, not just the first one
+    //     try {
+    //         $data = Order::where('id', $req->id)
+    //             ->with('subOrders.orderItems.foodItem.chef')
+    //             ->get(); // Use get() to retrieve multiple orders, not just the first one
 
-            $trackDetails = [];
+    //         $trackDetails = [];
 
-            foreach ($data as $order) {
-                foreach ($order->subOrders as $subOrder) {
-                    $trackId = $subOrder->track_id;
-                    $trackDetail = OrderTrackDetails::where('track_id', $trackId)->get();
-                    $trackDetails[$trackId] = $trackDetail;
-                }
-            }
+    //         foreach ($data as $order) {
+    //             foreach ($order->subOrders as $subOrder) {
+    //                 $trackId = $subOrder->track_id;
+    //                 $trackDetail = OrderTrackDetails::where('track_id', $trackId)->get();
+    //                 $trackDetails[$trackId] = $trackDetail;
+    //             }
+    //         }
 
-            if ($data->isEmpty()) {
-                return response()->json(["message" => "No orders found for this user", "success" => true], 200);
-            }
+    //         if ($data->isEmpty()) {
+    //             return response()->json(["message" => "No orders found for this user", "success" => true], 200);
+    //         }
 
-            return response()->json(["data" => $data, "trackDetails" => $trackDetails, "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage()); // Log as an error
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
-        }
-    }
+    //         return response()->json(["data" => $data, "trackDetails" => $trackDetails, "success" => true], 200);
+    //     } catch (\Throwable $th) {
+    //         Log::error($th->getMessage()); // Log as an error
+    //         return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
+    //     }
+    // }
 }

@@ -20,7 +20,7 @@ class taxSeeeder extends Seeder
             'updated_at' => Carbon::now()
         ]);
         DB::table('taxes')->insert([
-            "tax_type" => "PST",
+            "tax_type" => "QST",
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);

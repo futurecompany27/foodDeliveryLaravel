@@ -44,7 +44,10 @@ class OrderController extends Controller
                 'payment_mode' => $req->payment_mode,
                 'delivery_instructions' => $req->delivery_instructions,
                 'payment_status' => $req->payment_status,
-                'transacton_id' => $req->transacton_id
+                'transacton_id' => $req->transacton_id,
+                'user_mobile_no' => str_replace("-", "", $req->user_mobile_no),
+                'username' => $req->username,
+
             ]);
             $orderID = ('#HP' . str_pad($ID, 8, '0', STR_PAD_LEFT));
             Order::where('id', $ID)->update(['order_id' => $orderID]);

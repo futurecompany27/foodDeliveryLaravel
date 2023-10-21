@@ -36,6 +36,8 @@ class Order extends Model
         'transacton_id',
         'total_order_item',
         'tip_total',
+        'user_mobile_no',
+        'username',
         'token'
     ];
 
@@ -46,15 +48,5 @@ class Order extends Model
     public function subOrders()
     {
         return $this->hasMany(SubOrders::class, 'order_id', 'order_id');
-    }
-
-    public function orderItems()
-    {
-        return $this->hasMany(OrderItems::class, 'sub_order_id', 'sub_order_id');
-    }
-
-    public function shippingAddress()
-    {
-        return $this->hasMany(shippingAddress::class, 'user_id', 'user_id');
     }
 }
