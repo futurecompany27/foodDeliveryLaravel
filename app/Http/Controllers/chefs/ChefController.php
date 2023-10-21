@@ -1387,7 +1387,38 @@ class ChefController extends Controller
             return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
         }
         try {
-            $data = SubOrders::where('chef_id', $req->chef_id)->with('orderItems.foodItem')->with('Orders')->first();
+            $data = SubOrders::where('chef_id', $req->chef_id)
+                ->with('orderItems.foodItem')
+                ->with('Orders')
+                ->get();
+
+            $customerData = [];
+
+            foreach ($data as $subOrder) {
+                $customer = User::where('id', $subOrder->orders->user_id)->first();
+                $trackDetails = OrderTrackDetails::where('track_id', $subOrder->track_id)->first();
+                $customerData[] = [
+                    "data" => $subOrder,
+                    "customer" => $customer,
+                    "trackDetails" => $trackDetails,
+                ];
+            }
+
+            return response()->json(["data" => $data, "customer" => $customer, "trackDetails" => $trackDetails, "success" => true], 200);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+        }
+    }
+
+    public function getChefSubOrder(Request $req)
+    {
+        if (!$req->chef_id) {
+            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
+        }
+        try {
+            $data = SubOrders::where('chef_id', $req->chef_id)->where('sub_order_id', $req->sub_order_id)->with('orderItems.foodItem')->with('Orders')->first();
             $customer = User::where('id', $data->orders->user_id)->first();
             $trackDetails = OrderTrackDetails::where('track_id', $data->track_id)->first();
             Log::info($trackDetails);

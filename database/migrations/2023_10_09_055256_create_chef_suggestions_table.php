@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('cascade');
             $table->string('related_to');
             $table->text('message');
-            $table->text('sample_pic');
+            $table->text('sample_pic')->nullable();
             $table->timestamps();
         });
     }
