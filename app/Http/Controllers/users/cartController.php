@@ -225,7 +225,6 @@ class cartController extends Controller
                 // Convert the associative array back to indexed array
                 $finalMergedData = array_values($mergedData);
                 Cart::where("user_id", $req->user_id)->update(['cartData' => $finalMergedData, 'cartDeliveryDate' => $req->cartDeliveryDate], 200);
-                return response()->json(['message' => 'Successfully merged data', 'success' => true], 200);
             } else {
                 $cart = new Cart();
                 $cart->user_id = $req->user_id;
@@ -233,6 +232,7 @@ class cartController extends Controller
                 $cart->cartData = $req->cartData;
                 $cart->save();
             }
+            return response()->json(['message' => 'Successfully merged data', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
