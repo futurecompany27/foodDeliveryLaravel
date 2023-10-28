@@ -15,7 +15,7 @@ class postalCodeSeeeder extends Seeder
     public function run(): void
     {
         // DB::table('pincodes')->insert(["city_id" => 1, "pincode" => "J7A4N7", "latitude" => "45.6524509", "longitude" => "-73.7814507", 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-        DB::table('pincodes')->insert(["city_id" => 1, "pincode" => "H7A", "latitude" => "45.678657", "longitude" => "-73.5894284", 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        DB::table('pincodes')->insert(["city_id" => 1, "pincode" => "J7A", "latitude" => "45.6413875", "longitude" => "-73.799188", 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('pincodes')->insert(["city_id" => 2, "pincode" => "J7E", "latitude" => "45.6933081", "longitude" => "-73.8226268", 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('pincodes')->insert(["city_id" => 3, "pincode" => "H7N", "latitude" => "45.5590767", "longitude" => "-73.699898", 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('pincodes')->insert(["city_id" => 4, "pincode" => "H7W", "latitude" => "45.5305808", "longitude" => "-73.7700213", 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);

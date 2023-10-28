@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->text('password')->nullable();
             $table->string('social_id')->nullable();
             $table->string('social_type')->nullable();
+            $table->string('defaultPayment')->default('Paypal');
             $table->timestamp('email_verified_at')->nullable();
             $table->tinyinteger('status')->default(1)->comment('1 - active, 0 - inactive');
             $table->text('resetToken')->nullable();

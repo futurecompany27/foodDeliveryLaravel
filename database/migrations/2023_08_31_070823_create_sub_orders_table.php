@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('tip')->nullable();
             $table->string('tip_type');
             $table->string('tip_amount');
-            $table->string('status')->default(1);
+            $table->string('status')->default('Pending');
             $table->timestamps();
         });
     }

@@ -48,7 +48,6 @@ class UserController extends Controller
 {
     function UserRegisteration(Request $req)
     {
-        Log::info($req);
         $userExist = User::where("email", $req->email)->first();
         if ($userExist) {
             return response()->json(['message' => "This email is already register please use another email!", "success" => false], 400);
@@ -66,7 +65,6 @@ class UserController extends Controller
             $user->email = $req->email;
             $user->password = Hash::make($req->password);
             $user->save();
-            Log::info($user);
             $userDetail = User::find($user->id);
             Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
             $admins = Admin::all();
@@ -144,10 +142,9 @@ class UserController extends Controller
         }
 
         try {
-            $serviceExist = Pincode::where('pincode', str_replace(" ", "", strtoupper($req->postal_code)))->where('status', 1)->first();
+            $serviceExist = Pincode::where('pincode', substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3))->where('status', 1)->first();
             if ($serviceExist) {
                 $lat_long_result_array = $this->get_lat_long($req->postal_code);
-                Log::info($lat_long_result_array);
 
                 if ($lat_long_result_array["result"] == 1) {
                     /***** Now from the customer postal code we need to find the ******/
@@ -249,7 +246,6 @@ class UserController extends Controller
         // define GMAPIK in contstant file.
         $gmApiK = env('GOOGLE_MAP_KEY');
         $origin = $cust_pc_lat . ',' . $cust_pc_long;
-        Log::info($origin);
         $selected_postal_code = array();
         // dd($selected_postal_code);
         foreach ($postal_codes as $key => $postal_val) {
@@ -260,7 +256,6 @@ class UserController extends Controller
             if (count($routes) != 0) {
                 $dist = $routes[0]->legs[0]->distance->text;
                 $distance = explode(" ", $dist)[0];
-                Log::info("", [$distance, $radius]);
                 if ($distance <= $radius) {
                     // create a array of selected postal code
                     array_push($selected_postal_code, $postal_val->pincode);
@@ -479,7 +474,7 @@ class UserController extends Controller
         }
 
         try {
-            $serviceExist = Pincode::where('pincode', str_replace(" ", "", strtoupper($req->postal_code)))->where('status', 1)->first();
+            $serviceExist = Pincode::where('pincode', substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3))->where('status', 1)->first();
             if ($serviceExist) {
                 if ($req->id) {
                     $updateData = $req->all();
@@ -1184,7 +1179,7 @@ class UserController extends Controller
 
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
-            Log::error($th->getMessage()); 
+            Log::error($th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
         }
     }

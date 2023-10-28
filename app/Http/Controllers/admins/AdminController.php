@@ -959,10 +959,10 @@ class AdminController extends Controller
                     $query->where('approved_status', 'pending');
                 }
             ])->with([
-                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-                    'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
-                ])
-            ]);
+                        'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+                            'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                        ])
+                    ]);
 
             $skip = $req->page * 10;
 
@@ -1220,8 +1220,26 @@ class AdminController extends Controller
     public function getAllOrderDetails(Request $req)
     {
         try {
-            $orders = Order::with('subOrders.orderItems.foodItem.chef')
-                ->get();
+            $query = Order::query();
+            if ($req->filter) {
+                if ($req->from_date) {
+                    $query->where('created_at', '>=', $req->from_date);
+                }
+                if ($req->to_date) {
+                    $query->where('created_at', '<=', $req->to_date);
+                }
+                if ($req->user_id) {
+                    $query->where('user_id', $req->user_id);
+                }
+                if ($req->chef_id) {
+                    $query->whereHas('subOrders', function ($subQuery) use ($req) {
+                        $subQuery->where('chef_id', $req->chef_id);
+                    });
+                }
+            } else {
+                $query->with('subOrders.orderItems.foodItem.chef');
+            }
+            $orders = $query->get();
             return response()->json(["orders" => $orders, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -1234,7 +1252,8 @@ class AdminController extends Controller
     {
         // Validation
         $validator = Validator::make($req->all(), [
-            'id' => 'required|integer', // Adjust validation rules as needed
+            'id' => 'required|integer',
+            // Adjust validation rules as needed
         ]);
 
         if ($validator->fails()) {
@@ -1285,7 +1304,8 @@ class AdminController extends Controller
     {
         // Validation
         $validator = Validator::make($req->all(), [
-            'id' => 'required|integer', // Adjust validation rules as needed
+            'id' => 'required|integer',
+            // Adjust validation rules as needed
         ]);
 
         if ($validator->fails()) {

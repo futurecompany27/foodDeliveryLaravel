@@ -377,9 +377,7 @@ class commonFunctions extends Controller
             if ($req->user_type == 'User') {
 
                 User::where('email', $req->email)->update(['resetToken' => $token]);
-                Log::info($req->email);
                 $data = User::where('email', $req->email)->first();
-                Log::info($data);
                 $userDetail['full_name'] = $data->fullname;
             } else if ($req->user_type == 'Admin') {
 
@@ -400,7 +398,6 @@ class commonFunctions extends Controller
                 $data = Driver::where('email', $req->email)->first();
                 $userDetail['full_name'] = (ucfirst($data->first_name) . ' ' . ucfirst($data->last_name));
             }
-            Log::info($data->id);
             $userDetail['id'] = $data->id;
             $userDetail['user_type'] = $req->user_type;
             $userDetail['token'] = $token;
@@ -494,4 +491,109 @@ class commonFunctions extends Controller
             return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
         }
     }
+
+
+
+    public function user_access_token()
+    {
+
+        // Check for the request shef registration
+        // $clientIP = request()->ip();
+        // ravindra IP
+        $clientIP = "103.135.62.155";
+        // dd($clientIP);
+        //sarita  
+        // $clientIP = "84.196.106.221";
+        //zafeer $clientIP = "117.99.251.122";
+        //himanta
+        //$clientIP="49.36.114.16";
+        // $clientIP="103.205.130.21"; //megabyte
+
+
+        //sarita
+        // $clientIP = "84.199.114.130";
+        //zafeer
+        //$clientIP = "117.99.251.122";
+
+        $url = "https://ipinfo.io/" . $clientIP . "?token=24bb9a83efc13c";
+
+        $details = json_decode(file_get_contents($url));
+        //dd($details);
+
+        /************* Or we could block all the other types of private / anonymous connections...-------**************************/
+        //     if($details->vpn || $details->proxy || $details->tor || $details->hosting) {
+        //         $user_access_token = 0;
+        //     }
+        //    else
+        //    {
+        //             // write your below code
+        //    }
+
+        /*****************---------------End ------------****************/
+
+        if (isset($details->region)) {
+            $province_list = State::select('name')->where('status', 1)->get();
+            $province_name_array = [];
+            /**
+             * Collecting the province where we offer the services
+             */
+            for ($i = 0; $i < count($province_list); $i++) {
+                array_push($province_name_array, strtolower($province_list[$i]['name']));
+            }
+            //dd($province_name_array);
+            /**
+             * Checking the region we get from Cient Device IP is belongs to the official region
+             */
+            //location come like   "loc": "42.1015,-72.5898",
+            $location = $details->loc;
+            $location_array = Explode(",", $location);
+
+
+            if (in_array(strtolower($details->region), $province_name_array)) {
+
+
+                $data = [
+                    'user_access_token' => 1,
+                    'latitude' => $location_array[0],
+                    'longitude' => $location_array[1]
+                ];
+
+            } else {
+                $data = [
+                    'user_access_token' => 0,
+                    'latitude' => "",
+                    'longitude' => ""
+                ];
+            }
+
+        } else {
+            $data = [
+                'user_access_token' => 0,
+                'latitude' => "",
+                'longitude' => ""
+            ];
+        }
+        Session::put('user_access_detail', $data);
+        //store it into the session for further use
+
+
+
+    }
+
+    // implementation of VPN  
+
+    //  (new WebMainController)->user_access_token(); //array
+    //     $user_access_detail = Session::get('user_access_detail');
+
+    //     if ($user_access_detail['user_access_token'] == 1) {
+
+    //         /** Shef type data */
+
+    //         // $shef_types = ShefType::where('status', 1)->orderBy('name')->get();
+    //         return  view("frontend.website.chef.become_a_shef", compact('tr', 'site_setting'));
+    //         // return  view("frontend.website.chef.check_pincode_old", compact('tr', 'site_setting', 'shef_types'));
+    //     } else {
+    //         $msg = "We are currently not providing our service in this region.";
+    //         return view('frontend.website.access_block', compact('tr', 'msg'));
+    //     }
 }

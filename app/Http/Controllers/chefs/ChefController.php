@@ -59,7 +59,7 @@ class ChefController extends Controller
     {
         try {
             DB::beginTransaction();
-            $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtoupper($req->postal_code)), 'status' => 1])->first();
+            $checkPinCode = Pincode::where(['pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3), 'status' => 1])->first();
             if (!$checkPinCode) {
                 return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
@@ -223,8 +223,8 @@ class ChefController extends Controller
         }
         try {
             $data = chef::whereId($req->chef_id)->with([
-                'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-                    'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+                    'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
                 ])
             ])->first();
             return response()->json(["data" => $data, "success" => true], 200);
@@ -1422,7 +1422,7 @@ class ChefController extends Controller
             $customer = User::where('id', $data->orders->user_id)->first();
             $trackDetails = OrderTrackDetails::where('track_id', $data->track_id)->first();
             Log::info($trackDetails);
-            return response()->json(["data" => $data, "customer" => $customer, "trackDetails" => $trackDetails,  "success" => true], 200);
+            return response()->json(["data" => $data, "customer" => $customer, "trackDetails" => $trackDetails, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

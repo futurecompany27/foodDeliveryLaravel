@@ -307,6 +307,7 @@ Route::controller(shefTypesController::class)->group(function () {
 
 Route::controller(OrderController::class)->group(function () {
     Route::post('/placeOrders', 'placeOrders');
+    Route::post('/acceptOrRejectOrder', 'acceptOrRejectOrder');
 });
 
 /////////////// common api's ///////////////

@@ -28,9 +28,7 @@ class DriverController extends Controller
 {
     function driverRegisteraion(Request $req)
     {
-        Log::info($req->postal_code);
-        $checkPinCode = Pincode::where(['pincode' => str_replace(" ", "", strtoupper($req->postal_code)), 'status' => 1])->first();
-        Log::info($checkPinCode);
+        $checkPinCode = Pincode::where(['pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)),0,3), 'status' => 1])->first();
         if (!$checkPinCode) {
             return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 500);
         }
@@ -461,7 +459,6 @@ class DriverController extends Controller
 
             $ScheduleCall = DriverScheduleCall::orderBy('created_at', 'desc')->where('driver_id', $req->driver_id)->with('driver')->first();
             $admins = Admin::all();
-            Log::info($ScheduleCall);
             foreach ($admins as $admin) {
                 $admin->notify(new DriverScheduleCallNotification($ScheduleCall));
             }
