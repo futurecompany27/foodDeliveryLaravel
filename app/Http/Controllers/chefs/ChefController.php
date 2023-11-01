@@ -1387,24 +1387,30 @@ class ChefController extends Controller
             return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
         }
         try {
-            $data = SubOrders::where('chef_id', $req->chef_id)
-                ->with('orderItems.foodItem')
-                ->with('Orders')
-                ->get();
+            $query = SubOrders::query();
+            $query->where('chef_id', $req->chef_id)->with('Orders.user', 'OrderItems.foodItem');
 
-            $customerData = [];
+            if ($req->filter) {
+                if ($req->from_date) {
+                    $query->whereDate('created_at', '>=', $req->from_date);
+                }
 
-            foreach ($data as $subOrder) {
-                $customer = User::where('id', $subOrder->orders->user_id)->first();
-                $trackDetails = OrderTrackDetails::where('track_id', $subOrder->track_id)->first();
-                $customerData[] = [
-                    "data" => $subOrder,
-                    "customer" => $customer,
-                    "trackDetails" => $trackDetails,
-                ];
+                if ($req->to_date) {
+                    $query->whereDate('created_at', '<=', $req->to_date);
+                }
+
+                if (!empty($req->user_id)) { // Check if user_id is not empty
+                    $query->whereHas('Orders.user', function ($subQuery) use ($req) {
+                        $subQuery->where('user_id', $req->user_id);
+                    });
+                }
             }
 
-            return response()->json(["data" => $data, "customer" => $customer, "trackDetails" => $trackDetails, "success" => true], 200);
+            $data = $query->get();
+
+
+
+            return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

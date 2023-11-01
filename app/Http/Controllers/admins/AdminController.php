@@ -932,8 +932,12 @@ class AdminController extends Controller
     {
         try {
             $totalRecords = User::count();
-            $skip = $req->page * 10;
-            $data = User::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
+            if ($req->list) {
+                $data = User::select('id', 'fullname')->get();
+            } else {
+                $skip = $req->page * 10;
+                $data = User::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
+            }
             return response()->json([
                 'data' => $data,
                 'TotalRecords' => $totalRecords,
@@ -950,23 +954,27 @@ class AdminController extends Controller
     {
         try {
             $totalRecords = chef::count();
+            if ($req->list) {
+                $data = chef::select('id', 'first_name', 'last_name')->get();
+            } else {
+                Log::info('true');
+                $query = chef::orderBy('created_at', 'desc')->withCount([
+                    'foodItems as active_food_items_count' => function ($query) {
+                        $query->where('approved_status', 'active');
+                    },
+                    'foodItems as pending_food_items_count' => function ($query) {
+                        $query->where('approved_status', 'pending');
+                    }
+                ])->with([
+                            'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+                                'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+                            ])
+                        ]);
 
-            $query = chef::orderBy('created_at', 'desc')->withCount([
-                'foodItems as active_food_items_count' => function ($query) {
-                    $query->where('approved_status', 'active');
-                },
-                'foodItems as pending_food_items_count' => function ($query) {
-                    $query->where('approved_status', 'pending');
-                }
-            ])->with([
-                        'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-                            'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
-                        ])
-                    ]);
+                $skip = $req->page * 10;
 
-            $skip = $req->page * 10;
-
-            $data = $query->skip($skip)->take(10)->get();
+                $data = $query->skip($skip)->take(10)->get();
+            }
 
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
         } catch (\Throwable $th) {
@@ -1223,10 +1231,10 @@ class AdminController extends Controller
             $query = Order::query();
             if ($req->filter) {
                 if ($req->from_date) {
-                    $query->where('created_at', '>=', $req->from_date);
+                    $query->whereDate('created_at', '>=', $req->from_date);
                 }
                 if ($req->to_date) {
-                    $query->where('created_at', '<=', $req->to_date);
+                    $query->whereDate('created_at', '<=', $req->to_date);
                 }
                 if ($req->user_id) {
                     $query->where('user_id', $req->user_id);
@@ -1236,9 +1244,8 @@ class AdminController extends Controller
                         $subQuery->where('chef_id', $req->chef_id);
                     });
                 }
-            } else {
-                $query->with('subOrders.orderItems.foodItem.chef');
             }
+            $query->with(['subOrders.orderItems.foodItem', 'subOrders.chefs']);
             $orders = $query->get();
             return response()->json(["orders" => $orders, "success" => true], 200);
         } catch (\Throwable $th) {

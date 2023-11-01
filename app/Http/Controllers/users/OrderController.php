@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\users;
 
 use App\Http\Controllers\Controller;
-use App\Mail\subOrderRejectionMail;
+use App\Mail\OrderPlacedMailToUser;
+use App\Mail\subOrderDeclineMail;
 use App\Models\Admin;
 use App\Models\Cart;
 use App\Models\chef;
@@ -15,6 +16,7 @@ use App\Models\User;
 use App\Notifications\admin\newOrderPlacedForAdmin;
 use App\Notifications\Chef\newOrderPlacedForChef;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -54,13 +56,16 @@ class OrderController extends Controller
                 'transacton_id' => $req->transacton_id,
                 'user_mobile_no' => str_replace("-", "", $req->user_mobile_no),
                 'username' => $req->username,
+                'created_at' => Carbon::now(),
 
             ]);
             $orderID = ('#HP' . str_pad($ID, 8, '0', STR_PAD_LEFT));
-            Order::where('id', $ID)->update(['order_id' => $orderID]);
+            Order::where('id', $ID)->update(['order_id' => $orderID, 'updated_at' => Carbon::now()]);
 
             $user = User::find($req->user_id);
             $orderDetails = ['order_id' => $orderID, 'userName' => $user->fullname];
+
+            Mail::to(trim($user->email))->send(new OrderPlacedMailToUser($orderDetails));
             $admins = Admin::all();
             foreach ($admins as $admin) {
                 $admin->notify(new newOrderPlacedForAdmin($orderDetails));
@@ -78,6 +83,7 @@ class OrderController extends Controller
                     'chef_id' => $value->chef_id,
                     'item_total' => count($value->foodItems),
                     'amount' => $amount,
+                    'created_at' => Carbon::now(),
                 ];
                 if ($value->tip == 'fixedAmount') {
                     $add['tip_type'] = 'Fixed';
@@ -100,7 +106,7 @@ class OrderController extends Controller
                 $orderTrackingID = ('#TRACK' . str_pad($track_id, 8, '0', STR_PAD_LEFT));
                 OrderTrackDetails::where('id', $track_id)->update(['track_id' => $orderTrackingID]);
 
-                SubOrders::where('id', $sub_id)->update(['sub_order_id' => $subOrderID, 'track_id' => $orderTrackingID]);
+                SubOrders::where('id', $sub_id)->update(['sub_order_id' => $subOrderID, 'track_id' => $orderTrackingID, 'updated_at' => Carbon::now()]);
 
                 foreach ($foodItems as $food) {
                     OrderItems::insert([
@@ -108,7 +114,8 @@ class OrderController extends Controller
                         'food_id' => $food->food_id,
                         'quantity' => $food->quantity,
                         'price' => $food->price,
-                        'total' => ($food->quantity * $food->price)
+                        'total' => ($food->quantity * $food->price),
+                        'created_at' => Carbon::now(),
                     ]);
                 }
             }
@@ -125,7 +132,8 @@ class OrderController extends Controller
         }
     }
 
-    function acceptOrRejectOrder(Request $req){
+    function acceptOrRejectOrder(Request $req)
+    {
         $validator = Validator::make($req->all(), [
             "sub_order_id" => 'required',
             "status" => 'required',
@@ -137,14 +145,15 @@ class OrderController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $subOrder = SubOrders::where(['sub_order_id' =>$req->sub_order_id])->with(['Orders.user'])->first();
-            SubOrders::where(['sub_order_id' =>$req->sub_order_id])->update(['status'=> $req->status]);
-            if ($req->status == 'Accepted') {
-
-            }else if ($req->status == 'Rejected'){
-            OrderTrackDetails::where(['track_id'=>$subOrder->track_id])->update(['status'=> $req->status]);
-            // Mail::to(trim($subOrder->orders->user->email))->send(new subOrderRejectionMail());
+            $subOrder = SubOrders::where(['sub_order_id' => $req->sub_order_id])->with(['Orders.user', 'chefs'])->first();
+            SubOrders::where(['sub_order_id' => $req->sub_order_id])->update(['status' => $req->status]);
+            OrderTrackDetails::where(['track_id' => $subOrder->track_id])->update(['status' => $req->status]);
+            if ($req->status == 'Rejected') {
+                $mail = ['userName' => $subOrder->orders->user->fullname, 'status' => $req->status, 'chefName' => ($subOrder->chefs->first_name . ' ' . $subOrder->chefs->last_name), 'order_id' => $subOrder->order_id];
+                Mail::to(trim($subOrder->orders->user->email))->send(new subOrderDeclineMail($mail));
             }
+
+            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
 
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

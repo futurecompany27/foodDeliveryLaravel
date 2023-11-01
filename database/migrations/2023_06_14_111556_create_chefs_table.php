@@ -64,6 +64,7 @@ return new class extends Migration {
             $table->string('chefAvailibilityToTime')->nullable();
             $table->json('blacklistedUser')->nullable();
             $table->text('resetToken')->nullable();
+            $table->tinyInteger('profilePercenatge')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

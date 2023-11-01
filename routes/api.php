@@ -231,7 +231,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/getAdminDshboardCount', 'getAdminDshboardCount');
 
     Route::get('/getAllSubOrderDetails', 'getAllSubOrderDetails');
-    Route::get('/getAllOrderDetails', 'getAllOrderDetails');
+    Route::post('/getAllOrderDetails', 'getAllOrderDetails');
     Route::post('/getAdminOrderDetailsById', 'getAdminOrderDetailsById');
     Route::post('/getAdminSubOrderDetailsById', 'getAdminSubOrderDetailsById');
 
@@ -330,7 +330,7 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::post("/updateDriverScheduleCallStatus", 'updateDriverScheduleCallStatus');
     Route::get("/getAllDriverScheduleCall", 'getAllDriverScheduleCall');
 
-    Route::get("/getAllChefs", 'getAllChefs');
+    // Route::get("/getAllChefs", 'getAllChefs');
 
     Route::post('/sendPasswordResetLink', 'sendPasswordResetLink');
     Route::post('/verifyToken', 'verifyToken');

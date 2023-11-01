@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('order_track_details', function (Blueprint $table) {
             $table->id();
             $table->string('track_id')->nullable();
-            $table->string('status')->default(1);
+            $table->string('status')->default("Order Placed");
             $table->timestamps();
         });
     }
