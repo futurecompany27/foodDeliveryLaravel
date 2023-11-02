@@ -1388,7 +1388,7 @@ class ChefController extends Controller
         }
         try {
             $query = SubOrders::query();
-            $query->where('chef_id', $req->chef_id)->with('Orders.user', 'OrderItems.foodItem');
+            $query->where('chef_id', $req->chef_id)->with('Orders.user', 'OrderItems.foodItem', 'OrderTrack');
 
             if ($req->filter) {
                 if ($req->from_date) {
@@ -1404,6 +1404,12 @@ class ChefController extends Controller
                         $subQuery->where('user_id', $req->user_id);
                     });
                 }
+            }
+
+            if ($req->status != 'Accepted') {
+                $query->where('status', $req->status);
+            } else if ($req->status != 'Accepted') {
+                $query->where('status', '!=', 'Pending')->where('status', '!=', "Rejected");
             }
 
             $data = $query->get();
@@ -1441,19 +1447,23 @@ class ChefController extends Controller
         $validator = Validator::make($req->all(), [
             "track_id" => 'required',
             "status" => 'required',
+            'sub_order_id' => 'required',
         ], [
             "track_id.required" => "please fill track_id",
             "status.required" => "please fill status",
+            "sub_order_id.required" => "please fill sub order_id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $data = OrderTrackDetails::where('track_id', $req->track_id)->first();
-            if ($req->status == "1" || $req->status == "2") {
-                $updateStatus['status'] = $req->status;
-            }
-            OrderTrackDetails::where('track_id', $req->track_id)->update($updateStatus);
+            SubOrders::where('sub_order_id', $req->sub_order_id)->update(['status' => $req->status]);
+            OrderTrackDetails::create([
+                'track_id' => $req->track_id,
+                'status' => $req->status,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

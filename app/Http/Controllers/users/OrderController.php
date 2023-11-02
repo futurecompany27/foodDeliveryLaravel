@@ -104,7 +104,7 @@ class OrderController extends Controller
 
                 $track_id = OrderTrackDetails::insertGetId([]);
                 $orderTrackingID = ('#TRACK' . str_pad($track_id, 8, '0', STR_PAD_LEFT));
-                OrderTrackDetails::where('id', $track_id)->update(['track_id' => $orderTrackingID]);
+                OrderTrackDetails::where('id', $track_id)->update(['track_id' => $orderTrackingID, 'created_at' => Carbon::now()]);
 
                 SubOrders::where('id', $sub_id)->update(['sub_order_id' => $subOrderID, 'track_id' => $orderTrackingID, 'updated_at' => Carbon::now()]);
 
