@@ -464,7 +464,6 @@ class UserController extends Controller
             'last_name' => "required",
             'mobile_no' => "required",
             'postal_code' => "required",
-            'city' => "required",
             'state' => "required",
             'full_address' => "required",
             'address_type' => "required",
@@ -492,7 +491,7 @@ class UserController extends Controller
                     $newAdrees->last_name = $req->last_name;
                     $newAdrees->mobile_no = str_replace("-", '', $req->mobile_no);
                     $newAdrees->postal_code = $req->postal_code;
-                    $newAdrees->city = $req->city;
+                    $newAdrees->city = $req->city ? $req->city : '';
                     $newAdrees->state = $req->state;
                     // $newAdrees->landmark = $req->landmark;
                     // $newAdrees->locality = $req->locality;

@@ -204,7 +204,7 @@ class chefDocumentsController extends Controller
             if ($req->doc_item_id) {
                 $updateData['document_item_list_id'] = $req->document_item_list_id;
             }
-            if ($req->name) {
+            if ($req->field_name) {
                 $updateData['field_name'] = strtolower($req->field_name);
             }
             if ($req->type) {
@@ -216,6 +216,7 @@ class chefDocumentsController extends Controller
             if ($req->allows_as_kitchen_name == "0" || $req->allows_as_kitchen_name == "1") {
                 $updateData['allows_as_kitchen_name'] = isset($req->allows_as_kitchen_name) ? $req->allows_as_kitchen_name : 0;
             }
+            Log::info($updateData);
             DocumentItemField::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Throwable $th) {

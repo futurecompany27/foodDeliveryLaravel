@@ -79,21 +79,13 @@ class commonFunctions extends Controller
             return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
         }
         try {
-            $allFeilds = [];
             $chefDetail = chef::find($req->chef_id);
             $stateDetail = State::where('name', $chefDetail->state)->first();
+            $data = [];
             if ($stateDetail) {
-                $documentList = DocumentItemList::where(["state_id" => $stateDetail->id])->get();
-                if (count($documentList) > 0) {
-                    foreach ($documentList as $value) {
-                        $docFeilds = DocumentItemField::where('document_item_list_id', $value->id)->get();
-                        foreach ($docFeilds as $val) {
-                            array_push($allFeilds, $val);
-                        }
-                    }
-                }
+                $data = DocumentItemList::with('documentItemFields')->where(["state_id" => $stateDetail->id, 'status' => 1])->get();
             }
-            return response()->json(['data' => $allFeilds, "success" => true], 200);
+            return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

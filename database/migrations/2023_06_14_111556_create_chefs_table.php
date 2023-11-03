@@ -34,7 +34,9 @@ return new class extends Migration {
             $table->string("is_personal_detail_complete")->default(0)->comment("0 - incomplete, 1 - complete");
             $table->string("address_proof")->nullable();
             $table->string("address_proof_path")->nullable();
+            $table->string("id_proof_1")->nullable();
             $table->string("id_proof_path1")->nullable();
+            $table->string("id_proof_2")->nullable();
             $table->string("id_proof_path2")->nullable();
             $table->string("are_you_a")->nullable()->comment("student/refugee/single mom/lost job");
             $table->string("are_you_a_file_path")->nullable();

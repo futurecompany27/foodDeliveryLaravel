@@ -372,21 +372,21 @@ class ChefController extends Controller
             }
 
             // store ID proof 1
-            if ($req->hasFile('id_proof_path1')) {
+            if (isset($req->id_proof_1) && $req->hasFile('id_proof_path1')) {
                 if (file_exists(str_replace(env('filePath'), '', $chef->id_proof_path1))) {
                     unlink(str_replace(env('filePath'), '', $chef->id_proof_path1));
                 }
                 $storedPath = $req->file('id_proof_path1')->store($path, 'public');
-                chef::where("id", $req->chef_id)->update(["id_proof_path1" => asset('storage/' . $storedPath), 'status' => 0]);
+                chef::where("id", $req->chef_id)->update(["id_proof_1" => $req->id_proof_1, "id_proof_path1" => asset('storage/' . $storedPath), 'status' => 0]);
             }
 
             // store ID proof 2
-            if ($req->hasFile('id_proof_path2')) {
+            if (isset($req->id_proof_2) && $req->hasFile('id_proof_path2')) {
                 if (file_exists(str_replace(env('filePath'), '', $chef->id_proof_path1))) {
                     unlink(str_replace(env('filePath'), '', $chef->id_proof_path1));
                 }
                 $storedPath = $req->file('id_proof_path2')->store($path, 'public');
-                chef::where("id", $req->chef_id)->update(["id_proof_path2" => asset('storage/' . $storedPath), 'status' => 0]);
+                chef::where("id", $req->chef_id)->update(["id_proof_2" => $req->id_proof_2, "id_proof_path2" => asset('storage/' . $storedPath), 'status' => 0]);
             }
 
             // Additional fields which has values in string

@@ -22,6 +22,6 @@ class DocumentItemList extends Model
 
     public function documentItemFields()
     {
-        return $this->hasMany(DocumentItemList::class, 'document_item_list_id', 'id');
+        return $this->hasMany(DocumentItemField::class, 'document_item_list_id', 'id');
     }
 }
