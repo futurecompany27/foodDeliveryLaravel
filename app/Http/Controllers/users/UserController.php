@@ -877,7 +877,11 @@ class UserController extends Controller
             // getting counts of the available shefs for next 14 days
             foreach ($dateList as &$val) {
                 $query = chef::where('postal_code', strtoupper(str_replace(" ", "", $req->postal_code)));
-                $query->where('chefAvailibilityStatus', 1)->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->whereHas('foodItems', function ($query) use ($val) {
+                if ($req->kitchen_type_id) {
+                    $cuisine = Kitchentype::find($req->kitchen_type_id);
+                    $query->whereJsonContains('kitchen_types', $cuisine->kitchentype);
+                }
+                $query->where('chefAvailibilityStatus', 1)->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $val['weekdayShort'])->whereHas('foodItems', function ($query) use ($val) {
                     $query->whereJsonContains('foodAvailibiltyOnWeekdays', $val['weekdayShort']);
                 });
                 $val['total'] = $query->count();

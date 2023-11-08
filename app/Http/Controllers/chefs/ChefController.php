@@ -542,7 +542,7 @@ class ChefController extends Controller
             if ($slotNotAvailable) {
                 return response()->json(['message' => 'Slot not available select another slot', 'success' => false], 500);
             }
-            $SameChefSameSlot = ScheduleCall::where(['chef_id' => $req->chef_id, 'slot' => $req->slot])->first();
+            $SameChefSameSlot = ScheduleCall::where(['chef_id' => $req->chef_id, 'date' => $req->date, 'slot' => $req->slot])->first();
             if ($SameChefSameSlot) {
                 return response()->json(['message' => 'Already booked on same slot', 'success' => false], 500);
             }

@@ -438,18 +438,15 @@ class DriverController extends Controller
             return response()->json(["message" => 'Please fill all the details', 'success' => false], 400);
         }
         try {
-            // Log::info($req);
             $slotNotAvailable = DriverScheduleCall::where(['date' => $req->date, 'slot' => $req->slot])->first();
             if ($slotNotAvailable) {
                 return response()->json(['message' => 'Slot not available select another slot', 'success' => false], 500);
             }
-            // Log::info($req);
 
-            $SameChefSameSlot = DriverScheduleCall::where(['driver_id' => $req->driver_id, 'slot' => $req->slot])->first();
+            $SameChefSameSlot = DriverScheduleCall::where(['driver_id' => $req->driver_id, 'date' => $req->date, 'slot' => $req->slot])->first();
             if ($SameChefSameSlot) {
                 return response()->json(['message' => 'Already booked on same slot', 'success' => false], 500);
             }
-            // Log::info($req->driver_id);
 
             $scheduleNewCall = new DriverScheduleCall();
             $scheduleNewCall->driver_id = $req->driver_id;

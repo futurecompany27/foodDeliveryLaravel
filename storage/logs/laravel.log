@@ -1,18 +1,4 @@
-[2023-11-03 08:44:17] local.INFO: array (
-  'field_name' => 'licence number',
-  'type' => 'text',
-  'mandatory' => 0,
-  'allows_as_kitchen_name' => 0,
-)  
-[2023-11-03 08:44:32] local.INFO: array (
-  'field_name' => 'licence numberadfasdas',
-  'type' => 'text',
-  'mandatory' => 0,
-  'allows_as_kitchen_name' => 0,
-)  
-[2023-11-03 08:45:27] local.INFO: array (
-  'field_name' => 'expiry datesdasdas',
-  'type' => 'text',
-  'mandatory' => 1,
-  'allows_as_kitchen_name' => 0,
-)  
+[2023-11-08 06:55:16] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\app\\Http\\Controllers\\users\\UserController.php:254)
+[stacktrace]
+#0 {main}
+"} 
