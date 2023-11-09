@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->string('track_id')->nullable();
             $table->string('status')->default("Order Placed");
+            $table->softDeletes();
             $table->timestamps();
         });
     }

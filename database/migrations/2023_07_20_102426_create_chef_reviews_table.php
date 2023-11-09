@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->tinyInteger('status')->default(1)->comment('1 - active, 2 - inactive');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

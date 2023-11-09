@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->text("city");
             $table->string('postal_code');
             $table->json("kitchen_types");
+            $table->softDeletes();
             $table->timestamps();
         });
     }

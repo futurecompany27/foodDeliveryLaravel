@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('user_id');
             $table->json('cartDeliveryDate');
             $table->json('cartData');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

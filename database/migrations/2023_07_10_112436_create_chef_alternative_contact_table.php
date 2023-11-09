@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('mobile');
             $table->string('status')->default(1)->comment('1-active, 0-inactive');
             $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

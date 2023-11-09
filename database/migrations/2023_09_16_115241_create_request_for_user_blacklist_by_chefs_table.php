@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->tinyInteger('status')->default(0)->comment('0 - pending, 1 - Request accepted');
             $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

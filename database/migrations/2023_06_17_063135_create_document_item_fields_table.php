@@ -19,6 +19,7 @@ return new class extends Migration
             $table->tinyInteger('mandatory')->default(0)->comment('0- not required , 1- required');
             $table->tinyInteger('allows_as_kitchen_name')->default(0)->comment('0- not applicable , 1- applicable');
             $table->foreign('document_item_list_id')->references('id')->on('document_item_lists')->onDelete('NO ACTION');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

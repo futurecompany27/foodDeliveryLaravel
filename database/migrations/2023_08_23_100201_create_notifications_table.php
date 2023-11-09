@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->morphs('notifiable');
             $table->json('data');
             $table->timestamp('read_at')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('kitchentype');
             $table->string('image')->nullable();
             $table->tinyinteger('status')->default(1)->comment('1-active 0-inactive');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->json('request_for');
             $table->string('message');
             $table->tinyInteger('status')->default(0)->comment('0 - pending, 1 - approved, 2 - completed');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

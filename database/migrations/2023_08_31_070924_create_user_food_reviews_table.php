@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreign('food_id')->references('id')->on('food_items')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->tinyinteger('status')->default(0)->comment('1-completed 0-pending');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

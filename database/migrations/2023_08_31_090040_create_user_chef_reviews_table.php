@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('message');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->tinyinteger('status')->default(0)->comment('1-completed 0-pending');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

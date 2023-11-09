@@ -40,6 +40,7 @@ return new class extends Migration
             $table->string("institution_number")->nullable();
             $table->tinyinteger('status')->default(0);
             $table->text('resetToken')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

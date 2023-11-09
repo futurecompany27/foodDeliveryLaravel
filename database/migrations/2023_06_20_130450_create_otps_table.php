@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('mobile')->nullable();
             $table->string('email')->nullable();
             $table->integer('otp_number');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

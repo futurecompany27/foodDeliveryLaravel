@@ -43,8 +43,8 @@ return new class extends Migration {
             $table->string('status')->default('active');
             $table->string('approved_status')->default('pending');
             $table->string('approvedAt')->nullable();
-            $table->timestamps();
             $table->softDeletes();
+            $table->timestamps();
         });
     }
 

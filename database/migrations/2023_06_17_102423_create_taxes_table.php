@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('taxes', function (Blueprint $table) {
             $table->id();
             $table->string('tax_type'); //PST,GST etc
+            $table->softDeletes();
             $table->timestamps();
         });
     }

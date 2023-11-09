@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('review_id')->references('id')->on('chef_reviews')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

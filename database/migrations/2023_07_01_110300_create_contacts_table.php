@@ -17,6 +17,7 @@ return new class extends Migration
             $table->String("subject");
             $table->text("message");
             $table->tinyinteger('status')->default(1)->comment('1-Pending 0-Replied');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

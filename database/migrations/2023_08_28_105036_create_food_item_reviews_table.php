@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal("rating", 2, 1)->default(0);
             $table->text('review');
             $table->json('reviewImages');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

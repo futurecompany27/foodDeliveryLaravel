@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('detail_information')->nullable();
             $table->string('status')->default(0)->comment('0- inactive 1- active');
             $table->foreign('state_id')->references('id')->on('states')->onDelete('NO ACTION');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

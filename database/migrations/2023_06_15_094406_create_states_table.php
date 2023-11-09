@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
             $table->string('tax_type')->nullable();
             $table->string('tax_value')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

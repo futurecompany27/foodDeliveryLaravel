@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('subject');
             $table->text('message');
             $table->tinyinteger('status')->default(1)->comment('0 - Not Read Yet, 1 -Read');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

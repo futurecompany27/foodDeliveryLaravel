@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('message');
             $table->tinyinteger('status')->default(0)->comment('1-approved 0-unapproved');
             $table->unsignedInteger('star_rating');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

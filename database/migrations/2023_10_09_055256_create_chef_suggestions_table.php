@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('related_to');
             $table->text('message');
             $table->text('sample_pic')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -37,6 +37,7 @@ return new class extends Migration {
             $table->string('tip_total');
             $table->string('user_mobile_no');
             $table->string('username');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

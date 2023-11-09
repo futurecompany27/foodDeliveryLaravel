@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('diet_name')->unique();
             $table->string('image')->nullable();
             $table->string('small_description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

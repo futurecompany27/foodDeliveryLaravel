@@ -68,6 +68,7 @@ return new class extends Migration {
             $table->text('resetToken')->nullable();
             $table->tinyInteger('profilePercenatge')->default(0);
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

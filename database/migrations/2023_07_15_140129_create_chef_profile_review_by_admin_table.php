@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('chef_id');
             $table->string('status')->default('pending');
             $table->string('remark')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -24,6 +24,7 @@ return new class extends Migration {
             $table->string('full_address');
             $table->string('address_type');
             $table->string('default_address')->default(0)->comment('1 - default, 0 - not default');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

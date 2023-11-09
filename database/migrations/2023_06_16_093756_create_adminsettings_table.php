@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('food_default_comm')->default(0.0)->nullable();
             $table->integer('radius')->default(1)->comment("shef find with in this range to customer");
             $table->integer('multiChefOrderAllow')->default(5)->comment("user can add multi chef order if its under this range");
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->tinyinteger('status')->default(1)->comment('1- active,0-inactive');
             $table->text('resetToken')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

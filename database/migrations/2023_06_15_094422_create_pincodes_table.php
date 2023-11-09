@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('longitude')->unique()->nullable();
             $table->tinyInteger('status')->default(1)->comment('1-active, 0-inactive');
             $table->foreign('city_id')->references('id')->on('cities')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

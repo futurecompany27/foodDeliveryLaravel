@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name')->unqiue();
             $table->tinyInteger('status')->default(1)->comment('1-active , 0-inactive');
             $table->foreign('state_id')->references('id')->on('states')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

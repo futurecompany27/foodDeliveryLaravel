@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('postal_code');
             $table->string('full_name');
             $table->string('email');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

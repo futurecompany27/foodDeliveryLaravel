@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('status');
             $table->foreign('food_category_id')->references('id')->on('food_categories')->onDelete('NO ACTION');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

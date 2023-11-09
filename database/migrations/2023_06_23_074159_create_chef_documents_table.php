@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('field_value');
             $table->foreign('chef_id')->references('id')->on('chefs')->onDelete('NO ACTION');
             $table->foreign('document_field_id')->references('id')->on('document_item_fields')->onDelete('NO ACTION');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

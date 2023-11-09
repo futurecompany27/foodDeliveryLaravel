@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('country_code')->nullable();
             $table->tinyInteger('status')->default(1)->comment('1-active 0 -inactive');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

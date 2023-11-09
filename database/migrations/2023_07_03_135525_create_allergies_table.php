@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('image');
             $table->string('small_description');
             $table->string('allergy_name')->unique();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

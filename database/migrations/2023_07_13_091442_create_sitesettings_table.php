@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('youtubeIcon')->nullable();
             $table->string('created_by_company_link')->nullable();
             $table->string('created_by_company')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

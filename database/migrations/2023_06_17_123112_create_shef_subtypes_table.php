@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('status')->default(1)->comment('0- inactive, 1-active');
             $table->foreign('type_id')->references('id')->on('shef_types')->onDelete('NO ACTION');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

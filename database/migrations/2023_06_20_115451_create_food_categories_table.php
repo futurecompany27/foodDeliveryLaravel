@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('category')->comment('name like this is for the break fast, kid, dinner');
             $table->integer('commission')->comment('commition based on the food category select at the time of adding food item')->default(10);
             $table->text('image')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
