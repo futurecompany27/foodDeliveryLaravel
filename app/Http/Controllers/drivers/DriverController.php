@@ -84,7 +84,7 @@ class DriverController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new driverRegisterationNotification($driver));
             }
-            return response()->json(["message" => 'Registered successfully', "success" => true, "driver_id" => $driver->id], 200);
+            return response()->json(["message" => 'Your registration has been successful', "success" => true, "driver_id" => $driver->id], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -214,7 +214,7 @@ class DriverController extends Controller
                 $update['address_proof'] = asset('storage/' . $storedPath);
             }
             Driver::where('id', $req->driver_id)->update($update);
-            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Your information has been updated', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -249,7 +249,7 @@ class DriverController extends Controller
                 Driver::where('id', $req->id)->update(['driving_licence_proof' => asset('storage/' . $storedPath), 'status' => 0]);
             }
             Driver::where('id', $req->id)->update(['driving_licence_no' => $req->driving_licence_no]);
-            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Your license details has been updated', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -518,7 +518,7 @@ class DriverController extends Controller
             $driver = Driver::find($req->driver_id);
 
             Mail::to(trim($req->email))->send(new HomeshefDriverChangeEmailLink($driver));
-            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Your email has been updated', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

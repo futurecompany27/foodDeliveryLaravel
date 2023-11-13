@@ -10,6 +10,7 @@ use App\Mail\HomeshefChefEmailVerifiedSuccessfully;
 use App\Mail\HomeshefChefStatusChangeMail;
 use App\Mail\HomeshefFoodItemStatusChange;
 use App\Models\Admin;
+use App\Models\Adminsetting;
 use App\Models\Allergy;
 use App\Models\chef;
 use App\Models\ChefAlternativeContact;
@@ -61,7 +62,7 @@ class ChefController extends Controller
             DB::beginTransaction();
             $checkPinCode = Pincode::where(['pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3), 'status' => 1])->first();
             if (!$checkPinCode) {
-                return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 200);
+                return response()->json(['message' => 'We are currently not offering our services in this region yet.', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
 
             $chefExist = chef::where("email", $req->email)->first();
@@ -207,7 +208,7 @@ class ChefController extends Controller
             $chefDetail->makeVisible('password');
             if (Hash::check($req->password, $chefDetail['password'])) {
                 $chefDetail->makeHidden('password');
-                return response()->json(['message' => 'Logged in successfully!', 'data' => $chefDetail, 'success' => true], 200);
+                return response()->json(['message' => 'You are logged in now !', 'data' => $chefDetail, 'success' => true], 200);
             } else {
                 return response()->json(['message' => 'Invalid credentials!', 'success' => false], 500);
             }
@@ -524,7 +525,7 @@ class ChefController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new ChefContactUsNotification($contactUs));
             }
-            return response()->json(['message' => 'Submitted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Form submitted !', "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -557,7 +558,7 @@ class ChefController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new ChefScheduleCallNotification($ScheduleCall));
             }
-            return response()->json(["message" => 'Call has been scheduled successfully', 'success' => true], 200);
+            return response()->json(["message" => 'Your requested call  has been scheduled.', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -619,7 +620,7 @@ class ChefController extends Controller
                 foreach ($admins as $admin) {
                     $admin->notify(new ChefFoodItemNotification($chefDetail));
                 }
-                return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+                return response()->json(['message' => 'Item updated successfully', 'success' => true], 200);
             } else {
                 $validator = Validator::make(
                     $req->all(),
@@ -726,7 +727,7 @@ class ChefController extends Controller
                 foreach ($admins as $admin) {
                     $admin->notify(new ChefFoodItemNotification($chefDetail));
                 }
-                return response()->json(['message' => "Food Item Added Successfully", "success" => true], 200);
+                return response()->json(['message' => "Your new dish has been added successfully.", "success" => true], 200);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -860,7 +861,7 @@ class ChefController extends Controller
             $newAlternativeContact->chef_id = $req->chef_id;
             $newAlternativeContact->mobile = str_replace("-", "", $req->mobile);
             $newAlternativeContact->save();
-            return response()->json(['message' => 'Added successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Alternative contact number has been added successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -920,7 +921,7 @@ class ChefController extends Controller
         }
         try {
             if ($req->newPassword !== $req->confirmPassword) {
-                return response()->json(['message' => 'new password does not matched', 'success' => false], 500);
+                return response()->json(['message' => 'New and Confirm password should be the same.', 'success' => false], 500);
             }
             $chefDetail = chef::find($req->chef_id);
             if ($chefDetail) {
@@ -928,12 +929,12 @@ class ChefController extends Controller
                 if (Hash::check($req->currentPassword, $chefDetail['password'])) {
                     $chefDetail->makeHidden('password');
                     chef::where('id', $req->chef_id)->update(['password' => Hash::make($req->newPassword)]);
-                    return response()->json(['message' => 'password updated successfully', 'success' => false], 200);
+                    return response()->json(['message' => 'Your password has been changed successfully. ', 'success' => false], 200);
                 } else {
-                    return response()->json(['message' => 'current password is invalid', 'success' => false], 500);
+                    return response()->json(['message' => 'Invalid Password ! ', 'success' => false], 500);
                 }
             } else {
-                return response()->json(['message' => 'current password is invalid', 'success' => false], 500);
+                return response()->json(['message' => 'Invalid Password ! ', 'success' => false], 500);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -969,7 +970,7 @@ class ChefController extends Controller
         try {
             $alreadyPending = RequestForUpdateDetails::orderBy('created_at', 'desc')->where('chef_id', $req->chef_id)->whereIn('status', [0, 1])->first();
             if ($alreadyPending) {
-                return response()->json(['message' => 'you already have pending or approved request for update', 'success' => false], 500);
+                return response()->json(['message' => 'Action cannot be completed . Please wait till you previous request is processed.', 'success' => false], 500);
             }
             $newRequest = new RequestForUpdateDetails();
             $newRequest->chef_id = $req->chef_id;
@@ -983,7 +984,7 @@ class ChefController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new RequestQueryNotification($request_query));
             }
-            return response()->json(['message' => 'Request Submitted successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Your request has been sent to Homeplate. It will be processed shortly.', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1104,7 +1105,7 @@ class ChefController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new ChefRegisterationRequest($chefDetail));
             }
-            return response()->json(['message' => 'Requested successfully!', 'success' => true], 200);
+            return response()->json(['message' => 'Request sent to Homeplate', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1268,7 +1269,7 @@ class ChefController extends Controller
                 unlink(str_replace(env('filePath'), '', $img));
             }
             FoodItem::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Item deleted successfully', "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1377,7 +1378,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again!', 'success' => false], 500);
+            return response()->json(['message' => 'Something went wrong ! Trying editting the tax details again', 'success' => false], 500);
         }
     }
 
@@ -1388,7 +1389,7 @@ class ChefController extends Controller
         }
         try {
             $query = SubOrders::query();
-            $query->where('chef_id', $req->chef_id)->with('Orders.user', 'OrderItems.foodItem', 'OrderTrack');
+            $query->where('chef_id', $req->chef_id)->with('Orders.user', 'OrderItems.foodItem', 'OrderTrack', 'chefs');
 
             if ($req->filter) {
                 if ($req->from_date) {
@@ -1413,10 +1414,8 @@ class ChefController extends Controller
             }
 
             $data = $query->get();
-
-
-
             return response()->json(["data" => $data, "success" => true], 200);
+
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

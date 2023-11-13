@@ -92,12 +92,12 @@ class AdminController extends Controller
             if ($adminDetail) {
                 $adminDetail->makeVisible('password');
                 if (Hash::check($req->password, $adminDetail['password'])) {
-                    return response()->json(["message" => "Logged In successfully", 'admin_id' => $adminDetail->id, "success" => true], 200);
+                    return response()->json(["message" => "You are logged in now !", 'admin_id' => $adminDetail->id, "success" => true], 200);
                 } else {
-                    return response()->json(['message' => 'Invalid Credentials!', 'success' => false], 500);
+                    return response()->json(['message' => 'Invalid Password ! ', 'success' => false], 500);
                 }
             } else {
-                return response()->json(['message' => 'Invalid Credentials!', 'success' => false], 500);
+                return response()->json(['message' => 'Invalid Password ! ', 'success' => false], 500);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -285,13 +285,8 @@ class AdminController extends Controller
     public function getAdminSettings(Request $req)
     {
         try {
-            $totalRecords = Adminsetting::count();
-            $skip = $req->page * 10;
-            $data = Adminsetting::skip($skip)->take(10)->get();
-            return response()->json([
-                'data' => $data,
-                'TotalRecords' => $totalRecords,
-            ]);
+            $data = Adminsetting::latest()->first();
+            return response()->json(['data' => $data]);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

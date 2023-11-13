@@ -27,7 +27,7 @@ class otpController extends Controller
             } elseif ($req->email) {
                 Otp::updateOrCreate(['email' => $req->email], ['otp_number' => $otp]);
             }
-            return response()->json(['message' => "Otp has been sent successfully", "otp" => $otp, "success" => true], 200);
+            return response()->json(['message' => "OTP has been sent to your mobile number", "otp" => $otp, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             ;
@@ -49,9 +49,9 @@ class otpController extends Controller
                 $verified = Otp::where(["email" => $req->email, "otp_number" => $req->otp])->first();
             }
             if ($verified) {
-                return response()->json(['message' => "Verified successfully", "success" => true], 200);
+                return response()->json(['message' => "Your " . $req->email ? "Email" : "account" . " has been verified.", "success" => true], 200);
             } else {
-                return response()->json(['message' => "Invalid OTP", "success" => false], 500);
+                return response()->json(['message' => "OTP is invalid ! Try again", "success" => false], 500);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());

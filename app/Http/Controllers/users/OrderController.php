@@ -76,10 +76,10 @@ class OrderController extends Controller
                 $foodItems = $value->foodItems;
                 $amount = 0;
                 foreach ($foodItems as $food) {
-                    $amount = $amount + $food->price;
+                    $amount = $amount + ($food->price * $food->quantity);
                 }
                 $add = [
-                    'order_id' => $orderID,
+                    'order_id' => $orderID, 
                     'chef_id' => $value->chef_id,
                     'item_total' => count($value->foodItems),
                     'amount' => $amount,

@@ -72,7 +72,7 @@ class UserController extends Controller
                 $admin->notify(new CustomerRegisterationNotification($userDetail));
             }
             DB::commit();
-            return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
+            return response()->json(['message' => 'You are all set to start ordering your food now ! Thank you for registering with us', "data" => $userDetail, 'success' => true], 201);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             ;
@@ -97,7 +97,7 @@ class UserController extends Controller
             $userDetails->makeVisible('password');
             if ($userDetails && Hash::check($req->password, $userDetails->password)) {
                 $userDetails->makeHidden('password');
-                return response()->json(['message' => 'Logged in successfully!', 'data' => $userDetails, 'success' => true], 200);
+                return response()->json(['message' => 'You are logged in successfully', 'data' => $userDetails, 'success' => true], 200);
             } else {
                 return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
             }
@@ -381,7 +381,7 @@ class UserController extends Controller
 
             $userExist = User::where('email', $req->email)->first();
             if ($userExist) {
-                return response()->json(['message' => 'Login successfully!', "data" => $userExist, 'success' => true], 200);
+                return response()->json(['message' => 'You are logged in successfully', "data" => $userExist, 'success' => true], 200);
             } else {
                 DB::beginTransaction();
                 $user = new User();
@@ -398,7 +398,7 @@ class UserController extends Controller
                     $admin->notify(new CustomerRegisterationNotification($userDetail));
                 }
                 DB::commit();
-                return response()->json(['message' => 'Register successfully!', "data" => $userDetail, 'success' => true], 201);
+                return response()->json(['message' => 'You are all set to start ordering your food now ! Thank you for registering with us', "data" => $userDetail, 'success' => true], 201);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -448,7 +448,7 @@ class UserController extends Controller
                     }
                 }
             }
-            return response()->json(['message' => 'Your information has been securely saved', 'success' => true], 200);
+            return response()->json(['message' => 'Your information has been saved', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -480,7 +480,7 @@ class UserController extends Controller
                     $recordToUpdate = ShippingAddresse::find($req->id);
                     if ($recordToUpdate) {
                         $recordToUpdate->update($updateData);
-                        return response()->json(['message' => 'Address updated successfully', 'success' => true], 200);
+                        return response()->json(['message' => 'Delivery address updated successfuly', 'success' => true], 200);
                     } else {
                         return response()->json(['message' => 'Address not found', 'success' => false], 404);
                     }
@@ -508,10 +508,10 @@ class UserController extends Controller
                         }
                     }
                     $newAdrees->save();
-                    return response()->json(['message' => 'Added successfully', 'success' => true], 200);
+                    return response()->json(['message' => 'Delivery address added successfuly', 'success' => true], 200);
                 }
             } else {
-                return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 200);
+                return response()->json(['message' => 'We are currently not offering our services in this region yet.', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -543,7 +543,7 @@ class UserController extends Controller
         try {
             ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
             ShippingAddresse::where('id', $req->id)->update(['default_address' => 1]);
-            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Delivery address has been changed successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -558,7 +558,7 @@ class UserController extends Controller
         }
         try {
             ShippingAddresse::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Your address has been deleted ', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -612,7 +612,7 @@ class UserController extends Controller
                 $admin->notify(new CustomerProfileUpdateNotification($customer));
             }
             $data = User::where('id', $req->user_id)->first();
-            return response()->json(['message' => 'User updated successfully', 'data' => $data, 'success' => true], 200);
+            return response()->json(['message' => 'Your profile has been updated.', 'data' => $data, 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
