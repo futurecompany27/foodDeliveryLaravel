@@ -9,3 +9,9 @@
 [stacktrace]
 #0 {main}
 "} 
+[2023-11-13 10:28:18] local.INFO: true  
+[2023-11-13 10:28:39] local.INFO: true  
+[2023-11-16 05:32:58] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\app\\Http\\Controllers\\users\\UserController.php:254)
+[stacktrace]
+#0 {main}
+"} 

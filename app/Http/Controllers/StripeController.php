@@ -33,6 +33,7 @@ class StripeController extends Controller
                     ]
                 ],
                 'mode' => 'payment',
+                'customer_email' => $req->email,
                 'success_url' => env("domain") . 'success-transaction',
                 'cancel_url' => env("domain") . 'failed-transaction',
             ]);
