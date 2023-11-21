@@ -60,7 +60,8 @@ class UserController extends Controller
 
             DB::beginTransaction();
             $user = new User();
-            $user->fullname = $req->fullname;
+            $user->firstName = $req->firstName;
+            $user->lastName = $req->lastName;
             $user->mobile = str_replace("-", "", $req->mobile);
             $user->email = $req->email;
             $user->password = Hash::make($req->password);
@@ -385,7 +386,8 @@ class UserController extends Controller
             } else {
                 DB::beginTransaction();
                 $user = new User();
-                $user->fullname = $req->name;
+                $user->firstName = $req->firstName;
+                $user->lastName = $req->lastName;
                 $user->email = $req->email;
                 $user->social_id = $req->id;
                 $user->social_type = $req->provider;
@@ -412,7 +414,8 @@ class UserController extends Controller
         if (!$req->user_id) {
             $validator = Validator::make($req->all(), [
                 'postal_code' => "required",
-                'fullname' => "required",
+                'firstName' => "required",
+                'lastName' => "required",
                 'email' => "required",
             ]);
             if ($validator->fails()) {
@@ -427,7 +430,8 @@ class UserController extends Controller
                 $ifSameData = NoRecordFound::orderBy('created_at', 'desc')->where(['postal_code' => strtolower($req->postal_code), 'email' => $userDetail->email])->first();
                 if (!$ifSameData) {
                     $newData->postal_code = strtolower($req->postal_code);
-                    $newData->full_name = $userDetail->fullname;
+                    $newData->firstName = $userDetail->firstName;
+                    $newData->lastName = $userDetail->lastName;
                     $newData->email = $userDetail->email;
                     $newData->save();
                     $search = NoRecordFound::orderBy('created_at', 'desc')->where(['email' => $userDetail->email, 'postal_code' => strtolower($req->postal_code)])->first();
@@ -439,7 +443,8 @@ class UserController extends Controller
                 $ifSameData = NoRecordFound::orderBy('created_at', 'desc')->where(['postal_code' => strtolower($req->postal_code), 'email' => $req->email])->first();
                 if (!$ifSameData) {
                     $newData->postal_code = strtolower($req->postal_code);
-                    $newData->full_name = $req->fullname;
+                    $newData->firstName = $req->firstName;
+                    $newData->lastName = $req->lastName;
                     $newData->email = $req->email;
                     $newData->save();
                     $search = NoRecordFound::orderBy('created_at', 'desc')->where(['email' => $req->email, 'postal_code' => strtolower($req->postal_code)])->first();
@@ -460,8 +465,8 @@ class UserController extends Controller
     {
         $validator = Validator::make($req->all(), [
             'user_id' => "required",
-            'first_name' => "required",
-            'last_name' => "required",
+            'firstName' => "required",
+            'lastName' => "required",
             'mobile_no' => "required",
             'postal_code' => "required",
             'state' => "required",
@@ -487,8 +492,8 @@ class UserController extends Controller
                 } else {
                     $newAdrees = new ShippingAddresse();
                     $newAdrees->user_id = $req->user_id;
-                    $newAdrees->first_name = $req->first_name;
-                    $newAdrees->last_name = $req->last_name;
+                    $newAdrees->firstName = $req->firstName;
+                    $newAdrees->lastName = $req->lastName;
                     $newAdrees->mobile_no = str_replace("-", '', $req->mobile_no);
                     $newAdrees->postal_code = $req->postal_code;
                     $newAdrees->city = $req->city ? $req->city : '';
@@ -584,7 +589,8 @@ class UserController extends Controller
     {
         $validator = Validator::make($req->all(), [
             'user_id' => "required",
-            'fullname' => "required",
+            'firstName' => "required",
+            'lastName' => "required",
             'mobile' => "required",
             'email' => "required",
         ]);
@@ -595,7 +601,8 @@ class UserController extends Controller
         try {
             $user = User::where('id', $req->user_id)->first();
             $update = [
-                'fullname' => $req->fullname,
+                'firstName' => $req->firstName,
+                'lastName' => $req->lastName,
                 'email' => $req->email,
                 'mobile' => str_replace('-', '', $req->mobile)
             ];
@@ -626,14 +633,16 @@ class UserController extends Controller
             $req->all(),
             [
                 "are_you_a" => 'required',
-                "full_name" => 'required',
+                "firstName" => 'required',
+                "lastName" => 'required',
                 "email" => 'required',
                 "subject" => 'required',
                 "message" => "required",
             ],
             [
                 "are_you_a.required" => "please fill Are you a?",
-                "full_name.required" => "please fill full_name",
+                "firstName.required" => "please fill first name",
+                "lastName.required" => "please fill last name",
                 "email.required" => "please select email",
                 "subject.required" => "please select subject",
                 "message.required" => "please fill message",
@@ -645,7 +654,8 @@ class UserController extends Controller
         try {
             $contact = new UserContact();
             $contact->are_you_a = $req->are_you_a;
-            $contact->full_name = $req->full_name;
+            $contact->firstName = $req->firstName;
+            $contact->lastName = $req->lastName;
             $contact->email = $req->email;
             $contact->subject = $req->subject;
             $contact->message = $req->message;
@@ -790,7 +800,7 @@ class UserController extends Controller
         try {
             // $totalRecords = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->count();
             // $skip = $req->page * 10;
-            // $data = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->skip($skip)->take(10)->with('user:fullname,id')->get();
+            // $data = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->skip($skip)->take(10)->with('user:firstName,lastName,id')->get();
             // return response()->json([
             //     'data' => $data,
             //     'TotalRecords' => $totalRecords,
@@ -802,7 +812,7 @@ class UserController extends Controller
             $chefId = $req->chef_id;
 
             // Get the reviews related to the chef where status is 1
-            $reviews = ChefReview::where(['chef_id' => $chefId, 'status' => 1])->with('user:fullname,id')->get();
+            $reviews = ChefReview::where(['chef_id' => $chefId, 'status' => 1])->with('user:firstName,lastName,id')->get();
 
             // Get user IDs for the reviews
             $userIds = $reviews->pluck('user_id')->unique();
@@ -1003,7 +1013,7 @@ class UserController extends Controller
         try {
             $totalRecords = FoodItemReview::where('chef_id', $req->chef_id)->count();
             $skip = $req->page * 10;
-            $data = FoodItemReview::where('food_id', $req->food_id)->skip($skip)->take(10)->with('user:fullname,id')->get();
+            $data = FoodItemReview::where('food_id', $req->food_id)->skip($skip)->take(10)->with('user:firstName,lastName,id')->get();
             return response()->json([
                 'data' => $data,
                 'TotalRecords' => $totalRecords,

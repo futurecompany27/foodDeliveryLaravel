@@ -40,7 +40,7 @@ class ChefContactUsNotification extends Notification
         return [
             'id' => $this->contactUs['id'],
             'chef_id'=>$this->contactUs['chef']->id,
-            'message' => ($this->contactUs['chef']->first_name . ' ' . $this->contactUs['chef']->last_name) . ' has query regarding ' . $this->contactUs['needHelpFor'] . '.',
+            'message' => ($this->contactUs['chef']->firstName . ' ' . $this->contactUs['chef']->lastName) . ' has query regarding ' . $this->contactUs['needHelpFor'] . '.',
             'url' => '/admin/shef-contact-us'
         ];
     }

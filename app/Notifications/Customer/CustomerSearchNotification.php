@@ -42,7 +42,8 @@ class CustomerSearchNotification extends Notification
     {
         return [
             // 'id' => $this->search->id,
-            'full_name' => $this->search->full_name,
+            'firstName' => $this->search->firstName,
+            'lastName' => $this->search->lastName,
             'postal_code' => $this->search->postal_code,
             'message' => $this->search->email . ' search shef in ' . $this->search->postal_code . ' postal code',
             'url' => '/admin/customer-serach-for-other-postal-code'

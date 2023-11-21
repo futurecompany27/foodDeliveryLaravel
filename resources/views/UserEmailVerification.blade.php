@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 
-<body> <b>Hi {{ucfirst($fullname)}}</b>
+<body> <b>Hi {{ucfirst($firstName)}} {{ucfirst($lastName)}}</b>
     <p>Your account has been created successfully.</p>
     <p>You may access your
         account only after the verification of your documents and details.</p>

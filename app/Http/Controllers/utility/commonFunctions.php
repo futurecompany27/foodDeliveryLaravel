@@ -200,7 +200,8 @@ class commonFunctions extends Controller
             $newFeedback = new Feedback();
             $newFeedback->images = asset('storage/' . $imagePath);
             $newFeedback->are_you_a = $req->are_you_a;
-            $newFeedback->name = $req->name;
+            $newFeedback->firstName = $req->firstName;
+            $newFeedback->lastName = $req->lastName;
             $newFeedback->email = $req->email;
             $newFeedback->profession = $req->profession;
             $newFeedback->message = $req->message;
@@ -370,17 +371,20 @@ class commonFunctions extends Controller
 
                 User::where('email', $req->email)->update(['resetToken' => $token]);
                 $data = User::where('email', $req->email)->first();
-                $userDetail['full_name'] = $data->fullname;
+                $userDetail['firstName'] = $data->firstName;
+                $userDetail['lastName'] = $data->lastName;
             } else if ($req->user_type == 'Admin') {
 
                 Admin::where('email', $req->email)->update(['resetToken' => $token]);
                 $data = Admin::where('email', $req->email)->first();
-                $userDetail['full_name'] = $data->name;
+                $userDetail['firstName'] = $data->lastName;
+                $userDetail['lastName'] = $data->lastName;
             } else if ($req->user_type == 'chef') {
 
                 chef::where('email', $req->email)->update(['resetToken' => $token]);
                 $data = chef::where('email', $req->email)->first();
-                $userDetail['full_name'] = (ucfirst($data->first_name) . ' ' . ucfirst($data->last_name));
+                $userDetail['firstName'] = ucfirst($data->firstName);
+                $userDetail['lastName'] = ucfirst($data->lastName);
             } else if ($req->user_type == 'Driver') {
                 $driver = Driver::where('email', $req->email)->first();
                 if (!$driver) {
@@ -388,7 +392,8 @@ class commonFunctions extends Controller
                 }
                 Driver::where('email', $req->email)->update(['resetToken' => $token]);
                 $data = Driver::where('email', $req->email)->first();
-                $userDetail['full_name'] = (ucfirst($data->first_name) . ' ' . ucfirst($data->last_name));
+                $userDetail['firstName'] = ucfirst($data->firstName);
+                $userDetail['lastName'] = ucfirst($data->lastName);
             }
             $userDetail['id'] = $data->id;
             $userDetail['user_type'] = $req->user_type;

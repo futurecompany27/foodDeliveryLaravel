@@ -12,8 +12,8 @@ return new class extends Migration {
     {
         Schema::create('chefs', function (Blueprint $table) {
             $table->id();
-            $table->string('first_name');
-            $table->string('last_name');
+            $table->string('firstName');
+            $table->string('lastName');
             $table->string('date_of_birth');
             $table->string('type')->nullable();
             $table->string('sub_type')->nullable();

@@ -48,7 +48,8 @@ class ChefStatusUpdateNotification extends Notification
         ];
         return [
             'id' => $this->chefDetail['id'],
-            'full_name' => ($this->chefDetail['first_name'] . ' ' . $this->chefDetail['last_name']),
+            'firstName' => $this->chefDetail['firstName'],
+            'lastName' => $this->chefDetail['lastName'],
             'status' => $this->chefDetail['status'],
             'message' => $status_array[$this->chefDetail['status']]
         ];

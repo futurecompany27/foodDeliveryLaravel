@@ -24,6 +24,6 @@ class HomeshefDriverEmailVerrifiedSuccessfully extends Mailable
 
     public function build()
     {
-        return $this->view('driverEmailVerifiedSuccessfully', ['id' => $this->driverDetails->id, 'full_name' => ucfirst($this->driverDetails->first_name) . " " . ucfirst($this->driverDetails->last_name)]);
+        return $this->view('driverEmailVerifiedSuccessfully', ['id' => $this->driverDetails->id, 'firstName' => ucfirst($this->driverDetails->firstName), 'lastName' => ucfirst($this->driverDetails->lastName)]);
     }
 }

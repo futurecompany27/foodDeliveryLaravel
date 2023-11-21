@@ -41,9 +41,10 @@ class NewFeedback extends Notification
     {
         return [
             'id' => $this->feedback->id,
-            'full_name' => $this->feedback->name,
+            'firstName' => $this->feedback->firstName,
+            'lastName' => $this->feedback->lastName,
             'postal_code' => $this->feedback->email,
-            'message' => $this->feedback->name . ' has been send new feedback',
+            'message' => ($this->feedback->firstName . ' ' . $this->feedback->lastName)  . ' has been send new feedback',
             'url' => '/admin/new-feedback'
 
         ];

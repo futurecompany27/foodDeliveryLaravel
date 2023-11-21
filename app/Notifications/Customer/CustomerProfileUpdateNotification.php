@@ -42,7 +42,7 @@ class CustomerProfileUpdateNotification extends Notification
         return [
             'id' => $this->customer->id,
             'email' => $this->customer->email,
-            'message' => $this->customer->fullname . ' update his/her profile information.',
+            'message' => ($this->customer->firstName . ' ' . $this->customer->lastName) . ' update his/her profile information.',
             'url' => '/admin/profile'
         ];
     }

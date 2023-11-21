@@ -1,17 +1,101 @@
-[2023-11-08 06:55:16] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\app\\Http\\Controllers\\users\\UserController.php:254)
-[stacktrace]
-#0 {main}
-"} 
-[2023-11-09 05:53:10] local.INFO: true  
-[2023-11-10 04:59:34] local.INFO: Call to undefined relationship [chefs] on model [App\Models\Order].  
-[2023-11-10 05:10:14] local.INFO: true  
-[2023-11-10 06:30:53] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\app\\Http\\Controllers\\users\\UserController.php:254)
-[stacktrace]
-#0 {main}
-"} 
-[2023-11-13 10:28:18] local.INFO: true  
-[2023-11-13 10:28:39] local.INFO: true  
-[2023-11-16 05:32:58] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at D:\\fo9_final\\app\\Http\\Controllers\\users\\UserController.php:254)
-[stacktrace]
-#0 {main}
-"} 
+[2023-11-20 08:11:37] local.INFO: 1 ////// 1  
+[2023-11-20 08:11:37] local.INFO: 2 ////// 1  
+[2023-11-20 08:11:37] local.INFO: 1 ////// 2  
+[2023-11-20 08:11:37] local.INFO: 2 ////// 2  
+[2023-11-20 08:11:38] local.INFO: 1 ////// 1  
+[2023-11-20 08:11:38] local.INFO: 2 ////// 1  
+[2023-11-20 08:11:38] local.INFO: 1 ////// 2  
+[2023-11-20 08:11:38] local.INFO: 2 ////// 2  
+[2023-11-20 08:13:30] local.INFO: 1 ////// 1  
+[2023-11-20 08:13:30] local.INFO: 2 ////// 1  
+[2023-11-20 08:13:30] local.INFO: 1 ////// 2  
+[2023-11-20 08:13:30] local.INFO: 2 ////// 2  
+[2023-11-20 08:13:31] local.INFO: 1 ////// 1  
+[2023-11-20 08:13:31] local.INFO: 2 ////// 1  
+[2023-11-20 08:13:31] local.INFO: 1 ////// 2  
+[2023-11-20 08:13:31] local.INFO: 2 ////// 2  
+[2023-11-20 08:32:43] local.INFO: 1 ////// 1  
+[2023-11-20 08:32:43] local.INFO: 2 ////// 1  
+[2023-11-20 08:32:43] local.INFO: 1 ////// 2  
+[2023-11-20 08:32:43] local.INFO: 2 ////// 2  
+[2023-11-20 08:32:44] local.INFO: 1 ////// 1  
+[2023-11-20 08:32:44] local.INFO: 2 ////// 1  
+[2023-11-20 08:32:44] local.INFO: 1 ////// 2  
+[2023-11-20 08:32:44] local.INFO: 2 ////// 2  
+[2023-11-20 08:34:37] local.INFO: 1 ////// 1  
+[2023-11-20 08:34:37] local.INFO: 2 ////// 1  
+[2023-11-20 08:34:37] local.INFO: 1 ////// 2  
+[2023-11-20 08:34:37] local.INFO: 2 ////// 2  
+[2023-11-20 08:34:38] local.INFO: 1 ////// 1  
+[2023-11-20 08:34:38] local.INFO: 2 ////// 1  
+[2023-11-20 08:34:38] local.INFO: 1 ////// 2  
+[2023-11-20 08:34:38] local.INFO: 2 ////// 2  
+[2023-11-20 08:35:50] local.INFO: 1 ////// 1  
+[2023-11-20 08:35:50] local.INFO: 2 ////// 1  
+[2023-11-20 08:35:50] local.INFO: 1 ////// 2  
+[2023-11-20 08:35:50] local.INFO: 2 ////// 2  
+[2023-11-20 08:35:51] local.INFO: 1 ////// 1  
+[2023-11-20 08:35:51] local.INFO: 2 ////// 1  
+[2023-11-20 08:35:51] local.INFO: 1 ////// 2  
+[2023-11-20 08:35:51] local.INFO: 2 ////// 2  
+[2023-11-20 08:36:41] local.INFO: 1 ////// 1  
+[2023-11-20 08:36:41] local.INFO: 2 ////// 1  
+[2023-11-20 08:36:41] local.INFO: 1 ////// 2  
+[2023-11-20 08:36:41] local.INFO: 2 ////// 2  
+[2023-11-20 08:36:42] local.INFO: 1 ////// 1  
+[2023-11-20 08:36:42] local.INFO: 2 ////// 1  
+[2023-11-20 08:36:42] local.INFO: 1 ////// 2  
+[2023-11-20 08:36:42] local.INFO: 2 ////// 2  
+[2023-11-20 08:38:24] local.INFO: 1 ////// 1  
+[2023-11-20 08:38:24] local.INFO: 2 ////// 1  
+[2023-11-20 08:38:24] local.INFO: 1 ////// 2  
+[2023-11-20 08:38:24] local.INFO: 2 ////// 2  
+[2023-11-20 08:38:25] local.INFO: 1 ////// 1  
+[2023-11-20 08:38:25] local.INFO: 2 ////// 1  
+[2023-11-20 08:38:25] local.INFO: 1 ////// 2  
+[2023-11-20 08:38:25] local.INFO: 2 ////// 2  
+[2023-11-20 08:39:07] local.INFO: 1 ////// 1  
+[2023-11-20 08:39:07] local.INFO: 2 ////// 1  
+[2023-11-20 08:39:07] local.INFO: 1 ////// 2  
+[2023-11-20 08:39:07] local.INFO: 2 ////// 2  
+[2023-11-20 08:39:08] local.INFO: 1 ////// 1  
+[2023-11-20 08:39:08] local.INFO: 2 ////// 1  
+[2023-11-20 08:39:08] local.INFO: 1 ////// 2  
+[2023-11-20 08:39:08] local.INFO: 2 ////// 2  
+[2023-11-20 08:39:26] local.INFO: 1 ////// 1  
+[2023-11-20 08:39:26] local.INFO: 2 ////// 1  
+[2023-11-20 08:39:26] local.INFO: 1 ////// 2  
+[2023-11-20 08:39:26] local.INFO: 2 ////// 2  
+[2023-11-20 08:39:28] local.INFO: 1 ////// 1  
+[2023-11-20 08:39:28] local.INFO: 2 ////// 1  
+[2023-11-20 08:39:28] local.INFO: 1 ////// 2  
+[2023-11-20 08:39:28] local.INFO: 2 ////// 2  
+[2023-11-20 08:39:45] local.INFO: 1 ////// 1  
+[2023-11-20 08:39:45] local.INFO: 2 ////// 1  
+[2023-11-20 08:39:45] local.INFO: 1 ////// 2  
+[2023-11-20 08:39:45] local.INFO: 2 ////// 2  
+[2023-11-20 08:39:46] local.INFO: 1 ////// 1  
+[2023-11-20 08:39:46] local.INFO: 2 ////// 1  
+[2023-11-20 08:39:46] local.INFO: 1 ////// 2  
+[2023-11-20 08:39:46] local.INFO: 2 ////// 2  
+[2023-11-20 08:46:06] local.INFO: 1 ////// 1  
+[2023-11-20 08:46:06] local.INFO: 2 ////// 1  
+[2023-11-20 08:46:06] local.INFO: 1 ////// 2  
+[2023-11-20 08:46:06] local.INFO: 2 ////// 2  
+[2023-11-20 08:46:07] local.INFO: 1 ////// 1  
+[2023-11-20 08:46:07] local.INFO: 2 ////// 1  
+[2023-11-20 08:46:07] local.INFO: 1 ////// 2  
+[2023-11-20 08:46:07] local.INFO: 2 ////// 2  
+[2023-11-20 09:02:30] local.INFO: 1 ////// 1  
+[2023-11-20 09:02:30] local.INFO: 2 ////// 1  
+[2023-11-20 09:02:30] local.INFO: 1 ////// 2  
+[2023-11-20 09:02:30] local.INFO: 2 ////// 2  
+[2023-11-20 09:02:31] local.INFO: 1 ////// 1  
+[2023-11-20 09:02:31] local.INFO: 2 ////// 1  
+[2023-11-20 09:02:31] local.INFO: 1 ////// 2  
+[2023-11-20 09:02:31] local.INFO: 2 ////// 2  
+[2023-11-21 04:38:45] local.INFO: Attempt to read property "id" on null  
+[2023-11-21 04:39:02] local.INFO: Attempt to read property "id" on null  
+[2023-11-21 04:46:22] local.INFO: Attempt to read property "id" on null  
+[2023-11-21 04:54:19] local.INFO: Attempt to read property "id" on null  
+[2023-11-21 05:35:49] local.INFO: Attempt to read property "id" on null  

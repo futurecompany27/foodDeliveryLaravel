@@ -39,8 +39,9 @@ class ChefRegisterationNotification extends Notification
     {
         return  [
             'id' => $this->chefDetail['id'],
-            'full_name' => ($this->chefDetail['first_name'] . ' ' . $this->chefDetail['last_name']),
-            'message' => ($this->chefDetail['first_name'] . ' ' . $this->chefDetail['last_name']) . ' register as a new chef.',
+            'firstName' => $this->chefDetail['firstName'],
+            'lastName' => $this->chefDetail['lastName'],
+            'message' => ($this->chefDetail['firstName'] . ' ' . $this->chefDetail['lastName']) . ' register as a new chef.',
             'url' => '/admin/shef-profile'
         ];
     }

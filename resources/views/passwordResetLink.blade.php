@@ -6,7 +6,7 @@
 </head>
 <body>
  
- <b>Hi {{ucfirst($fullname)}}</b>
+ <b>Hi {{ucfirst($firstName)}} {{ucfirst($lastName)}}</b>
 
  <p>Kindly reset your {{ucfirst($user_type)}}'s password by clicking on the link below</p>
 

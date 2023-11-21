@@ -27,7 +27,8 @@ class HomeshefFoodItemStatusChange extends Mailable
         return $this->view('foodItemStatusChangeMail')
             ->with([
                 'id' => $this->chef['id'],
-                'full_name' => $this->chef['full_name'],
+                'firstName' => $this->chef['firstName'],
+                'lastName' => $this->chef['lastName'],
                 'food_name' => $this->chef['food_name'],
             ]);
     }

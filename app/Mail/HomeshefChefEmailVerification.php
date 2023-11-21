@@ -30,6 +30,6 @@ class HomeshefChefEmailVerification extends Mailable
      */
     public function build()
     {
-        return $this->view('ChefEmailVerification', ['id' => $this->chefDetail->id, 'full_name' => (ucfirst($this->chefDetail->first_name) . " " . ucfirst($this->chefDetail->last_name))]);
+        return $this->view('ChefEmailVerification', ['id' => $this->chefDetail->id, 'firstName' => ucfirst($this->chefDetail->firstName), "lastName" => ucfirst($this->chefDetail->lastName)]);
     }
 }

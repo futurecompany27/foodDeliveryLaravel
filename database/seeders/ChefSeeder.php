@@ -17,8 +17,8 @@ class ChefSeeder extends Seeder
     {
         // J7A
         DB::table("chefs")->insert([
-            "first_name" => "test0",
-            "last_name" => "test0",
+            "firstName" => "test0",
+            "lastName" => "test0",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111110",
@@ -29,13 +29,13 @@ class ChefSeeder extends Seeder
             "about_kitchen" => "We have 1 year of experience in cooking with all type of cuisines",
             "kitchen_types" => json_encode(["Indian", "American"]),
             "chefAvailibilityWeek" => json_encode(["Su", "M", "T", "W", "Th", "F", "S"]),
-            "status" => 1,
+            "status" => 0,
             "created_at" => Carbon::now(),
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test1",
-            "last_name" => "test1",
+            "firstName" => "test1",
+            "lastName" => "test1",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111111",
@@ -51,8 +51,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test2",
-            "last_name" => "test2",
+            "firstName" => "test2",
+            "lastName" => "test2",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111112",
@@ -68,8 +68,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test3",
-            "last_name" => "test3",
+            "firstName" => "test3",
+            "lastName" => "test3",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111113",
@@ -85,8 +85,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test4",
-            "last_name" => "test4",
+            "firstName" => "test4",
+            "lastName" => "test4",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111114",
@@ -102,8 +102,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test5",
-            "last_name" => "test5",
+            "firstName" => "test5",
+            "lastName" => "test5",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111115",
@@ -119,8 +119,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test6",
-            "last_name" => "test6",
+            "firstName" => "test6",
+            "lastName" => "test6",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111116",
@@ -136,8 +136,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test7",
-            "last_name" => "test7",
+            "firstName" => "test7",
+            "lastName" => "test7",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111117",
@@ -153,8 +153,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test8",
-            "last_name" => "test8",
+            "firstName" => "test8",
+            "lastName" => "test8",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111118",
@@ -170,8 +170,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test9",
-            "last_name" => "test9",
+            "firstName" => "test9",
+            "lastName" => "test9",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A",
             "mobile" => "1111111119",
@@ -189,8 +189,8 @@ class ChefSeeder extends Seeder
 
         // J7E
         DB::table("chefs")->insert([
-            "first_name" => "test20",
-            "last_name" => "test20",
+            "firstName" => "test20",
+            "lastName" => "test20",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111120",
@@ -206,8 +206,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test21",
-            "last_name" => "test21",
+            "firstName" => "test21",
+            "lastName" => "test21",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111121",
@@ -223,8 +223,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test22",
-            "last_name" => "test22",
+            "firstName" => "test22",
+            "lastName" => "test22",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111122",
@@ -240,8 +240,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test23",
-            "last_name" => "test23",
+            "firstName" => "test23",
+            "lastName" => "test23",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111123",
@@ -257,8 +257,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test24",
-            "last_name" => "test24",
+            "firstName" => "test24",
+            "lastName" => "test24",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111124",
@@ -274,8 +274,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test25",
-            "last_name" => "test25",
+            "firstName" => "test25",
+            "lastName" => "test25",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111125",
@@ -291,8 +291,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test26",
-            "last_name" => "test26",
+            "firstName" => "test26",
+            "lastName" => "test26",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111126",
@@ -308,8 +308,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test27",
-            "last_name" => "test27",
+            "firstName" => "test27",
+            "lastName" => "test27",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111127",
@@ -325,8 +325,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test28",
-            "last_name" => "test28",
+            "firstName" => "test28",
+            "lastName" => "test28",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111128",
@@ -342,8 +342,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test29",
-            "last_name" => "test29",
+            "firstName" => "test29",
+            "lastName" => "test29",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7E",
             "mobile" => "1111111129",
@@ -361,8 +361,8 @@ class ChefSeeder extends Seeder
 
         // H7N
         DB::table("chefs")->insert([
-            "first_name" => "test30",
-            "last_name" => "test30",
+            "firstName" => "test30",
+            "lastName" => "test30",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111130",
@@ -378,8 +378,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test31",
-            "last_name" => "test31",
+            "firstName" => "test31",
+            "lastName" => "test31",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111131",
@@ -395,8 +395,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test32",
-            "last_name" => "test32",
+            "firstName" => "test32",
+            "lastName" => "test32",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111132",
@@ -412,8 +412,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test33",
-            "last_name" => "test33",
+            "firstName" => "test33",
+            "lastName" => "test33",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111133",
@@ -429,8 +429,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test34",
-            "last_name" => "test34",
+            "firstName" => "test34",
+            "lastName" => "test34",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111134",
@@ -446,8 +446,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test35",
-            "last_name" => "test35",
+            "firstName" => "test35",
+            "lastName" => "test35",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111135",
@@ -463,8 +463,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test36",
-            "last_name" => "test36",
+            "firstName" => "test36",
+            "lastName" => "test36",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111136",
@@ -480,8 +480,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test37",
-            "last_name" => "test37",
+            "firstName" => "test37",
+            "lastName" => "test37",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111137",
@@ -497,8 +497,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test38",
-            "last_name" => "test38",
+            "firstName" => "test38",
+            "lastName" => "test38",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111138",
@@ -514,8 +514,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test39",
-            "last_name" => "test39",
+            "firstName" => "test39",
+            "lastName" => "test39",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7N",
             "mobile" => "1111111139",
@@ -533,8 +533,8 @@ class ChefSeeder extends Seeder
 
         // H7W
         DB::table("chefs")->insert([
-            "first_name" => "test40",
-            "last_name" => "test40",
+            "firstName" => "test40",
+            "lastName" => "test40",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111140",
@@ -550,8 +550,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test41",
-            "last_name" => "test41",
+            "firstName" => "test41",
+            "lastName" => "test41",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111141",
@@ -567,8 +567,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test42",
-            "last_name" => "test42",
+            "firstName" => "test42",
+            "lastName" => "test42",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111142",
@@ -584,8 +584,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test43",
-            "last_name" => "test43",
+            "firstName" => "test43",
+            "lastName" => "test43",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111143",
@@ -601,8 +601,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test44",
-            "last_name" => "test44",
+            "firstName" => "test44",
+            "lastName" => "test44",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111144",
@@ -618,8 +618,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test45",
-            "last_name" => "test45",
+            "firstName" => "test45",
+            "lastName" => "test45",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111145",
@@ -635,8 +635,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test46",
-            "last_name" => "test46",
+            "firstName" => "test46",
+            "lastName" => "test46",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111146",
@@ -652,8 +652,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test47",
-            "last_name" => "test47",
+            "firstName" => "test47",
+            "lastName" => "test47",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111147",
@@ -669,8 +669,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test48",
-            "last_name" => "test48",
+            "firstName" => "test48",
+            "lastName" => "test48",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111148",
@@ -686,8 +686,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test49",
-            "last_name" => "test49",
+            "firstName" => "test49",
+            "lastName" => "test49",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7w",
             "mobile" => "1111111149",
@@ -705,8 +705,8 @@ class ChefSeeder extends Seeder
 
         // H7L
         DB::table("chefs")->insert([
-            "first_name" => "test50",
-            "last_name" => "test50",
+            "firstName" => "test50",
+            "lastName" => "test50",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111150",
@@ -722,8 +722,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test51",
-            "last_name" => "test51",
+            "firstName" => "test51",
+            "lastName" => "test51",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111151",
@@ -739,8 +739,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test52",
-            "last_name" => "test52",
+            "firstName" => "test52",
+            "lastName" => "test52",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111152",
@@ -756,8 +756,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test53",
-            "last_name" => "test53",
+            "firstName" => "test53",
+            "lastName" => "test53",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111153",
@@ -773,8 +773,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test54",
-            "last_name" => "test54",
+            "firstName" => "test54",
+            "lastName" => "test54",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111154",
@@ -790,8 +790,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test55",
-            "last_name" => "test55",
+            "firstName" => "test55",
+            "lastName" => "test55",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111155",
@@ -807,8 +807,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test56",
-            "last_name" => "test56",
+            "firstName" => "test56",
+            "lastName" => "test56",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111156",
@@ -824,8 +824,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test57",
-            "last_name" => "test57",
+            "firstName" => "test57",
+            "lastName" => "test57",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111157",
@@ -841,8 +841,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test58",
-            "last_name" => "test58",
+            "firstName" => "test58",
+            "lastName" => "test58",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111158",
@@ -858,8 +858,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test59",
-            "last_name" => "test59",
+            "firstName" => "test59",
+            "lastName" => "test59",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7L",
             "mobile" => "1111111159",
@@ -877,8 +877,8 @@ class ChefSeeder extends Seeder
 
         // J7B
         DB::table("chefs")->insert([
-            "first_name" => "test60",
-            "last_name" => "test60",
+            "firstName" => "test60",
+            "lastName" => "test60",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111160",
@@ -894,8 +894,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test61",
-            "last_name" => "test61",
+            "firstName" => "test61",
+            "lastName" => "test61",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111161",
@@ -911,8 +911,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test62",
-            "last_name" => "test62",
+            "firstName" => "test62",
+            "lastName" => "test62",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111162",
@@ -928,8 +928,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test63",
-            "last_name" => "test63",
+            "firstName" => "test63",
+            "lastName" => "test63",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111163",
@@ -945,8 +945,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test64",
-            "last_name" => "test64",
+            "firstName" => "test64",
+            "lastName" => "test64",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111164",
@@ -962,8 +962,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test65",
-            "last_name" => "test65",
+            "firstName" => "test65",
+            "lastName" => "test65",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111165",
@@ -979,8 +979,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test66",
-            "last_name" => "test66",
+            "firstName" => "test66",
+            "lastName" => "test66",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111166",
@@ -996,8 +996,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test67",
-            "last_name" => "test67",
+            "firstName" => "test67",
+            "lastName" => "test67",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111167",
@@ -1013,8 +1013,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test68",
-            "last_name" => "test68",
+            "firstName" => "test68",
+            "lastName" => "test68",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111168",
@@ -1030,8 +1030,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test69",
-            "last_name" => "test69",
+            "firstName" => "test69",
+            "lastName" => "test69",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7B",
             "mobile" => "1111111169",
@@ -1049,8 +1049,8 @@ class ChefSeeder extends Seeder
 
         // J7H
         DB::table("chefs")->insert([
-            "first_name" => "test70",
-            "last_name" => "test70",
+            "firstName" => "test70",
+            "lastName" => "test70",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111170",
@@ -1066,8 +1066,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test71",
-            "last_name" => "test71",
+            "firstName" => "test71",
+            "lastName" => "test71",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111171",
@@ -1083,8 +1083,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test72",
-            "last_name" => "test72",
+            "firstName" => "test72",
+            "lastName" => "test72",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111172",
@@ -1100,8 +1100,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test73",
-            "last_name" => "test73",
+            "firstName" => "test73",
+            "lastName" => "test73",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111173",
@@ -1117,8 +1117,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test74",
-            "last_name" => "test74",
+            "firstName" => "test74",
+            "lastName" => "test74",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111174",
@@ -1134,8 +1134,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test75",
-            "last_name" => "test75",
+            "firstName" => "test75",
+            "lastName" => "test75",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111175",
@@ -1151,8 +1151,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test76",
-            "last_name" => "test76",
+            "firstName" => "test76",
+            "lastName" => "test76",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111176",
@@ -1168,8 +1168,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test77",
-            "last_name" => "test77",
+            "firstName" => "test77",
+            "lastName" => "test77",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111177",
@@ -1185,8 +1185,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test78",
-            "last_name" => "test78",
+            "firstName" => "test78",
+            "lastName" => "test78",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111178",
@@ -1202,8 +1202,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test79",
-            "last_name" => "test79",
+            "firstName" => "test79",
+            "lastName" => "test79",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7H",
             "mobile" => "1111111179",
@@ -1221,8 +1221,8 @@ class ChefSeeder extends Seeder
 
         // J6Z
         DB::table("chefs")->insert([
-            "first_name" => "test80",
-            "last_name" => "test80",
+            "firstName" => "test80",
+            "lastName" => "test80",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111180",
@@ -1238,8 +1238,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test81",
-            "last_name" => "test81",
+            "firstName" => "test81",
+            "lastName" => "test81",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111181",
@@ -1255,8 +1255,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test82",
-            "last_name" => "test82",
+            "firstName" => "test82",
+            "lastName" => "test82",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111182",
@@ -1272,8 +1272,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test83",
-            "last_name" => "test83",
+            "firstName" => "test83",
+            "lastName" => "test83",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111183",
@@ -1289,8 +1289,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test84",
-            "last_name" => "test84",
+            "firstName" => "test84",
+            "lastName" => "test84",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111184",
@@ -1306,8 +1306,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test85",
-            "last_name" => "test85",
+            "firstName" => "test85",
+            "lastName" => "test85",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111185",
@@ -1323,8 +1323,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test86",
-            "last_name" => "test86",
+            "firstName" => "test86",
+            "lastName" => "test86",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111186",
@@ -1340,8 +1340,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test87",
-            "last_name" => "test87",
+            "firstName" => "test87",
+            "lastName" => "test87",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111187",
@@ -1357,8 +1357,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test88",
-            "last_name" => "test88",
+            "firstName" => "test88",
+            "lastName" => "test88",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111188",
@@ -1374,8 +1374,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test89",
-            "last_name" => "test89",
+            "firstName" => "test89",
+            "lastName" => "test89",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J6Z",
             "mobile" => "1111111189",
@@ -1393,8 +1393,8 @@ class ChefSeeder extends Seeder
 
         // J7M
         DB::table("chefs")->insert([
-            "first_name" => "test90",
-            "last_name" => "test90",
+            "firstName" => "test90",
+            "lastName" => "test90",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111190",
@@ -1410,8 +1410,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test91",
-            "last_name" => "test91",
+            "firstName" => "test91",
+            "lastName" => "test91",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111191",
@@ -1427,8 +1427,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test92",
-            "last_name" => "test92",
+            "firstName" => "test92",
+            "lastName" => "test92",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111192",
@@ -1444,8 +1444,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test93",
-            "last_name" => "test93",
+            "firstName" => "test93",
+            "lastName" => "test93",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111193",
@@ -1461,8 +1461,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test94",
-            "last_name" => "test94",
+            "firstName" => "test94",
+            "lastName" => "test94",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111194",
@@ -1478,8 +1478,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test95",
-            "last_name" => "test95",
+            "firstName" => "test95",
+            "lastName" => "test95",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111195",
@@ -1495,8 +1495,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test96",
-            "last_name" => "test96",
+            "firstName" => "test96",
+            "lastName" => "test96",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111196",
@@ -1512,8 +1512,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test97",
-            "last_name" => "test97",
+            "firstName" => "test97",
+            "lastName" => "test97",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111197",
@@ -1529,8 +1529,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test98",
-            "last_name" => "test98",
+            "firstName" => "test98",
+            "lastName" => "test98",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111198",
@@ -1546,8 +1546,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test99",
-            "last_name" => "test99",
+            "firstName" => "test99",
+            "lastName" => "test99",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7M",
             "mobile" => "1111111199",
@@ -1565,8 +1565,8 @@ class ChefSeeder extends Seeder
 
         // H7P
         DB::table("chefs")->insert([
-            "first_name" => "test100",
-            "last_name" => "test100",
+            "firstName" => "test100",
+            "lastName" => "test100",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111100",
@@ -1582,8 +1582,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test101",
-            "last_name" => "test101",
+            "firstName" => "test101",
+            "lastName" => "test101",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111101",
@@ -1599,8 +1599,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test102",
-            "last_name" => "test102",
+            "firstName" => "test102",
+            "lastName" => "test102",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111102",
@@ -1616,8 +1616,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test103",
-            "last_name" => "test103",
+            "firstName" => "test103",
+            "lastName" => "test103",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111103",
@@ -1633,8 +1633,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test104",
-            "last_name" => "test104",
+            "firstName" => "test104",
+            "lastName" => "test104",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111104",
@@ -1650,8 +1650,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test105",
-            "last_name" => "test105",
+            "firstName" => "test105",
+            "lastName" => "test105",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111105",
@@ -1667,8 +1667,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test106",
-            "last_name" => "test106",
+            "firstName" => "test106",
+            "lastName" => "test106",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111106",
@@ -1684,8 +1684,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test107",
-            "last_name" => "test107",
+            "firstName" => "test107",
+            "lastName" => "test107",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111107",
@@ -1701,8 +1701,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test108",
-            "last_name" => "test108",
+            "firstName" => "test108",
+            "lastName" => "test108",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111108",
@@ -1718,8 +1718,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test109",
-            "last_name" => "test109",
+            "firstName" => "test109",
+            "lastName" => "test109",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "H7P",
             "mobile" => "1111111109",
@@ -1737,8 +1737,8 @@ class ChefSeeder extends Seeder
 
         // J7A4N7
         DB::table("chefs")->insert([
-            "first_name" => "test110",
-            "last_name" => "test110",
+            "firstName" => "test110",
+            "lastName" => "test110",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111210",
@@ -1754,8 +1754,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test111",
-            "last_name" => "test111",
+            "firstName" => "test111",
+            "lastName" => "test111",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111211",
@@ -1771,8 +1771,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test112",
-            "last_name" => "test112",
+            "firstName" => "test112",
+            "lastName" => "test112",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111212",
@@ -1788,8 +1788,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test113",
-            "last_name" => "test113",
+            "firstName" => "test113",
+            "lastName" => "test113",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111213",
@@ -1805,8 +1805,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test114",
-            "last_name" => "test114",
+            "firstName" => "test114",
+            "lastName" => "test114",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111214",
@@ -1822,8 +1822,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test115",
-            "last_name" => "test115",
+            "firstName" => "test115",
+            "lastName" => "test115",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111215",
@@ -1839,8 +1839,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test116",
-            "last_name" => "test116",
+            "firstName" => "test116",
+            "lastName" => "test116",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111216",
@@ -1856,8 +1856,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test117",
-            "last_name" => "test117",
+            "firstName" => "test117",
+            "lastName" => "test117",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111217",
@@ -1873,8 +1873,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test118",
-            "last_name" => "test118",
+            "firstName" => "test118",
+            "lastName" => "test118",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111218",
@@ -1890,8 +1890,8 @@ class ChefSeeder extends Seeder
             "updated_at" => Carbon::now()
         ]);
         DB::table("chefs")->insert([
-            "first_name" => "test119",
-            "last_name" => "test119",
+            "firstName" => "test119",
+            "lastName" => "test119",
             "date_of_birth" => "2001-11-04",
             "postal_code" => "J7A4N7",
             "mobile" => "1111111219",

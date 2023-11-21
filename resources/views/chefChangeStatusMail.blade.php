@@ -7,7 +7,7 @@
 <body>
  
  
- <b>Hi {{ucfirst($full_name)}}</b>
+ <b>Hi {{ucfirst($firstName)}} {{ucfirst($lastName)}}</b>
  @if($status === 0)
  <p>Your account on the Homeshef is now deactivated.</p>
  <p>For further enquiry kindy mail to support@homehef.com</p> 

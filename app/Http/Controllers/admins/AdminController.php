@@ -41,12 +41,14 @@ class AdminController extends Controller
     function adminRegistration(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            "name" => 'required',
+            "firstName" => 'required',
+            "lastName" => 'required',
             'email' => 'required|email',
             'password' => 'required|min:8',
             "status" => 'required',
         ], [
-            "name.required" => "please fill name",
+            "firstName.required" => "please fill first name",
+            "lastName.required" => "please fill last name",
             "email.required" => "please fill email",
             "password.required" => "please fill password",
             "status.required" => "please fill status",
@@ -63,7 +65,8 @@ class AdminController extends Controller
             }
 
             $admin = new Admin();
-            $admin->name = $req->name;
+            $admin->firstName = $req->firstName;
+            $admin->lastName = $req->lastName;
             $admin->email = $req->email;
             $admin->password = Hash::make($req->password);
             $admin->status = $req->status;
@@ -928,7 +931,7 @@ class AdminController extends Controller
         try {
             $totalRecords = User::count();
             if ($req->list) {
-                $data = User::select('id', 'fullname')->get();
+                $data = User::select('id', 'firstName','lastName')->get();
             } else {
                 $skip = $req->page * 10;
                 $data = User::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
@@ -950,7 +953,7 @@ class AdminController extends Controller
         try {
             $totalRecords = chef::count();
             if ($req->list) {
-                $data = chef::select('id', 'first_name', 'last_name')->get();
+                $data = chef::select('id', 'firstName', 'lastName')->get();
             } else {
                 Log::info('true');
                 $query = chef::orderBy('created_at', 'desc')->withCount([

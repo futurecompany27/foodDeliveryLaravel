@@ -42,9 +42,10 @@ class CustomerContactUsNotification extends Notification
     {
         return [
             'id' => $this->contactUSDetails->id,
-            'fullname' => $this->contactUSDetails->full_name,
+            'firstName' => $this->contactUSDetails->firstName,
+            'lastName' => $this->contactUSDetails->lastName,
             'email' => $this->contactUSDetails->email,
-            'message' => $this->contactUSDetails->full_name . ' send Customer request',
+            'message' => ($this->contactUSDetails->firstName . ' ' . $this->contactUSDetails->lastName)  . ' send Customer request',
             'url' => '/admin/new-contact-us'
         ];
     }

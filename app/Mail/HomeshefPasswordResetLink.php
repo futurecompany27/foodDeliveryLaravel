@@ -25,7 +25,8 @@ class HomeshefPasswordResetLink extends Mailable
     {
         return $this->view('passwordResetLink', [
             'id' => $this->userDetails['id'],
-            'fullname' => $this->userDetails['full_name'],
+            'firstName' => $this->userDetails['firstName'],
+            'lastName' => $this->userDetails['lastName'],
             'user_type' => $this->userDetails['user_type'],
             'token' => $this->userDetails['token'],
         ]);

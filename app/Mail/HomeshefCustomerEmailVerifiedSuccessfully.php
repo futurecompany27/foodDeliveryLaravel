@@ -24,6 +24,6 @@ class HomeshefCustomerEmailVerifiedSuccessfully extends Mailable
 
     public function build()
     {
-        return $this->view('userEmailVerifiedSuccessfully', ['id' => $this->userDetails->id, 'full_name' => ucfirst($this->userDetails->fullname)]);
+        return $this->view('userEmailVerifiedSuccessfully', ['id' => $this->userDetails->id, 'firstName' => ucfirst($this->userDetails->firstName), 'lastName'=> ucfirst($this->userDetails->lastName)]);
     }
 }

@@ -19,11 +19,13 @@ use App\Models\ChefProfileReviewByAdmin;
 use App\Models\ChefReview;
 use App\Models\chefReviewDeleteRequest;
 use App\Models\ChefSuggestion;
+use App\Models\DocumentItemList;
 use App\Models\FoodItem;
 use App\Models\RequestForUpdateDetails;
 use App\Models\RequestForUserBlacklistByChef;
 use App\Models\ScheduleCall;
 use App\Models\ShefRegisterationRequest;
+use App\Models\State;
 use App\Models\User;
 use App\Models\Contact;
 use App\Models\Dietary;
@@ -74,8 +76,8 @@ class ChefController extends Controller
                 return response()->json(['message' => "This mobileno is already register please use another mobileno!", "success" => false], 400);
             }
             $chef = new chef();
-            $chef->first_name = ucfirst($req->first_name);
-            $chef->last_name = ucfirst($req->last_name);
+            $chef->firstName = ucfirst($req->firstName);
+            $chef->lastName = ucfirst($req->lastName);
             $chef->date_of_birth = $req->date_of_birth;
             $chef->postal_code = str_replace(" ", "", strtoupper($req->postal_code));
             $chef->mobile = str_replace("-", "", $req->mobile);
@@ -94,7 +96,8 @@ class ChefController extends Controller
                 $UserController = new UserController;
                 $request = new Request();
                 $request->merge([
-                    "fullname" => (ucfirst($req->first_name) . " " . ucfirst($req->last_name)),
+                    "firstName" => ucfirst($req->firstName),
+                    "lastName" => ucfirst($req->lastName),
                     "mobile" => $req->mobile,
                     "email" => $req->email,
                     "password" => $req->password
@@ -123,8 +126,8 @@ class ChefController extends Controller
         $validator = Validator::make($req->all(), [
             "profile_pic" => 'nullable',
             "chef_id" => 'required',
-            "first_name" => 'required',
-            "last_name" => 'required',
+            "firstName" => 'required',
+            "lastName" => 'required',
             "type" => 'required',
             "sub_type" => "required",
             "address_line1" => "required",
@@ -135,8 +138,8 @@ class ChefController extends Controller
             "state" => "required"
         ], [
             "chef_id.required" => "please mention chef_id",
-            "first_name.required" => "please fill firstname",
-            "last_name.required" => "please fill lastname",
+            "firstName.required" => "please fill firstname",
+            "lastName.required" => "please fill lastname",
             "type.required" => "please select type",
             "sub_type.required" => "please select sub-type",
             "address_line1.required" => "please fill addressLine1",
@@ -153,8 +156,8 @@ class ChefController extends Controller
 
         try {
             $update = [
-                "first_name" => ucfirst($req->first_name),
-                "last_name" => ucfirst($req->last_name),
+                "firstName" => ucfirst($req->firstName),
+                "lastName" => ucfirst($req->lastName),
                 "type" => ucfirst($req->type),
                 "sub_type" => ucfirst($req->sub_type),
                 "address_line1" => htmlspecialchars(ucfirst($req->address_line1)),
@@ -223,11 +226,40 @@ class ChefController extends Controller
             return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
         }
         try {
-            $data = chef::whereId($req->chef_id)->with([
-                'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-                    'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
-                ])
-            ])->first();
+            $data = Chef::whereId($req->chef_id)->first();
+            // ->with([
+            //     'chefDocuments' => function ($q) {
+            //         $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+            //             'documentItemFields' => function ($qr) {
+            //                 $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')->with([
+            //                     'documentItemList' => function ($qri) {
+            //                         $qri->select('id', 'state_id', 'document_item_name', 'chef_type', 'reference_links', 'additional_links', 'detail_information', 'status');
+            //                     },
+            //                 ]);
+            //             },
+            //         ]);
+            //     },
+            // ])->first();
+
+            $documents = ChefDocument::where('chef_id', $req->chef_id)->get();
+
+            $stateDetail = State::where('name', $data->state)->first();
+            $DocList = DocumentItemList::with('documentItemFields')->where(["state_id" => $stateDetail->id, 'status' => 1])->get();
+
+            foreach ($DocList as &$list) {
+                // Use arrow operator to access the relationship
+                $fields = $list->documentItemFields;
+                foreach ($fields as &$field) {
+                    foreach ($documents as $docs) {
+                        Log::info($docs->document_field_id . ' ////// ' . $field->id);
+                        if ($docs->document_field_id == $field->id) {
+                            $field->value = $docs->field_value;
+                        }
+                    }
+                }
+            }
+
+            $data['chef_documents'] = $DocList;
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -1089,8 +1121,8 @@ class ChefController extends Controller
                 return response()->json(['message' => "This mobileno has already rerquest for register please use another mobileno!", "success" => false], 400);
             }
             $chef = new ShefRegisterationRequest();
-            $chef->first_name = ucfirst($req->first_name);
-            $chef->last_name = ucfirst($req->last_name);
+            $chef->firstName = ucfirst($req->firstName);
+            $chef->lastName = ucfirst($req->lastName);
             $chef->date_of_birth = $req->date_of_birth;
             $chef->mobile = str_replace("-", "", $req->mobile);
             $chef->email = $req->email;
@@ -1141,13 +1173,14 @@ class ChefController extends Controller
         }
         try {
             FoodItem::where('id', $req->id)->update(['approved_status' => $req->approved_status, 'approvedAt' => Carbon::now()->toDateTimeString()]);
-            $foodItem = FoodItem::with('chef:first_name,last_name,email,id')->find($req->id);
+            $foodItem = FoodItem::with('chef:firstName,lastName,email,id')->find($req->id);
             $chef = chef::find($foodItem->chef['id']);
             $chefDetail = [
                 'food_id' => $foodItem['id'],
                 'id' => $foodItem['chef']['id'],
                 'email' => $foodItem['chef']->email,
-                'full_name' => (ucfirst($foodItem['chef']->first_name) . ' ' . ucfirst($foodItem['chef']->last_name)),
+                'firstName' => ucfirst($foodItem['chef']->firstName),
+                'lastName' => ucfirst($foodItem['chef']->lastName),
                 'food_name' => $foodItem['dish_name'],
             ];
             if ($foodItem['approved_status'] == 'approved') {

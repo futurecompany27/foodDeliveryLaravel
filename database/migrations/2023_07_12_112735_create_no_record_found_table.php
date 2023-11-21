@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('no_record_found', function (Blueprint $table) {
             $table->id();
             $table->string('postal_code');
-            $table->string('full_name');
+            $table->string('firstName');
+            $table->string('lastName');
             $table->string('email');
             $table->softDeletes();
             $table->timestamps();

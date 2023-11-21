@@ -63,7 +63,7 @@ class OrderController extends Controller
             Order::where('id', $ID)->update(['order_id' => $orderID, 'updated_at' => Carbon::now()]);
 
             $user = User::find($req->user_id);
-            $orderDetails = ['order_id' => $orderID, 'userName' => $user->fullname];
+            $orderDetails = ['order_id' => $orderID, 'userName' => ($user->firstName . ' ' . $user->lastName)];
 
             Mail::to(trim($user->email))->send(new OrderPlacedMailToUser($orderDetails));
             $admins = Admin::all();
@@ -99,7 +99,7 @@ class OrderController extends Controller
                 $subOrderID = ('#HPSUB' . str_pad($sub_id, 8, '0', STR_PAD_LEFT));
 
                 $chef = chef::find($value->chef_id);
-                $subOrderDetail = ['sub_order_id' => $subOrderID, 'userName' => $user->fullname];
+                $subOrderDetail = ['sub_order_id' => $subOrderID, 'userName' => ($user->firstName . ' ' . $user->lastName)];
                 $chef->notify(new newOrderPlacedForChef($subOrderDetail));
 
                 $track_id = OrderTrackDetails::insertGetId([]);
@@ -149,7 +149,7 @@ class OrderController extends Controller
             SubOrders::where(['sub_order_id' => $req->sub_order_id])->update(['status' => $req->status]);
             OrderTrackDetails::where(['track_id' => $subOrder->track_id])->update(['status' => $req->status]);
             if ($req->status == 'Rejected') {
-                $mail = ['userName' => $subOrder->orders->user->fullname, 'status' => $req->status, 'chefName' => ($subOrder->chefs->first_name . ' ' . $subOrder->chefs->last_name), 'order_id' => $subOrder->order_id];
+                $mail = ['userName' => ($subOrder->orders->user->firstName . ' ' . $subOrder->orders->user->lastName) , 'status' => $req->status, 'chefName' => ($subOrder->chefs->firstName . ' ' . $subOrder->chefs->lastName), 'order_id' => $subOrder->order_id];
                 Mail::to(trim($subOrder->orders->user->email))->send(new subOrderDeclineMail($mail));
             }
 

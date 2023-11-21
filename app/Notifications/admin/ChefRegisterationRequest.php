@@ -39,7 +39,7 @@ class ChefRegisterationRequest extends Notification
     {
         return [
             'id' => $this->chefDetail->id,
-            'message' => (($this->chefDetail->first_name . ' ' . $this->chefDetail->last_name) . ' has requested to become chef on ' . date('d M Y', strtotime($this->chefDetail->created_at)) . '.'),
+            'message' => (($this->chefDetail->firstName . ' ' . $this->chefDetail->lastName) . ' has requested to become chef on ' . date('d M Y', strtotime($this->chefDetail->created_at)) . '.'),
             'url' => '/admin/shef-change-request'
         ];
     }

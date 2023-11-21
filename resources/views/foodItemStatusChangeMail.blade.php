@@ -9,7 +9,7 @@
 <body>
 
 
-    <b>Hello {{ ucwords($full_name) }},</b>
+    <b>Hello {{ ucwords($firstName)}} {{ucfirst($lastName)}},</b>
     <p>Congratulations ! Your dish - <b>{{ $food_name }}</b> has been approved by our Admin. You can
         check the same on the website. You can edit the details anytime you want but will have to wait till the admin
         approves it again. It wont take us much time though.

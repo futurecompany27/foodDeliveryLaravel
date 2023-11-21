@@ -16,14 +16,16 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         DB::table('admins')->insert([
-            'name' => 'admin',
+            'firstName' => 'admin',
+            'lastName' => 'user 1',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('password'),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
         DB::table('admins')->insert([
-            'name' => 'admin',
+            'firstName' => 'admin',
+            'lastName' => 'user 2',
             'email' => 'admin1@gmail.com',
             'password' => Hash::make('password'),
             'created_at' => Carbon::now(),

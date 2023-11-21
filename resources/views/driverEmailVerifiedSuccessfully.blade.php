@@ -6,7 +6,7 @@
 </head>
 <body>
  
- <b>Hi {{ucfirst($full_name)}}</b>
+ <b>Hi {{ucfirst($firstName)}} {{ucfirst($lastName)}}</b>
  <p>Your driver's account, email has been verified successfully by Homeshef.</p> 
 
  <p>Regards,</p>

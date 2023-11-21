@@ -33,8 +33,8 @@ class DriverController extends Controller
             return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 500);
         }
         $validator = Validator::make($req->all(), [
-            "first_name" => 'required',
-            "last_name" => 'required',
+            "firstName" => 'required',
+            "lastName" => 'required',
             "email" => 'required',
             "mobileNo" => 'required',
             "are_you_a" => 'required',
@@ -44,8 +44,8 @@ class DriverController extends Controller
             "city" => 'required',
             "postal_code" => 'required',
         ], [
-            "first_name.required" => "please fill email",
-            "last_name.required" => "please fill email",
+            "firstName.required" => "please fill email",
+            "lastName.required" => "please fill email",
             "email.required" => "please fill email",
             "mobileNo.required" => "please fill mobileNo",
             "are_you_a.required" => "please fill select driver",
@@ -68,8 +68,8 @@ class DriverController extends Controller
                 return response()->json(["message" => 'Mobile No already registered', "success" => false], 500);
             }
             $driver = new Driver();
-            $driver->first_name = $req->first_name;
-            $driver->last_name = $req->last_name;
+            $driver->firstName = $req->firstName;
+            $driver->lastName = $req->lastName;
             $driver->email = $req->email;
             $driver->mobileNo = str_replace("-", "", $req->mobileNo);
             $driver->are_you_a = $req->are_you_a;
@@ -161,16 +161,16 @@ class DriverController extends Controller
     {
         $validator = Validator::make($req->all(), [
             "driver_id" => 'required',
-            "first_name" => 'required',
-            "last_name" => 'required',
+            "firstName" => 'required',
+            "lastName" => 'required',
             "full_address" => 'required',
             "province" => 'required',
             "city" => 'required',
             "postal_code" => 'required',
         ], [
             "driver_id.required" => "please fill driver_id",
-            "first_name.required" => "please fill first_name",
-            "last_name.required" => "please fill last_name",
+            "firstName.required" => "please fill firstName",
+            "lastName.required" => "please fill lastName",
             "full_address.required" => "please fill full_address",
             "province.required" => "please fill province",
             "city.required" => "please fill city",
@@ -185,8 +185,8 @@ class DriverController extends Controller
                 File::makeDirectory($path, $mode = 0777, true, true);
             }
             $update = [
-                'first_name' => $req->first_name,
-                'last_name' => $req->last_name,
+                'firstName' => $req->firstName,
+                'lastName' => $req->lastName,
                 'full_address' => $req->full_address,
                 'province' => $req->province,
                 'city' => $req->city,

@@ -12,7 +12,8 @@ class Admin extends Model
     use Notifiable;
     protected $table = "admins";
     protected $fillable = [
-        'name',
+        'firstName',
+        'lastName',
         'email',
         'password',
         'status',

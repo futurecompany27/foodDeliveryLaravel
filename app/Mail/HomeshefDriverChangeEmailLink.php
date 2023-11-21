@@ -29,6 +29,6 @@ class HomeshefDriverChangeEmailLink extends Mailable
      */
     public function build()
     {
-        return $this->view('driverChangeEmailVerification', ['id' => $this->driver->id, 'full_name' => (ucfirst($this->driver->first_name) . " " . ucfirst($this->driver->last_name))]);
+        return $this->view('driverChangeEmailVerification', ['id' => $this->driver->id, 'firstName' => ucfirst($this->driver->firstName), "lastName" => ucfirst($this->driver->lastName)]);
     }
 }

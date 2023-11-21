@@ -7,7 +7,7 @@
 <body>
  
  
- <b>Hi {{ucfirst($full_name)}}</b>
+ <b>Hi {{ucfirst($firstName)}} {{ucfirst($lastName)}}</b>
  <p>Your email address has been updated successfully.</p>
  <p>You may access your account only after the verification of your documents and details.</p> 
 

@@ -11,7 +11,8 @@ class NoRecordFound extends Model
     protected $table = 'no_record_found';
     protected $fillable = [
         'postal_code',
-        'full_name',
+        'firstName',
+        'lastName',
         'email'
     ];
 }

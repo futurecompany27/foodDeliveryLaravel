@@ -40,7 +40,7 @@ class SendOrderReminders extends Command
                 $currentTime = Carbon::now();
                 $timeElapsedInMinutes = $currentTime->diffInMinutes($createdAt);
 
-                $mail = ['chefName' => ($value->chefs->first_name . ' ' . $value->chefs->last_name), 'subOrderID' => $value->sub_order_id];
+                $mail = ['chefName' => ($value->chefs->firstName . ' ' . $value->chefs->lastName), 'subOrderID' => $value->sub_order_id];
 
                 if ($timeElapsedInMinutes >= 5 && $timeElapsedInMinutes <= 15) {
                     $mail['slot'] = 1;

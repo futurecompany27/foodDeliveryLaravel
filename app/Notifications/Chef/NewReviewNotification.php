@@ -42,7 +42,7 @@ class NewReviewNotification extends Notification
         return [
             'id' => $this->reviewDetails['id'],
             'chef_id' => $this->reviewDetails['chef']->id,
-            'message' => $this->reviewDetails['user']->fullname . ' send a review to the chef ' . ($this->reviewDetails['chef']->first_name . ' ' . $this->reviewDetails['chef']->last_name) . ' on ' . date('d M Y', strtotime($this->reviewDetails['date'])),
+            'message' => ($this->reviewDetails['user']->firstName . ' ' . $this->reviewDetails['user']->lastName) . ' send a review to the chef ' . ($this->reviewDetails['chef']->firstName . ' ' . $this->reviewDetails['chef']->lastName) . ' on ' . date('d M Y', strtotime($this->reviewDetails['date'])),
             'url' => '/admin/view/chefs-review/'
 
         ];
