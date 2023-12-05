@@ -26,12 +26,14 @@ return new class extends Migration {
             $table->string('shipping_address');
             $table->string('city');
             $table->string('state');
+            $table->string('latitude');
+            $table->string('longitude');
             $table->string('postal_code');
             $table->string('payment_mode');
             $table->string('delivery_date');
             $table->string('delivery_time');
             $table->string('delivery_instructions')->nullable();
-            $table->string('payment_status')->default(0);
+            $table->string('payment_status');
             $table->string('transacton_id')->nullable();
             $table->string('total_order_item');
             $table->string('tip_total');

@@ -19,7 +19,7 @@ class DriverSeeder extends Seeder
             "firstName" => 'test',
             "lastName" => "test",
             "email" => "test",
-            "mobileNo" => "9876543210",
+            "mobileNo" => "7777777777",
             "are_you_a" => "Outsider",
             "password" => Hash::make('Homeshef@123'),
             "full_address" => "Test Address",

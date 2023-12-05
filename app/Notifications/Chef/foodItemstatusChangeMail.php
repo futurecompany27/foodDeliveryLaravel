@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications\chef;
+namespace App\Notifications\Chef;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

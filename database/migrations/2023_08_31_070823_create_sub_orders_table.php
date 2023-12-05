@@ -24,6 +24,7 @@ return new class extends Migration {
             $table->string('tip_amount');
             $table->string('status')->default('Pending');
             $table->text('reason')->nullable();
+            $table->text('driver_id')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

@@ -19,6 +19,8 @@ return new class extends Migration {
             $table->string('postal_code');
             $table->string('city')->nullable();
             $table->string('state');
+            $table->string('latitude');
+            $table->string('longitude');
             $table->string('landmark')->nullable();
             $table->string('locality')->nullable();
             $table->string('full_address');

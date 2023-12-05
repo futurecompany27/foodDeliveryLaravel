@@ -7,10 +7,13 @@ use App\Mail\HomeshefDriverChangeEmailLink;
 use App\Mail\HomeshefDriverEmailVerificationLink;
 use App\Mail\HomeshefDriverEmailVerrifiedSuccessfully;
 use App\Models\Admin;
+use App\Models\Adminsetting;
 use App\Models\Driver;
 use App\Models\DriverContact;
 use App\Models\DriverScheduleCall;
+use App\Models\Order;
 use App\Models\Pincode;
+use App\Models\SubOrders;
 use App\Notifications\Driver\DriverContactUsNotification;
 use App\Notifications\Driver\driverRegisterationNotification;
 use App\Notifications\Driver\DriverScheduleCallNotification;
@@ -28,7 +31,7 @@ class DriverController extends Controller
 {
     function driverRegisteraion(Request $req)
     {
-        $checkPinCode = Pincode::where(['pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)),0,3), 'status' => 1])->first();
+        $checkPinCode = Pincode::where(['pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3), 'status' => 1])->first();
         if (!$checkPinCode) {
             return response()->json(['message' => 'we are not offering our services in this region', 'ServiceNotAvailable' => true, 'success' => false], 500);
         }
@@ -42,6 +45,8 @@ class DriverController extends Controller
             "full_address" => 'required',
             "province" => 'required',
             "city" => 'required',
+            "latitude" => 'required',
+            "longitude" => 'required',
             "postal_code" => 'required',
         ], [
             "firstName.required" => "please fill email",
@@ -53,6 +58,8 @@ class DriverController extends Controller
             "full_address" => 'please fill full_address',
             "province" => 'please fill province',
             "city" => 'please fill city',
+            "latitude" => 'please fill latitude',
+            "longitude" => 'please fill longitude',
             "postal_code" => 'please fill postal_code',
         ]);
         if ($validator->fails()) {
@@ -77,6 +84,8 @@ class DriverController extends Controller
             $driver->full_address = $req->full_address;
             $driver->province = $req->province;
             $driver->city = $req->city;
+            $driver->latitude = $req->latitude;
+            $driver->longitude = $req->longitude;
             $driver->postal_code = strtoupper($req->postal_code);
             $driver->save();
             Mail::to(trim($req->email))->send(new HomeshefDriverEmailVerificationLink($driver));
@@ -541,6 +550,64 @@ class DriverController extends Controller
                 Mail::to(trim($driverDetails->email))->send(new HomeshefDriverEmailVerrifiedSuccessfully($driverDetails));
                 return response()->json(['message' => 'Email has been verified successfully', 'success' => true], 200);
             }
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+        }
+    }
+
+    function updateLatLongAndGetListOfOrdersForDriver(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "driver_id" => 'required',
+            "latitude" => 'required',
+            "longitude" => 'required',
+        ], [
+            "driver_id.required" => "please fill driver_id",
+            "latitude.required" => "please fill latitude",
+            "longitude.required" => "please fill longitude",
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $admin_setting = Adminsetting::first();
+            $radius = $admin_setting->radius != "" ? $admin_setting->radius : 1;
+            Driver::where('id', $req->driver_id)->update(['latitude' => $req->latitude, 'longitude' => $req->long]);
+            $getAllOrdersWithAcceptedSuborder = Order::where('payment_status', 'paid')->with([
+                'subOrders' => function ($query) {
+                    $query->where('status', 'Accepted')->whereNull('driver_id')->with('chefs');
+                }
+            ])->get();
+
+            // define GMAPIK in contstant file.
+            $gmApiK = env('GOOGLE_MAP_KEY');
+            $origin = $req->latitude . ',' . $req->longitude;
+
+            $PendingSubOrdersIDToDisplayToDriver = array();
+
+            foreach ($getAllOrdersWithAcceptedSuborder as $orders) {
+                $sub_orders = $orders->subOrders;
+                foreach ($sub_orders as $sub_order_of_chef) {
+                    // $destination = $sub_order_of_chef->chefs->latitude . ',' . $sub_order_of_chef->chefs->longitude;
+                    $destination = "19.2526774,73.0104143";
+                    $routes = json_decode(file_get_contents("https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($origin) . "&destination=" . urlencode($destination) . "&alternatives=true&sensor=false&departure_time=now&key=" . $gmApiK))->routes;
+                    if (count($routes) != 0) {
+                        $dist = $routes[0]->legs[0]->distance->text;
+                        $distance = explode(" ", $dist)[0];
+                        Log::info($distance);
+                        if ($distance <= $radius) {
+                            array_push($PendingSubOrdersIDToDisplayToDriver, $sub_order_of_chef->sub_order_id);
+                        }
+                    }
+                }
+            }
+
+            Log::info('', $PendingSubOrdersIDToDisplayToDriver);
+            $data = SubOrders::whereIn('sub_order_id', $PendingSubOrdersIDToDisplayToDriver)->with(['Orders', 'chefs', 'OrderItems', 'OrderTrack'])->get();
+
+            return $data;
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

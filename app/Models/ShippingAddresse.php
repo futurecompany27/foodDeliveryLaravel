@@ -18,6 +18,8 @@ class ShippingAddresse extends Model
         'city',
         'state',
         'landmark',
+        'latitude',
+        'longitude',
         'locality',
         'full_address',
         'address_type',

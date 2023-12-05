@@ -44,6 +44,8 @@ class OrderController extends Controller
                 'user_id' => $req->user_id,
                 'shipping_address' => $req->shipping_address,
                 'postal_code' => $req->postal_code,
+                'latitude' => $req->latitude,
+                'longitude' => $req->longitude,
                 'city' => $req->city,
                 'state' => $req->state,
                 'delivery_date' => $req->delivery_date,
@@ -79,7 +81,7 @@ class OrderController extends Controller
                     $amount = $amount + ($food->price * $food->quantity);
                 }
                 $add = [
-                    'order_id' => $orderID, 
+                    'order_id' => $orderID,
                     'chef_id' => $value->chef_id,
                     'item_total' => count($value->foodItems),
                     'amount' => $amount,
@@ -102,11 +104,16 @@ class OrderController extends Controller
                 $subOrderDetail = ['sub_order_id' => $subOrderID, 'userName' => ($user->firstName . ' ' . $user->lastName)];
                 $chef->notify(new newOrderPlacedForChef($subOrderDetail));
 
-                $track_id = OrderTrackDetails::insertGetId([]);
-                $orderTrackingID = ('#TRACK' . str_pad($track_id, 8, '0', STR_PAD_LEFT));
-                OrderTrackDetails::where('id', $track_id)->update(['track_id' => $orderTrackingID, 'created_at' => Carbon::now()]);
+                if ($req->payment_status == 'Paid') {
+                    # code...
+                    $track_id = OrderTrackDetails::insertGetId([]);
+                    $orderTrackingID = ('#TRACK' . str_pad($track_id, 8, '0', STR_PAD_LEFT));
+                    OrderTrackDetails::where('id', $track_id)->update(['track_id' => $orderTrackingID, 'created_at' => Carbon::now()]);
+                    SubOrders::where('id', $sub_id)->update(['sub_order_id' => $subOrderID, 'track_id' => $orderTrackingID, 'updated_at' => Carbon::now()]);
+                } else {
+                    SubOrders::where('id', $sub_id)->update(['sub_order_id' => $subOrderID, 'updated_at' => Carbon::now()]);
+                }
 
-                SubOrders::where('id', $sub_id)->update(['sub_order_id' => $subOrderID, 'track_id' => $orderTrackingID, 'updated_at' => Carbon::now()]);
 
                 foreach ($foodItems as $food) {
                     OrderItems::insert([
@@ -120,7 +127,7 @@ class OrderController extends Controller
                 }
             }
 
-            if ($req->payment_status == 1) {
+            if ($req->payment_status == "Paid") {
                 Cart::where('user_id', $req->user_id)->delete();
             }
             DB::commit();
@@ -139,17 +146,21 @@ class OrderController extends Controller
             "status" => 'required',
         ], [
             "sub_order_id.required" => "please fill sub_order_id",
-            "status.required" => "please fill sub_order_id",
+            "status.required" => "please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $subOrder = SubOrders::where(['sub_order_id' => $req->sub_order_id])->with(['Orders.user', 'chefs'])->first();
-            SubOrders::where(['sub_order_id' => $req->sub_order_id])->update(['status' => $req->status]);
+            $update = ['status' => $req->status];
+            if ($req->reason) {
+                $update['reason'] = $req->reason;
+            }
+            SubOrders::where(['sub_order_id' => $req->sub_order_id])->update($update);
             OrderTrackDetails::where(['track_id' => $subOrder->track_id])->update(['status' => $req->status]);
             if ($req->status == 'Rejected') {
-                $mail = ['userName' => ($subOrder->orders->user->firstName . ' ' . $subOrder->orders->user->lastName) , 'status' => $req->status, 'chefName' => ($subOrder->chefs->firstName . ' ' . $subOrder->chefs->lastName), 'order_id' => $subOrder->order_id];
+                $mail = ['userName' => ($subOrder->orders->user->firstName . ' ' . $subOrder->orders->user->lastName), 'status' => $req->status, 'chefName' => ($subOrder->chefs->firstName . ' ' . $subOrder->chefs->lastName), 'order_id' => $subOrder->order_id];
                 Mail::to(trim($subOrder->orders->user->email))->send(new subOrderDeclineMail($mail));
             }
 

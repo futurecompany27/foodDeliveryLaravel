@@ -38,4 +38,8 @@ class SubOrders extends Model
     {
         return $this->belongsTo(chef::class, 'chef_id', 'id');
     }
+
+    public function driver(){
+        return $this->belongsTo(Driver::class, 'driver_id', 'id');
+    }
 }

@@ -53,6 +53,9 @@ Route::controller(DriverController::class)->group(function () {
     Route::post('/getMyDetails', 'getMyDetails');
     Route::post('/driverUpdateEmail', 'driverUpdateEmail');
     Route::post('/VerifyDriverEmail', 'VerifyDriverEmail');
+    
+    
+    Route::post('/updateLatLongAndGetListOfOrdersForDriver', 'updateLatLongAndGetListOfOrdersForDriver');
 });
 
 // Routes for users

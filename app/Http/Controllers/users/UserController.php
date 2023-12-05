@@ -183,7 +183,12 @@ class UserController extends Controller
                     $data = $query->skip($skip)->limit(12)->get();
                     return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
                 } else {
-                    $query = chef::whereIn('postal_code', $selected_postal_code)->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
+                    Log::info('', $selected_postal_code);
+                    $query = chef::where(function ($q) use ($selected_postal_code) {
+                        foreach ($selected_postal_code as $postalCode) {
+                            $q->orWhere('postal_code', 'like', $postalCode . '%');
+                        }
+                    })->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
                         $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
                     });
                     if ($req->refresh) {
@@ -294,7 +299,11 @@ class UserController extends Controller
             }
 
             $cuisine = Kitchentype::find($req->kitchen_type_id);
-            $query = chef::whereIn('postal_code', $selected_postal_code)->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->whereJsonContains('kitchen_types', $cuisine->kitchentype)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
+            $query = chef::where(function ($q) use ($selected_postal_code) {
+                foreach ($selected_postal_code as $postalCode) {
+                    $q->orWhere('postal_code', 'like', $postalCode . '%');
+                }
+            })->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->whereJsonContains('kitchen_types', $cuisine->kitchentype)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
                 $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
             });
             if ($req->refresh) {
@@ -472,6 +481,8 @@ class UserController extends Controller
             'state' => "required",
             'full_address' => "required",
             'address_type' => "required",
+            'latitude' => "required",
+            'longitude' => "required",
         ]);
         if ($validator->fails()) {
             return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
@@ -500,6 +511,8 @@ class UserController extends Controller
                     $newAdrees->state = $req->state;
                     // $newAdrees->landmark = $req->landmark;
                     // $newAdrees->locality = $req->locality;
+                    $newAdrees->latitude = $req->latitude;
+                    $newAdrees->longitude = $req->longitude;
                     $newAdrees->full_address = $req->full_address;
                     $newAdrees->address_type = $req->address_type;
 

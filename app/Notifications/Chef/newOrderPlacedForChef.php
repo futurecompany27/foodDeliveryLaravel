@@ -46,7 +46,7 @@ class newOrderPlacedForChef extends Notification
         return [
             'id' => $this->subOrderDetail['sub_order_id'],
             'message' => ($this->subOrderDetail['userName'] . ' has placed a new order at ' . date('d M Y', strtotime(Carbon::now())) . '.'),
-            'url' => '/shef/order'
+            'url' => '/chef/order'
         ];
     }
 }

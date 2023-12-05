@@ -42,11 +42,11 @@ class FoodItemSeeder extends Seeder
         DB::table('food_items')->insert([
             'chef_id' => 1,
             'dish_name' => 'pizza',
-            'description' => 'ye samose ka description hai',
+            'description' => 'ye pizza ka description hai',
             'dishImage' => (env('filePath') . 'storage/foodItem/pizza.jpeg'),
             'dishImageThumbnail' => (env('filePath') . 'storage/foodItem/thumbnail/pizza.jpeg'),
             'regularDishAvailabilty' => 'No Limits',
-            "foodAvailibiltyOnWeekdays" => json_encode(['Su', 'T', 'Th', 'S']),
+            "foodAvailibiltyOnWeekdays" => json_encode(['Su', 'M', 'T', 'W', 'Th', 'F', 'S']),
             'orderLimit' => "10",
             'foodTypeId' => '1',
             'spicyLevel' => 'Mild Spicy',
@@ -90,7 +90,7 @@ class FoodItemSeeder extends Seeder
             'updated_at' => Carbon::now()
         ]);
         DB::table('food_items')->insert([
-            'chef_id' => 101,
+            'chef_id' => 2,
             'dish_name' => 'pasta',
             'description' => 'ye pasta ka description hai',
             'dishImage' => (env('filePath') . 'storage/foodItem/pasta.jpg'),

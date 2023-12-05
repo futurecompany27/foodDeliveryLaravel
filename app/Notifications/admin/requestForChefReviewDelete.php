@@ -39,7 +39,7 @@ class requestForChefReviewDelete extends Notification
         return [
             'id' => $this->chefReviewDeleteRequest->chef_id,
             'message' => 'One Request update profile coming from the chef.',
-            'url' => '/admin/shef-review-delete'
+            'url' => '/admin/chef-review-delete'
         ];
     }
 }

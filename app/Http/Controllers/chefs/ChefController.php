@@ -227,39 +227,28 @@ class ChefController extends Controller
         }
         try {
             $data = Chef::whereId($req->chef_id)->first();
-            // ->with([
-            //     'chefDocuments' => function ($q) {
-            //         $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-            //             'documentItemFields' => function ($qr) {
-            //                 $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')->with([
-            //                     'documentItemList' => function ($qri) {
-            //                         $qri->select('id', 'state_id', 'document_item_name', 'chef_type', 'reference_links', 'additional_links', 'detail_information', 'status');
-            //                     },
-            //                 ]);
-            //             },
-            //         ]);
-            //     },
-            // ])->first();
 
-            $documents = ChefDocument::where('chef_id', $req->chef_id)->get();
+            if ($data->state) {
+                $documents = ChefDocument::where('chef_id', $req->chef_id)->get();
 
-            $stateDetail = State::where('name', $data->state)->first();
-            $DocList = DocumentItemList::with('documentItemFields')->where(["state_id" => $stateDetail->id, 'status' => 1])->get();
+                $stateDetail = State::where('name', $data->state)->first();
+                $DocList = DocumentItemList::with('documentItemFields')->where(["state_id" => $stateDetail->id, 'status' => 1])->get();
 
-            foreach ($DocList as &$list) {
-                // Use arrow operator to access the relationship
-                $fields = $list->documentItemFields;
-                foreach ($fields as &$field) {
-                    foreach ($documents as $docs) {
-                        Log::info($docs->document_field_id . ' ////// ' . $field->id);
-                        if ($docs->document_field_id == $field->id) {
-                            $field->value = $docs->field_value;
+                foreach ($DocList as &$list) {
+                    // Use arrow operator to access the relationship
+                    $fields = $list->documentItemFields;
+                    foreach ($fields as &$field) {
+                        foreach ($documents as $docs) {
+                            Log::info($docs->document_field_id . ' ////// ' . $field->id);
+                            if ($docs->document_field_id == $field->id) {
+                                $field->value = $docs->field_value;
+                            }
                         }
                     }
                 }
-            }
 
-            $data['chef_documents'] = $DocList;
+                $data['chef_documents'] = $DocList;
+            }
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
@@ -749,7 +738,7 @@ class ChefController extends Controller
                 $foodItem->serving_unit = $req->serving_unit;
                 $foodItem->serving_person = $req->serving_person;
                 $foodItem->price = $req->price;
-                $foodItem->comments = $req->comments;
+                $foodItem->comments = isset($req->comments) ? $req->comments :'';
                 $foodItem->save();
                 DB::commit();
                 $chefDetail = chef::find($req->chef_id);
@@ -797,7 +786,7 @@ class ChefController extends Controller
                     }
                     $value['allergies'] = $AllergyArr;
                 }
-
+                
                 // dietary 
                 if ($value['dietary']) {
                     $DieatryArr = $value['dietary'];
@@ -815,7 +804,7 @@ class ChefController extends Controller
                     }
                     $value['ingredients'] = $IngredientArr;
                 }
-
+                
                 // geographical cuisines
                 if ($value['geographicalCuisine']) {
                     $geographicalCuisine = $value['geographicalCuisine'];
@@ -824,8 +813,8 @@ class ChefController extends Controller
                     }
                     $value['geographicalCuisine'] = $geographicalCuisine;
                 }
-
-                if (in_array($req->todaysWeekDay, $chefData->chefAvailibilityWeek)) {
+                
+                if ($chefData->chefAvailibilityWeek && in_array($req->todaysWeekDay, $chefData->chefAvailibilityWeek)) {
                     // Determine availability based on the condition
                     $value['available'] = $req->todaysWeekDay ? in_array($req->todaysWeekDay, $value->foodAvailibiltyOnWeekdays) : false;
                 } else {
@@ -1422,7 +1411,10 @@ class ChefController extends Controller
         }
         try {
             $query = SubOrders::query();
-            $query->where('chef_id', $req->chef_id)->with('Orders.user', 'OrderItems.foodItem', 'OrderTrack', 'chefs');
+            $query->where('chef_id', $req->chef_id)->with('Orders.user', 'OrderItems.foodItem', 'OrderTrack', 'chefs')->whereHas('Orders', function ($subQuery) {
+                $subQuery->where('payment_status', 'Paid');
+            });
+            ;
 
             if ($req->filter) {
                 if ($req->from_date) {
@@ -1440,10 +1432,11 @@ class ChefController extends Controller
                 }
             }
 
-            if ($req->status != 'Accepted') {
-                $query->where('status', $req->status);
-            } else if ($req->status != 'Accepted') {
+            if ($req->status == 'Accepted') {
                 $query->where('status', '!=', 'Pending')->where('status', '!=', "Rejected");
+            }
+            if ($req->status == 'Pending' || $req->status == 'Rejected') {
+                $query->where('status', $req->status);
             }
 
             $data = $query->get();

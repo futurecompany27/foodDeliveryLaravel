@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('are_you_a');
             $table->string('full_address');
             $table->string('address_proof')->nullable();
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->string('province');
             $table->string('city');
             $table->string('postal_code');
