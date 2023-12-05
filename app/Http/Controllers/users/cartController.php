@@ -20,9 +20,9 @@ class cartController extends Controller
             'cartDeliveryDate' => 'required',
             'cartData' => 'required',
         ], [
-            'user_id.required' => 'please fill user_id',
-            'cartDeliveryDate.required' => 'please fill delivery date',
-            'cartData.required' => 'please fill food data'
+            'user_id.required' => 'Please fill user_id',
+            'cartDeliveryDate.required' => 'Please fill delivery date',
+            'cartData.required' => 'Please fill food data'
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -43,14 +43,14 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function getMyCart(Request $req)
     {
         if (!$req->user_id) {
-            return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["error" => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             if ($req->user_id) {
@@ -81,7 +81,7 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -94,11 +94,11 @@ class cartController extends Controller
             'type' => 'required',
             'quantity' => 'required'
         ], [
-            'user_id.required' => 'please fill user_id',
-            'food_id.required' => 'please fill food_id',
-            'chef_id.required' => 'please fill chef_id',
-            'type.required' => 'please fill type',
-            'quantity.required' => 'please fill type',
+            'user_id.required' => 'Please fill user_id',
+            'food_id.required' => 'Please fill food_id',
+            'chef_id.required' => 'Please fill chef_id',
+            'type.required' => 'Please fill type',
+            'quantity.required' => 'Please fill type',
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -128,14 +128,14 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
         }
     }
 
     function removeItemFromCart(Request $req)
     {
         if (!$req->user_id || !$req->food_id || !$req->chef_id) {
-            return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["error" => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             $cartData = Cart::where("user_id", $req->user_id)->first()->cartData;
@@ -163,7 +163,7 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
         }
     }
 
@@ -174,9 +174,9 @@ class cartController extends Controller
             'cartDeliveryDate' => 'required',
             'cartData' => 'required',
         ], [
-            'user_id.required' => 'please fill user_id',
-            'cartDeliveryDate.required' => 'please fill delivery date',
-            'cartData.required' => 'please fill food data'
+            'user_id.required' => 'Please fill user_id',
+            'cartDeliveryDate.required' => 'Please fill delivery date',
+            'cartData.required' => 'Please fill food data'
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -236,14 +236,14 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function updateCartDeliveryDate(Request $req)
     {
         if (!$req->user_id || !$req->cartDeliveryDate) {
-            return response()->json(["error" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["error" => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             Cart::where("user_id", $req->user_id)->update(['cartDeliveryDate' => $req->cartDeliveryDate]);
@@ -251,7 +251,7 @@ class cartController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 }

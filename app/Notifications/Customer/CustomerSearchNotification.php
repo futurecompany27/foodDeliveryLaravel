@@ -45,9 +45,7 @@ class CustomerSearchNotification extends Notification
             'firstName' => $this->search->firstName,
             'lastName' => $this->search->lastName,
             'postal_code' => $this->search->postal_code,
-            'message' => $this->search->email . ' search shef in ' . $this->search->postal_code . ' postal code',
-            'url' => '/admin/customer-serach-for-other-postal-code'
-
+            'message' => $this->search->email . ' search shef in ' . $this->search->postal_code . ' postal code.'
         ];
     }
 }

@@ -58,7 +58,7 @@ class commonFunctions extends Controller
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again!', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -69,14 +69,14 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
 
     function getDocumentListAccToChefTypeAndState(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the fields', 'success' => false], 400);
         }
         try {
             $chefDetail = chef::find($req->chef_id);
@@ -89,7 +89,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
 
@@ -100,7 +100,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
 
@@ -115,7 +115,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
 
@@ -126,7 +126,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
 
@@ -137,7 +137,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
 
@@ -148,7 +148,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
 
@@ -160,7 +160,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
     function giveSiteFeedback(Request $req)
@@ -177,13 +177,13 @@ class commonFunctions extends Controller
                 "star_rating" => "required|integer|min:1|max:5",
             ],
             [
-                "images.required" => "please fill images",
-                "are_you_a.required" => "please fill Are you a?",
-                "name.required" => "please fill name",
-                "email.required" => "please select email",
-                "profession.required" => "please select profession",
-                "message.required" => "please fill message",
-                "star_rating" => "please fill star_rating",
+                "images.required" => "Please fill images",
+                "are_you_a.required" => "Please fill Are you a?",
+                "name.required" => "Please fill name",
+                "email.required" => "Please select email",
+                "profession.required" => "Please select profession",
+                "message.required" => "Please fill message",
+                "star_rating" => "Please fill star_rating",
             ]
         );
 
@@ -218,7 +218,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -236,7 +236,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -246,8 +246,8 @@ class commonFunctions extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -258,7 +258,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -272,7 +272,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -283,8 +283,8 @@ class commonFunctions extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -295,7 +295,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -309,7 +309,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -320,8 +320,8 @@ class commonFunctions extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -332,7 +332,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -346,7 +346,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -356,8 +356,8 @@ class commonFunctions extends Controller
             "user_type" => 'required',
             "email" => 'required',
         ], [
-            "user_type.required" => "please fill user_type",
-            "email.required" => "please fill email",
+            "user_type.required" => "Please fill user_type",
+            "email.required" => "Please fill email",
         ]);
 
         if ($validator->fails()) {
@@ -403,7 +403,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -413,8 +413,8 @@ class commonFunctions extends Controller
             "user_type" => 'required',
             "id" => 'required',
         ], [
-            "user_type.required" => "please fill user_type",
-            "id.required" => "please fill user_id",
+            "user_type.required" => "Please fill user_type",
+            "id.required" => "Please fill user_id",
         ]);
 
         if ($validator->fails()) {
@@ -439,7 +439,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -451,10 +451,10 @@ class commonFunctions extends Controller
             "token" => 'required',
             "password" => 'required',
         ], [
-            "user_type.required" => "please fill user_type",
-            "id.required" => "please fill user_id",
-            "token.required" => "please fill user_type",
-            "password.required" => "please fill user_type",
+            "user_type.required" => "Please fill user_type",
+            "id.required" => "Please fill user_id",
+            "token.required" => "Please fill user_type",
+            "password.required" => "Please fill user_type",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -485,7 +485,7 @@ class commonFunctions extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 

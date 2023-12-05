@@ -32,14 +32,14 @@ class otpController extends Controller
             Log::info($th->getMessage());
             ;
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function verifyOtp(Request $req)
     {
         if (!$req->otp) {
-            return response()->json(['message' => "please fill required fields", "success" => false], 400);
+            return response()->json(['message' => "Please fill required fields", "success" => false], 400);
         }
         try {
             if ($req->mobile) {
@@ -57,7 +57,7 @@ class otpController extends Controller
             Log::info($th->getMessage());
             ;
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 

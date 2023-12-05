@@ -64,7 +64,7 @@ class SendOrderReminders extends Command
             $this->info('Reminders sent successfully.');
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
 
     }

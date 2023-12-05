@@ -20,7 +20,7 @@ class regionController extends Controller
     function addCountry(Request $req)
     {
         if (!$req->name || !$req->country_code) {
-            return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the fields', 'success' => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -33,11 +33,11 @@ class regionController extends Controller
             $country->country_code = $req->country_code;
             $country->save();
             DB::commit();
-            return response()->json(["message" => "country added successfully", "success" => true], 200);
+            return response()->json(["message" => "Country added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -46,7 +46,7 @@ class regionController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -58,7 +58,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -67,7 +67,7 @@ class regionController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -78,7 +78,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -89,7 +89,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -127,7 +127,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
         }
     }
 
@@ -136,7 +136,7 @@ class regionController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -159,7 +159,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -168,7 +168,7 @@ class regionController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -180,7 +180,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -196,14 +196,14 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function addCity(Request $req)
     {
         if (!$req->name || !$req->state_id) {
-            return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the fields', 'success' => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -220,7 +220,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -230,7 +230,7 @@ class regionController extends Controller
             "id" => 'required',
             
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -243,7 +243,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -252,7 +252,7 @@ class regionController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -264,7 +264,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -288,14 +288,14 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function addPincode(Request $req)
     {
         if (!$req->pincode || !$req->city_id) {
-            return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the fields', 'success' => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -314,7 +314,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
         }
     }
 
@@ -323,7 +323,7 @@ class regionController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -339,7 +339,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -348,7 +348,7 @@ class regionController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -359,7 +359,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -389,7 +389,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -399,8 +399,8 @@ class regionController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -414,7 +414,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -424,8 +424,8 @@ class regionController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -439,7 +439,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -449,8 +449,8 @@ class regionController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -465,7 +465,7 @@ class regionController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 }

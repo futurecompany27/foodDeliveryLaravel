@@ -27,7 +27,7 @@ class notificationController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 

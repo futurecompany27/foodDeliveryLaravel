@@ -69,11 +69,11 @@ class ChefController extends Controller
 
             $chefExist = chef::where("email", $req->email)->first();
             if ($chefExist) {
-                return response()->json(['message' => "This email is already register please use another email!", "success" => false], 400);
+                return response()->json(['message' => "This email is already register Please use another email!", "success" => false], 400);
             }
             $chefExist = chef::where('mobile', str_replace("-", "", $req->mobile))->first();
             if ($chefExist) {
-                return response()->json(['message' => "This mobileno is already register please use another mobileno!", "success" => false], 400);
+                return response()->json(['message' => "This mobileno is already register Please use another mobileno!", "success" => false], 400);
             }
             $chef = new chef();
             $chef->firstName = ucfirst($req->firstName);
@@ -116,7 +116,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -137,17 +137,17 @@ class ChefController extends Controller
             "city" => "required",
             "state" => "required"
         ], [
-            "chef_id.required" => "please mention chef_id",
-            "firstName.required" => "please fill firstname",
-            "lastName.required" => "please fill lastname",
-            "type.required" => "please select type",
-            "sub_type.required" => "please select sub-type",
-            "address_line1.required" => "please fill addressLine1",
-            "postal_code" => "please fill postal code",
-            "latitude" => "please fill latitude",
-            "longitude" => "please fill longitude",
-            "city" => "please fill city",
-            "state" => "please fill state"
+            "chef_id.required" => "Please mention chef_id",
+            "firstName.required" => "Please fill firstname",
+            "lastName.required" => "Please fill lastname",
+            "type.required" => "Please select type",
+            "sub_type.required" => "Please select sub-type",
+            "address_line1.required" => "Please fill addressLine1",
+            "postal_code" => "Please fill postal code",
+            "latitude" => "Please fill latitude",
+            "longitude" => "Please fill longitude",
+            "city" => "Please fill city",
+            "state" => "Please fill state"
         ]);
 
         if ($validator->fails()) {
@@ -187,11 +187,11 @@ class ChefController extends Controller
             }
 
             chef::where('id', $req->chef_id)->update($update);
-            return response()->json(["message" => "profile updated successfully", "success" => true], 200);
+            return response()->json(["message" => "Profile updated successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
         }
     }
 
@@ -203,7 +203,7 @@ class ChefController extends Controller
         ];
         $validate = Validator::make($req->all(), $rules);
         if ($validate->fails()) {
-            return response()->json(['message' => 'please fill all the fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the fields', 'success' => false], 400);
         }
         $chefDetail = chef::where("email", $req->email)->first();
 
@@ -223,7 +223,7 @@ class ChefController extends Controller
     function getChefDetails(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["message" => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             $data = Chef::whereId($req->chef_id)->first();
@@ -253,7 +253,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
         }
     }
 
@@ -263,8 +263,8 @@ class ChefController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill chef id",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill chef id",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -278,14 +278,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function updateChefPrimaryEmail(Request $req)
     {
         if (!$req->chef_id || !$req->new_email) {
-            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["message" => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             $chefDetails = chef::find($req->chef_id);
@@ -308,14 +308,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function updateSocialMediaLinks(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["message" => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             $chef = chef::find($req->chef_id);
@@ -334,7 +334,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
         }
     }
 
@@ -347,11 +347,11 @@ class ChefController extends Controller
             "transit_number" => 'required',
             "institution_number" => 'required',
         ], [
-            "chef_id.required" => "please mention chef_id",
-            "bank_name.required" => "please fill bank_name",
-            "account_number.required" => "please fill account_number",
-            "transit_number.required" => "please select transit_number",
-            "institution_number.required" => "please select institution_number",
+            "chef_id.required" => "Please mention chef_id",
+            "bank_name.required" => "Please fill bank_name",
+            "account_number.required" => "Please fill account_number",
+            "transit_number.required" => "Please select transit_number",
+            "institution_number.required" => "Please select institution_number",
         ]);
 
         if ($validator->fails()) {
@@ -365,18 +365,18 @@ class ChefController extends Controller
             $chef->institution_number = $req->institution_number;
             $chef->status = 0;
             $chef->save();
-            return response()->json(['message' => "updated successfully", "success" => true], 200);
+            return response()->json(['message' => "Updated successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function updateDocuments(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['message' => "please fill all the required fields", "success" => false], 400);
+            return response()->json(['message' => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -455,18 +455,18 @@ class ChefController extends Controller
             }
 
             DB::commit();
-            return response()->json(['message' => "updated successfully", 'success' => true], 200);
+            return response()->json(['message' => "Updated successfully", 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function updateKitchen(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['message' => "please fill all the required fields", "success" => false], 400);
+            return response()->json(['message' => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -497,18 +497,18 @@ class ChefController extends Controller
             ];
             chef::where('id', $req->chef_id)->update($update);
             DB::commit();
-            return response()->json(["message" => "updated successfully", "success" => true], 200);
+            return response()->json(["message" => "Updated successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function updateSpecialBenifits(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['message' => "please fill all the required fields", "success" => false], 400);
+            return response()->json(['message' => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             $path = 'chef/' . $req->chef_id;
@@ -519,21 +519,21 @@ class ChefController extends Controller
                 }
                 $storedPath = $req->file('are_you_a_file_path')->store($path, 'public');
                 chef::where("id", $req->chef_id)->update(["are_you_a_file_path" => asset('storage/' . $storedPath), "are_you_a" => $req->are_you_a, 'status' => 0]);
-                return response()->json(["message" => "updated successfully", "success" => true], 200);
+                return response()->json(["message" => "Updated successfully", "success" => true], 200);
             } else {
-                return response()->json(["message" => "please upload proof of " . $req->are_you_a, "success" => false], 500);
+                return response()->json(["message" => "Please upload proof of " . $req->are_you_a, "success" => false], 500);
             }
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function AddContactData(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(["message" => "please fill all the required fields ", "success" => false], 400);
+            return response()->json(["message" => "Please fill all the required fields ", "success" => false], 400);
         }
         try {
             $contact = new contact();
@@ -550,7 +550,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -583,7 +583,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -668,22 +668,22 @@ class ChefController extends Controller
                     [
                         'dish_name.required' => 'Please mention dish name',
                         'description.required' => 'Please add dish discription',
-                        'foodImage.required' => 'please add dish image',
-                        'foodImage.image' => 'please select image file only',
-                        'regularDishAvailabilty.required' => 'please mention regularity of the dish',
-                        'foodAvailibiltyOnWeekdays.required' => 'please mention weekdays availablity of the food',
-                        'orderLimit.required' => 'please mention order limit',
+                        'foodImage.required' => 'Please add dish image',
+                        'foodImage.image' => 'Please select image file only',
+                        'regularDishAvailabilty.required' => 'Please mention regularity of the dish',
+                        'foodAvailibiltyOnWeekdays.required' => 'Please mention weekdays availablity of the food',
+                        'orderLimit.required' => 'Please mention order limit',
                         'orderLimit.numeric' => 'order limit must be in number only',
-                        'foodTypeId.required' => 'please select food type',
-                        'spicyLevel.required' => 'please select spicy level of the food',
-                        'heating_instruction_id.required' => 'please select heating instruction option',
-                        'heating_instruction_description.required' => 'please enter food heading instruction',
-                        'package.required' => 'please select package type',
+                        'foodTypeId.required' => 'Please select food type',
+                        'spicyLevel.required' => 'Please select spicy level of the food',
+                        'heating_instruction_id.required' => 'Please select heating instruction option',
+                        'heating_instruction_description.required' => 'Please enter food heading instruction',
+                        'package.required' => 'Please select package type',
                         'size.required' => 'Please enter package size',
                         'expiresIn.required' => 'Please mention the expirey period of the food',
                         'serving_unit.required' => 'Please mention serving unit',
                         'serving_person.required' => 'Please mention the food sufficency',
-                        'price.required' => 'please mention the price of the food',
+                        'price.required' => 'Please mention the price of the food',
                     ]
                 );
 
@@ -753,7 +753,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -826,7 +826,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -841,7 +841,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -864,18 +864,18 @@ class ChefController extends Controller
         }
         try {
             FoodItem::where('id', $req->food_id)->update(['foodAvailibiltyOnWeekdays' => $req->weekAvailibilty]);
-            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function addNewAlternativeContact(Request $req)
     {
         if (!$req->chef_id || !$req->mobile) {
-            return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required fields', 'success' => false], 400);
         }
         try {
             $newAlternativeContact = new ChefAlternativeContact();
@@ -886,28 +886,28 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function getAllAlternativeContacts(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required fields', 'success' => false], 400);
         }
         try {
             return response()->json(['data' => ChefAlternativeContact::where('chef_id', $req->chef_id)->get(), 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function updateStatusOfAlternativeContact(Request $req)
     {
         if (!$req->id) {
-            return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required fields', 'success' => false], 400);
         }
         try {
             ChefAlternativeContact::where('id', $req->id)->update(['status' => $req->status]);
@@ -915,7 +915,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -960,14 +960,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function sendProfileForReview(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required fields', 'success' => false], 400);
         }
         try {
             $newProfileForReview = new ChefProfileReviewByAdmin();
@@ -979,14 +979,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function requestForUpdate(Request $req)
     {
         if (!$req->chef_id || !$req->request_for || !$req->message) {
-            return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required fields', 'success' => false], 400);
         }
         try {
             $alreadyPending = RequestForUpdateDetails::orderBy('created_at', 'desc')->where('chef_id', $req->chef_id)->whereIn('status', [0, 1])->first();
@@ -1009,7 +1009,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1026,14 +1026,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
     function getApprovedUpdaterequest(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(['message' => 'please fill all the required fields', 'success' => false], 400);
+            return response()->json(['message' => 'Please fill all the required fields', 'success' => false], 400);
         }
         try {
             $data = RequestForUpdateDetails::orderBy('created_at', 'desc')->where(['chef_id' => $req->chef_id, 'status' => 1])->first();
@@ -1041,7 +1041,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1058,7 +1058,7 @@ class ChefController extends Controller
             ]
         );
         if ($validator->fails()) {
-            return response()->json(["message" => 'please fill all required fields', "success" => false], 400);
+            return response()->json(["message" => 'Please fill all required fields', "success" => false], 400);
         }
 
         try {
@@ -1072,14 +1072,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function VerifyChefEmail(Request $req)
     {
         if (!$req->id) {
-            return response()->json(["message" => 'please fill all the details', "success" => false], 400);
+            return response()->json(["message" => 'Please fill all the details', "success" => false], 400);
         }
         try {
             $checkVerification = chef::find($req->id);
@@ -1094,7 +1094,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+            return response()->json(['error' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -1103,11 +1103,11 @@ class ChefController extends Controller
         try {
             $chefRequestExist = ShefRegisterationRequest::where("email", $req->email)->first();
             if ($chefRequestExist) {
-                return response()->json(['message' => "This email has already rerquest for register please use another email!", "success" => false], 400);
+                return response()->json(['message' => "This email has already rerquest for register Please use another email!", "success" => false], 400);
             }
             $chefRequestExist = ShefRegisterationRequest::where('mobile', str_replace("-", "", $req->mobile))->first();
             if ($chefRequestExist) {
-                return response()->json(['message' => "This mobileno has already rerquest for register please use another mobileno!", "success" => false], 400);
+                return response()->json(['message' => "This mobileno has already rerquest for register Please use another mobileno!", "success" => false], 400);
             }
             $chef = new ShefRegisterationRequest();
             $chef->firstName = ucfirst($req->firstName);
@@ -1130,7 +1130,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1144,7 +1144,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -1154,8 +1154,8 @@ class ChefController extends Controller
             "id" => 'required',
             "approved_status" => 'required',
         ], [
-            "id.required" => "please fill food id",
-            "approved_status.required" => "please fill status",
+            "id.required" => "Please fill food id",
+            "approved_status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1180,7 +1180,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1192,10 +1192,10 @@ class ChefController extends Controller
             "review_id" => 'required',
             "reason" => 'required',
         ], [
-            "chef_id.required" => "please fill chef id",
-            "user_id.required" => "please fill user id",
-            "review_id.required" => "please fill review id",
-            "reason.required" => "please fill reason",
+            "chef_id.required" => "Please fill chef id",
+            "user_id.required" => "Please fill user id",
+            "review_id.required" => "Please fill review id",
+            "reason.required" => "Please fill reason",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1218,7 +1218,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1230,10 +1230,10 @@ class ChefController extends Controller
             "reason" => 'required',
             "review_id" => 'required',
         ], [
-            "chef_id.required" => "please fill chef id",
-            "user_id.required" => "please fill user id",
-            "review_id.required" => "please fill review id",
-            "reason.required" => "please fill reason",
+            "chef_id.required" => "Please fill chef id",
+            "user_id.required" => "Please fill user id",
+            "review_id.required" => "Please fill review id",
+            "reason.required" => "Please fill reason",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1263,7 +1263,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1272,7 +1272,7 @@ class ChefController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill chef id",
+            "id.required" => "Please fill chef id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1295,7 +1295,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1304,7 +1304,7 @@ class ChefController extends Controller
         $validator = Validator::make($req->all(), [
             "chef_id" => 'required',
         ], [
-            "chef_id.required" => "please fill chef id",
+            "chef_id.required" => "Please fill chef id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1329,7 +1329,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1407,7 +1407,7 @@ class ChefController extends Controller
     public function getChefOrders(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["message" => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             $query = SubOrders::query();
@@ -1445,14 +1445,14 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
         }
     }
 
     public function getChefSubOrder(Request $req)
     {
         if (!$req->chef_id) {
-            return response()->json(["message" => "please fill all the required fields", "success" => false], 400);
+            return response()->json(["message" => "Please fill all the required fields", "success" => false], 400);
         }
         try {
             $data = SubOrders::where('chef_id', $req->chef_id)->where('sub_order_id', $req->sub_order_id)->with('orderItems.foodItem')->with('Orders')->first();
@@ -1463,7 +1463,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
         }
     }
 
@@ -1474,9 +1474,9 @@ class ChefController extends Controller
             "status" => 'required',
             'sub_order_id' => 'required',
         ], [
-            "track_id.required" => "please fill track_id",
-            "status.required" => "please fill status",
-            "sub_order_id.required" => "please fill sub order_id",
+            "track_id.required" => "Please fill track_id",
+            "status.required" => "Please fill status",
+            "sub_order_id.required" => "Please fill sub order_id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1493,7 +1493,7 @@ class ChefController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 }

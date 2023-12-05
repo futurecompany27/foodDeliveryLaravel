@@ -54,11 +54,11 @@ class kitchentypeController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(["message" => "added successfully", "success" => true], 201);
+            return response()->json(["message" => "Added successfully", "success" => true], 201);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -74,7 +74,7 @@ class kitchentypeController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -83,7 +83,7 @@ class kitchentypeController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -121,7 +121,7 @@ class kitchentypeController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -130,7 +130,7 @@ class kitchentypeController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -147,7 +147,7 @@ class kitchentypeController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -157,8 +157,8 @@ class kitchentypeController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -173,7 +173,7 @@ class kitchentypeController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 }

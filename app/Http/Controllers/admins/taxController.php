@@ -31,11 +31,11 @@ class taxController extends Controller
                 'tax_type' => strtoupper($req->tax_type),
             ]);
             DB::commit();
-            return response()->json(['message' => "added successfully", "success" => true], 200);
+            return response()->json(['message' => "Added successfully", "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -45,7 +45,7 @@ class taxController extends Controller
             "id" => 'required',
             'tax_type' => 'required|string',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
             'tax_type.required' => 'Tax type is required',
             'tax_type.string' => 'Only letters allowed',
         ]);
@@ -62,7 +62,7 @@ class taxController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -71,7 +71,7 @@ class taxController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -83,7 +83,7 @@ class taxController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -103,7 +103,7 @@ class taxController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 }

@@ -49,18 +49,18 @@ class DriverController extends Controller
             "longitude" => 'required',
             "postal_code" => 'required',
         ], [
-            "firstName.required" => "please fill email",
-            "lastName.required" => "please fill email",
-            "email.required" => "please fill email",
-            "mobileNo.required" => "please fill mobileNo",
-            "are_you_a.required" => "please fill select driver",
-            "password.required" => "please fill password",
-            "full_address" => 'please fill full_address',
-            "province" => 'please fill province',
-            "city" => 'please fill city',
-            "latitude" => 'please fill latitude',
-            "longitude" => 'please fill longitude',
-            "postal_code" => 'please fill postal_code',
+            "firstName.required" => "Please fill email",
+            "lastName.required" => "Please fill email",
+            "email.required" => "Please fill email",
+            "mobileNo.required" => "Please fill mobileNo",
+            "are_you_a.required" => "Please fill select driver",
+            "password.required" => "Please fill password",
+            "full_address" => 'Please fill full_address',
+            "province" => 'Please fill province',
+            "city" => 'Please fill city',
+            "latitude" => 'Please fill latitude',
+            "longitude" => 'Please fill longitude',
+            "postal_code" => 'Please fill postal_code',
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -97,7 +97,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -107,8 +107,8 @@ class DriverController extends Controller
             "userName" => 'required',
             "password" => 'required',
         ], [
-            "userName.required" => "please fill User Name",
-            "password.required" => "please fill password",
+            "userName.required" => "Please fill User Name",
+            "password.required" => "Please fill password",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -135,7 +135,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -145,7 +145,7 @@ class DriverController extends Controller
             "userName" => 'required',
             "password" => 'required',
         ], [
-            "password.required" => "please fill password",
+            "password.required" => "Please fill password",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -162,7 +162,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -177,13 +177,13 @@ class DriverController extends Controller
             "city" => 'required',
             "postal_code" => 'required',
         ], [
-            "driver_id.required" => "please fill driver_id",
-            "firstName.required" => "please fill firstName",
-            "lastName.required" => "please fill lastName",
-            "full_address.required" => "please fill full_address",
-            "province.required" => "please fill province",
-            "city.required" => "please fill city",
-            "postal_code.required" => "please fill postal_code",
+            "driver_id.required" => "Please fill driver_id",
+            "firstName.required" => "Please fill firstName",
+            "lastName.required" => "Please fill lastName",
+            "full_address.required" => "Please fill full_address",
+            "province.required" => "Please fill province",
+            "city.required" => "Please fill city",
+            "postal_code.required" => "Please fill postal_code",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -227,7 +227,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -237,8 +237,8 @@ class DriverController extends Controller
             "id" => 'required',
             "driving_licence_no" => ['required', 'regex:/^[A-Z][0-9]{4} [0-9]{6} [0-9]{2}$/'],
         ], [
-            "id.required" => "please fill password",
-            "driving_licence_no.required" => "please fill driving licence no",
+            "id.required" => "Please fill password",
+            "driving_licence_no.required" => "Please fill driving licence no",
             "driving_licence_no.regex" => "Invalid driving licence number format. Please enter a valid format like 'A3567 678907 45'.",
         ]);
         if ($validator->fails()) {
@@ -262,7 +262,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -271,7 +271,7 @@ class DriverController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -333,7 +333,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -346,11 +346,11 @@ class DriverController extends Controller
     //         "city" => 'required',
     //         "postal_code" => 'required',
     //     ], [
-    //         "id.required" => "please fill password",
-    //         "full_address.required" => "please fill driving licence no",
-    //         "province.required" => "please fill driving licence no",
-    //         "city.required" => "please fill driving licence no",
-    //         "postal_code.required" => "please fill driving licence no",
+    //         "id.required" => "Please fill password",
+    //         "full_address.required" => "Please fill driving licence no",
+    //         "province.required" => "Please fill driving licence no",
+    //         "city.required" => "Please fill driving licence no",
+    //         "postal_code.required" => "Please fill driving licence no",
     //     ]);
     //     if ($validator->fails()) {
     //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -375,7 +375,7 @@ class DriverController extends Controller
     //     } catch (\Throwable $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
-    //         return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
     //     }
     // }
 
@@ -384,7 +384,7 @@ class DriverController extends Controller
         $validator = Validator::make($req->all(), [
             "criminal_report" => 'required',
         ], [
-            "criminal_report.required" => "please fill criminal report",
+            "criminal_report.required" => "Please fill criminal report",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -403,7 +403,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -416,11 +416,11 @@ class DriverController extends Controller
             "account_number" => 'required',
             "institution_number" => 'required',
         ], [
-            "id.required" => "please fill id",
-            "bank_name.required" => "please fill bank name",
-            "transit_number.required" => "please fill driving transit number",
-            "account_number.required" => "please fill driving account number",
-            "institution_number.required" => "please fill driving institution number",
+            "id.required" => "Please fill id",
+            "bank_name.required" => "Please fill bank name",
+            "transit_number.required" => "Please fill driving transit number",
+            "account_number.required" => "Please fill driving account number",
+            "institution_number.required" => "Please fill driving institution number",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -437,7 +437,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to login again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -473,14 +473,14 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function AddDriverContactData(Request $req)
     {
         if (!$req->driver_id) {
-            return response()->json(["message" => "please fill all the required fields ", "success" => false], 400);
+            return response()->json(["message" => "Please fill all the required fields ", "success" => false], 400);
         }
 
         try {
@@ -498,14 +498,14 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function getMyDetails(Request $req)
     {
         if (!$req->driver_id) {
-            return response()->json(["message" => "please fill all the required fields ", "success" => false], 400);
+            return response()->json(["message" => "Please fill all the required fields ", "success" => false], 400);
         }
         try {
             $driver = Driver::find($req->driver_id);
@@ -513,14 +513,14 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function driverUpdateEmail(Request $req)
     {
         if (!$req->driver_id || !$req->email) {
-            return response()->json(["message" => "please fill all the required fields ", "success" => false], 400);
+            return response()->json(["message" => "Please fill all the required fields ", "success" => false], 400);
         }
         try {
             Driver::where('id', $req->driver_id)->update(['email' => $req->email, 'status' => 0]);
@@ -531,14 +531,14 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
     function VerifyDriverEmail(Request $req)
     {
         if (!$req->id) {
-            return response()->json(["message" => 'please fill all the details', "success" => false], 400);
+            return response()->json(["message" => 'Please fill all the details', "success" => false], 400);
         }
         try {
             $checkVerification = Driver::find($req->id);
@@ -553,7 +553,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+            return response()->json(['error' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -564,9 +564,9 @@ class DriverController extends Controller
             "latitude" => 'required',
             "longitude" => 'required',
         ], [
-            "driver_id.required" => "please fill driver_id",
-            "latitude.required" => "please fill latitude",
-            "longitude.required" => "please fill longitude",
+            "driver_id.required" => "Please fill driver_id",
+            "latitude.required" => "Please fill latitude",
+            "longitude.required" => "Please fill longitude",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -611,7 +611,7 @@ class DriverController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to again !', 'success' => false], 500);
+            return response()->json(['error' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 }

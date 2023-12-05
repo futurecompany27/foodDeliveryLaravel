@@ -41,7 +41,7 @@ class foodItemstatusChangeMail extends Notification
             'food_id' => $this->chefDetail['food_id'],
             'chef_id' => $this->chefDetail['id'],
             'message' => ($this->chefDetail['food_name'] . ' has been approved.'),
-            'url' => '/shef/shef-menu'
+            'url' => '/chef/chef-menu'
         ];
     }
 }

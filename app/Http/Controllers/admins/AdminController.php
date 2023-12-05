@@ -47,11 +47,11 @@ class AdminController extends Controller
             'password' => 'required|min:8',
             "status" => 'required',
         ], [
-            "firstName.required" => "please fill first name",
-            "lastName.required" => "please fill last name",
-            "email.required" => "please fill email",
-            "password.required" => "please fill password",
-            "status.required" => "please fill status",
+            "firstName.required" => "Please fill first name",
+            "lastName.required" => "Please fill last name",
+            "email.required" => "Please fill email",
+            "password.required" => "Please fill password",
+            "status.required" => "Please fill status",
         ]);
 
         if ($validator->fails()) {
@@ -76,7 +76,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -105,7 +105,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to Login again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -114,7 +114,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
 
         if ($validator->fails()) {
@@ -146,7 +146,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -155,7 +155,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -167,7 +167,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -185,7 +185,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -200,19 +200,19 @@ class AdminController extends Controller
             'food_default_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
             "radius" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
         ], [
-            "default_comm.required" => "please fill default_comm",
-            "default_comm.regex" => "please enter valid default_comm",
-            "refugee_comm.required" => "please fill refugee_comm",
-            "refugee_comm.regex" => "please enter valid refugee_comm",
-            "singlemom_comm.required" => "please fill singlemom_comm",
-            "singlemom_comm.regex" => "please enter valid singlemom_comm",
-            "lostjob_comm.required" => "please fill lostjob_comm",
-            "lostjob_comm.regex" => "please enter valid lostjob_comm",
-            "student_comm.required" => "please fill student_comm",
-            "student_comm.regex" => "please enter valid student_comm",
-            "food_default_comm.required" => "please fill food_default_comm",
-            "food_default_comm.regex" => "please enter valid food_default_comm",
-            "radius.required" => "please fill radius",
+            "default_comm.required" => "Please fill default_comm",
+            "default_comm.regex" => "Please enter valid default_comm",
+            "refugee_comm.required" => "Please fill refugee_comm",
+            "refugee_comm.regex" => "Please enter valid refugee_comm",
+            "singlemom_comm.required" => "Please fill singlemom_comm",
+            "singlemom_comm.regex" => "Please enter valid singlemom_comm",
+            "lostjob_comm.required" => "Please fill lostjob_comm",
+            "lostjob_comm.regex" => "Please enter valid lostjob_comm",
+            "student_comm.required" => "Please fill student_comm",
+            "student_comm.regex" => "Please enter valid student_comm",
+            "food_default_comm.required" => "Please fill food_default_comm",
+            "food_default_comm.regex" => "Please enter valid food_default_comm",
+            "radius.required" => "Please fill radius",
         ]);
 
         if ($validator->fails()) {
@@ -233,7 +233,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -242,7 +242,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -260,7 +260,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -269,7 +269,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -281,7 +281,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -293,7 +293,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -304,8 +304,8 @@ class AdminController extends Controller
             "commission" => 'nullable|integer|between:1,100',
             "image" => 'required',
         ], [
-            "category.required" => "please fill category",
-            "image.required" => "please fill image",
+            "category.required" => "Please fill category",
+            "image.required" => "Please fill image",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -326,7 +326,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -335,7 +335,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -364,7 +364,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -373,7 +373,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -390,7 +390,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+            return response()->json(['error' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -401,9 +401,9 @@ class AdminController extends Controller
             "small_description" => 'required',
             "allergy_name" => 'required',
         ], [
-            "image.required" => "please fill image",
-            "small_description.required" => "please fill small_description",
-            "allergy_name.required" => "please fill allergy_name",
+            "image.required" => "Please fill image",
+            "small_description.required" => "Please fill small_description",
+            "allergy_name.required" => "Please fill allergy_name",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -436,11 +436,11 @@ class AdminController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(["message" => "added successfully", "success" => true], 201);
+            return response()->json(["message" => "Added successfully", "success" => true], 201);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -449,7 +449,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -490,7 +490,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -499,7 +499,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -516,7 +516,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -527,9 +527,9 @@ class AdminController extends Controller
             "small_description" => 'required',
             "image" => 'required',
         ], [
-            "diet_name.required" => "please fill diet_name",
-            "small_description.required" => "please fill small_description",
-            "image.required" => "please fill image",
+            "diet_name.required" => "Please fill diet_name",
+            "small_description.required" => "Please fill small_description",
+            "image.required" => "Please fill image",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -562,11 +562,11 @@ class AdminController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(["message" => "added successfully", "success" => true], 201);
+            return response()->json(["message" => "Added successfully", "success" => true], 201);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -575,7 +575,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -615,7 +615,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -624,7 +624,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -641,7 +641,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -651,8 +651,8 @@ class AdminController extends Controller
             "title" => 'required',
             "description" => 'required',
         ], [
-            "title.required" => "please fill title",
-            "description.required" => "please fill description",
+            "title.required" => "Please fill title",
+            "description.required" => "Please fill description",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -666,7 +666,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -675,7 +675,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -688,7 +688,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -697,7 +697,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -709,7 +709,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -719,8 +719,8 @@ class AdminController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -735,7 +735,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -744,7 +744,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "ing_name" => 'required',
         ], [
-            "ing_name.required" => "please fill ing_name",
+            "ing_name.required" => "Please fill ing_name",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -762,7 +762,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -771,7 +771,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -784,7 +784,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -793,7 +793,7 @@ class AdminController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -805,7 +805,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -815,8 +815,8 @@ class AdminController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -831,7 +831,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -842,9 +842,9 @@ class AdminController extends Controller
     //         "subject" => 'required',
     //         "message" => 'required',
     //     ], [
-    //         "chef_id.required" => "please fill chef_id",
-    //         "subject.required" => "please fill subject",
-    //         "message.required" => "please fill message",
+    //         "chef_id.required" => "Please fill chef_id",
+    //         "subject.required" => "Please fill subject",
+    //         "message.required" => "Please fill message",
     //     ]);
     //     if ($validator->fails()) {
     //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -863,7 +863,7 @@ class AdminController extends Controller
     //     } catch (\Throwable $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
-    //         return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
     //     }
     // }
 
@@ -872,7 +872,7 @@ class AdminController extends Controller
     //     $validator = Validator::make($req->all(), [
     //         "id" => 'required',
     //     ], [
-    //         "id.required" => "please fill id",
+    //         "id.required" => "Please fill id",
     //     ]);
     //     if ($validator->fails()) {
     //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -884,7 +884,7 @@ class AdminController extends Controller
     //     } catch (\Throwable $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
-    //         return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
     //     }
     // }
 
@@ -893,7 +893,7 @@ class AdminController extends Controller
     //     $validator = Validator::make($req->all(), [
     //         "id" => 'required',
     //     ], [
-    //         "id.required" => "please fill id",
+    //         "id.required" => "Please fill id",
     //     ]);
     //     if ($validator->fails()) {
     //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -904,7 +904,7 @@ class AdminController extends Controller
     //     } catch (\Throwable $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
-    //         return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
     //     }
     // }
 
@@ -922,7 +922,7 @@ class AdminController extends Controller
     //     } catch (\Throwable $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
-    //         return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
     //     }
     // }
 
@@ -944,7 +944,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -978,7 +978,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -992,7 +992,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1002,8 +1002,8 @@ class AdminController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1014,7 +1014,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1025,9 +1025,9 @@ class AdminController extends Controller
             "subject" => 'required',
             "body" => 'required',
         ], [
-            "chef_id.required" => "please fill chef id",
-            "subject.required" => "please fill subject",
-            "body.required" => "please fill body of mail",
+            "chef_id.required" => "Please fill chef id",
+            "subject.required" => "Please fill subject",
+            "body.required" => "Please fill body of mail",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1040,7 +1040,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -1050,8 +1050,8 @@ class AdminController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1062,7 +1062,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1075,7 +1075,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1086,9 +1086,9 @@ class AdminController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "review_id.required" => "please fill review id",
-            "id.required" => "please fill id",
-            "status.required" => "please fill status",
+            "review_id.required" => "Please fill review id",
+            "id.required" => "Please fill id",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1105,7 +1105,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1118,7 +1118,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1129,9 +1129,9 @@ class AdminController extends Controller
             "chef_id" => 'required',
             "request_id" => 'required',
         ], [
-            "user_id.required" => "please fill user id",
-            "chef_id.required" => "please fill chef id",
-            "request_id.required" => "please fill chef id",
+            "user_id.required" => "Please fill user id",
+            "chef_id.required" => "Please fill chef id",
+            "request_id.required" => "Please fill chef id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1156,11 +1156,11 @@ class AdminController extends Controller
             $UserController->updateChefrating($req->chef_id);
 
             DB::commit();
-            return response()->json(['message' => 'blacklisted successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Blacklisted successfully', 'success' => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1170,8 +1170,8 @@ class AdminController extends Controller
             "user_id" => 'required',
             "chef_id" => 'required',
         ], [
-            "user_id.required" => "please fill user id",
-            "chef_id.required" => "please fill chef id",
+            "user_id.required" => "Please fill user id",
+            "chef_id.required" => "Please fill chef id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -1190,7 +1190,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1202,7 +1202,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -1219,7 +1219,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
@@ -1249,7 +1249,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1288,7 +1288,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1301,7 +1301,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -1340,7 +1340,7 @@ class AdminController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to again after sometime !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 }

@@ -43,7 +43,7 @@ class ChefScheduleCallNotification extends Notification
             'id' => $this->ScheduleCall['id'],
             'chef_id' => $this->ScheduleCall['chef']->chef_id,
             'message' => ($this->ScheduleCall['chef']->firstName . ' ' . $this->ScheduleCall['chef']->firstName) . ' has requested for call on ' . date('d M Y', strtotime($this->ScheduleCall['date'])) . ' between ' . $this->ScheduleCall['slot'] . '.',
-            'url' => '/admin/shef-call-request'
+            'url' => '/admin/chef-call-request'
         ];
     }
 }

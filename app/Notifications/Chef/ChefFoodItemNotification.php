@@ -48,7 +48,7 @@ class ChefFoodItemNotification extends Notification
             'firstName' => $this->chefDetail['firstName'],
             'lastName' => $this->chefDetail['lastName'],
             'message' => ($this->chefDetail['firstName'] . ' ' . $this->chefDetail['lastName']) . ' ' . $opration . ' a food ' . $this->chefDetail['food_name'],
-            'url' => '/admin/shef-profile'
+            'url' => '/admin/chef-profile'
         ];
     }
 }

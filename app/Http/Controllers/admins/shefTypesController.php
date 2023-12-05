@@ -18,8 +18,8 @@ class shefTypesController extends Controller
         $validatedData = Validator::make($req->all(), [
             'name' => 'required|unique:shef_types|min:4',
         ], [
-            'name.required' => 'Shef type is required',
-            'name.unique' => 'Shef type already exists. Try another type name',
+            'name.required' => 'Chef type is required',
+            'name.unique' => 'Chef type already exists. Try another type name',
             'name.min' => 'Tag name should be atleast 4 letters longs',
         ]);
         if ($validatedData->fails()) {
@@ -34,11 +34,11 @@ class shefTypesController extends Controller
             ]);
             DB::commit();
 
-            return response()->json(['message' => 'Shef type created successfully', "success" => true], 200);
+            return response()->json(['message' => 'Chef type created successfully', "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -48,8 +48,8 @@ class shefTypesController extends Controller
             "id" => 'required',
             'name' => 'required|unique:shef_types|min:4',
         ], [
-            'name.required' => 'Shef type is required',
-            'name.unique' => 'Shef type already exists. Try another type name',
+            'name.required' => 'Chef type is required',
+            'name.unique' => 'Chef type already exists. Try another type name',
             'name.min' => 'Tag name should be atleast 4 letters longs',
         ]);
         if ($validator->fails()) {
@@ -65,7 +65,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -74,7 +74,7 @@ class shefTypesController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -85,7 +85,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -97,7 +97,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false]);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false]);
         }
     }
 
@@ -107,8 +107,8 @@ class shefTypesController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -123,7 +123,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -151,11 +151,11 @@ class shefTypesController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(['message' => 'Shef subtype Added Successfully', "success" => true], 200);
+            return response()->json(['message' => 'Chef subtype Added Successfully', "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
 
@@ -185,7 +185,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -194,7 +194,7 @@ class shefTypesController extends Controller
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
-            "id.required" => "please fill id",
+            "id.required" => "Please fill id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -205,7 +205,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -217,7 +217,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !' . $th->getMessage(), 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
         }
     }
 
@@ -227,8 +227,8 @@ class shefTypesController extends Controller
             "id" => 'required',
             "status" => 'required',
         ], [
-            "id.required" => "please fill status",
-            "status.required" => "please fill status",
+            "id.required" => "Please fill status",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -243,7 +243,7 @@ class shefTypesController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to update again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 }

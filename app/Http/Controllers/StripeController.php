@@ -14,7 +14,7 @@ class StripeController extends Controller
     public function createSession(Request $req)
     {
         if (!$req->totalAmt) {
-            return response()->json(["message" => 'please fill cartData', "success" => false], 400);
+            return response()->json(["message" => 'Please fill cartData', "success" => false], 400);
         }
         try {
             Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -47,7 +47,7 @@ class StripeController extends Controller
     public function retriveStripePaymentStatus(Request $req)
     {
         if (!$req->user_id && !$req->session_id) {
-            return response()->json(["message" => 'please fill all details', "success" => false], 400);
+            return response()->json(["message" => 'Please fill all details', "success" => false], 400);
         }
         try {
             // Set your Stripe secret key

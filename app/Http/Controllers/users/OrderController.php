@@ -29,7 +29,7 @@ class OrderController extends Controller
         $validator = Validator::make($req->all(), [
             "user_id" => 'required',
         ], [
-            "user_id.required" => "please fill user_id",
+            "user_id.required" => "Please fill user_id",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -135,7 +135,7 @@ class OrderController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -145,8 +145,8 @@ class OrderController extends Controller
             "sub_order_id" => 'required',
             "status" => 'required',
         ], [
-            "sub_order_id.required" => "please fill sub_order_id",
-            "status.required" => "please fill status",
+            "sub_order_id.required" => "Please fill sub_order_id",
+            "status.required" => "Please fill status",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
@@ -169,7 +169,7 @@ class OrderController extends Controller
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong. Please try to register again !', 'success' => false], 500);
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 

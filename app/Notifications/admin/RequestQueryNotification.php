@@ -45,7 +45,7 @@ class RequestQueryNotification extends Notification
             'id' => $this->request_query->chef_id,
             'request_for' => $this->request_query->request_for,
             'message' => 'One Request update profile coming from the chef.',
-            'url' => '/admin/shef-contact-us'
+            'url' => '/admin/chef-change-request'
         ];
     }
 }
