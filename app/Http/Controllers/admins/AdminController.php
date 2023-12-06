@@ -36,10 +36,8 @@ use Intervention\Image\ImageManagerStatic as Image;
 // use Intervention\Image\Image; //Intervention Image
 use Illuminate\Support\Facades\File;
 
-class AdminController extends Controller
-{
-    function adminRegistration(Request $req)
-    {
+class AdminController extends Controller {
+    function adminRegistration(Request $req) {
         $validator = Validator::make($req->all(), [
             "firstName" => 'required',
             "lastName" => 'required',
@@ -54,13 +52,13 @@ class AdminController extends Controller
             "status.required" => "Please fill status",
         ]);
 
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             DB::beginTransaction();
             $adminExist = Admin::where("email", $req->email)->first();
-            if ($adminExist) {
+            if($adminExist) {
                 return response()->json(["message" => 'Email is already Registered!', "success" => false], 400);
             }
 
@@ -80,21 +78,20 @@ class AdminController extends Controller
         }
     }
 
-    function adminLogin(Request $req)
-    {
+    function adminLogin(Request $req) {
         $rules = [
             'email' => 'required|email',
             'password' => 'required|min:8'
         ];
         $validate = Validator::make($req->all(), $rules);
-        if ($validate->fails()) {
+        if($validate->fails()) {
             return response()->json(["message" => $validate->errors(), "success" => false], 400);
         }
         try {
             $adminDetail = Admin::where("email", $req->email)->first();
-            if ($adminDetail) {
+            if($adminDetail) {
                 $adminDetail->makeVisible('password');
-                if (Hash::check($req->password, $adminDetail['password'])) {
+                if(Hash::check($req->password, $adminDetail['password'])) {
                     return response()->json(["message" => "You are logged in now !", 'admin_id' => $adminDetail->id, "success" => true], 200);
                 } else {
                     return response()->json(['message' => 'Invalid Password ! ', 'success' => false], 500);
@@ -109,20 +106,19 @@ class AdminController extends Controller
         }
     }
 
-    public function updateSiteSettings(Request $req)
-    {
+    public function updateSiteSettings(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
 
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Sitesetting::where('id', $req->id)->first();
-            if ($data) {
+            if($data) {
                 $updateData = $req->all();
                 Sitesetting::where('id', $req->id)->update($updateData);
                 return response()->json(['message' => "Updated Successfully", "success" => true], 200);
@@ -150,14 +146,13 @@ class AdminController extends Controller
         }
     }
 
-    public function deleteSiteSettings(Request $req)
-    {
+    public function deleteSiteSettings(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -171,8 +166,7 @@ class AdminController extends Controller
         }
     }
 
-    public function getSiteSettings(Request $req)
-    {
+    public function getSiteSettings(Request $req) {
         try {
             $totalRecords = Sitesetting::count();
             $skip = $req->page * 10;
@@ -189,8 +183,7 @@ class AdminController extends Controller
         }
     }
 
-    public function addAdminSettings(Request $req)
-    {
+    public function addAdminSettings(Request $req) {
         $validator = Validator::make($req->all(), [
             "default_comm" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
             'refugee_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
@@ -217,7 +210,7 @@ class AdminController extends Controller
             "radiusForDriver.required" => "Please fill radius for driver",
         ]);
 
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -241,14 +234,13 @@ class AdminController extends Controller
         }
     }
 
-    public function updateAdminSettings(Request $req)
-    {
+    public function updateAdminSettings(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -268,14 +260,13 @@ class AdminController extends Controller
         }
     }
 
-    public function deleteAdminSettings(Request $req)
-    {
+    public function deleteAdminSettings(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -289,8 +280,7 @@ class AdminController extends Controller
         }
     }
 
-    public function getAdminSettings(Request $req)
-    {
+    public function getAdminSettings(Request $req) {
         try {
             $data = Adminsetting::latest()->first();
             return response()->json(['data' => $data]);
@@ -301,8 +291,7 @@ class AdminController extends Controller
         }
     }
 
-    public function addFoodTypes(Request $req)
-    {
+    public function addFoodTypes(Request $req) {
         $validator = Validator::make($req->all(), [
             "category" => 'required',
             "commission" => 'nullable|integer|between:1,100',
@@ -311,12 +300,12 @@ class AdminController extends Controller
             "category.required" => "Please fill category",
             "image.required" => "Please fill image",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
-        if ($req->hasFile('image')) {
+        if($req->hasFile('image')) {
             $file = $req->file('image')->store("admin/food_category/", "public");
-            $filename = asset('storage/' . $file);
+            $filename = asset('storage/'.$file);
         }
         try {
             $foodcategory = new FoodCategory();
@@ -334,33 +323,32 @@ class AdminController extends Controller
         }
     }
 
-    public function updateFoodTypes(Request $req)
-    {
+    public function updateFoodTypes(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = FoodCategory::where('id', $req->id)->first();
             $updateData = [];
-            if ($req->category) {
+            if($req->category) {
                 $updateData['category'] = $req->category;
             }
-            if ($req->commission) {
+            if($req->commission) {
                 $updateData['commission'] = $req->commission ? $req->commission : 10;
             }
-            if ($req->hasFile('image')) {
+            if($req->hasFile('image')) {
                 $images = $data->image;
                 str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
+                if(file_exists(str_replace(env('filePath'), '', $images))) {
                     unlink(str_replace(env('filePath'), '', $images));
                 }
                 $file = $req->file('image')->store("admin/food_category/", "public");
-                $filename = asset('storage/' . $file);
+                $filename = asset('storage/'.$file);
                 $updateData['image'] = $filename;
             }
             FoodCategory::where('id', $req->id)->update($updateData);
@@ -372,21 +360,20 @@ class AdminController extends Controller
         }
     }
 
-    public function deleteFoodTypes(Request $req)
-    {
+    public function deleteFoodTypes(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = FoodCategory::where('id', $req->id)->first();
             $images = json_decode($data->image);
             str_replace(env('filePath'), '', $images);
-            if (file_exists(str_replace(env('filePath'), '', $images))) {
+            if(file_exists(str_replace(env('filePath'), '', $images))) {
                 unlink(str_replace(env('filePath'), '', $images));
             }
             FoodCategory::where('id', $req->id)->delete();
@@ -398,8 +385,7 @@ class AdminController extends Controller
         }
     }
 
-    public function addAllergies(Request $req)
-    {
+    public function addAllergies(Request $req) {
         $validator = Validator::make($req->all(), [
             "image" => 'required',
             "small_description" => 'required',
@@ -409,28 +395,28 @@ class AdminController extends Controller
             "small_description.required" => "Please fill small_description",
             "allergy_name.required" => "Please fill allergy_name",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $path = "storage/admin/allergen_icons/";
-            if (!File::exists($path)) {
+            if(!File::exists($path)) {
                 File::makeDirectory($path, $mode = 0777, true, true);
             }
             DB::beginTransaction();
 
-            if ($req->file('image') && isset($req->image)) {
+            if($req->file('image') && isset($req->image)) {
 
                 $big_image = $req->file('image');
 
                 $image_name = strtolower($req->allergy_name);
                 $new_name = str_replace(" ", "", $image_name);
-                $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
+                $name_gen = $new_name.".".$big_image->getClientOriginalExtension();
                 $big_img = Image::make($req->file('image'))
                     ->resize(200, 200)
-                    ->save('storage/admin/allergen_icons/' . $name_gen);
+                    ->save('storage/admin/allergen_icons/'.$name_gen);
 
-                $filename = asset("storage/admin/allergen_icons/" . $name_gen);
+                $filename = asset("storage/admin/allergen_icons/".$name_gen);
             }
             Allergy::insert([
                 'image' => $filename,
@@ -448,45 +434,44 @@ class AdminController extends Controller
         }
     }
 
-    public function updateAllergies(Request $req)
-    {
+    public function updateAllergies(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
-        if (!File::exists("storage/admin/allergen_icons/")) {
+        if(!File::exists("storage/admin/allergen_icons/")) {
             File::makeDirectory("storage/admin/allergen_icons/", $mode = 0777, true, true);
         }
         try {
             $data = Allergy::where('id', $req->id)->first();
             $updateData = [];
-            if ($req->hasFile('image')) {
+            if($req->hasFile('image')) {
                 $images = $data->image;
                 str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
+                if(file_exists(str_replace(env('filePath'), '', $images))) {
                     unlink(str_replace(env('filePath'), '', $images));
                 }
-                if ($req->file('image') && isset($req->image)) {
+                if($req->file('image') && isset($req->image)) {
 
                     $big_image = $req->file('image');
                     $image_name = strtolower($req->allergy_name);
                     $new_name = str_replace(" ", "", $image_name);
-                    $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
+                    $name_gen = $new_name.".".$big_image->getClientOriginalExtension();
                     $big_img = Image::make($req->file('image'))
                         ->resize(200, 200)
-                        ->save('storage/admin/allergen_icons/' . $name_gen);
-                    $filename = asset("storage/admin/allergen_icons/" . $name_gen);
+                        ->save('storage/admin/allergen_icons/'.$name_gen);
+                    $filename = asset("storage/admin/allergen_icons/".$name_gen);
                     $updateData['image'] = $filename;
                 }
             }
-            if ($req->small_description) {
+            if($req->small_description) {
                 $updateData['small_description'] = $req->small_description;
             }
-            if ($req->allergy_name) {
+            if($req->allergy_name) {
                 $updateData['allergy_name'] = $req->allergy_name;
             }
             Allergy::where('id', $req->id)->update($updateData);
@@ -498,21 +483,20 @@ class AdminController extends Controller
         }
     }
 
-    public function deleteAllergies(Request $req)
-    {
+    public function deleteAllergies(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Allergy::where('id', $req->id)->first();
             $images = $data->image;
             str_replace(env('filePath'), '', $images);
-            if (file_exists(str_replace(env('filePath'), '', $images))) {
+            if(file_exists(str_replace(env('filePath'), '', $images))) {
                 unlink(str_replace(env('filePath'), '', $images));
             }
             Allergy::where('id', $req->id)->delete();
@@ -524,8 +508,7 @@ class AdminController extends Controller
         }
     }
 
-    public function addDietaries(Request $req)
-    {
+    public function addDietaries(Request $req) {
         $validator = Validator::make($req->all(), [
             "diet_name" => 'required',
             "small_description" => 'required',
@@ -535,28 +518,28 @@ class AdminController extends Controller
             "small_description.required" => "Please fill small_description",
             "image.required" => "Please fill image",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $path = "storage/admin/dietaries_icons/";
-            if (!File::exists($path)) {
+            if(!File::exists($path)) {
                 File::makeDirectory($path, $mode = 0777, true, true);
             }
             DB::beginTransaction();
 
-            if ($req->file('image') && isset($req->image)) {
+            if($req->file('image') && isset($req->image)) {
 
                 $big_image = $req->file('image');
 
                 $image_name = strtolower($req->diet_name);
                 $new_name = str_replace(" ", "", $image_name);
-                $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
+                $name_gen = $new_name.".".$big_image->getClientOriginalExtension();
                 $big_img = Image::make($req->file('image'))
                     ->resize(200, 200)
-                    ->save('storage/admin/dietaries_icons/' . $name_gen);
+                    ->save('storage/admin/dietaries_icons/'.$name_gen);
 
-                $filename = asset("storage/admin/dietaries_icons/" . $name_gen);
+                $filename = asset("storage/admin/dietaries_icons/".$name_gen);
             }
             Dietary::insert([
                 'diet_name' => strtolower($req->diet_name),
@@ -574,44 +557,43 @@ class AdminController extends Controller
         }
     }
 
-    public function updateDietaries(Request $req)
-    {
+    public function updateDietaries(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
-        if (!File::exists("storage/admin/dietaries_icons/")) {
+        if(!File::exists("storage/admin/dietaries_icons/")) {
             File::makeDirectory("storage/admin/dietaries_icons/", $mode = 0777, true, true);
         }
         try {
             $data = Dietary::where('id', $req->id)->first();
             $updateData = [];
-            if ($req->hasFile('image')) {
+            if($req->hasFile('image')) {
                 $images = $data->image;
                 str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
+                if(file_exists(str_replace(env('filePath'), '', $images))) {
                     unlink(str_replace(env('filePath'), '', $images));
                 }
-                if ($req->file('image') && isset($req->image)) {
+                if($req->file('image') && isset($req->image)) {
                     $big_image = $req->file('image');
                     $image_name = strtolower($req->diet_name);
                     $new_name = str_replace(" ", "", $image_name);
-                    $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
+                    $name_gen = $new_name.".".$big_image->getClientOriginalExtension();
                     $big_img = Image::make($req->file('image'))
                         ->resize(200, 200)
-                        ->save('storage/admin/dietaries_icons/' . $name_gen);
-                    $filename = asset("storage/admin/dietaries_icons/" . $name_gen);
+                        ->save('storage/admin/dietaries_icons/'.$name_gen);
+                    $filename = asset("storage/admin/dietaries_icons/".$name_gen);
                     $updateData['image'] = $filename;
                 }
             }
-            if ($req->diet_name) {
+            if($req->diet_name) {
                 $updateData['diet_name'] = $req->diet_name;
             }
-            if ($req->small_description) {
+            if($req->small_description) {
                 $updateData['small_description'] = $req->small_description;
             }
             Dietary::where('id', $req->id)->update($updateData);
@@ -623,21 +605,20 @@ class AdminController extends Controller
         }
     }
 
-    public function deleteDietaries(Request $req)
-    {
+    public function deleteDietaries(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Dietary::where('id', $req->id)->first();
             $images = $data->image;
             str_replace(env('filePath'), '', $images);
-            if (file_exists(str_replace(env('filePath'), '', $images))) {
+            if(file_exists(str_replace(env('filePath'), '', $images))) {
                 unlink(str_replace(env('filePath'), '', $images));
             }
             Dietary::where('id', $req->id)->delete();
@@ -649,8 +630,7 @@ class AdminController extends Controller
         }
     }
 
-    public function addHeatingInstructions(Request $req)
-    {
+    public function addHeatingInstructions(Request $req) {
         $validator = Validator::make($req->all(), [
             "title" => 'required',
             "description" => 'required',
@@ -658,7 +638,7 @@ class AdminController extends Controller
             "title.required" => "Please fill title",
             "description.required" => "Please fill description",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -674,14 +654,13 @@ class AdminController extends Controller
         }
     }
 
-    public function updateHeatingInstructions(Request $req)
-    {
+    public function updateHeatingInstructions(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -696,14 +675,13 @@ class AdminController extends Controller
         }
     }
 
-    public function deleteHeatingInstructions(Request $req)
-    {
+    public function deleteHeatingInstructions(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -717,8 +695,7 @@ class AdminController extends Controller
         }
     }
 
-    public function updateHeatingInstructionsStatus(Request $req)
-    {
+    public function updateHeatingInstructionsStatus(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
             "status" => 'required',
@@ -726,11 +703,11 @@ class AdminController extends Controller
             "id.required" => "Please fill status",
             "status.required" => "Please fill status",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            if ($req->status == "0" || $req->status == "1") {
+            if($req->status == "0" || $req->status == "1") {
                 $updateData['status'] = $req->status;
             }
             // $updateData = $req->status;
@@ -743,19 +720,18 @@ class AdminController extends Controller
         }
     }
 
-    public function addIngredients(Request $req)
-    {
+    public function addIngredients(Request $req) {
         $validator = Validator::make($req->all(), [
             "ing_name" => 'required',
         ], [
             "ing_name.required" => "Please fill ing_name",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = Ingredient::where('ing_name', $req->ing_name)->first();
-            if ($data) {
+            if($data) {
                 return response()->json(["message" => "Ingredient Already exist", "success" => false], 500);
             } else {
                 $ingredient = new Ingredient();
@@ -770,14 +746,13 @@ class AdminController extends Controller
         }
     }
 
-    public function updateIngredient(Request $req)
-    {
+    public function updateIngredient(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -792,14 +767,13 @@ class AdminController extends Controller
         }
     }
 
-    public function deleteIngredient(Request $req)
-    {
+    public function deleteIngredient(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
         ], [
             "id.required" => "Please fill id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -813,8 +787,7 @@ class AdminController extends Controller
         }
     }
 
-    public function updateIngredientStatus(Request $req)
-    {
+    public function updateIngredientStatus(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
             "status" => 'required',
@@ -822,11 +795,11 @@ class AdminController extends Controller
             "id.required" => "Please fill status",
             "status.required" => "Please fill status",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            if ($req->status == "0" || $req->status == "1") {
+            if($req->status == "0" || $req->status == "1") {
                 $updateData['status'] = $req->status;
             }
             // $updateData = $req->status;
@@ -930,11 +903,10 @@ class AdminController extends Controller
     //     }
     // }
 
-    function getAllUsers(Request $req)
-    {
+    function getAllUsers(Request $req) {
         try {
             $totalRecords = User::count();
-            if ($req->list) {
+            if($req->list) {
                 $data = User::select('id', 'firstName', 'lastName')->get();
             } else {
                 $skip = $req->page * 10;
@@ -952,46 +924,41 @@ class AdminController extends Controller
         }
     }
 
-    function getAllChefs(Request $req)
-    {
+    function getAllChefs(Request $req) {
         try {
-            if ($req->list) {
+            if($req->list) {
                 $totalRecords = chef::count();
                 $data = chef::select('id', 'firstName', 'lastName')->get();
             } else {
                 $query = chef::query();
-                if ($req->postalCodes) {
-
+                if($req->postalCodes) {
                     $postalCodes = explode(',', $req->postalCodes);
-
                     $query->where(function ($q) use ($postalCodes) {
-                        foreach ($postalCodes as $postalCode) {
-                            $q->orWhere('postal_code', 'like', $postalCode . '%');
+                        foreach($postalCodes as $postalCode) {
+                            $q->orWhere('postal_code', 'like', $postalCode.'%');
                         }
                     });
                 }
 
-                if ($req->kitchenTypes) {
-
+                if($req->kitchenTypes) {
                     $kitchenTypes = explode(',', $req->kitchenTypes);
                     $query->where(function ($q) use ($kitchenTypes) {
-                        foreach ($kitchenTypes as $value) {
+                        foreach($kitchenTypes as $value) {
                             $q->whereJsonContains('kitchen_types', $value);
                         }
                     });
                 }
 
-                if ($req->weekDay_availibilty) {
-
+                if($req->weekDay_availibilty) {
                     $weekDay_availibilty = explode(',', $req->weekDay_availibilty);
                     $query->where(function ($q) use ($weekDay_availibilty) {
-                        foreach ($weekDay_availibilty as $key => $value) {
+                        foreach($weekDay_availibilty as $key => $value) {
                             $q->whereJsonContains('foodAvailibiltyOnWeekdays', $value);
                         }
                     });
                 }
 
-                if ($req->status) {
+                if(isset($req->status)) {
                     $query->where('status', $req->status);
                 }
 
@@ -1022,8 +989,7 @@ class AdminController extends Controller
         }
     }
 
-    public function getAllContactData(Request $req)
-    {
+    public function getAllContactData(Request $req) {
         try {
             $totalRecords = Contact::count();
             $skip = $req->page * 10;
@@ -1036,8 +1002,7 @@ class AdminController extends Controller
         }
     }
 
-    public function updateContactDataStatus(Request $req)
-    {
+    public function updateContactDataStatus(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
             "status" => 'required',
@@ -1045,7 +1010,7 @@ class AdminController extends Controller
             "id.required" => "Please fill status",
             "status.required" => "Please fill status",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -1058,8 +1023,7 @@ class AdminController extends Controller
         }
     }
 
-    function sendMailToChef(Request $req)
-    {
+    function sendMailToChef(Request $req) {
         $validator = Validator::make($req->all(), [
             "chef_id" => 'required',
             "subject" => 'required',
@@ -1069,7 +1033,7 @@ class AdminController extends Controller
             "subject.required" => "Please fill subject",
             "body.required" => "Please fill body of mail",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -1084,8 +1048,7 @@ class AdminController extends Controller
         }
     }
 
-    function updateChnageRequestStatus(Request $req)
-    {
+    function updateChnageRequestStatus(Request $req) {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
             "status" => 'required',
@@ -1093,7 +1056,7 @@ class AdminController extends Controller
             "id.required" => "Please fill status",
             "status.required" => "Please fill status",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -1106,8 +1069,7 @@ class AdminController extends Controller
         }
     }
 
-    function getAllRequestForChefReviewDeletion()
-    {
+    function getAllRequestForChefReviewDeletion() {
         try {
             $TotalRecords = chefReviewDeleteRequest::where(['status' => 0])->count();
             $data = chefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at')->where(['status' => 0])->get();
@@ -1119,8 +1081,7 @@ class AdminController extends Controller
         }
     }
 
-    function updateStatusOfChefReviewDeleteRequest(Request $req)
-    {
+    function updateStatusOfChefReviewDeleteRequest(Request $req) {
         $validator = Validator::make($req->all(), [
             "review_id" => 'required',
             "id" => 'required',
@@ -1130,13 +1091,13 @@ class AdminController extends Controller
             "id.required" => "Please fill id",
             "status.required" => "Please fill status",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $chefReviewDeleteRequest = chefReviewDeleteRequest::find($req->id);
             chefReviewDeleteRequest::where('id', $req->id)->update(['status' => $req->status]);
-            if ($req->status == 1) {
+            if($req->status == 1) {
                 ChefReview::where('id', $req->review_id)->update(['status' => 2]);
             }
             $UserController = new UserController;
@@ -1149,8 +1110,7 @@ class AdminController extends Controller
         }
     }
 
-    function getAllBlackListRequestByChef(Request $req)
-    {
+    function getAllBlackListRequestByChef(Request $req) {
         try {
             $TotalRecords = RequestForUserBlacklistByChef::count();
             $data = RequestForUserBlacklistByChef::with(['user', 'chef', 'reviews'])->orderByDesc('created_at')->get();
@@ -1162,8 +1122,7 @@ class AdminController extends Controller
         }
     }
 
-    function blacklistUserOnChefRequest(Request $req)
-    {
+    function blacklistUserOnChefRequest(Request $req) {
         $validator = Validator::make($req->all(), [
             "user_id" => 'required',
             "chef_id" => 'required',
@@ -1173,7 +1132,7 @@ class AdminController extends Controller
             "chef_id.required" => "Please fill chef id",
             "request_id.required" => "Please fill chef id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -1204,8 +1163,7 @@ class AdminController extends Controller
         }
     }
 
-    function unBlackListUser(Request $req)
-    {
+    function unBlackListUser(Request $req) {
         $validator = Validator::make($req->all(), [
             "user_id" => 'required',
             "chef_id" => 'required',
@@ -1213,7 +1171,7 @@ class AdminController extends Controller
             "user_id.required" => "Please fill user id",
             "chef_id.required" => "Please fill chef id",
         ]);
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
@@ -1234,8 +1192,7 @@ class AdminController extends Controller
         }
     }
 
-    public function getAllChefSuggestions(Request $req)
-    {
+    public function getAllChefSuggestions(Request $req) {
         try {
             $totalRecords = ChefSuggestion::count();
             $skip = $req->page * 10;
@@ -1248,8 +1205,7 @@ class AdminController extends Controller
         }
     }
 
-    public function getAdminDshboardCount(Request $req)
-    {
+    public function getAdminDshboardCount(Request $req) {
         try {
             $driver = Driver::count();
             $chef = chef::count();
@@ -1265,21 +1221,20 @@ class AdminController extends Controller
         }
     }
 
-    public function getAllOrderDetails(Request $req)
-    {
+    public function getAllOrderDetails(Request $req) {
         try {
             $query = Order::query();
-            if ($req->filter) {
-                if ($req->from_date) {
+            if($req->filter) {
+                if($req->from_date) {
                     $query->whereDate('created_at', '>=', $req->from_date);
                 }
-                if ($req->to_date) {
+                if($req->to_date) {
                     $query->whereDate('created_at', '<=', $req->to_date);
                 }
-                if ($req->user_id) {
+                if($req->user_id) {
                     $query->where('user_id', $req->user_id);
                 }
-                if ($req->chef_id) {
+                if($req->chef_id) {
                     $query->whereHas('subOrders', function ($subQuery) use ($req) {
                         $subQuery->where('chef_id', $req->chef_id);
                     });
@@ -1295,15 +1250,14 @@ class AdminController extends Controller
         }
     }
 
-    public function getAdminOrderDetailsById(Request $req)
-    {
+    public function getAdminOrderDetailsById(Request $req) {
         // Validation
         $validator = Validator::make($req->all(), [
             'id' => 'required|integer',
             // Adjust validation rules as needed
         ]);
 
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => "Validation failed", "errors" => $validator->errors()->first(), "success" => false], 400);
         }
 
@@ -1314,15 +1268,15 @@ class AdminController extends Controller
 
             $trackDetails = [];
 
-            foreach ($data as $order) {
-                foreach ($order->subOrders as $subOrder) {
+            foreach($data as $order) {
+                foreach($order->subOrders as $subOrder) {
                     $trackId = $subOrder->track_id;
                     $trackDetail = OrderTrackDetails::where('track_id', $trackId)->get();
                     $trackDetails[$trackId] = $trackDetail;
                 }
             }
 
-            if ($data->isEmpty()) {
+            if($data->isEmpty()) {
                 return response()->json(["message" => "No orders found", "success" => true], 200);
             }
 
@@ -1335,8 +1289,7 @@ class AdminController extends Controller
     }
 
 
-    public function getAllSubOrderDetails(Request $req)
-    {
+    public function getAllSubOrderDetails(Request $req) {
         try {
             $subOrders = SubOrders::with('orderItems.foodItem.chef')->with('Orders')->get();
             return response()->json(["subOrders" => $subOrders, "success" => true], 200);
@@ -1347,15 +1300,14 @@ class AdminController extends Controller
         }
     }
 
-    public function getAdminSubOrderDetailsById(Request $req)
-    {
+    public function getAdminSubOrderDetailsById(Request $req) {
         // Validation
         $validator = Validator::make($req->all(), [
             'id' => 'required|integer',
             // Adjust validation rules as needed
         ]);
 
-        if ($validator->fails()) {
+        if($validator->fails()) {
             return response()->json(["message" => "Validation failed", "errors" => $validator->errors()->first(), "success" => false], 400);
         }
 
@@ -1366,15 +1318,15 @@ class AdminController extends Controller
 
             $trackDetails = [];
 
-            foreach ($data as $order) {
-                foreach ($order->subOrders as $subOrder) {
+            foreach($data as $order) {
+                foreach($order->subOrders as $subOrder) {
                     $trackId = $subOrder->track_id;
                     $trackDetail = OrderTrackDetails::where('track_id', $trackId)->get();
                     $trackDetails[$trackId] = $trackDetail;
                 }
             }
 
-            if ($data->isEmpty()) {
+            if($data->isEmpty()) {
                 return response()->json(["message" => "No orders found", "success" => true], 200);
             }
 

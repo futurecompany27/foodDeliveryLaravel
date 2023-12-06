@@ -332,9 +332,7 @@ Route::controller(commonFunctions::class)->group(function () {
 
     Route::post("/updateDriverScheduleCallStatus", 'updateDriverScheduleCallStatus');
     Route::get("/getAllDriverScheduleCall", 'getAllDriverScheduleCall');
-
-    // Route::get("/getAllChefs", 'getAllChefs');
-
+    
     Route::post('/sendPasswordResetLink', 'sendPasswordResetLink');
     Route::post('/verifyToken', 'verifyToken');
     Route::post('/changePasswordwithToken', 'changePasswordwithToken');
