@@ -34,7 +34,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/test', function () {
-    return response()->json(['message' => 'Wlcome to HomePlate', 'success' => true],200);
+    return response()->json(['message' => 'Wlcome to HomePlate', 'success' => true], 200);
 });
 
 // Route for driver
@@ -53,8 +53,8 @@ Route::controller(DriverController::class)->group(function () {
     Route::post('/getMyDetails', 'getMyDetails');
     Route::post('/driverUpdateEmail', 'driverUpdateEmail');
     Route::post('/VerifyDriverEmail', 'VerifyDriverEmail');
-    
-    
+
+
     Route::post('/updateLatLongAndGetListOfOrdersForDriver', 'updateLatLongAndGetListOfOrdersForDriver');
 });
 

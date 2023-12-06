@@ -199,6 +199,7 @@ class AdminController extends Controller
             'student_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
             'food_default_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
             "radius" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
+            "radiusForDriver" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
         ], [
             "default_comm.required" => "Please fill default_comm",
             "default_comm.regex" => "Please enter valid default_comm",
@@ -213,6 +214,7 @@ class AdminController extends Controller
             "food_default_comm.required" => "Please fill food_default_comm",
             "food_default_comm.regex" => "Please enter valid food_default_comm",
             "radius.required" => "Please fill radius",
+            "radiusForDriver.required" => "Please fill radius for driver",
         ]);
 
         if ($validator->fails()) {
@@ -227,6 +229,8 @@ class AdminController extends Controller
             $adminSetting->student_comm = $req->student_comm;
             $adminSetting->food_default_comm = $req->food_default_comm;
             $adminSetting->radius = $req->radius;
+            $adminSetting->radiusForDriver = $req->radiusForDriver;
+            $adminSetting->Work_with_us_content = $req->Work_with_us_content;
 
             $adminSetting->save();
             return response()->json(["message" => "Submitted successfully", "success" => true], 200);
@@ -248,11 +252,11 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            Log::info($req->all());
             // Check if the value exceeds 500
-            if ($req->all() > 500) {
-                return response()->json(["message" => "The input value must be lower than 500.", "success" => false], 400);
-            }
-            $data = Adminsetting::where('id', $req->id)->first();
+            // if ($req->all() > 500) {
+            //     return response()->json(["message" => "The input value must be lower than 500.", "success" => false], 400);
+            // }
             $updateData = $req->all();
 
             Adminsetting::where('id', $req->id)->update($updateData);
@@ -931,7 +935,7 @@ class AdminController extends Controller
         try {
             $totalRecords = User::count();
             if ($req->list) {
-                $data = User::select('id', 'firstName','lastName')->get();
+                $data = User::select('id', 'firstName', 'lastName')->get();
             } else {
                 $skip = $req->page * 10;
                 $data = User::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
@@ -951,12 +955,47 @@ class AdminController extends Controller
     function getAllChefs(Request $req)
     {
         try {
-            $totalRecords = chef::count();
             if ($req->list) {
+                $totalRecords = chef::count();
                 $data = chef::select('id', 'firstName', 'lastName')->get();
             } else {
-                Log::info('true');
-                $query = chef::orderBy('created_at', 'desc')->withCount([
+                $query = chef::query();
+                if ($req->postalCodes) {
+
+                    $postalCodes = explode(',', $req->postalCodes);
+
+                    $query->where(function ($q) use ($postalCodes) {
+                        foreach ($postalCodes as $postalCode) {
+                            $q->orWhere('postal_code', 'like', $postalCode . '%');
+                        }
+                    });
+                }
+
+                if ($req->kitchenTypes) {
+
+                    $kitchenTypes = explode(',', $req->kitchenTypes);
+                    $query->where(function ($q) use ($kitchenTypes) {
+                        foreach ($kitchenTypes as $value) {
+                            $q->whereJsonContains('kitchen_types', $value);
+                        }
+                    });
+                }
+
+                if ($req->weekDay_availibilty) {
+
+                    $weekDay_availibilty = explode(',', $req->weekDay_availibilty);
+                    $query->where(function ($q) use ($weekDay_availibilty) {
+                        foreach ($weekDay_availibilty as $key => $value) {
+                            $q->whereJsonContains('foodAvailibiltyOnWeekdays', $value);
+                        }
+                    });
+                }
+
+                if ($req->status) {
+                    $query->where('status', $req->status);
+                }
+
+                $query->orderBy('created_at', 'desc')->withCount([
                     'foodItems as active_food_items_count' => function ($query) {
                         $query->where('approved_status', 'active');
                     },
@@ -972,6 +1011,7 @@ class AdminController extends Controller
                 $skip = $req->page * 10;
 
                 $data = $query->skip($skip)->take(10)->get();
+                $totalRecords = $query->count();
             }
 
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
@@ -1194,11 +1234,13 @@ class AdminController extends Controller
         }
     }
 
-    public function getAllChefSuggestions()
+    public function getAllChefSuggestions(Request $req)
     {
         try {
-            $data = ChefSuggestion::all();
-            return response()->json(["data" => $data, "success" => true], 200);
+            $totalRecords = ChefSuggestion::count();
+            $skip = $req->page * 10;
+            $data = ChefSuggestion::with('chef')->skip($skip)->take(10)->get();
+            return response()->json(["data" => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             DB::rollback();

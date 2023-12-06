@@ -20,7 +20,9 @@ return new class extends Migration
             $table->integer('student_comm')->default(0.0)->nullable();
             $table->integer('food_default_comm')->default(0.0)->nullable();
             $table->integer('radius')->default(1)->comment("shef find with in this range to customer");
+            $table->integer('radiusForDriver')->default(5);
             $table->integer('multiChefOrderAllow')->default(5)->comment("user can add multi chef order if its under this range");
+            $table->longText('Work_with_us_content')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

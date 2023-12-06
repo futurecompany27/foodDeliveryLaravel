@@ -738,7 +738,7 @@ class ChefController extends Controller
                 $foodItem->serving_unit = $req->serving_unit;
                 $foodItem->serving_person = $req->serving_person;
                 $foodItem->price = $req->price;
-                $foodItem->comments = isset($req->comments) ? $req->comments :'';
+                $foodItem->comments = isset($req->comments) ? $req->comments : '';
                 $foodItem->save();
                 DB::commit();
                 $chefDetail = chef::find($req->chef_id);
@@ -786,7 +786,7 @@ class ChefController extends Controller
                     }
                     $value['allergies'] = $AllergyArr;
                 }
-                
+
                 // dietary 
                 if ($value['dietary']) {
                     $DieatryArr = $value['dietary'];
@@ -804,7 +804,7 @@ class ChefController extends Controller
                     }
                     $value['ingredients'] = $IngredientArr;
                 }
-                
+
                 // geographical cuisines
                 if ($value['geographicalCuisine']) {
                     $geographicalCuisine = $value['geographicalCuisine'];
@@ -813,7 +813,7 @@ class ChefController extends Controller
                     }
                     $value['geographicalCuisine'] = $geographicalCuisine;
                 }
-                
+
                 if ($chefData->chefAvailibilityWeek && in_array($req->todaysWeekDay, $chefData->chefAvailibilityWeek)) {
                     // Determine availability based on the condition
                     $value['available'] = $req->todaysWeekDay ? in_array($req->todaysWeekDay, $value->foodAvailibiltyOnWeekdays) : false;
@@ -1309,8 +1309,8 @@ class ChefController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
-        if (!File::exists("storage/chef/suggestions")) {
-            File::makeDirectory("storage/chef/suggestions", $mode = 0777, true, true);
+        if (!file_exists('storage/chef/suggestions')) {
+            mkdir('storage/chef/suggestions', 0755, true);
         }
         try {
             DB::beginTransaction();
