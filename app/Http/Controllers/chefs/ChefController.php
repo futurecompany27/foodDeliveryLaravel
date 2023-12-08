@@ -732,6 +732,7 @@ class ChefController extends Controller
                 $foodItem->dietary = json_decode($req->dietary);
                 $foodItem->heating_instruction_id = $req->heating_instruction_id;
                 $foodItem->heating_instruction_description = $req->heating_instruction_description;
+                $foodItem->packageInstructions = $req->packageInstructions;
                 $foodItem->package = $req->package;
                 $foodItem->size = $req->size;
                 $foodItem->expiresIn = $req->expiresIn;
