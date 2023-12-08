@@ -28,6 +28,7 @@ class cartController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            Log::info($req);
             $mycart = Cart::where("user_id", $req->user_id)->first();
             if ($mycart) {
                 Cart::where("user_id", $req->user_id)->update(['cartData' => $req->cartData]);

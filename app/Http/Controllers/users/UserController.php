@@ -897,9 +897,23 @@ class UserController extends Controller
                 ];
             }
 
+            $lat_long_result_array = $this->get_lat_long($req->postal_code);
+
+            if ($lat_long_result_array["result"] == 1) {
+                /***** Now from the customer postal code we need to find the ******/
+                $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
+                foreach ($selected_postal_code as &$value) {
+                    $value = str_replace(" ", "", strtoupper($value));
+                }
+            }
+
             // getting counts of the available shefs for next 14 days
             foreach ($dateList as &$val) {
-                $query = chef::where('postal_code', strtoupper(str_replace(" ", "", $req->postal_code)));
+                $query = chef::where(function ($q) use ($selected_postal_code) {
+                    foreach ($selected_postal_code as $postalCode) {
+                        $q->orWhere('postal_code', 'like', $postalCode . '%');
+                    }
+                });
                 if ($req->kitchen_type_id) {
                     $cuisine = Kitchentype::find($req->kitchen_type_id);
                     $query->whereJsonContains('kitchen_types', $cuisine->kitchentype);
