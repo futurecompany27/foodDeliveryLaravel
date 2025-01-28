@@ -2,11 +2,11 @@
 <html>
 
 <head>
-    <title>HomeShef Registration </title>
+    <title>Homeplate User Email Verification </title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 
-<body> <b>Hi {{ucfirst($firstName)}} {{ucfirst($lastName)}}</b>
+<body> <b>Hi {{ ucfirst($firstName) }} {{ ucfirst($lastName) }}</b>
     <p>Your account has been created successfully.</p>
     <p>You may access your
         account only after the verification of your documents and details.</p>
@@ -16,11 +16,15 @@
         Email
         Verification<a>
 
-            <p>Regards,</p>
-            <img src="{{env('filePath') . 'storage/admin/logos/mainlogo.png'}}" class="object-fit-cover img-fluid"
+            <br>
+            <br>
+            <br>
+
+            <p style="margin: 0px; padding: 0px">Regards,</p>
+            <p style="margin: 0px; padding: 0px">Homeplate Team</p>
+            <img src="{{ env('filePath') . 'storage/admin/new_logos/main-logo-mail.png' }}" class="object-fit-cover img-fluid"
                 width="80" alt="">
-            <p>Homeplate Team</p>
-            <p>support@homeplate.ca</p>
+            <p style="margin: 0px; padding: 0px">support@homeplate.ca</p>
 </body>
 
 </html>

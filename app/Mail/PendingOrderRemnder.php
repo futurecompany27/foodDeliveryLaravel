@@ -20,6 +20,8 @@ class PendingOrderRemnder extends Mailable
 
     public function build()
     {
-        return $this->view('orderReminder', ['subject' => "Chef declined order", 'chefName' => $this->mail['chefName'], 'timeElapsedInMinutes' => $this->mail['remaningTime'], 'slot' => $this->mail['slot']]);
+        return $this
+        ->subject('Chef Decline the Order')
+        ->view('orderReminder', ['subject' => "Chef declined order", 'chefName' => $this->mail['chefName'], 'timeElapsedInMinutes' => $this->mail['remaningTime'], 'slot' => $this->mail['slot']]);
     }
 }

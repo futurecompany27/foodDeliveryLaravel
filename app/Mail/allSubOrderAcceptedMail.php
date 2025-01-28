@@ -21,6 +21,9 @@ class allSubOrderAcceptedMail extends Mailable {
     }
 
     public function build() {
-        return $this->view('allOrderHasBeenAccepted', ['subject' => 'Exciting News: Your Orders (Order ID: '.$this->mail['order_id'].') are Underway!', 'userName' => $this->mail['userName'], 'chefName' => $this->mail['chefName'], 'order_id' => $this->mail['order_id']]);
+        return $this
+        // ->subject('Your Order ID:'. $this->mail['order_id'] . 'are Underway!')
+        ->subject('Your Order ID: ('. $this->mail['order_id'].') Has Been Accepted by our Chef!')
+        ->view('allOrderHasBeenAccepted', ['subject' => 'Exciting News: Your Orders (Order ID: '.$this->mail['order_id'].') are Underway!', 'userName' => $this->mail['userName'], 'chefName' => $this->mail['chefName'], 'order_id' => $this->mail['order_id']]);
     }
 }

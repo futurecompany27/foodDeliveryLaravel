@@ -24,6 +24,7 @@ class HomeshefCustomerEmailVerifiedSuccessfully extends Mailable
 
     public function build()
     {
-        return $this->view('userEmailVerifiedSuccessfully', ['id' => $this->userDetails->id, 'firstName' => ucfirst($this->userDetails->firstName), 'lastName'=> ucfirst($this->userDetails->lastName)]);
+        return $this->subject('Homeplate Email Verification Successfully')
+            ->view('userEmailVerifiedSuccessfully', ['id' => $this->userDetails->id, 'firstName' => ucfirst($this->userDetails->firstName), 'lastName' => ucfirst($this->userDetails->lastName)]);
     }
 }

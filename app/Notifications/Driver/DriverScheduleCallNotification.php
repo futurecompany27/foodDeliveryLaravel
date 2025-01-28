@@ -40,8 +40,8 @@ class DriverScheduleCallNotification extends Notification
         return [
             'id' => $this->ScheduleCall['id'],
             'driver_id' => $this->ScheduleCall['driver_id'],
-            'message' => ($this->ScheduleCall['firstName'] . ' ' . $this->ScheduleCall['lastName']) . ' has requested for call on ' . date('d M Y', strtotime($this->ScheduleCall['date'])) . ' between ' . $this->ScheduleCall['slot'] . '.',
-            'url' => '/admin/shef-call-request'
+            'message' => ($this->ScheduleCall['driver']['firstName'] . ' ' . $this->ScheduleCall['driver']['lastName']) . ' has requested for call on ' . date('d M Y', strtotime($this->ScheduleCall['date'])) . ' between ' . $this->ScheduleCall['slot'] . '.',
+            'url' => '/admin/driver-call-request'
         ];
     }
 }

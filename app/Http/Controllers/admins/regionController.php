@@ -4,10 +4,13 @@ namespace App\Http\Controllers\admins;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\utility\commonFunctions;
+use App\Models\Chef;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Driver;
 use App\Models\Pincode;
 use App\Models\PostalCode;
+use App\Models\ShippingAddresse;
 use App\Models\State;
 use Database\Seeders\CountrySeeder;
 use Illuminate\Http\Request;
@@ -20,7 +23,7 @@ class regionController extends Controller
     function addCountry(Request $req)
     {
         if (!$req->name || !$req->country_code) {
-            return response()->json(['message' => 'Please fill all the fields', 'success' => false], 400);
+            return response()->json(['messagedeleteCountry' => 'Please fill all the fields', 'success' => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -34,7 +37,7 @@ class regionController extends Controller
             $country->save();
             DB::commit();
             return response()->json(["message" => "Country added successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -55,7 +58,7 @@ class regionController extends Controller
             $updateData = $req->all();
             Country::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -73,9 +76,13 @@ class regionController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            $countryCheck = State::where('country_id', $req->id)->first();
+            if ($countryCheck) {
+                return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => true], 200);
+            }
             Country::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -86,7 +93,7 @@ class regionController extends Controller
     {
         try {
             return response()->json(['data' => Country::all(), "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -124,7 +131,7 @@ class regionController extends Controller
             $state->save();
             DB::commit();
             return response()->json(["message" => "State added successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
@@ -150,13 +157,17 @@ class regionController extends Controller
         if ($req->tax_type) {
             $updateData['tax_type'] = $req->tax_type;
         }
-        if ($req->tax_value) {
-            $updateData['tax_value'] = $req->tax_value;
+        if (is_array($req->tax_value)) {
+            $updateData['tax_value'] = array_map(function ($value) {
+                return round((float)$value, 2);
+            }, $req->tax_value);
+        } elseif ($req->tax_value) {
+            $updateData['tax_value'] = round((float)$req->tax_value, 2);
         }
         try {
             State::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -174,10 +185,14 @@ class regionController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            $checkState = City::where('state_id', $req->id)->first();
+            if ($checkState) {
+                return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => true], 200);
+            }
             $data = State::where('id', $req->id)->first();
             State::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -193,7 +208,7 @@ class regionController extends Controller
                 $data = State::with('country')->get();
             }
             return response()->json(['data' => $data, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -217,7 +232,7 @@ class regionController extends Controller
             $City->save();
             DB::commit();
             return response()->json(["message" => "City added successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -228,7 +243,7 @@ class regionController extends Controller
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
-            
+
         ], [
             "id.required" => "Please fill id",
         ]);
@@ -240,7 +255,7 @@ class regionController extends Controller
             $updateData = $req->all();
             City::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -258,10 +273,14 @@ class regionController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            $checkCity = Pincode::where('city_id', $req->id)->first();
+            if ($checkCity) {
+                return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => true], 200);
+            }
             $data = City::where('id', $req->id)->first();
             City::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -285,7 +304,7 @@ class regionController extends Controller
                 ])->get();
             }
             return response()->json(['data' => $data, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -311,7 +330,7 @@ class regionController extends Controller
             $Pincode->save();
             DB::commit();
             return response()->json(["message" => "Postal Code Added Successfully ", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false]);
@@ -336,12 +355,13 @@ class regionController extends Controller
             $updateData['longitude'] = $req->long;
             Pincode::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
 
     function deletePincode(Request $req)
     {
@@ -354,9 +374,31 @@ class regionController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            $pincode = Pincode::find($req->id);
+            $shipping = ShippingAddresse::where('postal_code', $pincode->pincode)->first();
+            if ($shipping) {
+                // If the pincode exists in the shipping table, return the message
+                return response()->json(['success' => false, 'message' => 'You cannot delete this pincode.'], 400);
+            }
+            $chef = Chef::where('postal_code', $pincode->pincode)->first();
+            if ($chef) {
+                // If the pincode exists in the chef table, return the message
+                return response()->json(['success' => false, 'message' => 'You cannot delete this pincode.'], 400);
+            }
+            $driver = Driver::where('postal_code', $pincode->pincode)->first();
+            if ($driver) {
+                // If the pincode exists in the driver table, return the message
+                return response()->json(['success' => false, 'message' => 'You cannot delete this pincode.'], 400);
+            }
+
+            $countryCheck = State::where('country_id', $req->id)->first();
+            if ($countryCheck) {
+                return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => true], 200);
+            }
+            // check postol code in multiple table like driver, chef
             Pincode::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+            return response()->json(['message' => 'Pincode Deleted successfully', "success" => true], 200);
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -367,7 +409,7 @@ class regionController extends Controller
     {
         try {
             if ($req->city_id) {
-                $data = Pincode::where('city_id',$req->city_id)->with([
+                $data = Pincode::where('city_id', $req->city_id)->with([
                     'city' => function ($query) {
                         $query->select('id', 'state_id');
                     },
@@ -375,10 +417,10 @@ class regionController extends Controller
                         $query->select('id', 'country_id');
                     }
                 ])->get();
-            }else{
+            } else {
                 if ($req->status) {
                     $data = Pincode::where('status', $req->status)->get();
-                }else{
+                } else {
                     $data = Pincode::with([
                         'city' => function ($query) {
                             $query->select('id', 'state_id');
@@ -390,7 +432,7 @@ class regionController extends Controller
                 }
             }
             return response()->json(['data' => $data, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -415,7 +457,7 @@ class regionController extends Controller
             }
             Country::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -440,7 +482,7 @@ class regionController extends Controller
             }
             State::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -466,7 +508,7 @@ class regionController extends Controller
             // $updateData = $req->status;
             City::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);

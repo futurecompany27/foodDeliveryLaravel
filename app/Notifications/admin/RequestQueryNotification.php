@@ -2,6 +2,7 @@
 
 namespace App\Notifications\admin;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -44,7 +45,7 @@ class RequestQueryNotification extends Notification
             'type' => $this->request_query->type,
             'id' => $this->request_query->chef_id,
             'request_for' => $this->request_query->request_for,
-            'message' => 'One Request update profile coming from the chef.',
+            'message' => ($this->request_query->chef['firstName'].' '. $this->request_query->chef['lastName'] .' has submitted a request to update their information in the chef panel on. ' . date('d M Y', strtotime(Carbon::now())) . '.'),
             'url' => '/admin/chef-change-request'
         ];
     }

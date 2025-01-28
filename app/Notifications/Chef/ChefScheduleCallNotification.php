@@ -42,7 +42,7 @@ class ChefScheduleCallNotification extends Notification
         return [
             'id' => $this->ScheduleCall['id'],
             'chef_id' => $this->ScheduleCall['chef']->chef_id,
-            'message' => ($this->ScheduleCall['chef']->firstName . ' ' . $this->ScheduleCall['chef']->firstName) . ' has requested for call on ' . date('d M Y', strtotime($this->ScheduleCall['date'])) . ' between ' . $this->ScheduleCall['slot'] . '.',
+            'message' => (ucfirst($this->ScheduleCall['chef']->firstName) . ' ' . ucfirst($this->ScheduleCall['chef']->lastName) . ' has requested for call on ' . date('d M Y', strtotime($this->ScheduleCall['date'])) . ' between ' . $this->ScheduleCall['slot'] . '.'),
             'url' => '/admin/chef-call-request'
         ];
     }

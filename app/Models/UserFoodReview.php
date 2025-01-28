@@ -16,7 +16,7 @@ class UserFoodReview extends Model
 
     public function chef()
     {
-        return $this->belongsTo(chef::class);
+        return $this->belongsTo(Chef::class);
     }
     public function food()
     {

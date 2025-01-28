@@ -9,4 +9,9 @@ class Otp extends Model
 {
     use HasFactory;
     protected $fillable = ['email', 'mobile', 'otp_number'];
+
+    public function driver()
+    {
+        return $this->belongsTo(Driver::class);
+    }
 }

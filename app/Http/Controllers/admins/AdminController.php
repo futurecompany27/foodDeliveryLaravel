@@ -4,13 +4,13 @@ namespace App\Http\Controllers\admins;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\users\UserController;
-use App\Mail\MessageFromAdminToChef;
+use App\Mail\MessageFromHomeplateTeamToChef;
 use App\Models\Admin;
 use App\Models\Adminsetting;
 use App\Models\Allergy;
-use App\Models\chef;
+use App\Models\Chef;
 use App\Models\ChefReview;
-use App\Models\chefReviewDeleteRequest;
+use App\Models\ChefReviewDeleteRequest;
 use App\Models\ChefSuggestion;
 use App\Models\Contact;
 use App\Models\Dietary;
@@ -26,16 +26,23 @@ use App\Models\RequestForUserBlacklistByChef;
 use App\Models\Sitesetting;
 use App\Models\SubOrders;
 use App\Models\User;
+use App\Notifications\Chef\ChefEmailNotification;
+use App\Notifications\Chef\NewChefReviewNotification;
+use App\Notifications\Chef\NewReviewNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\Paginator;
+use PDF;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\ImageManagerStatic as Image;
 // use Intervention\Image\Image; //Intervention Image
 use Illuminate\Support\Facades\File;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class AdminController extends Controller
 {
@@ -74,7 +81,7 @@ class AdminController extends Controller
             $admin->save();
             DB::commit();
             return response()->json(["message" => "Registered successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -84,29 +91,73 @@ class AdminController extends Controller
     function adminLogin(Request $req)
     {
         $rules = [
-            'email' => 'required|email',
+            'email' => 'required|email|exists:admins,email',
             'password' => 'required|min:8'
         ];
         $validate = Validator::make($req->all(), $rules);
         if ($validate->fails()) {
-            return response()->json(["message" => $validate->errors(), "success" => false], 400);
+            return response()->json(["message" => $validate->errors()->first(), "success" => false], 400);
         }
         try {
             $adminDetail = Admin::where("email", $req->email)->first();
             if ($adminDetail) {
                 $adminDetail->makeVisible('password');
                 if (Hash::check($req->password, $adminDetail['password'])) {
-                    return response()->json(["message" => "You are logged in now !", 'admin_id' => $adminDetail->id, "success" => true], 200);
+                    if (!$token = auth('admin')->attempt(['email' => $req->email, 'password' => $req->password])) {
+                        return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+                    }
+                    // return Admin::createToken($token);
+                    return response()->json(["message" => "You are logged in now !", 'admin_id' => $adminDetail->id, 'token' => Admin::createToken($token), "success" => true], 200);
                 } else {
                     return response()->json(['message' => 'Invalid Password ! ', 'success' => false], 500);
                 }
-            } else {
-                return response()->json(['message' => 'Invalid Password ! ', 'success' => false], 500);
             }
-        } catch (\Throwable $th) {
+            return response()->json(['message' => 'Login failed due to incorrect credentials ! ', 'success' => false], 500);
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
+        }
+    }
+
+    public function adminProfile()
+    {
+        // Retrieve the authenticated user
+        $admin = auth()->guard('admin')->user();
+        // Check if the user is authenticated
+        if (!$admin) {
+            return response()->json(['message' => 'admin not found', 'success' => false], 404);
+        }
+        // Return the user's profile
+        return response()->json(['success' => true, 'data' => $admin], 200);
+    }
+
+    public function adminLogout()
+    {
+        auth()->guard('admin')->logout();
+
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function adminRefreshToken()
+    {
+        try {
+            // Get the current token
+            $currentToken = JWTAuth::getToken();
+
+            // Refresh the token
+            $newToken = JWTAuth::refresh($currentToken);
+
+            // Return the new token in the same format as in createToken
+            return response()->json([
+                'access_token' => $newToken,
+                'token_type' => 'bearer',
+                'expires_in' => auth()->factory()->getTTL() * 720, // 24 hours in seconds
+                'success' => true,
+                'message' => 'Token refreshed successfully!'
+            ]);
+        } catch (JWTException $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to refresh token, please try again'], 500);
         }
     }
 
@@ -144,7 +195,7 @@ class AdminController extends Controller
                 $siteSeting->save();
                 return response()->json(['message' => "Added Successfully", "success" => true], 200);
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
@@ -163,9 +214,9 @@ class AdminController extends Controller
         }
         try {
             $data = Sitesetting::where('id', $req->id)->first();
-            Sitesetting::where('id', $req->id)->delete();
+            $data->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -183,7 +234,7 @@ class AdminController extends Controller
                 'data' => $data,
                 'TotalRecords' => $totalRecords,
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
@@ -193,14 +244,18 @@ class AdminController extends Controller
     public function addAdminSettings(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            "default_comm" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
-            'refugee_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
-            'singlemom_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
-            "lostjob_comm" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
-            'student_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
-            'food_default_comm' => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
-            "radius" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
-            "radiusForDriver" => 'required|regex:^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$',
+            // "default_comm" => 'required|regex:/^(?:[0-4]?\d\d|500|\d+(\.\d+)?)$/',
+            "default_comm" => 'required',
+            'refugee_comm' => 'required',
+            'singlemom_comm' => 'required',
+            "lostjob_comm" => 'required',
+            'student_comm' => 'required',
+            'food_default_comm' => 'required',
+            "radius" => 'required',
+            "radiusForDriver" => 'required',
+            "food_handler_certificate_cost" => 'required',
+            "restaurant_and_retail_license_cost" => 'required',
+            "certificate_handling_cost" => 'required',
         ], [
             "default_comm.required" => "Please fill default_comm",
             "default_comm.regex" => "Please enter valid default_comm",
@@ -216,6 +271,9 @@ class AdminController extends Controller
             "food_default_comm.regex" => "Please enter valid food_default_comm",
             "radius.required" => "Please fill radius",
             "radiusForDriver.required" => "Please fill radius for driver",
+            "food_handler_certificate_cost.required" => "Please fill food handler certificate cost",
+            "restaurant_and_retail_license_cost.required" => "Please fill restaurant and retail license cost",
+            "certificate_handling_cost.required" => "Please fill certificate handling cost",
         ]);
 
         if ($validator->fails()) {
@@ -232,15 +290,19 @@ class AdminController extends Controller
             $adminSetting->radius = $req->radius;
             $adminSetting->radiusForDriver = $req->radiusForDriver;
             $adminSetting->Work_with_us_content = $req->Work_with_us_content;
+            $adminSetting->food_handler_certificate_cost = $req->food_handler_certificate_cost;
+            $adminSetting->restaurant_and_retail_license_cost = $req->restaurant_and_retail_license_cost;
+            $adminSetting->certificate_handling_cost = $req->certificate_handling_cost;
 
             $adminSetting->save();
             return response()->json(["message" => "Submitted successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
+
 
     public function updateAdminSettings(Request $req)
     {
@@ -262,7 +324,7 @@ class AdminController extends Controller
 
             Adminsetting::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -282,7 +344,7 @@ class AdminController extends Controller
         try {
             Adminsetting::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -293,10 +355,9 @@ class AdminController extends Controller
     {
         try {
             $data = Adminsetting::latest()->first();
-            return response()->json(['data' => $data]);
-        } catch (\Throwable $th) {
+            return response()->json(['success' => true, 'data' => $data]);
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
@@ -327,7 +388,7 @@ class AdminController extends Controller
             $foodcategory->image = $filename;
             $foodcategory->save();
             return response()->json(["message" => "Submitted successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -365,7 +426,7 @@ class AdminController extends Controller
             }
             FoodCategory::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -391,7 +452,7 @@ class AdminController extends Controller
             }
             FoodCategory::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong', 'success' => false], 500);
@@ -441,7 +502,7 @@ class AdminController extends Controller
             ]);
             DB::commit();
             return response()->json(["message" => "Added successfully", "success" => true], 201);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -491,7 +552,7 @@ class AdminController extends Controller
             }
             Allergy::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -517,7 +578,7 @@ class AdminController extends Controller
             }
             Allergy::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
@@ -567,7 +628,7 @@ class AdminController extends Controller
             ]);
             DB::commit();
             return response()->json(["message" => "Added successfully", "success" => true], 201);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -616,7 +677,7 @@ class AdminController extends Controller
             }
             Dietary::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -642,7 +703,7 @@ class AdminController extends Controller
             }
             Dietary::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
@@ -667,7 +728,7 @@ class AdminController extends Controller
             $heating->description = $req->description;
             $heating->save();
             return response()->json(["message" => "Submitted successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -689,7 +750,7 @@ class AdminController extends Controller
             $updateData = $req->all();
             HeatingInstruction::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -710,7 +771,7 @@ class AdminController extends Controller
             $data = HeatingInstruction::where('id', $req->id)->first();
             HeatingInstruction::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -736,7 +797,7 @@ class AdminController extends Controller
             // $updateData = $req->status;
             HeatingInstruction::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -763,7 +824,7 @@ class AdminController extends Controller
                 $ingredient->save();
                 return response()->json(["message" => "Submitted successfully", "success" => true], 200);
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -785,7 +846,7 @@ class AdminController extends Controller
             $updateData = $req->all();
             Ingredient::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -806,7 +867,7 @@ class AdminController extends Controller
             $data = Ingredient::where('id', $req->id)->first();
             Ingredient::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -832,7 +893,7 @@ class AdminController extends Controller
             // $updateData = $req->status;
             Ingredient::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -864,7 +925,7 @@ class AdminController extends Controller
     //         // $email = $data->email;
     //         // $mobile = $data->mobile;
     //         return response()->json(['message' => 'Message Sent Successfully', "success" => true], 200);
-    //     } catch (\Throwable $th) {
+    //     } catch (\Exception $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
     //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -885,7 +946,7 @@ class AdminController extends Controller
     //         $updateData = $req->all();
     //         Contact::where('id', $req->id)->update($updateData);
     //         return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-    //     } catch (\Throwable $th) {
+    //     } catch (\Exception $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
     //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -905,7 +966,7 @@ class AdminController extends Controller
     //     try {
     //         Contact::where('id', $req->id)->delete();
     //         return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-    //     } catch (\Throwable $th) {
+    //     } catch (\Exception $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
     //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -923,7 +984,7 @@ class AdminController extends Controller
     //             'TotalRecords' => $totalRecords,
     //             'success' => true
     //         ], 200);
-    //     } catch (\Throwable $th) {
+    //     } catch (\Exception $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
     //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -937,52 +998,126 @@ class AdminController extends Controller
             if ($req->list) {
                 $data = User::select('id', 'firstName', 'lastName')->get();
             } else {
-                $skip = $req->page * 10;
-                $data = User::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
+                // $skip = $req->page * 10;
+                $data = User::orderBy('created_at', 'desc')
+                    // ->skip($skip)->take(10)
+                    ->get();
+                // $data = User::orderBy('created_at', 'desc')->paginate(10);
             }
             return response()->json([
                 'data' => $data,
                 'TotalRecords' => $totalRecords,
                 'success' => true
             ], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
-    function getAllChefs(Request $req)
+    // function getAllChefs(Request $req)
+    // {
+    //     try {
+    //         if ($req->list)
+    //         {
+    //             $totalRecords = Chef::count();
+    //             $data = Chef::select('id', 'firstName', 'lastName')->get();
+    //         }
+    //         else
+    //         {
+    //             $query = Chef::query();
+    //             if ($req->postalCodes) {
+    //                 $postalCodes = explode(',', $req->postalCodes);
+    //                 $query->where(function ($q) use ($postalCodes) {
+    //                     foreach ($postalCodes as $postalCode) {
+    //                         $q->orWhere('postal_code', 'like', $postalCode . '%');
+    //                     }
+    //                 });
+    //             }
+
+    //             if ($req->kitchenTypes) {
+    //                 $kitchenTypes = explode(',', $req->kitchenTypes);
+    //                 $query->where(function ($q) use ($kitchenTypes) {
+    //                     foreach ($kitchenTypes as $value) {
+    //                         $q->whereJsonContains('kitchen_types', $value);
+    //                     }
+    //                 });
+    //             }
+
+    //             if ($req->weekDay_availibilty) {
+    //                 $weekDay_availibilty = explode(',', $req->weekDay_availibilty);
+    //                 Log::info($weekDay_availibilty);
+    //                 $query->where(function ($q) use ($weekDay_availibilty) {
+    //                     foreach ($weekDay_availibilty as $key => $value) {
+    //                         $q->whereJsonContains('chefAvailibilityWeek', $value);
+    //                     }
+    //                 });
+    //             }
+
+    //             if (isset($req->status)) {
+    //                 $query->where('status', $req->status);
+    //             }
+    //             $query->orderBy('created_at', 'desc')->withCount([
+    //                 'foodItems as active_food_items_count' => function ($query) {
+    //                     $query->where('approved_status', 'approved');
+    //                 },
+    //                 'foodItems as unapproved_food_items_count' => function ($query) {
+    //                     $query->where('approved_status', 'unapproved');
+    //                 }
+    //             ])->with([
+    //                 'chefDocuments' => fn ($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
+    //                     'documentItemFields' => fn ($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
+    //                 ])
+    //             ]);
+
+    //             $skip = $req->page * 10;
+
+    //             $data = $query->get();
+    //             $totalRecords = $query->count();
+    //         }
+
+    //         return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
+    //     } catch (\Exception $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => ($th->getMessage()).'Oops! Something went wrong.', 'success' => false], 500);
+    //     }
+    // }
+
+    public function getAllChefs(Request $req)
     {
         try {
-            if ($req->list) {
-                $totalRecords = chef::count();
-                $data = chef::select('id', 'firstName', 'lastName')->get();
+            $query = Chef::query();
+
+            // For list view, only select specific columns
+            if (!empty($req->list)) {
+                $query->select('id', 'firstName', 'lastName');
             } else {
-                $query = chef::query();
-                if ($req->postalCodes) {
+                // Apply filters based on the request
+                if (!empty($req->postalCodes)) {
                     $postalCodes = explode(',', $req->postalCodes);
                     $query->where(function ($q) use ($postalCodes) {
                         foreach ($postalCodes as $postalCode) {
-                            $q->orWhere('postal_code', 'like', $postalCode . '%');
+                            $q->orWhere('postal_code', 'like', "$postalCode%");
                         }
                     });
                 }
 
-                if ($req->kitchenTypes) {
+                if (!empty($req->kitchenTypes)) {
                     $kitchenTypes = explode(',', $req->kitchenTypes);
                     $query->where(function ($q) use ($kitchenTypes) {
-                        foreach ($kitchenTypes as $value) {
-                            $q->whereJsonContains('kitchen_types', $value);
+                        foreach ($kitchenTypes as $kitchenType) {
+                            $q->orWhereJsonContains('kitchen_types', $kitchenType);
                         }
                     });
                 }
 
-                if ($req->weekDay_availibilty) {
+                if (!empty($req->weekDay_availibilty)) {
                     $weekDay_availibilty = explode(',', $req->weekDay_availibilty);
                     $query->where(function ($q) use ($weekDay_availibilty) {
-                        foreach ($weekDay_availibilty as $key => $value) {
-                            $q->whereJsonContains('foodAvailibiltyOnWeekdays', $value);
+                        foreach ($weekDay_availibilty as $day) {
+                            $q->whereJsonContains('chefAvailibilityWeek', $day);
                         }
                     });
                 }
@@ -991,32 +1126,35 @@ class AdminController extends Controller
                     $query->where('status', $req->status);
                 }
 
-                $query->orderBy('created_at', 'desc')->withCount([
+                $query->withCount([
                     'foodItems as active_food_items_count' => function ($query) {
-                        $query->where('approved_status', 'active');
+                        $query->where('approved_status', 'approved');
                     },
-                    'foodItems as pending_food_items_count' => function ($query) {
-                        $query->where('approved_status', 'pending');
+                    'foodItems as unapproved_food_items_count' => function ($query) {
+                        $query->where('approved_status', 'unapproved');
                     }
                 ])->with([
-                            'chefDocuments' => fn($q) => $q->select('id', 'chef_id', 'document_field_id', 'field_value')->with([
-                                'documentItemFields' => fn($qr) => $qr->select('id', 'document_item_list_id', 'field_name', 'type', 'mandatory')
-                            ])
-                        ]);
-
-                $skip = $req->page * 10;
-
-                $data = $query->skip($skip)->take(10)->get();
-                $totalRecords = $query->count();
+                    'chefDocuments' => function ($q) {
+                        $q->select('id', 'chef_id', 'document_field_id', 'field_value')
+                            ->with('documentItemFields:id,document_item_list_id,field_name,type,mandatory');
+                    }
+                ])->orderBy('created_at', 'desc');
             }
 
+
+            $data = $query->get();
+
+            // For totalRecords, it should ideally be calculated before applying pagination to get accurate total count
+            $totalRecords = empty($req->list) ? $query->count() : count($data);
+
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
+        } catch (\Exception $th) {
+            Log::error($th->getMessage()); // It's better to use Log::error for exceptions
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
+
 
     public function getAllContactData(Request $req)
     {
@@ -1025,7 +1163,7 @@ class AdminController extends Controller
             $skip = $req->page * 10;
             $data = Contact::with('chef')->skip($skip)->take(10)->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1047,14 +1185,80 @@ class AdminController extends Controller
         try {
             Contact::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
-    function sendMailToChef(Request $req)
+    public function deleteContactData(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|integer|exists:contacts,id', // Ensure id is present, an integer, and exists in the contacts table
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400); // Return validation errors with appropriate status code
+        }
+        try {
+            DB::beginTransaction(); // Start transaction for potential rollback if errors occur
+            $contact = Contact::find($req->id);
+            if (!$contact) {
+                // Handle non-existent contact gracefully
+                return response()->json(['message' => 'Contact not found.', 'success' => false], 404);
+            }
+            $contact->delete();
+            DB::commit(); // Commit transaction if successful deletion
+
+            return response()->json(['message' => 'Contact deleted successfully.', 'success' => true], 200);
+        } catch (\Exception $th) {
+            DB::rollBack(); // Rollback transaction if any errors occur
+            Log::error($th->getMessage()); // Log the error message for debugging purposes
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        }
+    }
+
+    // function sendMailToChef(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         "chef_id" => 'required',
+    //         "subject" => 'required',
+    //         "body" => 'required',
+    //     ], [
+    //         "chef_id.required" => "Please fill chef id",
+    //         "subject.required" => "Please fill subject",
+    //         "body.required" => "Please fill body of mail",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+    //     }
+    //     try {
+    //         $chefDetail = Chef::select('email')->where('id', $req->chef_id)->first();
+    //         $mail = [
+    //             'subject' => $req->subject,
+    //             'body' => $req->body,
+    //             'chef' => $chefDetail,
+    //         ];
+    //         Log::info($mail);
+    //         try {
+    //             if (config('services.is_mail_enable')) {
+    //                 Mail::to(trim($chefDetail->email))->send(new messageFromAdminToChef($mail));
+    //             }
+    //         } catch (\Exception $e) {
+    //             Log::error($e);
+    //         }
+    //         $chefDetail->notify(new ChefEmailNotification($chefDetail));
+    //         return response()->json(['message' => "Mail has been sent to chef's register email", 'success' => true], 200);
+    //     } catch (\Exception $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
+    //     }
+    // }
+
+
+    public function sendMailToChef(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "chef_id" => 'required',
@@ -1065,22 +1269,41 @@ class AdminController extends Controller
             "subject.required" => "Please fill subject",
             "body.required" => "Please fill body of mail",
         ]);
+
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
         try {
-            $chefDetail = chef::select('email')->where('id', $req->chef_id)->first();
-            $mail = ['subject' => $req->subject, 'body' => $req->body];
-            Mail::to(trim($chefDetail->email))->send(new messageFromAdminToChef($mail));
-            return response()->json(['message' => "Mail has been sent to chef's register email", 'success' => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
+            $chefDetail = Chef::select('email', 'firstName', 'lastName')->where('id', $req->chef_id)->first();
+
+            if (!$chefDetail) {
+                return response()->json(['message' => 'Chef not found', 'success' => false], 404);
+            }
+            $mail = [
+                'chef_name' => $chefDetail->firstName,
+                'subject' => $req->subject,
+                'body' => $req->body,
+                // 'chef_email' => $chefDetail->email, // Pass only the email
+            ];
+            Log::info($mail);
+            // Notify chef
+            $chef = Chef::find($req->chef_id);
+            $chef->notify(new ChefEmailNotification($mail));
+            // Send email
+            if (config('services.is_mail_enable')) {
+                Mail::to(trim($chefDetail->email))->send(new MessageFromHomeplateTeamToChef($mail));
+            }
+
+            return response()->json(['message' => "Mail has been sent to chef's registered email", 'success' => true], 200);
+        } catch (\Exception $th) {
+            Log::error($th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
-    function updateChnageRequestStatus(Request $req)
+
+    function updateChangeRequestStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
@@ -1095,7 +1318,7 @@ class AdminController extends Controller
         try {
             RequestForUpdateDetails::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1105,10 +1328,10 @@ class AdminController extends Controller
     function getAllRequestForChefReviewDeletion()
     {
         try {
-            $TotalRecords = chefReviewDeleteRequest::where(['status' => 0])->count();
-            $data = chefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at')->where(['status' => 0])->get();
+            $TotalRecords = ChefReviewDeleteRequest::where(['status' => 0])->count();
+            $data = ChefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at')->where(['status' => 0])->get();
             return response()->json(['data' => $data, 'TotalRecords' => $TotalRecords, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1130,15 +1353,15 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $chefReviewDeleteRequest = chefReviewDeleteRequest::find($req->id);
-            chefReviewDeleteRequest::where('id', $req->id)->update(['status' => $req->status]);
+            $chefReviewDeleteRequest = ChefReviewDeleteRequest::find($req->id);
+            ChefReviewDeleteRequest::where('id', $req->id)->update(['status' => $req->status]);
             if ($req->status == 1) {
                 ChefReview::where('id', $req->review_id)->update(['status' => 2]);
             }
             $UserController = new UserController;
             $UserController->updateChefrating($chefReviewDeleteRequest->chef_id);
             return response()->json(["message" => 'Updated successfully', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1151,7 +1374,7 @@ class AdminController extends Controller
             $TotalRecords = RequestForUserBlacklistByChef::count();
             $data = RequestForUserBlacklistByChef::with(['user', 'chef', 'reviews'])->orderByDesc('created_at')->get();
             return response()->json(['data' => $data, 'TotalRecords' => $TotalRecords, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1174,15 +1397,15 @@ class AdminController extends Controller
         }
         try {
             DB::beginTransaction();
-            $chef = chef::find($req->chef_id);
+            $chef = Chef::find($req->chef_id);
 
             $blaclistedArray = isset($chef->blacklistedUser) ? $chef->blacklistedUser : [];
 
             array_push($blaclistedArray, $req->user_id);
 
-            chef::where('id', $req->chef_id)->update(['blacklistedUser' => $blaclistedArray]);
+            Chef::where('id', $req->chef_id)->update(['blacklistedUser' => $blaclistedArray]);
 
-            chefReviewDeleteRequest::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['status' => 1]);
+            ChefReviewDeleteRequest::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['status' => 1]);
 
             ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['status' => 2]);
 
@@ -1193,7 +1416,7 @@ class AdminController extends Controller
 
             DB::commit();
             return response()->json(['message' => 'Blacklisted successfully', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1213,17 +1436,17 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $chef = chef::find($req->chef_id);
+            $chef = Chef::find($req->chef_id);
 
             $blaclistedArray = $chef->blacklistedUser;
             $user_id = $req->user_id;
             $newArray = array_filter($blaclistedArray, function ($value) use ($user_id) {
                 return $value !== $user_id;
             });
-            chef::where('id', $req->chef_id)->update(['blacklistedUser' => $newArray]);
+            Chef::where('id', $req->chef_id)->update(['blacklistedUser' => $newArray]);
 
             return response()->json(['message' => 'Unblocked successfully', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1237,7 +1460,7 @@ class AdminController extends Controller
             $skip = $req->page * 10;
             $data = ChefSuggestion::with('chef')->skip($skip)->take(10)->get();
             return response()->json(["data" => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
@@ -1248,18 +1471,19 @@ class AdminController extends Controller
     {
         try {
             $driver = Driver::count();
-            $chef = chef::count();
+            $chef = Chef::count();
             $order = Order::count();
             $user = User::count();
             // $canelOrders = Order::where('')->count();
 
             return response()->json(["driver" => $driver, "chef" => $chef, "order" => $order, "user" => $user, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
+
 
     public function getAllOrderDetails(Request $req)
     {
@@ -1281,21 +1505,22 @@ class AdminController extends Controller
                     });
                 }
             }
+            $query->orderBy('created_at', 'desc');
             $query->with(['subOrders.orderItems.foodItem', 'subOrders.chefs']);
             $orders = $query->get();
             return response()->json(["orders" => $orders, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
 
     public function getAdminOrderDetailsById(Request $req)
     {
         // Validation
         $validator = Validator::make($req->all(), [
-            'id' => 'required|integer',
+            'id' => 'required|exists:orders,id',
             // Adjust validation rules as needed
         ]);
 
@@ -1307,7 +1532,16 @@ class AdminController extends Controller
             $data = Order::where('id', $req->id)
                 ->with('subOrders.orderItems.foodItem.chef')
                 ->get(); // Use get() to retrieve multiple orders, not just the first one
-
+            if ($data) {
+                foreach ($data as $order) {
+                    foreach ($order->subOrders as $subOrder) {
+                        // Decode sub_order_tax_detail if it's stored as a JSON string
+                        $subOrder->chef_commission_taxes = json_decode($subOrder->chef_commission_taxes, true);
+                        $subOrder->driver_commission_taxes = json_decode($subOrder->driver_commission_taxes, true);
+                        $subOrder->sub_order_tax_detail = json_decode($subOrder->sub_order_tax_detail, true);
+                    }
+                }
+            }
             $trackDetails = [];
 
             foreach ($data as $order) {
@@ -1319,11 +1553,11 @@ class AdminController extends Controller
             }
 
             if ($data->isEmpty()) {
-                return response()->json(["message" => "No orders found", "success" => true], 200);
+                return response()->json(["message" => "No orders found", "success" => true, 'data' => $data], 200);
             }
 
             return response()->json(["data" => $data, "trackDetails" => $trackDetails, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1334,9 +1568,16 @@ class AdminController extends Controller
     public function getAllSubOrderDetails(Request $req)
     {
         try {
-            $subOrders = SubOrders::with('orderItems.foodItem.chef')->with('Orders')->get();
+            $subOrders = SubOrders::with('orderItems.foodItem.chef')->with('Orders')->orderBy('created_at', 'desc')->get();
+            $subOrders->transform(function ($subOrder) {
+                if ($subOrder->chef_commission_taxes) {
+                    $subOrder->chef_commission_taxes = json_decode($subOrder->chef_commission_taxes, true);
+                }
+                return $subOrder;
+            });
+
             return response()->json(["subOrders" => $subOrders, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1375,7 +1616,7 @@ class AdminController extends Controller
             }
 
             return response()->json(["data" => $data, "trackDetails" => $trackDetails, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1413,7 +1654,7 @@ class AdminController extends Controller
                 $newTemplate->save();
                 return response()->json(['message' => 'Added template successfully', 'success' => true], 200);
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1429,12 +1670,13 @@ class AdminController extends Controller
             }
             $data = $query->get();
             return response()->json(['data' => $data, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
 
     public function updateTemplateStatus(Request $req)
     {
@@ -1448,7 +1690,7 @@ class AdminController extends Controller
         try {
             PackingTemplates::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => 'Updated template status successfully', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1466,10 +1708,175 @@ class AdminController extends Controller
         try {
             PackingTemplates::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
+    }
+
+    public function getChefAcceptedSuborder()
+    {
+        try {
+            $subOrder = SubOrders::whereIn('status', ['3', 'approve'])->get();
+            return response()->json(['message' => 'Deleted successfully', 'success' => true, 'data' => $subOrder], 200);
+        } catch (\Exception $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        }
+    }
+
+    public function getSubOrderAcceptedByChef(Request $req)
+    {
+        try {
+            // Fetch sub-orders with status "accepted" or '3'
+            $subOrders = SubOrders::whereIn('status', ['accepted', '3'])->get();
+
+            return response()->json(['success' => true, 'data' => $subOrders], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+        }
+    }
+
+    public function getSubOrderByDriver(Request $req)
+    {
+        try {
+            // Fetch sub-orders where driver_id is not null
+            $subOrders = SubOrders::whereNotNull('driver_id')->get();
+
+            return response()->json(['success' => true, 'message' => 'SubOrder fetched successfully', 'data' => $subOrders], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+        }
+    }
+
+    public function storeChefChecklist(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'chef_id' => 'required|exists:chefs,id',
+            'is_personal_details_completed' => 'sometimes|required|in:0,1',
+            'is_special_benefit_document_completed' => 'sometimes|required|in:0,1',
+            'is_document_details_completed' => 'sometimes|required|in:0,1',
+            'is_fhc_document_completed' => 'sometimes|required|in:0,1',
+            'is_rrc_certificate_document_completed' => 'sometimes|required|in:0,1',
+            'is_bank_detail_completed' => 'sometimes|required|in:0,1',
+            'is_social_detail_completed' => 'sometimes|required|in:0,1',
+            'is_kitchen_detail_completed' => 'sometimes|required|in:0,1',
+            'is_tax_document_completed' => 'sometimes|required|in:0,1'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => "Validation failed", "errors" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $chefChecklist = Chef::find($req->chef_id);
+
+            if (!$chefChecklist) {
+                return response()->json(['success' => false, 'message' => 'Chef not found'], 404);
+            }
+            $chefChecklist->update($req->only([
+                'is_personal_details_completed',
+                'is_special_benefit_document_completed',
+                'is_document_details_completed',
+                'is_fhc_document_completed',
+                'is_rrc_certificate_document_completed',
+                'is_bank_detail_completed',
+                'is_social_detail_completed',
+                'is_kitchen_detail_completed',
+                'is_tax_document_completed'
+            ]));
+
+            return response()->json(['success' => true, 'message' => 'Chef checklist updated successfully', 'data' => $chefChecklist], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+        }
+    }
+
+    public function storeDriverChecklist(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'driver_id' => 'required|exists:drivers,id',
+            'is_personal_details_completed' => 'sometimes|required|in:0,1',
+            'is_driving_license_document_completed' => 'sometimes|required|in:0,1',
+            'is_address_proof_document_completed' => 'sometimes|required|in:0,1',
+            'is_tax_document_completed' => 'sometimes|required|in:0,1',
+            'is_bank_document_detail' => 'sometimes|required|in:0,1'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(["message" => "Validation failed", "errors" => $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $driverChecklist = Driver::findOrFail($req->driver_id);
+            if (!$driverChecklist) {
+                return response()->json(['success' => false, 'message' => 'Driver not found'], 404);
+            }
+            $driverChecklist->update($req->only([
+                'is_personal_details_completed',
+                'is_driving_license_document_completed',
+                'is_address_proof_document_completed',
+                'is_tax_document_completed',
+                'is_bank_document_detail'
+            ]));
+
+            return response()->json(['success' => true, 'message' => 'Driver checklist updated successfully', 'data' => $driverChecklist], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+        }
+    }
+
+    // function ChefReviewInAdmin(Request $req)
+    // {
+    //     $validator = Validator::make(
+    //         $req->all(),
+    //         [
+    //             "user_id" => 'required|exists:users,id',
+    //             "chef_id" => 'required|exists:chefs,id',
+    //             "star_rating" => "required",
+    //             "message" => 'required',
+    //         ]
+    //     );
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" =>  $validator->errors()->first(), "success" => false], 400);
+    //     }
+    //     try {
+    //         $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id, 'status' => 1])->first();
+    //         if ($reviewExist) {
+    //             ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);
+    //         } else {
+    //             $newReview = new ChefReview();
+    //             $newReview->user_id = $req->user_id;
+    //             $newReview->chef_id = $req->chef_id;
+    //             $newReview->star_rating = $req->star_rating;
+    //             $newReview->message = $req->message;
+    //             $newReview->save();
+    //         }
+    //         $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
+    //         $reviewDetails['date'] = Carbon::now();
+    //         $chef = Chef::find($req->chef_id);
+    //         $chef->notify(new NewChefReviewNotification($reviewDetails));
+    //         $admins = Admin::all();
+    //         foreach ($admins as $admin) {
+    //             $admin->notify(new NewReviewNotification($reviewDetails));
+    //         }
+    //         $this->updateChefrating($req->chef_id);
+    //         return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+    //     } catch (\Exception $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['error' => $th->getMessage() . 'Oops! Something went wrong.', 'success' => false], 500);
+    //     }
+    // }
+
+    // This function is used in ChefReviewInAdmin Founction
+    function updateChefrating($chef_id)
+    {
+        $allReview = ChefReview::select('star_rating')->where(['chef_id' => $chef_id, 'status' => 1])->get();
+        $totalNoReview = ChefReview::where(['chef_id' => $chef_id, 'status' => 1])->count();
+        $totalStars = 0;
+        foreach ($allReview as $value) {
+            $totalStars = $totalStars + $value['star_rating'];
+        }
+        $rating = $totalStars / $totalNoReview;
+        Chef::where('id', $chef_id)->update(['rating' => $rating]);
     }
 }

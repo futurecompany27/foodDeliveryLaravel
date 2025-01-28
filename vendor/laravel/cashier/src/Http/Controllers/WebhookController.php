@@ -180,10 +180,10 @@ class WebhookController extends Controller
 
             // Update subscription items...
             if (isset($data['items'])) {
-                $prices = [];
+                $subscriptionItemIds = [];
 
                 foreach ($data['items']['data'] as $item) {
-                    $prices[] = $item['price']['id'];
+                    $subscriptionItemIds[] = $item['id'];
 
                     $subscription->items()->updateOrCreate([
                         'stripe_id' => $item['id'],
@@ -195,7 +195,7 @@ class WebhookController extends Controller
                 }
 
                 // Delete items that aren't attached to the subscription anymore...
-                $subscription->items()->whereNotIn('stripe_price', $prices)->delete();
+                $subscription->items()->whereNotIn('stripe_id', $subscriptionItemIds)->delete();
             }
         }
 
@@ -284,6 +284,14 @@ class WebhookController extends Controller
     protected function handleInvoicePaymentActionRequired(array $payload)
     {
         if (is_null($notification = config('cashier.payment_notification'))) {
+            return $this->successMethod();
+        }
+
+        if ($payload['data']['object']['metadata']['is_on_session_checkout'] ?? false) {
+            return $this->successMethod();
+        }
+
+        if ($payload['data']['object']['subscription_details']['metadata']['is_on_session_checkout'] ?? false) {
             return $this->successMethod();
         }
 

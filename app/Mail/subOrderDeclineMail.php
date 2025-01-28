@@ -21,6 +21,8 @@ class subOrderDeclineMail extends Mailable
 
     public function build()
     {
-        return $this->view('orderHasBeenDeclined', ['subject' => "Chef declined order", 'userName' => $this->mail['userName'], 'chefName' => $this->mail['chefName'], 'order_id' => $this->mail['order_id']]);
+        return $this
+        ->subject('Chef declined order')
+        ->view('orderHasBeenDeclined', ['subject' => "Chef declined order", 'userName' => $this->mail['userName'], 'chefName' => $this->mail['chefName'], 'order_id' => $this->mail['order_id']]);
     }
 }

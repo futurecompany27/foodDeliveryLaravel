@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class RequestForUpdateDetails extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $table = 'request_for_update_details';
     protected $fillable = [
         "chef_id",

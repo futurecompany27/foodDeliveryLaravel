@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('mobileNo');
             $table->text('password');
+            $table->integer('is_email_varified')->default('0');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('are_you_a');
             $table->string('full_address');
@@ -41,6 +42,11 @@ return new class extends Migration
             $table->string("account_number")->nullable();
             $table->string("institution_number")->nullable();
             $table->tinyinteger('status')->default(0);
+            $table->tinyInteger('is_personal_details_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_driving_license_document_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_address_proof_document_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_tax_document_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_bank_document_detail')->default('0')->comment('status: 0->incomplete, 1->complete');
             $table->text('resetToken')->nullable();
             $table->softDeletes();
             $table->timestamps();

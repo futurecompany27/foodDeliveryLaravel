@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class chef extends Model
+class Chef extends Authenticatable implements JWTSubject
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     use Notifiable;
 
 
@@ -19,9 +22,22 @@ class chef extends Model
      */
     protected $fillable = [
         'name',
+        'is_hfc_paid',
+        'is_rrc_paid',
         'email',
         'password',
         'status',
+        'are_you_a',
+        'is_personal_details_completed',
+        'is_special_benefit_document_completed',
+        'is_document_details_completed',
+        'is_fhc_document_completed',
+        'is_rrc_certificate_document_completed',
+        'is_bank_detail_completed',
+        'is_social_detail_completed',
+        'is_kitchen_detail_completed',
+        'is_tax_document_completed',
+
     ];
 
     /**
@@ -65,4 +81,40 @@ class chef extends Model
     {
         return $this->hasMany(UserChefReview::class, 'chef_id', 'id');
     }
+
+    public function foodLicense()
+    {
+        return $this->hasOne(FoodLicense::class);
+    }
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class);
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT
+     *
+     * @return
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public static function createToken($token)
+    {
+        return [
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('chef')->factory()->getTTL() * 1440,
+            'success' => true,
+            'message' => 'Token generated successfully!'
+        ];
+    }
+
+
 }

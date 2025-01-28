@@ -13,6 +13,6 @@ class ChefSuggestion extends Model
 
     public function chef()
     {
-        return $this->belongsTo(chef::class, 'chef_id', 'id');
+        return $this->belongsTo(Chef::class, 'chef_id', 'id');
     }
 }

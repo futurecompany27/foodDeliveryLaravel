@@ -12,6 +12,8 @@ return new class extends Migration {
     {
         Schema::create('chefs', function (Blueprint $table) {
             $table->id();
+            $table->enum('is_hfc_paid', [0,1])->default('0')->comment('status: 0->unpaid, 1->paid');
+            $table->enum('is_rcc_paid', [0,1])->default('0')->comment('status: 0->unpaid, 1->paid');
             $table->string('firstName');
             $table->string('lastName');
             $table->string('date_of_birth');
@@ -67,6 +69,16 @@ return new class extends Migration {
             $table->json('blacklistedUser')->nullable();
             $table->text('resetToken')->nullable();
             $table->tinyInteger('profilePercenatge')->default(0);
+            $table->longText('story')->nullable();
+            $table->string('story_img')->nullable();
+            $table->tinyInteger('is_personal_details_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_special_benefit_document_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_document_details_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_fhc_document_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_rrc_certificate_document_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_bank_detail_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_social_detail_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_kitchen_detail_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();

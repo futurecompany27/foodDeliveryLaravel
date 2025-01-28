@@ -11,6 +11,7 @@ class OrderTrackDetails extends Model
     protected $fillable = [
         'track_id',
         'status',
+        'track_desc',
         'date',
         'time'
     ];

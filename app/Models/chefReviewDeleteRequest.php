@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class chefReviewDeleteRequest extends Model
+class ChefReviewDeleteRequest extends Model
 {
     use HasFactory;
 
@@ -17,7 +17,7 @@ class chefReviewDeleteRequest extends Model
 
     public function chef()
     {
-        return $this->belongsTo(chef::class, 'chef_id', 'id');
+        return $this->belongsTo(Chef::class, 'chef_id', 'id');
     }
 
     public function review()

@@ -45,7 +45,8 @@ class CustomerSearchNotification extends Notification
             'firstName' => $this->search->firstName,
             'lastName' => $this->search->lastName,
             'postal_code' => $this->search->postal_code,
-            'message' => $this->search->email . ' search shef in ' . $this->search->postal_code . ' postal code.'
+            'message' => $this->search->email . ' has searched for a chef at ' . $this->search->postal_code . ' postal code.',
+            'url' =>   '/admin/search-history'
         ];
     }
 }

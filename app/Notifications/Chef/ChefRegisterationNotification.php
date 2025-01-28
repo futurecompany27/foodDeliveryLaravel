@@ -41,7 +41,7 @@ class ChefRegisterationNotification extends Notification
             'id' => $this->chefDetail['id'],
             'firstName' => $this->chefDetail['firstName'],
             'lastName' => $this->chefDetail['lastName'],
-            'message' => ($this->chefDetail['firstName'] . ' ' . $this->chefDetail['lastName']) . ' register as a new chef.',
+            'message' => (($this->chefDetail['firstName'] . ' ' . $this->chefDetail['lastName']) . ' register as a new chef and customer on .'. date('d M Y', strtotime($this->chefDetail->created_at)) . '.'),
             'url' => '/admin/chef-profile'
         ];
     }

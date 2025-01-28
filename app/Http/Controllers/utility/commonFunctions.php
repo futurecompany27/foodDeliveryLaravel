@@ -7,7 +7,7 @@ use App\Mail\HomeshefPasswordResetLink;
 use App\Models\Admin;
 use App\Models\Allergy;
 use App\Models\BankName;
-use App\Models\chef;
+use App\Models\Chef;
 use App\Models\Dietary;
 use App\Models\DocumentItemField;
 use App\Models\DocumentItemList;
@@ -17,6 +17,7 @@ use App\Models\Feedback;
 use App\Models\FoodCategory;
 use App\Models\HeatingInstruction;
 use App\Models\Ingredient;
+use App\Models\OrderStatus;
 use App\Models\ScheduleCall;
 use App\Models\Sitesetting;
 use App\Models\State;
@@ -56,7 +57,7 @@ class commonFunctions extends Controller
             } else {
                 return response()->json(['message' => 'Please check the Postal Code',], 400);
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
@@ -66,7 +67,7 @@ class commonFunctions extends Controller
     {
         try {
             return response()->json(['data' => BankName::all(), 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
@@ -79,14 +80,16 @@ class commonFunctions extends Controller
             return response()->json(['message' => 'Please fill all the fields', 'success' => false], 400);
         }
         try {
-            $chefDetail = chef::find($req->chef_id);
+            $chefDetail = Chef::find($req->chef_id);
             $stateDetail = State::where('name', $chefDetail->state)->first();
+            Log::info($chefDetail);
             $data = [];
             if ($stateDetail) {
-                $data = DocumentItemList::with('documentItemFields')->where(["state_id" => $stateDetail->id, 'status' => 1])->get();
+                $data = DocumentItemList::with('documentItemFields')
+                    ->where(["state_id" => $stateDetail->id, 'status' => 1])->get();
             }
             return response()->json(["data" => $data, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
@@ -97,7 +100,7 @@ class commonFunctions extends Controller
     {
         try {
             return response()->json(['data' => FoodCategory::all(), 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
@@ -112,7 +115,7 @@ class commonFunctions extends Controller
             } else {
                 return response()->json(["data" => HeatingInstruction::where('status', 1)->get(), "success" => true], 200);
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
@@ -123,7 +126,7 @@ class commonFunctions extends Controller
     {
         try {
             return response()->json(['data' => Allergy::all(), 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
@@ -134,7 +137,7 @@ class commonFunctions extends Controller
     {
         try {
             return response()->json(['data' => Dietary::all(), 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
@@ -145,7 +148,7 @@ class commonFunctions extends Controller
     {
         try {
             return response()->json(['data' => Ingredient::all(), 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
@@ -157,7 +160,7 @@ class commonFunctions extends Controller
         try {
             $data = Sitesetting::first();
             return response()->json(['data' => $data, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.' . $th->getMessage(), 'success' => false], 500);
@@ -215,7 +218,7 @@ class commonFunctions extends Controller
             }
 
             return response()->json(['message' => "Feedback submitted successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -233,7 +236,7 @@ class commonFunctions extends Controller
             }
             $data = $query->skip($skip)->take(10)->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -255,7 +258,7 @@ class commonFunctions extends Controller
         try {
             Feedback::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -269,7 +272,7 @@ class commonFunctions extends Controller
             $skip = $req->page * 10;
             $data = ScheduleCall::with('chef')->skip($skip)->take(10)->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -292,7 +295,7 @@ class commonFunctions extends Controller
         try {
             ScheduleCall::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -306,7 +309,7 @@ class commonFunctions extends Controller
             $skip = $req->page * 10;
             $data = DriverScheduleCall::with('driver')->skip($skip)->take(10)->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -329,7 +332,7 @@ class commonFunctions extends Controller
         try {
             DriverScheduleCall::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -339,11 +342,11 @@ class commonFunctions extends Controller
     // public function getAllChefs(Request $req)
     // {
     //     try {
-    //         $totalRecords = chef::count();
+    //         $totalRecords = Chef::count();
     //         $skip = $req->page * 10;
-    //         $data = chef::skip($skip)->take(10)->get();
+    //         $data = Chef::skip($skip)->take(10)->get();
     //         return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
-    //     } catch (\Throwable $th) {
+    //     } catch (\Exception $th) {
     //         Log::info($th->getMessage());
     //         DB::rollback();
     //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -368,21 +371,34 @@ class commonFunctions extends Controller
             $token = Str::random(40); // Generates a random token with 40 characters
             $userDetail = [];
             if ($req->user_type == 'User') {
-
+                $data = User::where('email', $req->email)->first();
+                if (!$data) {
+                    return response()->json(['message' => 'please enter valid email.', 'success' => false], 404);
+                }
                 User::where('email', $req->email)->update(['resetToken' => $token]);
                 $data = User::where('email', $req->email)->first();
                 $userDetail['firstName'] = $data->firstName;
                 $userDetail['lastName'] = $data->lastName;
             } else if ($req->user_type == 'Admin') {
-
+                $data = Admin::where('email', $req->email)->first();
+                if (!$data) {
+                    return response()->json(['message' => 'please enter valid email.', 'success' => false], 404);
+                }
                 Admin::where('email', $req->email)->update(['resetToken' => $token]);
                 $data = Admin::where('email', $req->email)->first();
                 $userDetail['firstName'] = $data->lastName;
                 $userDetail['lastName'] = $data->lastName;
             } else if ($req->user_type == 'chef') {
+                // Check if the email exists in the chef table
+                $data = Chef::where('email', $req->email)->first();
 
-                chef::where('email', $req->email)->update(['resetToken' => $token]);
-                $data = chef::where('email', $req->email)->first();
+                // If the email does not exist, return a response indicating the email is invalid
+                if (!$data) {
+                    return response()->json(['message' => 'please enter valid email.', 'success' => false], 404);
+                }
+
+                Chef::where('email', $req->email)->update(['resetToken' => $token]);
+                $data = Chef::where('email', $req->email)->first();
                 $userDetail['firstName'] = ucfirst($data->firstName);
                 $userDetail['lastName'] = ucfirst($data->lastName);
             } else if ($req->user_type == 'Driver') {
@@ -398,9 +414,22 @@ class commonFunctions extends Controller
             $userDetail['id'] = $data->id;
             $userDetail['user_type'] = $req->user_type;
             $userDetail['token'] = $token;
-            Mail::to(trim($req->email))->send(new HomeshefPasswordResetLink($userDetail));
+            try {
+                if (config('services.is_mail_enable')) {
+                    try {
+                        if (config('services.is_mail_enable')) {
+                            Mail::to(trim($req->email))->send(new HomeshefPasswordResetLink($userDetail));
+                        }
+                    } catch (\Exception $e) {
+                        Log::error($e);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error($e);
+            }
+            DB::commit();
             return response()->json(['message' => 'Password reset link has been send on mail', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -426,7 +455,7 @@ class commonFunctions extends Controller
             } else if ($req->user_type == 'Admin') {
                 $data = Admin::where(['id' => $req->id, 'resetToken' => $req->token])->first();
             } else if ($req->user_type == 'chef') {
-                $data = chef::where(['id' => $req->id, 'resetToken' => $req->token])->first();
+                $data = Chef::where(['id' => $req->id, 'resetToken' => $req->token])->first();
             } else if ($req->user_type == 'Driver') {
                 $data = Driver::where(['id' => $req->id, 'resetToken' => $req->token])->first();
             }
@@ -436,7 +465,7 @@ class commonFunctions extends Controller
             } else {
                 return response()->json(['message' => 'token is expired', 'success' => false], 500);
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -471,9 +500,9 @@ class commonFunctions extends Controller
                     Admin::where('id', $req->id)->update(['password' => Hash::make($req->password), 'resetToken' => '']);
                 }
             } else if ($req->user_type == 'chef') {
-                $data = chef::where(['id' => $req->id, 'resetToken' => $req->token])->first();
+                $data = Chef::where(['id' => $req->id, 'resetToken' => $req->token])->first();
                 if ($data) {
-                    chef::where('id', $req->id)->update(['password' => Hash::make($req->password), 'resetToken' => '']);
+                    Chef::where('id', $req->id)->update(['password' => Hash::make($req->password), 'resetToken' => '']);
                 }
             } else if ($req->user_type == 'Driver') {
                 $data = Driver::where(['id' => $req->id, 'resetToken' => $req->token])->first();
@@ -482,7 +511,7 @@ class commonFunctions extends Controller
                 }
             }
             return response()->json(['message' => 'Password has been changed', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -499,7 +528,7 @@ class commonFunctions extends Controller
         // ravindra IP
         $clientIP = "103.135.62.155";
         // dd($clientIP);
-        //sarita  
+        //sarita
         // $clientIP = "84.196.106.221";
         //zafeer $clientIP = "117.99.251.122";
         //himanta
@@ -554,7 +583,6 @@ class commonFunctions extends Controller
                     'latitude' => $location_array[0],
                     'longitude' => $location_array[1]
                 ];
-
             } else {
                 $data = [
                     'user_access_token' => 0,
@@ -562,7 +590,6 @@ class commonFunctions extends Controller
                     'longitude' => ""
                 ];
             }
-
         } else {
             $data = [
                 'user_access_token' => 0,
@@ -573,24 +600,77 @@ class commonFunctions extends Controller
         Session::put('user_access_detail', $data);
         //store it into the session for further use
 
-
-
     }
 
-    // implementation of VPN  
+    // This functin will call from document list -> additional link data
+    public function getHowToApply(Request $req)
+    {
+        $links = DocumentItemField::getAdditionalLinksById($req->id);
 
-    //  (new WebMainController)->user_access_token(); //array
-    //     $user_access_detail = Session::get('user_access_detail');
+        if (!$links) {
+            return response()->json(['error' => 'Document item not found'], 404);
+        }
 
-    //     if ($user_access_detail['user_access_token'] == 1) {
+        return response()->json(['message' => "Data fetched successfully", 'success' => true, 'data' => $links]);
+    }
 
-    //         /** Shef type data */
 
-    //         // $shef_types = ShefType::where('status', 1)->orderBy('name')->get();
-    //         return  view("frontend.website.chef.become_a_shef", compact('tr', 'site_setting'));
-    //         // return  view("frontend.website.chef.check_pincode_old", compact('tr', 'site_setting', 'shef_types'));
-    //     } else {
-    //         $msg = "We are currently not providing our service in this region.";
-    //         return view('frontend.website.access_block', compact('tr', 'msg'));
+    // public function getOrderStatus(Request $req)
+    // {
+
+    //     try {
+    //         $types = explode(',', $req->type);
+    //         $query = OrderStatus::query();
+    //         $query->orWhereJsonContains('types', $type);
+
+    //         $sql = $query->toSql();
+    //         Log::info("Generated SQL query: $sql");
+    //         $data = $query->get();
+    //         //dd($data);
+    //         return response()->json(['message' => "Data fetched successfully ", 'success' => true, 'data' => $data], 200);
+    //     } catch (\Exception $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
     //     }
+    // }
+
+    public function getOrderStatus(Request $req)
+    {
+        try {
+            $types = explode(',', $req->type);
+
+            $query = OrderStatus::query();
+            $query->where(function ($q) use ($types) {
+                foreach ($types as $type) {
+                    $q->orWhereJsonContains('types', $type);
+                }
+            });
+            $data = $query->get();
+            // Decode types JSON string (assuming it's JSON)
+            foreach ($data as &$order) {
+                $order['types'] = json_decode($order['types'], true);
+
+                // Optional: Remove backslashes from each type (if needed)
+                if (is_array($order['types'])) {
+                    $order['types'] = array_map('stripslashes', $order['types']);
+                }
+            }
+            return response()->json(['message' => "Data fetched successfully", 'success' => true, 'data' => $data], 200);
+        } catch (\Exception $th) {
+            Log::info($th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        }
+    }
+
+    public function getBankDetail()
+    {
+        try {
+            $bankDetail = BankName::get();
+            return response()->json(['message' => "Data fetched successfully", 'success' => true, 'data' => $bankDetail], 200);
+        } catch (\Exception $th) {
+            Log::info('getBankDetail: ' . $th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        }
+    }
 }

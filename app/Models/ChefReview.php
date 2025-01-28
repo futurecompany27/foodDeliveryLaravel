@@ -9,7 +9,7 @@ class ChefReview extends Model
 {
     use HasFactory;
     protected $table = "chef_reviews";
-    protected $fillable = ['id', 'firstName','lastName', 'chef_id', 'star_rating', 'message'];
+    protected $fillable = ['id', 'user_id', 'chef_id', 'star_rating', 'message'];
 
     public function user()
     {
@@ -18,6 +18,6 @@ class ChefReview extends Model
 
     public function chef()
     {
-        return $this->belongsTo(chef::class, 'chef_id', 'id');
+        return $this->belongsTo(Chef::class, 'chef_id', 'id');
     }
 }

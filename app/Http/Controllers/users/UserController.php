@@ -15,7 +15,7 @@ use App\Models\PaymentCredentialsCardData;
 use App\Models\PaymentCredentialsPayPalData;
 use App\Models\ShippingAddresse;
 use App\Models\User;
-use App\Models\chef;
+use App\Models\Chef;
 use App\Models\ChefReview;
 use App\Models\FoodItem;
 use App\Models\FoodItemReview;
@@ -27,12 +27,14 @@ use App\Models\UserChefReview;
 use App\Models\UserContact;
 use App\Models\UserFoodReview;
 use App\Notifications\Chef\NewChefReviewNotification;
+use App\Notifications\Chef\ChefFoodReviewNotification;
 use App\Notifications\Chef\NewReviewNotification;
 use App\Notifications\Customer\CustomerContactUsNotification;
 use App\Notifications\Customer\CustomerProfileUpdateNotification;
 use App\Notifications\Customer\CustomerRegisterationNotification;
 use App\Notifications\Customer\CustomerSearchNotification;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -40,12 +42,18 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\File;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Response;
 use Stripe\Customer;
+use Illuminate\Support\Facades\Cache;
+
+
 
 class UserController extends Controller
 {
+
     function UserRegisteration(Request $req)
     {
         $userExist = User::where("email", $req->email)->first();
@@ -54,7 +62,7 @@ class UserController extends Controller
         }
         $userExist = User::where('mobile', str_replace("-", "", $req->mobile))->first();
         if ($userExist) {
-            return response()->json(['message' => "This mobileno is already register Please use another mobileno!", "success" => false], 400);
+            return response()->json(['message' => "This mobile no is already register Please use another mobile no!", "success" => false], 400);
         }
         try {
 
@@ -67,16 +75,22 @@ class UserController extends Controller
             $user->password = Hash::make($req->password);
             $user->save();
             $userDetail = User::find($user->id);
-            Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
-            $admins = Admin::all();
+
+            try {
+                if (config('services.is_mail_enable')) {
+                    Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
+                }
+            } catch (\Exception $e) {
+                Log::error($e);
+            }
+            $admins = Admin::all(['*']);
             foreach ($admins as $admin) {
                 $admin->notify(new CustomerRegisterationNotification($userDetail));
             }
             DB::commit();
             return response()->json(['message' => 'You are all set to start ordering your food now ! Thank you for registering with us', "data" => $userDetail, 'success' => true], 201);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            ;
+        } catch (\Exception $e) {
+            Log::info($e);
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
@@ -84,28 +98,85 @@ class UserController extends Controller
 
     function UserLogin(Request $req)
     {
-        $rules = [
+        $validator = Validator::make($req->all(), [
             "mobile" => 'required',
             "password" => 'required',
-        ];
-        $validate = Validator::make($req->all(), $rules);
-        if ($validate->fails()) {
-            return response()->json(["error" => ' Please fill all the details', 'success' => false], 500);
-        }
+        ]);
 
-        $userDetails = User::where("mobile", str_replace("-", "", $req->mobile))->first();
-        if ($userDetails) {
-            $userDetails->makeVisible('password');
-            if ($userDetails && Hash::check($req->password, $userDetails->password)) {
-                $userDetails->makeHidden('password');
-                return response()->json(['message' => 'You are logged in successfully', 'data' => $userDetails, 'success' => true], 200);
-            } else {
-                return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
-            }
-        } else {
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'error' => $validator->errors()->first(), 'data' => ""], 400);
+        }
+        // Normalize the mobile number
+        $mobile = str_replace("-", "", $req->mobile);
+        // Retrieve user details
+        $userDetails = User::where("mobile", $mobile)->first();
+        // Check if user exists
+        if (!$userDetails) {
             return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
         }
+        // Check user status
+        if ($userDetails->status == 0) {
+            return response()->json(['message' => 'You have an inactive account. Please get in touch with the Homeplete team.'], 403);
+        }
+        // Make password visible for checking
+        $userDetails->makeVisible('password');
+        // Validate password
+        if (!Hash::check($req->password, $userDetails->password)) {
+            return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+        }
+        if (!$token = auth('user')->attempt(['mobile' => $mobile, 'password' => $req->password])) {
+            return response()->json(['message' => 'Invalid credentials!', 'success' => false], 400);
+        }
+        // Hide password again
+        $userDetails->makeHidden('password');
+        return response()->json(['message' => 'Login Successfully!', 'user_id' => auth()->user()->id, 'token' => User::createToken($token), 'success' => true], 200);
+        // return User::createToken($token);
     }
+
+    public function userProfile()
+    {
+        // Retrieve the authenticated user
+        $user = auth()->guard('user')->user();
+        // Check if the user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'User not found', 'success' => false], 404);
+        }
+        // Return the user's profile
+        return response()->json(['success' => true, 'data' => $user], 200);
+    }
+
+    public function userLogout()
+    {
+        auth()->guard('user')->logout();
+
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function userRefreshToken()
+    {
+        try {
+            // Get the current token
+            $currentToken = JWTAuth::getToken();
+
+            // Refresh the token
+            $newToken = JWTAuth::refresh($currentToken);
+
+            // Return the new token in the same format as in createToken
+            return response()->json([
+                'access_token' => $newToken,
+                'token_type' => 'bearer',
+                'expires_in' => auth()->factory()->getTTL() * 720, // 24 hours in seconds
+                'success' => true,
+                'message' => 'Token refreshed successfully!'
+            ]);
+        } catch (JWTException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to refresh token, please try again'
+            ], 500);
+        }
+    }
+
 
     function updateUserDetailStatus(Request $req)
     {
@@ -126,71 +197,332 @@ class UserController extends Controller
             // $updateData = $req->status;
             User::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
+
+    // function getChefsByPostalCode(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         'postal_code' => "required",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['message' => $validator->errors()->all(), 'success' => false], 400);
+    //     }
+
+    //     try {
+    //         $postalCode = substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3);
+    //         $serviceExist = Pincode::where('pincode', $postalCode)->where('status', 1)->first();
+
+    //         if (!$serviceExist) {
+    //             return response()->json(['message' => 'Service not available now', 'ServiceNotAvailable' => true, 'success' => false], 200);
+    //         }
+
+    //         $lat_long_result_array = $this->get_lat_long($req->postal_code);
+    //         if ($lat_long_result_array["result"] != 1) {
+    //             return response()->json(['message' => 'Invalid postal code', 'success' => false], 400);
+    //         }
+
+    //         $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
+    //         $selected_postal_code = array_map(function ($value) {
+    //             return str_replace(" ", "", strtoupper($value));
+    //         }, $selected_postal_code);
+
+    //         $query = Chef::where(function ($q) use ($selected_postal_code) {
+    //             foreach ($selected_postal_code as $postalCode) {
+    //                 $q->orWhere('postal_code', 'like', $postalCode . '%');
+    //             }
+    //         })->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1);
+
+
+    //         if ($req->filter == 'true') {
+    //             $minPrice = $req->input('min');
+    //             $maxPrice = $req->input('max') > 300 ? 99999999999999999 : $req->input('max');
+
+    //             if ($req->has('rating')) {
+    //                 $query->where('rating', '<=', intval($req->rating));
+    //             }
+
+    //             $query->whereHas('foodItems', function ($q) use ($minPrice, $maxPrice, $req) {
+    //                 $q->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay)
+    //                     ->where('price', '>=', $minPrice)
+    //                     ->where('price', '<=', $maxPrice);
+
+    //                 // Additional filters
+    //                 if ($req->has('foodType')) {
+    //                     $q->whereIn('foodTypeId', $req->foodType);
+    //                 }
+    //                 if ($req->has('spicyLevel')) {
+    //                     $q->whereIn('spicyLevel', $req->spicyLevel);
+    //                 }
+    //                 if ($req->has('allergies')) {
+    //                     $q->whereIn('allergies', $req->allergies);
+    //                 }
+    //             });
+    //         }
+    //         if ($req->has('kitchen_name')) {
+    //             $query->where(function ($q) use ($req) {
+    //                 $q->where('kitchen_name', 'like', '%' . $req->kitchen_name . '%')
+    //                     ->orWhereHas('foodItems', function ($q) use ($req) {
+    //                         $q->where('dish_name', 'like', '%' . $req->kitchen_name . '%');
+    //                     });
+    //             });
+    //         }
+
+    //         $skip = $req->page * 12;
+    //         $data = $query->skip($skip)->take(12)->get();
+    //         $total = $query->count();
+
+    //         return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
+    //     } catch (\Exception $th) {
+    //         Log::info($th->getMessage());
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+    //     }
+    // }
+
+
+
+    // function getChefsByPostalCode(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         'postal_code' => "required",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['message' => $validator->errors()->all(), 'success' => false], 400);
+    //     }
+
+    //     try {
+    //         $serviceExist = Pincode::where('pincode', substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3))->where('status', 1)->first();
+    //         if ($serviceExist) {
+    //             $lat_long_result_array = $this->get_lat_long($req->postal_code);
+
+    //             if ($lat_long_result_array["result"] == 1) {
+    //                 /***** Now from the customer postal code we need to find the ******/
+    //                 $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
+    //                 foreach ($selected_postal_code as &$value) {
+    //                     $value = str_replace(" ", "", strtoupper($value));
+    //                 }
+    //             }
+    //             if ($req->filter == 'true') {
+    //                 $minPrice = $req->input('min');
+    //                 if ($req->input('max') > 300) {
+    //                     $maxPrice = 99999999999999999;
+    //                 } else {
+    //                     $maxPrice = $req->input('max');
+    //                 }
+    //                 $skip = $req->page * 12;
+    //                 $query = Chef::whereIn('postal_code', $selected_postal_code)->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1);
+
+    //                 // $rating = $req->rating ? intval($req->rating) : null;
+    //                 if ($req->rating) {
+    //                     $query->where('rating', '<=', intval($req->rating));
+    //                 }
+
+    //                 if ($req->query) {
+    //                     $search = mb_strtolower(trim(request()->input('query')));
+    //                     $query->whereRaw('LOWER(`kitchen_name`) LIKE ?', ['%' . strtolower($search) . '%']);
+    //                 }
+    //                 $query->whereHas('foodItems', function ($query) use ($maxPrice, $minPrice, $req) {
+    //                     $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+    //                     $query->where('price', '>=', $minPrice)->where('price', '<=', $maxPrice);
+    //                     if ($req->foodType) {
+    //                         $query->whereIn('foodTypeId', $req->foodType);
+    //                     }
+    //                     if ($req->spicyLevel) {
+    //                         $query->whereIn('spicyLevel', $req->spicyLevel);
+    //                     }
+    //                     if ($req->allergies) {
+    //                         $query->whereIn('allergies', $req->allergies);
+    //                     }
+    //                     if ($req->query) {
+    //                         $search = mb_strtolower(trim(request()->input('query')));
+    //                         $query->whereRaw('LOWER(`dish_name`) LIKE ?', ['%' . strtolower($search) . '%']);
+    //                     }
+    //                 });
+
+    //                 $total = $query->count();
+    //                 $data = $query->get();
+    //                 // $data = $query->skip($skip)->limit(12)->get();
+    //                 return response()->json(['success' => true, 'data' => $data, 'total' => $total], 200);
+    //             } else {
+    //                 Log::info('', $selected_postal_code);
+    //                 $query = Chef::where(function ($q) use ($selected_postal_code) {
+    //                     foreach ($selected_postal_code as $postalCode) {
+    //                         $q->orWhere('postal_code', 'like', $postalCode . '%');
+    //                     }
+    //                 })->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
+    //                     $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+    //                 });
+    //                 if ($req->refresh) {
+    //                     $skip = ($req->page + 1) * 12;
+    //                     $data = $query->limit($skip)->get();
+    //                 } else {
+    //                     $skip = $req->page * 12;
+    //                     $data = $query->skip($skip)->limit(12)->get();
+    //                 }
+    //                 $total = $query->count();
+    //                 return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
+    //             }
+    //         } else {
+    //             return response()->json(['message' => 'Service not availbale now', 'ServiceNotAvailable' => true, 'success' => false], 200);
+    //         }
+    //     } catch (Exception $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+    //     }
+    // }
+
+
+
     function getChefsByPostalCode(Request $req)
     {
         $validator = Validator::make($req->all(), [
             'postal_code' => "required",
         ]);
+
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()->all(), 'success' => false], 400);
         }
 
+        // Generate a unique cache key based on the postal code and filter parameters
+        $cacheKey = 'chefs_' . $req->postal_code . '_' . md5(json_encode($req->all()));
+        Log::info('cacheKey', [$cacheKey]);
+        // Try to get the data from cache
+        if (Cache::has($cacheKey)) {
+            $cachedData = Cache::get($cacheKey);
+            Log::info('cachedData', [$cachedData]);
+            return response()->json($cachedData, 200);
+        }
+
         try {
-            $serviceExist = Pincode::where('pincode', substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3))->where('status', 1)->first();
+            $serviceExist = Pincode::where('pincode', substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3))
+                ->where('status', 1)
+                ->first();
+
             if ($serviceExist) {
                 $lat_long_result_array = $this->get_lat_long($req->postal_code);
-
+                $selected_postal_code[] = '';
                 if ($lat_long_result_array["result"] == 1) {
-                    /***** Now from the customer postal code we need to find the ******/
                     $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
                     foreach ($selected_postal_code as &$value) {
                         $value = str_replace(" ", "", strtoupper($value));
                     }
                 }
+
                 if ($req->filter == 'true') {
                     $minPrice = $req->input('min');
-                    if ($req->input('max') > 300) {
-                        $maxPrice = 99999999999999999;
-                    } else {
-                        $maxPrice = $req->input('max');
-                    }
+                    $maxPrice = $req->input('max') > 300 ? 99999999999999999 : $req->input('max');
                     $skip = $req->page * 12;
-                    $query = chef::whereIn('postal_code', $selected_postal_code)->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1);
+
+                    $query = Chef::whereIn('postal_code', $selected_postal_code)
+                        ->where('status', 1)
+                        ->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)
+                        ->where('chefAvailibilityStatus', 1);
+
                     if ($req->rating) {
-                        $query->where('rating', '<=', $req->rating);
+                        $query->where('rating', '<=', intval($req->rating));
                     }
+
                     $query->whereHas('foodItems', function ($query) use ($maxPrice, $minPrice, $req) {
-                        $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
-                        $query->where('price', '>=', $minPrice)->where('price', '<=', $maxPrice);
+                        $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay)
+                            ->where('price', '>=', $minPrice)
+                            ->where('price', '<=', $maxPrice);
+
                         if ($req->foodType) {
                             $query->whereIn('foodTypeId', $req->foodType);
                         }
+
                         if ($req->spicyLevel) {
                             $query->whereIn('spicyLevel', $req->spicyLevel);
                         }
+
                         if ($req->allergies) {
                             $query->whereIn('allergies', $req->allergies);
                         }
+
+                        if ($req->query) {
+                            $search = mb_strtolower(trim($req->input('query')));
+                            $query->whereRaw('LOWER(`dish_name`) LIKE ?', ['%' . $search . '%']);
+                        }
                     });
+
                     $total = $query->count();
-                    $data = $query->skip($skip)->limit(12)->get();
+                    $data = $query->get();
+
+                    // Store the result in cache
+                    Cache::put($cacheKey, ['data' => $data, 'total' => $total, 'success' => true], now()->addMinutes(1440));
+
                     return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
                 } else {
-                    Log::info('', $selected_postal_code);
-                    $query = chef::where(function ($q) use ($selected_postal_code) {
+                    Log::info("///////ELSE PART///////////", [$selected_postal_code]);
+
+                    $query = Chef::where(function ($q) use ($selected_postal_code) {
                         foreach ($selected_postal_code as $postalCode) {
                             $q->orWhere('postal_code', 'like', $postalCode . '%');
                         }
-                    })->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
-                        $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
-                    });
+                    })
+                        ->where('status', 1)
+                        ->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)
+                        ->where('chefAvailibilityStatus', 1)
+                        ->whereHas('foodItems', function ($query) use ($req) {
+                            $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+                        });
+
+                    $searchQuery = trim(strtolower($req->kitchen_name));
+
+                    if ($searchQuery !== '') {
+                        $foodItems = FoodItem::where('dish_name', 'LIKE', '%' . $searchQuery . '%')
+                            ->with('chef')
+                            ->get();
+
+                        if ($foodItems->isNotEmpty()) {
+                            $formattedData = [];
+                            foreach ($foodItems as $foodItem) {
+                                if ($foodItem->chef) {
+                                    $formattedData[] = [
+                                        'dish_id' => $foodItem->id,
+                                        'dish_name' => $foodItem->dish_name,
+                                        'chef_id' => $foodItem->chef->id,
+                                        'firstName' => $foodItem->chef->firstName,
+                                        'lastName' => $foodItem->chef->lastName,
+                                    ];
+                                }
+                            }
+
+                            if (!empty($formattedData)) {
+                                Cache::put($cacheKey, ['data' => $formattedData, 'success' => true], now()->addMinutes(1440)); // store cache in 24 hr
+
+                                return response()->json(['data' => $formattedData, 'success' => true], 200);
+                            }
+                        }
+
+                        $chefs = Chef::where('kitchen_name', 'LIKE', '%' . $searchQuery . '%')
+                            ->where('status', 1)
+                            ->with('foodItems')
+                            ->get();
+
+                        if ($chefs->isNotEmpty()) {
+                            $formattedChefs = [];
+                            foreach ($chefs as $chef) {
+                                $formattedChefs[] = [
+                                    'chef_id' => $chef->id,
+                                    'chef_name' => $chef->firstName,
+                                    'kitchen_name' => $chef->kitchen_name,
+                                    'food_items' => $chef->foodItems,
+                                ];
+                            }
+
+                            Cache::put($cacheKey, ['data' => $formattedChefs, 'success' => true], now()->addMinutes(1440)); //24 hr expiry cache
+
+                            return response()->json(['data' => $formattedChefs, 'success' => true], 200);
+                        }
+                    }
+
                     if ($req->refresh) {
                         $skip = ($req->page + 1) * 12;
                         $data = $query->limit($skip)->get();
@@ -199,17 +531,22 @@ class UserController extends Controller
                         $data = $query->skip($skip)->limit(12)->get();
                     }
                     $total = $query->count();
-                    return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
+
+                    Cache::put($cacheKey, ['total' => $total, 'success' => true, 'data' => $data], now()->addMinutes(1)); //24 hr expiry cache
+
+                    return response()->json(['total' => $total, 'success' => true, 'data' => $data], 200);
                 }
             } else {
-                return response()->json(['message' => 'Service not availbale now', 'ServiceNotAvailable' => true, 'success' => false], 200);
+                return response()->json(['message' => 'Service not available now', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
+
 
     function get_lat_long($val)
     {
@@ -231,7 +568,7 @@ class UserController extends Controller
                 $data = ['result' => 0];
                 return $data;
             }
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
@@ -289,7 +626,7 @@ class UserController extends Controller
         try {
 
             $lat_long_result_array = $this->get_lat_long($req->postal_code);
-
+            $selected_postal_code[] = '';
             if ($lat_long_result_array["result"] == 1) {
                 /***** Now from the customer postal code we need to find the ******/
                 $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
@@ -299,7 +636,7 @@ class UserController extends Controller
             }
 
             $cuisine = Kitchentype::find($req->kitchen_type_id);
-            $query = chef::where(function ($q) use ($selected_postal_code) {
+            $query = Chef::where(function ($q) use ($selected_postal_code) {
                 foreach ($selected_postal_code as $postalCode) {
                     $q->orWhere('postal_code', 'like', $postalCode . '%');
                 }
@@ -315,60 +652,144 @@ class UserController extends Controller
             }
             $total = $query->count();
             return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
+    // function calculateDistanceUsingTwoLatlong(Request $req)
+    // {
+    //     Log::info('calculateDistanceUsing', [$req->all()]);
+    //     $validator = Validator::make($req->all(), [
+    //         'postal_code_1' => "required",
+    //         'postal_code_2' => "required",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['message' => $validator->errors()->first(), 'success' => false], 400);
+    //     }
+    //     try {
+    //         $admin_setting = Adminsetting::first();
+    //         $multiChefOrderRadius = $admin_setting->multiChefOrderAllow != "" ? $admin_setting->multiChefOrderAllow : 5;
+    //         $data = ['success' => true];
+
+    //         //define GMAPIK in contstant file.
+    //         $gmApiK = env('GOOGLE_MAP_KEY');
+
+    //         $latlongOfPostalCode1 = $this->get_lat_long($req->postal_code_1);
+
+    //         $origin = $latlongOfPostalCode1["lat"] . ',' . $latlongOfPostalCode1["long"];
+
+    //         $latlongOfPostalCode2 = $this->get_lat_long($req->postal_code_2);
+    //         $destination = $latlongOfPostalCode2["lat"] . ',' . $latlongOfPostalCode2["long"];
+    //         Log::info('Distance LOg: ', [$destination]);
+    //         $routes = json_decode(file_get_contents("https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($origin) . "&destination=" . urlencode($destination) . "&alternatives=true&sensor=false&departure_time=now&key=" . $gmApiK))->routes;
+
+    //         if (count($routes) != 0) {
+    //             $dist = $routes[0]->legs[0]->distance->text;
+    //             $distance = explode(" ", $dist)[0];
+    //             if ($distance <= $multiChefOrderRadius) {
+    //                 $data['message'] = 'Distance is within the limit and can make multi chef order';
+    //                 $data['status'] = 1;
+    //             } else {
+    //                 $data['message'] = 'Distance is not within the limit multi chef order is not allowed';
+    //                 $data['status'] = 2;
+    //             }
+    //             $data['distance'] = $distance . ' KM';
+    //         } else {
+    //             $data['message'] = 'Unable to find Routes so allow to add multi chef order';
+    //             $data['status'] = 1;
+    //         }
+
+    //         return response()->json($data);
+    //     } catch (Exception $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+    //     }
+    // }
+
+
     function calculateDistanceUsingTwoLatlong(Request $req)
     {
+        Log::info('calculateDistanceUsing', [$req->all()]);
+
+        // Validate input data
         $validator = Validator::make($req->all(), [
             'postal_code_1' => "required",
             'postal_code_2' => "required",
         ]);
+
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()->first(), 'success' => false], 400);
         }
+
         try {
+            // Get admin setting
             $admin_setting = Adminsetting::first();
             $multiChefOrderRadius = $admin_setting->multiChefOrderAllow != "" ? $admin_setting->multiChefOrderAllow : 5;
-            $data = ['success' => true];
-            //define GMAPIK in contstant file.
+
+            // Define GMAPIK in constant file or from .env
             $gmApiK = env('GOOGLE_MAP_KEY');
 
+            // Get latitude and longitude of postal code 1
             $latlongOfPostalCode1 = $this->get_lat_long($req->postal_code_1);
-            $origin = $latlongOfPostalCode1["lat"] . ',' . $latlongOfPostalCode1["long"];
+            if (!$latlongOfPostalCode1 || !isset($latlongOfPostalCode1['lat']) || !isset($latlongOfPostalCode1['long'])) {
+                return response()->json(['message' => 'Invalid postal code 1 coordinates.', 'success' => false], 400);
+            }
+            $origin = $latlongOfPostalCode1['lat'] . ',' . $latlongOfPostalCode1['long'];
 
+            // Get latitude and longitude of postal code 2
             $latlongOfPostalCode2 = $this->get_lat_long($req->postal_code_2);
-            $destination = $latlongOfPostalCode2["lat"] . ',' . $latlongOfPostalCode2["long"];
+            if (!$latlongOfPostalCode2 || !isset($latlongOfPostalCode2['lat']) || !isset($latlongOfPostalCode2['long'])) {
+                return response()->json(['message' => 'Invalid postal code 2 coordinates.', 'success' => false], 400);
+            }
+            $destination = $latlongOfPostalCode2['lat'] . ',' . $latlongOfPostalCode2['long'];
 
-            $routes = json_decode(file_get_contents("https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($origin) . "&destination=" . urlencode($destination) . "&alternatives=true&sensor=false&departure_time=now&key=" . $gmApiK))->routes;
+            // Log the destination coordinates for debugging
+            Log::info('Distance Log: ', [$destination]);
 
+            // Call Google Maps API to get the routes
+            $url = "https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($origin) . "&destination=" . urlencode($destination) . "&alternatives=true&sensor=false&departure_time=now&key=" . $gmApiK;
+
+            // Fetch the response and check for errors
+            $response = file_get_contents($url);
+            if ($response === FALSE) {
+                throw new Exception("Failed to retrieve data from Google Maps API");
+            }
+
+            // Decode the JSON response
+            $routes = json_decode($response)->routes;
+
+            // Check if routes are returned
             if (count($routes) != 0) {
                 $dist = $routes[0]->legs[0]->distance->text;
-                $distance = explode(" ", $dist)[0];
+                $distance = explode(" ", $dist)[0]; // Extract the numeric distance
+
+                // Check if the distance is within the allowed radius
                 if ($distance <= $multiChefOrderRadius) {
-                    $data['message'] = 'Distance is within the limit and can make multi chef order';
+                    $data['message'] = 'Distance is within the limit and can make multi-chef order';
                     $data['status'] = 1;
                 } else {
-                    $data['message'] = 'Distance is not within the limit multi chef order is not allowed';
+                    $data['message'] = 'Distance is not within the limit, multi-chef order is not allowed';
                     $data['status'] = 2;
                 }
                 $data['distance'] = $distance . ' KM';
             } else {
-                $data['message'] = 'Unable to find Routes so allow to add multi chef order';
+                // If no routes are found, allow the multi-chef order
+                $data['message'] = 'Unable to find routes, allowing multi-chef order';
                 $data['status'] = 1;
             }
 
             return response()->json($data);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
+        } catch (Exception $th) {
+            Log::error($th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
+
 
     function getChefDetails(Request $req)
     {
@@ -376,9 +797,9 @@ class UserController extends Controller
             return response()->json(['message' => 'Please fill all th required fields', "success" => false], 400);
         }
         try {
-            $data = chef::with(['chefDocuments', 'alternativeContacts'])->find($req->chef_id);
+            $data = Chef::with(['chefDocuments', 'alternativeContacts'])->find($req->chef_id);
             return response()->json(["data" => $data, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -388,7 +809,6 @@ class UserController extends Controller
     function googleSigin(Request $req)
     {
         try {
-
             $userExist = User::where('email', $req->email)->first();
             if ($userExist) {
                 return response()->json(['message' => 'You are logged in successfully', "data" => $userExist, 'success' => true], 200);
@@ -403,7 +823,13 @@ class UserController extends Controller
                 $user->email_verified_at = Carbon::now();
                 $user->save();
                 $userDetail = User::find($user->id);
-                Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
+                try {
+                    if (config('services.is_mail_enable')) {
+                        Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
+                    }
+                } catch (Exception $e) {
+                    Log::error($e);
+                }
                 $admins = Admin::all();
                 foreach ($admins as $admin) {
                     $admin->notify(new CustomerRegisterationNotification($userDetail));
@@ -411,7 +837,7 @@ class UserController extends Controller
                 DB::commit();
                 return response()->json(['message' => 'You are all set to start ordering your food now ! Thank you for registering with us', "data" => $userDetail, 'success' => true], 201);
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -420,7 +846,8 @@ class UserController extends Controller
 
     function recordNotFoundSubmit(Request $req)
     {
-        if (!$req->user_id) {
+        $user = auth()->guard('user')->user();
+        if (!$user) {
             $validator = Validator::make($req->all(), [
                 'postal_code' => "required",
                 'firstName' => "required",
@@ -434,8 +861,9 @@ class UserController extends Controller
         try {
             $admins = Admin::all();
             $newData = new NoRecordFound();
-            if ($req->user_id) {
-                $userDetail = User::find($req->user_id);
+            // if ($req->user_id)
+            if ($user) {
+                $userDetail = User::find($user->id);
                 $ifSameData = NoRecordFound::orderBy('created_at', 'desc')->where(['postal_code' => strtolower($req->postal_code), 'email' => $userDetail->email])->first();
                 if (!$ifSameData) {
                     $newData->postal_code = strtolower($req->postal_code);
@@ -463,9 +891,20 @@ class UserController extends Controller
                 }
             }
             return response()->json(['message' => 'Your information has been saved', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        }
+    }
+
+    public function getRecordNotFound(Request $req)
+    {
+        try {
+            $searchHistory = NoRecordFound::orderBy('created_at', 'desc')->get();
+            return response()->json(['message' => 'Search records fetched successfully', 'success' => true, 'data' => $searchHistory], 200);
+        } catch (Exception $th) {
+            Log::error($th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
@@ -473,7 +912,7 @@ class UserController extends Controller
     function addUpdateShippingAddress(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'user_id' => "required",
+            // 'user_id' => "required",
             'firstName' => "required",
             'lastName' => "required",
             'mobile_no' => "required",
@@ -487,7 +926,6 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
         }
-
         try {
             $serviceExist = Pincode::where('pincode', substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3))->where('status', 1)->first();
             if ($serviceExist) {
@@ -496,13 +934,15 @@ class UserController extends Controller
                     $recordToUpdate = ShippingAddresse::find($req->id);
                     if ($recordToUpdate) {
                         $recordToUpdate->update($updateData);
-                        return response()->json(['message' => 'Delivery address updated successfuly', 'success' => true], 200);
+                        return response()->json(['message' => 'Delivery address updated successfully', 'success' => true], 200);
                     } else {
                         return response()->json(['message' => 'Address not found', 'success' => false], 404);
                     }
                 } else {
+                    $user = auth()->guard('user')->user();
                     $newAdrees = new ShippingAddresse();
-                    $newAdrees->user_id = $req->user_id;
+                    // $newAdrees->user_id = $req->user_id;
+                    $newAdrees->user_id = $user->id;
                     $newAdrees->firstName = $req->firstName;
                     $newAdrees->lastName = $req->lastName;
                     $newAdrees->mobile_no = str_replace("-", '', $req->mobile_no);
@@ -518,9 +958,9 @@ class UserController extends Controller
 
                     if ($req->default_address) {
                         $newAdrees->default_address = 1;
-                        ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
+                        ShippingAddresse::where(['user_id' => $user->id, 'default_address' => 1])->update(['default_address' => 0]);
                     } else {
-                        $count = ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->count();
+                        $count = ShippingAddresse::where(['user_id' => $user->id, 'default_address' => 1])->count();
                         if ($count < 1) {
                             $newAdrees->default_address = 1;
                         }
@@ -531,7 +971,7 @@ class UserController extends Controller
             } else {
                 return response()->json(['message' => 'We are currently not offering our services in this region yet.', 'ServiceNotAvailable' => true, 'success' => false], 200);
             }
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -540,18 +980,17 @@ class UserController extends Controller
 
     function getAllShippingAdressOfUser(Request $req)
     {
-        if (!$req->user_id) {
-            return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
-        }
         try {
-            $data = ShippingAddresse::where('user_id', $req->user_id)->get();
+            $user = auth()->guard('user')->user();
+            // Log::info('User Address' [$user]);
+            $data = ShippingAddresse::where('user_id', $user->id)->get();
             return response()->json(['data' => $data, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
 
     function changeDefaultShippingAddress(Request $req)
     {
@@ -562,7 +1001,7 @@ class UserController extends Controller
             ShippingAddresse::where(['user_id' => $req->user_id, 'default_address' => 1])->update(['default_address' => 0]);
             ShippingAddresse::where('id', $req->id)->update(['default_address' => 1]);
             return response()->json(['message' => 'Delivery address has been changed successfully', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -575,9 +1014,11 @@ class UserController extends Controller
             return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
         }
         try {
+            $user = auth()->guard('user')->user();
             ShippingAddresse::where('id', $req->id)->delete();
+            // ShippingAddresse::where('user_id', $user->id)->delete();
             return response()->json(['message' => 'Your address has been deleted ', 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
@@ -586,12 +1027,11 @@ class UserController extends Controller
 
     function getUserDetails(Request $req)
     {
-        if (!$req->user_id) {
-            return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
-        }
         try {
-            return response()->json(['data' => User::find($req->user_id), 'success' => true], 200);
-        } catch (\Throwable $th) {
+            $user = auth()->guard('user')->user();
+
+            return response()->json(['data' => $user, 'message' => 'User fetched successfully', 'success' => true], 200);
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
@@ -601,7 +1041,7 @@ class UserController extends Controller
     function updateUserDetail(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            'user_id' => "required",
+            // 'user_id' => "required",
             'firstName' => "required",
             'lastName' => "required",
             'mobile' => "required",
@@ -612,7 +1052,8 @@ class UserController extends Controller
             return response()->json(['message' => 'Please fill all the required field', 'success' => false], 400);
         }
         try {
-            $user = User::where('id', $req->user_id)->first();
+            // $user = User::where('id', $req->user_id)->first();
+            $user = auth()->guard('user')->user();
             $update = [
                 'firstName' => $req->firstName,
                 'lastName' => $req->lastName,
@@ -625,17 +1066,39 @@ class UserController extends Controller
             if ($req->email != $user->email) {
                 $update['email_verified_at'] = Carbon::now();
             }
-            User::where('id', $req->user_id)->update($update);
-            $customer = User::find($req->user_id);
+            User::where('id', $user->id)->update($update);
+            $customer = User::find($user->id);
             $admins = Admin::all();
             foreach ($admins as $admin) {
                 $admin->notify(new CustomerProfileUpdateNotification($customer));
             }
-            $data = User::where('id', $req->user_id)->first();
+            $data = User::where('id', $user->id)->first();
             return response()->json(['message' => 'Your profile has been updated.', 'data' => $data, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
+        }
+    }
+
+    function updatePaymentMethod(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'defaultPayment' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first(), 'success' => false], 400);
+        }
+        try {
+            $auth = auth()->user();
+            if ($req->defaultPayment) {
+                $user = User::find($auth->id);
+                $user->defaultPayment = $req->defaultPayment;
+                $user->save();
+            }
+        } catch (Exception $th) {
+            Log::info($th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
@@ -681,7 +1144,7 @@ class UserController extends Controller
                 $admin->notify(new CustomerContactUsNotification($contactUSDetails));
             }
             return response()->json(['message' => "Submitted successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -691,7 +1154,7 @@ class UserController extends Controller
     function updateContactStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            "id" => 'required',
+            "id" => 'required|exists:user_contacts,id',
             "status" => 'required',
         ], [
             "id.required" => "Please fill status",
@@ -703,7 +1166,7 @@ class UserController extends Controller
         try {
             UserContact::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -717,7 +1180,7 @@ class UserController extends Controller
             $skip = $req->page * 10;
             $items = UserContact::orderBy('created_at', 'desc')->skip($skip)->take(10)->get();
             return response()->json(['data' => $items, 'TotalRecords' => $totalRecords], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -726,34 +1189,34 @@ class UserController extends Controller
 
     function ChefReview(Request $req)
     {
-
         $validator = Validator::make(
             $req->all(),
             [
-                "user_id" => 'required',
-                "chef_id" => 'required',
-                "star_rating" => "required|integer|min:1|max:5",
+                // "user_id" => 'required|exists:users,id',
+                "chef_id" => 'required|exists:chefs,id',
+                "star_rating" => "required",
                 "message" => 'required',
             ]
         );
         if ($validator->fails()) {
-            return response()->json(["message" => 'Please fill all the details', "success" => false], 400);
+            return response()->json(["message" =>  $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id, 'status' => 1])->first();
+            $user = auth()->guard('user')->user();
+            $reviewExist = ChefReview::where(['user_id' => $user->id, 'chef_id' => $req->chef_id, 'status' => 1])->first();
             if ($reviewExist) {
-                ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);
+                ChefReview::where(['user_id' => $user->id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);
             } else {
                 $newReview = new ChefReview();
-                $newReview->user_id = $req->user_id;
+                $newReview->user_id = $user->id;
                 $newReview->chef_id = $req->chef_id;
                 $newReview->star_rating = $req->star_rating;
                 $newReview->message = $req->message;
                 $newReview->save();
             }
-            $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
+            $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $user->id, 'chef_id' => $req->chef_id])->first();
             $reviewDetails['date'] = Carbon::now();
-            $chef = chef::find($req->chef_id);
+            $chef = Chef::find($req->chef_id);
             $chef->notify(new NewChefReviewNotification($reviewDetails));
             $admins = Admin::all();
             foreach ($admins as $admin) {
@@ -761,10 +1224,10 @@ class UserController extends Controller
             }
             $this->updateChefrating($req->chef_id);
             return response()->json(['message' => "Submitted successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
+            return response()->json(['error' => $th->getMessage() . 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
@@ -777,7 +1240,7 @@ class UserController extends Controller
             $totalStars = $totalStars + $value['star_rating'];
         }
         $rating = $totalStars / $totalNoReview;
-        chef::where('id', $chef_id)->update(['rating' => $rating]);
+        Chef::where('id', $chef_id)->update(['rating' => $rating]);
     }
 
     function deleteChefReview(Request $req)
@@ -793,7 +1256,7 @@ class UserController extends Controller
         try {
             ChefReview::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
@@ -803,53 +1266,72 @@ class UserController extends Controller
     function getChefReview(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            "chef_id" => 'required',
-        ], [
-            "chef_id.required" => "Please fill chef_id",
+            "chef_id" => 'sometimes|required|exists:chefs,id',
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            $query = ChefReview::where('status', 1);
+
+            // Apply chef_id filter if provided
+            if ($req->has('chef_id')) {
+                $query->where('chef_id', $req->chef_id);
+            }
+
+            // Pagination logic
+            $totalRecords = $query->count();
+            $skip = $req->page * 10;
+            $data = $query->skip($skip)->take(10)->with('user:firstName,lastName,id')->get();
+
             // $totalRecords = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->count();
             // $skip = $req->page * 10;
             // $data = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->skip($skip)->take(10)->with('user:firstName,lastName,id')->get();
-            // return response()->json([
-            //     'data' => $data,
-            //     'TotalRecords' => $totalRecords,
-            //     'success' => true
-            // ], 200);
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            $chefId = $req->chef_id;
-
-            // Get the reviews related to the chef where status is 1
-            $reviews = ChefReview::where(['chef_id' => $chefId, 'status' => 1])->with('user:firstName,lastName,id')->get();
-
-            // Get user IDs for the reviews
-            $userIds = $reviews->pluck('user_id')->unique();
-
-            // Count the number of reviews with status 2 for each user
-            $userReviewCounts = [];
-            foreach ($userIds as $userId) {
-                $userReviewCounts[$userId] = ChefReview::where(['chef_id' => $chefId, 'user_id' => $userId, 'status' => 2])->count();
-            }
-
-            // Add the IsBlacklistAllowed property to the reviews
-            $reviews->each(function ($review) use ($userReviewCounts) {
-                $userId = $review->user_id;
-                $review->IsBlacklistAllowed = ($userReviewCounts[$userId] >= 2);
-            });
-
-            $totalRecords = $reviews->count(); // Count the total number of reviews
-
             return response()->json([
-                'data' => $reviews,
+                'data' => $data,
                 'TotalRecords' => $totalRecords,
                 'success' => true
             ], 200);
-        } catch (\Throwable $th) {
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // $chefId = $req->chef_id;
+            // $chefId = ChefReview::where('chef_id',$req->chef_id)->first();
+            // dd($chefId);
+            // if(!$chefId){
+            //     return response()->json([
+            //         'message' => 'Review not found',
+            //         'success' => false,
+            //         'data' => '',
+            //     ], 200);
+            // }
+
+            // // Get the reviews related to the chef where status is 1
+            // $reviews = ChefReview::where(['chef_id' => $chefId, 'status' => 1])->with('user:firstName,lastName,id')->get();
+
+            // // Get user IDs for the reviews
+            // $userIds = $reviews->pluck('user_id')->unique();
+
+            // // Count the number of reviews with status 2 for each user
+            // $userReviewCounts = [];
+            // foreach ($userIds as $userId) {
+            //     $userReviewCounts[$userId] = ChefReview::where(['chef_id' => $chefId, 'user_id' => $userId, 'status' => 2])->count();
+            // }
+
+            // // Add the IsBlacklistAllowed property to the reviews
+            // $reviews->each(function ($review) use ($userReviewCounts) {
+            //     $userId = $review->user_id;
+            //     $review->IsBlacklistAllowed = ($userReviewCounts[$userId] >= 2);
+            // });
+
+            // $totalRecords = $reviews->count(); // Count the total number of reviews
+
+            // return response()->json([
+            //     'data' => $reviews,
+            //     'TotalRecords' => $totalRecords,
+            //     'success' => true
+            // ], 200);
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -869,7 +1351,7 @@ class UserController extends Controller
         try {
             $dateList = [];
 
-            for ($i = 1; $i <= 30; $i++) {
+            for ($i = 0; $i <= 30; $i++) {
                 $date = now()->addDays($i);
                 $dayName = $date->shortDayName;
 
@@ -898,7 +1380,7 @@ class UserController extends Controller
             }
 
             $lat_long_result_array = $this->get_lat_long($req->postal_code);
-
+            $selected_postal_code[] = '';
             if ($lat_long_result_array["result"] == 1) {
                 /***** Now from the customer postal code we need to find the ******/
                 $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
@@ -909,7 +1391,7 @@ class UserController extends Controller
 
             // getting counts of the available shefs for next 14 days
             foreach ($dateList as &$val) {
-                $query = chef::where(function ($q) use ($selected_postal_code) {
+                $query = Chef::where(function ($q) use ($selected_postal_code) {
                     foreach ($selected_postal_code as $postalCode) {
                         $q->orWhere('postal_code', 'like', $postalCode . '%');
                     }
@@ -924,7 +1406,7 @@ class UserController extends Controller
                 $val['total'] = $query->count();
             }
             return response()->json(['data' => $dateList, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -933,20 +1415,27 @@ class UserController extends Controller
 
     function VerifyUserEmail(Request $req)
     {
-        if (!$req->id) {
-            return response()->json(["message" => 'Please fill all the details', "success" => false], 400);
-        }
+        // if (!$req->id) {
+        //     return response()->json(["message" => 'Please fill all the details', "success" => false], 400);
+        // }
         try {
-            $checkVerification = User::find($req->id);
+            $user = auth()->guard('user')->user();
+            $checkVerification = User::find($user->id);
             if ($checkVerification->email_verified_at) {
                 return response()->json(['message' => 'Email has been already verified successfully', 'status' => 1, 'success' => true], 200);
             } else {
-                User::where('id', $req->id)->update(['email_verified_at' => Carbon::now()]);
-                $userDetails = User::find($req->id);
-                Mail::to(trim($userDetails->email))->send(new HomeshefCustomerEmailVerifiedSuccessfully($userDetails));
+                User::where('id', $user->id)->update(['email_verified_at' => Carbon::now()]);
+                $userDetails = User::find($user->id);
+                try {
+                    if (config('services.is_mail_enable')) {
+                        Mail::to(trim($userDetails->email))->send(new HomeshefCustomerEmailVerifiedSuccessfully($userDetails));
+                    }
+                } catch (Exception $e) {
+                    Log::error($e);
+                }
                 return response()->json(['message' => 'Email has been verified successfully', 'success' => true], 200);
             }
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -959,10 +1448,11 @@ class UserController extends Controller
             $validator = Validator::make(
                 $req->all(),
                 [
-                    "user_id" => 'required',
-                    "food_id" => 'required',
-                    "rating" => "required|integer|min:1|max:5",
-                    "review" => 'required',
+                    "user_id" => 'required|exists:users,id',
+                    "food_id" => 'required|exists:food_items,id',
+                    "star_rating" => "required|integer|min:1|max:5",
+                    "message" => 'required',
+                    "image" => 'nullable|image|mimes:jpeg,jpg,png|max:250',
                 ]
             );
             if ($validator->fails()) {
@@ -990,8 +1480,8 @@ class UserController extends Controller
                     [
                         'user_id' => $req->user_id,
                         'food_id' => $req->food_id,
-                        'rating' => $req->rating,
-                        'review' => $req->review,
+                        'rating' => $req->star_rating,
+                        'review' => $req->message,
                         'reviewImages' => $imagePaths,
                     ]
                 );
@@ -999,13 +1489,11 @@ class UserController extends Controller
                 $review = new FoodItemReview();
                 $review->user_id = $req->user_id;
                 $review->food_id = $req->food_id;
-                $review->rating = $req->rating;
-                $review->review = $req->review;
+                $review->rating = $req->star_rating;
+                $review->review = $req->message;
                 $review->reviewImages = $imagePaths;
                 $review->save();
             }
-
-
             $allReview = FoodItemReview::select('rating')->where('food_id', $req->food_id)->get();
             $totalNoReview = FoodItemReview::where('food_id', $req->food_id)->count();
             $totalStars = 0;
@@ -1014,42 +1502,117 @@ class UserController extends Controller
             }
             $rating = $totalStars / $totalNoReview;
             FoodItem::where('id', $req->food_id)->update(['rating' => $rating]);
+            $reviewDetails = FoodItemReview::where(['user_id' => $req->user_id, 'food_id' => $req->food_id])->with('user:id,firstName,lastName')->first();
+            // Log::info($reviewDetails);
+            // if ($reviewExist) {
+            //     $chefDetail = FoodItem::find($req->food_id);
+            //     Log::info($chefDetail);
+            //     $chefDetail->chef_id->notify(new NewChefReviewNotification($reviewDetails));
 
+            //     return response()->json(['message' => 'Review updated successfully', 'success' => true], 200);
+            // }
             if ($reviewExist) {
+                // Assuming you have the relationship setup correctly
+                $chefDetail = FoodItem::with('chef')->find($req->food_id);
+                $message = ' updated a food review on ';
+
+                if ($chefDetail && $chefDetail->chef) {
+                    $chefDetail->chef->notify(new ChefFoodReviewNotification($reviewDetails, $message));
+                } else {
+                    return response()->json(['message' => 'Chef details not found for food item ID:' . ($req->food_id), 'success' => false], 400);
+                }
+
                 return response()->json(['message' => 'Review updated successfully', 'success' => true], 200);
             } else {
+                $chefDetail = FoodItem::with('chef')->find($req->food_id);
+                $message = ' sent a food review to you on ';
+                if ($chefDetail && $chefDetail->chef) {
+                    $chefDetail->chef->notify(new ChefFoodReviewNotification($reviewDetails, $message));
+                } else {
+                    return response()->json(['message' => 'Chef details not found for food item ID:' . ($req->food_id), 'success' => false], 400);
+                }
                 return response()->json(['message' => 'Added successfully', 'success' => true], 200);
             }
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
+    // function getAllFoodReview(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         "food_id" => 'required',
+    //     ], [
+    //         "food_id.required" => "Please fill chef_id",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+    //     }
+    //     try {
+    //         $totalRecords = FoodItemReview::where('chef_id', $req->chef_id)->count();
+    //         $skip = $req->page * 10;
+    //         $data = FoodItemReview::where('food_id', $req->food_id)->skip($skip)->take(10)->with('user:firstName,lastName,id')->get();
+    //         return response()->json([
+    //             'data' => $data,
+    //             'TotalRecords' => $totalRecords,
+    //             'success' => true
+    //         ], 200);
+    //     } catch (\Exception $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
+    //     }
+    // }
+
     function getAllFoodReview(Request $req)
     {
+        // Validate request parameters
         $validator = Validator::make($req->all(), [
-            "food_id" => 'required',
+            "food_id" => 'required|integer',
         ], [
-            "food_id.required" => "Please fill chef_id",
+            "food_id.required" => "Please provide the food ID.",
+            "food_id.integer" => "Food ID must be a valid integer.",
         ]);
+
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
         try {
-            $totalRecords = FoodItemReview::where('chef_id', $req->chef_id)->count();
-            $skip = $req->page * 10;
-            $data = FoodItemReview::where('food_id', $req->food_id)->skip($skip)->take(10)->with('user:firstName,lastName,id')->get();
+            $foodId = $req->food_id;
+
+            // Get total reviews for the food
+            $totalRecords = FoodItemReview::where('food_id', $foodId)->count();
+
+            // Pagination logic (assuming page starts from 1)
+            $page = (int) $req->page ?: 1;
+            $skip = ($page - 1) * 10;
+
+            // Fetch reviews with user details (limited fields)
+            $data = FoodItemReview::where('food_id', $foodId)
+                ->skip($skip)
+                ->take(10)
+                ->with(['user' => function ($query) {
+                    $query->select('id', 'firstName', 'lastName');
+                }])
+                ->with(['food' => function ($query) {
+                    $query->select('id', 'dish_name', 'dishImageThumbnail');
+                }]) // Load food details
+                ->get();
+
             return response()->json([
-                'data' => $data,
-                'TotalRecords' => $totalRecords,
-                'success' => true
+                "data" => $data,
+                "TotalRecords" => $totalRecords,
+                "success" => true,
             ], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
+        } catch (\Exception $th) {
+            Log::error($th->getMessage());
+            return response()->json([
+                "error" => "An unexpected error occurred. Please try again later.",
+                "success" => false,
+            ], 500);
         }
     }
 
@@ -1068,7 +1631,7 @@ class UserController extends Controller
         try {
             UserFoodReview::where('id', $req->id)->update(['status' => $req->status]);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1096,7 +1659,7 @@ class UserController extends Controller
             }
             UserFoodReview::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
@@ -1125,7 +1688,7 @@ class UserController extends Controller
             $foodReviews = $query->skip($skip)->take(10)->get();
             $totalRecords = $foodReviews->count();
             return response()->json(['data' => $foodReviews, 'TotalRecords' => $totalRecords, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1151,7 +1714,7 @@ class UserController extends Controller
             // $updateData = $req->status;
             UserChefReview::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1171,7 +1734,7 @@ class UserController extends Controller
         try {
             UserChefReview::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong. Please try to contact again !', 'success' => false], 500);
@@ -1200,7 +1763,7 @@ class UserController extends Controller
             $chefReviews = $query->skip($skip)->take(10)->get();
             $totalRecords = $chefReviews->count();
             return response()->json(['data' => $chefReviews, 'TotalRecords' => $totalRecords, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -1209,56 +1772,188 @@ class UserController extends Controller
 
     public function getUserOrders(Request $req)
     {
-
         try {
-            $query = Order::query();
-            if ($req->user_id) {
-                $query->where('user_id', $req->user_id);
-            }
-            $data = $query->with('subOrders.OrderTrack', 'subOrders.OrderItems', 'subOrders.chefs', 'subOrders.OrderItems.foodItem')->get();
+            $user = auth()->guard('user')->user();
+            $query = Order::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->with([
+                    'subOrders.OrderTrack',
+                    'subOrders.OrderItems.foodItem',
+                    'subOrders.chefs'
+                ]);
+            $orders = $query->get();
+            $orders->each(function ($order) {
+                $order->subOrders->each->makeVisible('customer_delivery_token');
+            });
 
-            return response()->json(["data" => $data, "success" => true], 200);
-        } catch (\Throwable $th) {
+            return response()->json(["message" => "fetched user order successfully", "data" => $orders, "success" => true], 200);
+        } catch (Exception $th) {
             Log::error($th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
         }
     }
 
-    // public function getUserOrderDetails(Request $req)
-    // {
-    //     // Validation
-    //     $validator = Validator::make($req->all(), [
-    //         'id' => 'required|integer',
-    //         // Adjust validation rules as needed
-    //     ]);
+    public function getUserOrderDetails(Request $req)
+    {
+        // Validation
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|integer',
+            // Adjust validation rules as needed
+        ]);
 
-    //     if ($validator->fails()) {
-    //         return response()->json(["message" => "Validation failed", "errors" => $validator->errors(), "success" => false], 400);
+        if ($validator->fails()) {
+            return response()->json(["message" => "Validation failed", "errors" => $validator->errors(), "success" => false], 400);
+        }
+
+        try {
+            $data = Order::where('id', $req->id)
+                ->with('subOrders.orderItems.foodItem.chef')
+                ->get(); // Use get() to retrieve multiple orders, not just the first one
+
+            $trackDetails = [];
+
+            foreach ($data as $order) {
+                foreach ($order->subOrders as $subOrder) {
+                    $trackId = $subOrder->track_id;
+                    $trackDetail = OrderTrackDetails::where('track_id', $trackId)->get();
+                    $trackDetails[$trackId] = $trackDetail;
+                }
+            }
+
+            if ($data->isEmpty()) {
+                return response()->json(["message" => "No orders found for this user", "success" => true], 200);
+            }
+
+            return response()->json(["data" => $data, "trackDetails" => $trackDetails, "success" => true], 200);
+        } catch (\Exception $th) {
+            Log::error($th->getMessage()); // Log as an error
+            return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
+        }
+    }
+
+    public function userOrderInvoicePDF(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|exists:sub_orders,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(["message" => "Validation failed", "errors" => $validator->errors(), "success" => false], 400);
+        }
+        try {
+            $data = SubOrders::with(['chefs', 'Orders', 'OrderItems.foodItem'])->findOrFail($req->id);
+            Log::info('Invoice Data: ', [$data]);
+
+            $pdf = Pdf::loadView('pdf.user-order-invoice', compact('data'));
+            $pdf->getDomPDF()->setPaper('a4', 'portrait');
+            return $pdf->download('customer-order-invoice.pdf');
+
+            // return response()->json(["data" => $data, "success" => true], 200);
+
+        } catch (\Exception $th) {
+            Log::error($th);
+            return response()->json(['message' => 'Oops! Something went wrong', $th->getMessage(), 'success' => false], 500);
+        }
+    }
+
+    // $chefs = Chef::with('foodItems')->where('kitchen_name', 'like', "%$query%")->Where('postal_code', $postal)->get();
+    // $foods = FoodItem::where('dish_name', 'like', "%$query%")->with('chef')->get();
+    // if ($chefs) {
+    //     $results = [];
+
+    //     // Loop through chefs
+    //     foreach ($chefs as $chef) {
+    //         // Fetch Chef's All Column Data
+    //         $results[] = $chef->toArray();
+    //         // $results[] = [
+    //         //     'id' => $chef->id,
+    //         //     'firstName' => $chef->firstName,
+    //         //     'lastName' => $chef->lastName,
+    //         //     'kitchen_name' => $chef->kitchen_name,
+    //         //     'type' => 'chef',
+    //         // ];
     //     }
-
-    //     try {
-    //         $data = Order::where('id', $req->id)
-    //             ->with('subOrders.orderItems.foodItem.chef')
-    //             ->get(); // Use get() to retrieve multiple orders, not just the first one
-
-    //         $trackDetails = [];
-
-    //         foreach ($data as $order) {
-    //             foreach ($order->subOrders as $subOrder) {
-    //                 $trackId = $subOrder->track_id;
-    //                 $trackDetail = OrderTrackDetails::where('track_id', $trackId)->get();
-    //                 $trackDetails[$trackId] = $trackDetail;
-    //             }
-    //         }
-
-    //         if ($data->isEmpty()) {
-    //             return response()->json(["message" => "No orders found for this user", "success" => true], 200);
-    //         }
-
-    //         return response()->json(["data" => $data, "trackDetails" => $trackDetails, "success" => true], 200);
-    //     } catch (\Throwable $th) {
-    //         Log::error($th->getMessage()); // Log as an error
-    //         return response()->json(['message' => 'Oops! Something went wrong. Please try again.', 'success' => false], 500);
-    //     }
+    //     return response()->json(['success' => true, 'message' => 'Searched by Chef respective data', 'data' => $results]);
     // }
+
+
+    public function searchFood(Request $request)
+    {
+        try {
+            $query = $request->input('query');
+            $postal = $request->input('postal_code');
+            if (!$postal || !$query) {
+                return response()->json(['success' => true, 'message' => 'please provide the requied details', 'data' => ''], 200);
+            }
+
+            $chefs = Chef::with('foodItems')
+                ->where(function ($queryBuilder) use ($query) {
+                    $queryBuilder->where('kitchen_name', 'like', "%$query%")
+                        ->orWhereHas('foodItems', function ($foodItemsQuery) use ($query) {
+                            $foodItemsQuery->where('dish_name', 'like', "%$query%");
+                        });
+                })
+                ->where('postal_code', $postal)
+                ->get();
+
+            $results = [];
+
+            foreach ($chefs as $chef) {
+                $matchedFoodItems = $chef->foodItems->filter(function ($foodItem) use ($query) {
+                    // return strpos(strtolower($foodItem->dish_name), strtolower($query)) !== false;
+                    return stripos($foodItem->dish_name, $query) !== false;
+                })->toArray();
+
+                if (!empty($matchedFoodItems) || stripos($chef->kitchen_name, $query) !== false) {
+                    $results[] = [
+                        'chef_id' => $chef->id,
+                        'kitchen_name' => $chef->kitchen_name,
+                        'food_item' => $matchedFoodItems,
+                    ];
+                }
+            }
+            return response()->json(['success' => true, 'message' => 'Search data fetch successfully', 'data' => $results], 200);
+        } catch (Exception $e) {
+            // Return error response in case of any exception
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        // Validate the request
+        Log::info($request->all());
+        $validator = Validator::make($request->all(), [
+            'mobile' => 'required|string',
+            'new_password' => 'required|string|min:8',
+            'confirmed' => 'required|same:new_password',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()->first()], 422);
+        }
+
+        try {
+            // Retrieve the user by mobile number
+            $user = User::where('mobile', $request->mobile)->first();
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+            // Update the user's password
+            $user->password = Hash::make($request->new_password);
+            Log::info($user);
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password changed successfully!',
+            ], 200);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops! Something went wrong, please try again!',
+            ], 500);
+        }
+    }
 }

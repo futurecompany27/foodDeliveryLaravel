@@ -31,6 +31,9 @@ class Order extends Model
         'delivery_date',
         'from_time',
         'to_time',
+        'food_instruction',
+        'delivery_option',
+        'option_desc',
         'delivery_instructions',
         'payment_status',
         'transacton_id',
@@ -52,5 +55,8 @@ class Order extends Model
 
     public function user(){
         return $this->belongsTo(User::class, 'user_id','id');
+    }
+    public function chef(){
+        return $this->belongsTo(Chef::class, 'user_id','id');
     }
 }

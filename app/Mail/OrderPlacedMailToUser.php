@@ -13,18 +13,27 @@ class OrderPlacedMailToUser extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $mail;
+    protected $orderDetails;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($mail)
+    public function __construct($orderDetails)
     {
-        $this->mail = $mail;
+        $this->orderDetails = $orderDetails;
     }
 
     public function build()
     {
-        return $this->view('orderHasBeenPlaced', ['subject' => "Order Placed", 'userName' => $this->mail['userName'], 'order_id' => $this->mail['order_id']]);
+        return $this
+        ->subject('Your Order is Confirmed!')
+        ->view('orderHasBeenPlaced', ['subject' => "Your Order is Confirmed!",
+        'userName' => $this->orderDetails['userName'],
+        'order_id' => $this->orderDetails['order_id'],
+        'grand_total' => $this->orderDetails['grand_total'],
+        'dishNames' => $this->orderDetails['dishNames'],
+        'total_order_item' => $this->orderDetails['total_order_item'],
+        'created_at' => $this->orderDetails['created_at']
+        ]);
     }
 }

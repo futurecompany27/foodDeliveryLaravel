@@ -55,7 +55,7 @@ class kitchentypeController extends Controller
             ]);
             DB::commit();
             return response()->json(["message" => "Added successfully", "success" => true], 201);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -71,7 +71,7 @@ class kitchentypeController extends Controller
                 $kitchenTyepData = Kitchentype::where('status', 1)->get();
             }
             return response()->json(["data" => $kitchenTyepData, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -118,7 +118,7 @@ class kitchentypeController extends Controller
             }
             Kitchentype::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -144,7 +144,7 @@ class kitchentypeController extends Controller
             }
             Kitchentype::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
@@ -170,7 +170,7 @@ class kitchentypeController extends Controller
             // $updateData = $req->status;
             Kitchentype::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);

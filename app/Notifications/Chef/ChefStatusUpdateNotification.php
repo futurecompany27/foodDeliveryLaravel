@@ -51,7 +51,8 @@ class ChefStatusUpdateNotification extends Notification
             'firstName' => $this->chefDetail['firstName'],
             'lastName' => $this->chefDetail['lastName'],
             'status' => $this->chefDetail['status'],
-            'message' => $status_array[$this->chefDetail['status']]
+            'message' => $status_array[$this->chefDetail['status']],
+            'url' => '/chef/chefprofile'
         ];
     }
 }

@@ -23,12 +23,13 @@ class HomeshefPasswordResetLink extends Mailable
 
     public function build()
     {
-        return $this->view('passwordResetLink', [
-            'id' => $this->userDetails['id'],
-            'firstName' => $this->userDetails['firstName'],
-            'lastName' => $this->userDetails['lastName'],
-            'user_type' => $this->userDetails['user_type'],
-            'token' => $this->userDetails['token'],
-        ]);
+        return $this->subject('Homeplate Password Reset Link')
+            ->view('passwordResetLink', [
+                'id' => $this->userDetails['id'],
+                'firstName' => $this->userDetails['firstName'],
+                'lastName' => $this->userDetails['lastName'],
+                'user_type' => $this->userDetails['user_type'],
+                'token' => $this->userDetails['token'],
+            ]);
     }
 }

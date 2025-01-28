@@ -11,6 +11,6 @@ class ScheduleCall extends Model
     protected $fillable = ['chef_id', 'date', 'slot', 'status'];
 
     public function chef() {
-        return $this->belongsTo(chef::class, 'chef_id','id');
+        return $this->belongsTo(Chef::class, 'chef_id','id');
     }
 }

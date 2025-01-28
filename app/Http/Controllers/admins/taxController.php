@@ -32,7 +32,7 @@ class taxController extends Controller
             ]);
             DB::commit();
             return response()->json(['message' => "Added successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -59,31 +59,65 @@ class taxController extends Controller
             $data = Tax::where('id', $req->id)->first();
             Tax::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
 
-    public function deleteTaxType(Request $req)
+    // public function deleteTaxType(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         "id" => 'required',
+    //     ], [
+    //         "id.required" => "Please fill id",
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+    //     }
+    //     try {
+    //         $tax = Tax::find($req->id);
+    //         Log::info($tax);
+    //         $checkTax = State::where('tax_type', $tax->tax_type)->exists();
+    //         Log::info($checkTax);
+    //         if ($checkTax) {
+    //             return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => true], 200);
+    //         }
+    //         $tax->delete();
+    //         // $data = Tax::where('id', $req->id)->first();
+    //         // Tax::where('id', $req->id)->delete();
+    //         return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+    //     } catch (\Exception $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+    //     }
+    // }
+
+    public function deleteTaxType(Request $request)
     {
-        $validator = Validator::make($req->all(), [
-            "id" => 'required',
-        ], [
-            "id.required" => "Please fill id",
-        ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        $taxId = $request->input('id');
+        $tax = Tax::find($taxId);
+        if (!$tax) {
+            return response()->json(['message' => 'Tax not found.', 'success' => false], 404);
         }
-        try {
-            $data = Tax::where('id', $req->id)->first();
-            Tax::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        $taxType = $tax->tax_type;
+        // Check if any state uses this tax_type
+        $isUsedInStates = State::whereJsonContains('tax_type', $taxType)->exists(); // For JSON column
+        if ($isUsedInStates) {
+            // Tax type is in use, do not delete
+            return response()->json(['message' => 'You cannot delete this tax type as it is being used in states.', 'success' => false], 403);
+        } else {
+            // Proceed with deletion
+            try {
+                $tax->delete();
+                return response()->json(['message' => 'Tax deleted successfully.', 'success' => true], 200);
+            } catch (\Exception $th) {
+                Log::info($th->getMessage());
+                DB::rollback();
+                return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+            }
         }
     }
 
@@ -100,7 +134,7 @@ class taxController extends Controller
                 $data = Tax::skip($skip)->take(10)->get();
                 return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);

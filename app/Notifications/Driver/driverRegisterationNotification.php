@@ -36,13 +36,13 @@ class driverRegisterationNotification extends Notification
      * @return array<string, mixed>
      */
     public function toArray($notifiable)
-    {
+    { 
         return [
             'id' => $this->driver->id,
             'firstName' => $this->driver->firstName,
             'lastName' => $this->driver->lastName,
             'email' => $this->driver->email,
-            'message' => ($this->driver->firstName . ' ' . $this->driver->lastName) . ' has registered as delivery partner.',
+            'message' => (($this->driver->firstName . ' ' . $this->driver->lastName) . ' has registered as delivery partner. '. date('d M Y', strtotime($this->driver->created_at)) . '.'),
             'url' => '/admin/new-contact-us'
         ];
     }

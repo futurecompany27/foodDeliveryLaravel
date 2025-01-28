@@ -24,11 +24,11 @@ class DatabaseSeeder extends Seeder
             postalCodeSeeeder::class,
             DriverSeeder::class,
             UserSeeder::class,
-            ChefSeeder::class,
+            // ChefSeeder::class,
             DocumetItemListSeeder::class,
             DocumetItemFieldsSeeder::class,
             FoodCategorySeeder::class,
-            FoodItemSeeder::class,
+            // FoodItemSeeder::class,
             HeatingInstructionSeeder::class,
             IngredientSeeder::class,
             KitchenTypeSeeder::class,
@@ -36,7 +36,8 @@ class DatabaseSeeder extends Seeder
             ShefSubTypeSeeder::class,
             SitesettingSeeder::class,
             UnitSeeder::class,
-            taxSeeeder::class
+            taxSeeeder::class,
+            OrderStatusSeeder::class
         ]);
     }
 }

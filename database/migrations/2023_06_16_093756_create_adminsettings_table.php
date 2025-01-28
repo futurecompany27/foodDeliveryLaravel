@@ -23,6 +23,9 @@ return new class extends Migration
             $table->integer('radiusForDriver')->default(5);
             $table->integer('multiChefOrderAllow')->default(5)->comment("user can add multi chef order if its under this range");
             $table->longText('Work_with_us_content')->nullable();
+            $table->float('food_handler_certificate_cost', 10, 2)->nullable();
+            $table->float('restaurant_and_retail_license_cost', 10, 2)->nullable();
+            $table->float('certificate_handling_cost', 10, 2)->nullable()->comment('RRC handling & shipping cost');
             $table->softDeletes();
             $table->timestamps();
         });

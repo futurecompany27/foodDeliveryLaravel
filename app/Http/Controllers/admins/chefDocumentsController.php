@@ -3,14 +3,19 @@
 namespace App\Http\Controllers\admins;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PaymentReceivedMailToChef;
+use App\Models\Admin;
 use App\Models\DocumentItemField;
 use App\Models\DocumentItemList;
-use App\Models\chef;
+use App\Models\Chef;
 use App\Models\State;
+use App\Models\Transaction;
+use App\Notifications\admin\PaymentReceivedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class chefDocumentsController extends Controller
@@ -43,7 +48,7 @@ class chefDocumentsController extends Controller
             ]);
             DB::commit();
             return response()->json(["message" => "Added successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -81,7 +86,7 @@ class chefDocumentsController extends Controller
             }
             DocumentItemList::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -101,7 +106,7 @@ class chefDocumentsController extends Controller
         try {
             DocumentItemList::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -120,7 +125,7 @@ class chefDocumentsController extends Controller
                 }
             ])->get();
             return response()->json(['data' => $data, 'success' => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -146,7 +151,7 @@ class chefDocumentsController extends Controller
             // $updateData = $req->status;
             DocumentItemList::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -183,7 +188,7 @@ class chefDocumentsController extends Controller
             ]);
             DB::commit();
             return response()->json(['message' => 'Document item Field created Successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -219,7 +224,7 @@ class chefDocumentsController extends Controller
             Log::info($updateData);
             DocumentItemField::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -239,7 +244,7 @@ class chefDocumentsController extends Controller
         try {
             DocumentItemField::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
@@ -252,10 +257,52 @@ class chefDocumentsController extends Controller
             $totalRecords = DocumentItemField::where('document_item_list_id', $req->document_item_list_id)->count();
             $data = DocumentItemField::where('document_item_list_id', $req->document_item_list_id)->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
+    // public function storeTransectionDetail(Request $req)
+    // {
+    //     $req->validate([
+    //         'transaction_type' => 'required',
+    //         'user_type' => 'required',
+    //         'user_id' => 'required',
+    //         'remark' => 'nullable',
+    //         'amount' => 'required',
+    //     ]);
+    //     DB::beginTransaction();
+    //     try {
+    //         $transaction = Transaction::create([
+    //             'transaction_type' => $req->input('transaction_type'),
+    //             'user_type' => $req->input('user_type'),
+    //             'user_id' => $req->input('user_id'),
+    //             'remark' => $req->input('remark'),
+    //             'amount' => $req->input('amount'),
+    //         ]);
+    //         DB::commit();
+    //         if ($req->input('user_type') === 'chef') {
+    //             $chefDetails = Chef::findOrFail($req->input('user_id')); // Retrieve chef data
+    //             try {
+    //                 if (config('services.is_mail_enable')) {
+    //                     Mail::to(trim($chefDetails->email))->send(new PaymentReceivedMailToChef($chefDetails, $transaction));
+    //                 }
+    //             } catch (\Exception $e) {
+    //                 Log::error($e);
+    //             }
+    //         }
+    //         $admins = Admin::all();
+    //         foreach ($admins as $admin) {
+    //             $admin->notify(new PaymentReceivedNotification($chefDetails));
+    //         }
+
+    //         return response()->json(['message' => 'Transaction created successfully', 'transaction' => $transaction], 201);
+    //     } catch (\Exception $th) {
+    //         Log::info($th->getMessage());
+    //         DB::rollback();
+    //         return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+    //     }
+    // }
 }

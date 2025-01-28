@@ -24,7 +24,7 @@ class HomeshefFoodItemStatusChange extends Mailable
     public function build()
     {
 
-        return $this->view('foodItemStatusChangeMail')
+        return $this->subject('Homeplate Food Item Status Change')->view('foodItemStatusChangeMail')
             ->with([
                 'id' => $this->chef['id'],
                 'firstName' => $this->chef['firstName'],

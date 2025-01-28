@@ -41,7 +41,7 @@ class CustomerRegisterationNotification extends Notification
         return [
             'id' => $this->userDetail->id,
             'email' => $this->userDetail->email,
-            'message' => ($this->userDetail->firstName . ' ' . $this->userDetail->lastName) . ' register as a new user.',
+            'message' => (($this->userDetail->firstName . ' ' . $this->userDetail->lastName) . ' register as a new user.'. date('d M Y', strtotime($this->userDetail->created_at)) . '.'),
             'url' => '/admin/profile'
         ];
     }

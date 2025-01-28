@@ -18,8 +18,8 @@ class KitchenTypeSeeder extends Seeder
         DB::table('kitchentypes')->insert(['kitchentype' => 'Caribbean', 'image' => (env('filePath') . 'storage/admin/kitchentype/caribbean.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'American', 'image' => (env('filePath') . 'storage/admin/kitchentype/american.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Pakistani', 'image' => (env('filePath') . 'storage/admin/kitchentype/pakistani.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-        DB::table('kitchentypes')->insert(['kitchentype' => 'Latin American', 'image' => (env('filePath') . 'storage/admin/kitchentype/latinamerican.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-        DB::table('kitchentypes')->insert(['kitchentype' => 'Southeast Asian', 'image' => (env('filePath') . 'storage/admin/kitchentype/southeastasian.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        DB::table('kitchentypes')->insert(['kitchentype' => 'Latin', 'image' => (env('filePath') . 'storage/admin/kitchentype/latinamerican.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        DB::table('kitchentypes')->insert(['kitchentype' => 'Asian', 'image' => (env('filePath') . 'storage/admin/kitchentype/southeastasian.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Southern', 'image' => (env('filePath') . 'storage/admin/kitchentype/southern.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Mediterranean', 'image' => (env('filePath') . 'storage/admin/kitchentype/mediterranean.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         DB::table('kitchentypes')->insert(['kitchentype' => 'Chinese', 'image' => (env('filePath') . 'storage/admin/kitchentype/chinese.png'), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);

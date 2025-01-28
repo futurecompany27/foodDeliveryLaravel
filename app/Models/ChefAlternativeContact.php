@@ -14,4 +14,6 @@ class ChefAlternativeContact extends Model
         'mobile',
         'status',
     ];
+
+
 }

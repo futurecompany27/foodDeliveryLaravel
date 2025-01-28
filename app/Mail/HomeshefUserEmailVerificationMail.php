@@ -29,6 +29,7 @@ class HomeshefUserEmailVerificationMail extends Mailable
      */
     public function build()
     {
-        return $this->view('UserEmailVerification', ['id' => $this->userDetail->id, 'firstName' => $this->userDetail->firstName,'lastName'=> $this->userDetail->lastName]);
+        return $this->subject('Homeplate User Email Verification')
+            ->view('UserEmailVerification', ['id' => $this->userDetail->id, 'firstName' => $this->userDetail->firstName, 'lastName' => $this->userDetail->lastName]);
     }
 }

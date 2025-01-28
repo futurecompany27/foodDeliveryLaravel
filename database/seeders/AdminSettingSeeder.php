@@ -23,6 +23,9 @@ class AdminSettingSeeder extends Seeder
             'food_default_comm' => 10,
             'radius' => 3,
             'multiChefOrderAllow' => 5,
+            'food_handler_certificate_cost' => 50,
+            'restaurant_and_retail_license_cost' => 50,
+            'certificate_handling_cost' => 25,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);

@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('document_item_name');
             $table->string('chef_type');
             $table->string('reference_links')->nullable();
-            $table->string('additional_links')->nullable();
+            $table->text('additional_links')->nullable();
             $table->string('detail_information')->nullable();
             $table->string('status')->default(0)->comment('0- inactive 1- active');
             $table->foreign('state_id')->references('id')->on('states')->onDelete('NO ACTION');

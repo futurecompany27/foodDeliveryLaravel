@@ -32,7 +32,7 @@ return new class extends Migration {
             $table->json('dietary')->nullable();
             $table->string('heating_instruction_id');
             $table->string('heating_instruction_description');
-            $table->string('packageInstructions')->nullable();
+            $table->text('packageInstructions');
             $table->string('package');
             $table->string('size');
             $table->string('expiresIn');
