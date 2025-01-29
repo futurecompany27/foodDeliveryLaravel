@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->enum('is_hfc_paid', [0,1])->default('0')->comment('status: 0->unpaid, 1->paid');
             $table->enum('is_rcc_paid', [0,1])->default('0')->comment('status: 0->unpaid, 1->paid');
+            $table->tinyInteger('is_taxable')->default('0')->comment('taxable: 0->not taxable, 1->taxable');
             $table->string('firstName');
             $table->string('lastName');
             $table->string('date_of_birth');
@@ -79,6 +80,7 @@ return new class extends Migration {
             $table->tinyInteger('is_bank_detail_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
             $table->tinyInteger('is_social_detail_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
             $table->tinyInteger('is_kitchen_detail_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
+            $table->tinyInteger('is_tax_document_completed')->default('0')->comment('status: 0->incomplete, 1->complete');
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();
