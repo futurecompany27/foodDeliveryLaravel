@@ -15,13 +15,13 @@ return new class extends Migration {
             $table->id();
             $table->string('order_id')->nullable()->unique();
             $table->json('tax_types');
-            $table->string('order_total');
-            $table->string('order_tax');
+            $table->double('order_total', 8,2);
+            $table->double('order_tax', 8,2);
             $table->string('order_date')->default(Carbon::now()->toDateTimeString());
             $table->string('shipping')->default(0);
             $table->string('shipping_tax')->default(0);
             $table->string('discount_amount')->default(0);
-            $table->string('grand_total');
+            $table->double('grand_total', 8,2);
             $table->string('user_id');
             $table->string('shipping_address');
             $table->string('city')->nullable();
