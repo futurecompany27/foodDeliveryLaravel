@@ -221,6 +221,7 @@ Route::prefix('driver')->group(function () {
 Route::prefix('user')->group(function () {
     Route::controller(UserController::class)->group(function () {
         Route::post('/UserRegisteration', 'UserRegisteration');
+        Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
         Route::post('/UserLogin', 'UserLogin');
         Route::post('/googleSigin', 'googleSigin');
         Route::post('/getChefsByPostalCode', 'getChefsByPostalCode'); //without Auth can access
@@ -307,7 +308,6 @@ Route::prefix('user')->group(function () {
             Route::post('/deleteUserChefReview', 'deleteUserChefReview');
             Route::post('/getAllUserChefReviewsbyStatus', 'getAllUserChefReviewsbyStatus');
 
-            Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
             Route::post('/getUserOrders', 'getUserOrders');
             Route::post('/getUserOrderDetails', 'getUserOrderDetails');
 
