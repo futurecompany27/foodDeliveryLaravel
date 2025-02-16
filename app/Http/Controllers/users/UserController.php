@@ -129,7 +129,7 @@ class UserController extends Controller
         }
         // Hide password again
         $userDetails->makeHidden('password');
-        return response()->json(['message' => 'Login Successfully!', 'user_id' => auth()->user()->id, 'token' => User::createToken($token), 'success' => true], 200);
+        return response()->json(['message' => 'Login Successfully!', 'user_id' => auth()->user()->id,'first_name' =>auth()->user()->firstName, 'last_name' =>auth()->user()->lastName, 'token' => User::createToken($token), 'success' => true], 200);
         // return User::createToken($token);
     }
 
