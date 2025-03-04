@@ -489,6 +489,7 @@ class ChefController extends Controller
         }
     }
 
+
     public function updateDocuments(Request $req)
     {
         try {
@@ -499,99 +500,82 @@ class ChefController extends Controller
 
             DB::beginTransaction();
 
-            // Define the S3 path inside the chef's folder
-            $path = "chef/{$chef->id}/documents";
+            $path = 'chef/' . $chef->id;
+            $chef = Chef::findOrFail($chef->id);
 
-            $chef = Chef::find($chef->id);
+            // Function to handle file storage in S3 and update DB
+            function storeAndUpdateFile($request, $fileKey, $fieldKey, $chef, $path)
+            {
+                if ($request->hasFile($fileKey)) {
+                    // Delete old file from S3 if it exists
+                    if ($chef->$fieldKey) {
+                        $oldFilePath = str_replace(Storage::disk('s3')->url(''), '', $chef->$fieldKey);
+                        Storage::disk('s3')->delete($oldFilePath);
+                    }
 
-            // Store Address Proof
-            if ($req->hasFile('address_proof_path')) {
-                // Delete old file from S3 if exists
-                if (!empty($chef->address_proof_path)) {
-                    Storage::disk('s3')->delete(str_replace(env('AWS_URL') . '/', '', $chef->address_proof_path));
+                    // Store new file in S3
+                    $storedPath = $request->file($fileKey)->store($path, 's3');
+
+                    // Return the new file URL
+                    return Storage::disk('s3')->url($storedPath);
                 }
+                return $chef->$fieldKey; // Keep old value if no new file
+            }
 
-                // Upload new file to S3
-                $storedPath = $req->file('address_proof_path')->store($path, 's3');
-                Storage::disk('s3')->setVisibility($storedPath, 'public');
-
-                // Update database with S3 URL
+            // Updating address proof
+            if (isset($req->address_proof)) {
+                $addressProofPath = storeAndUpdateFile($req, 'address_proof_path', 'address_proof_path', $chef, $path);
                 Chef::where("id", $chef->id)->update([
-                    "address_proof_path" => Storage::disk('s3')->url($storedPath),
+                    "address_proof_path" => $addressProofPath,
                     "address_proof" => $req->address_proof,
-                    "status" => 0
+                    'status' => 0
                 ]);
             }
 
-            // Store ID Proof 1
-            if ($req->hasFile('id_proof_path1')) {
-                if (!empty($chef->id_proof_path1)) {
-                    Storage::disk('s3')->delete(str_replace(env('AWS_URL') . '/', '', $chef->id_proof_path1));
-                }
-
-                $storedPath = $req->file('id_proof_path1')->store($path, 's3');
-                Storage::disk('s3')->setVisibility($storedPath, 'public');
-
+            // Updating ID proof 1
+            if (isset($req->id_proof_1)) {
+                $idProofPath1 = storeAndUpdateFile($req, 'id_proof_path1', 'id_proof_path1', $chef, $path);
                 Chef::where("id", $chef->id)->update([
                     "id_proof_1" => $req->id_proof_1,
-                    "id_proof_path1" => Storage::disk('s3')->url($storedPath),
-                    "status" => 0
+                    "id_proof_path1" => $idProofPath1,
+                    'status' => 0
                 ]);
             }
 
-            // Store ID Proof 2
-            if ($req->hasFile('id_proof_path2')) {
-                if (!empty($chef->id_proof_path2)) {
-                    Storage::disk('s3')->delete(str_replace(env('AWS_URL') . '/', '', $chef->id_proof_path2));
-                }
-
-                $storedPath = $req->file('id_proof_path2')->store($path, 's3');
-                Storage::disk('s3')->setVisibility($storedPath, 'public');
-
+            // Updating ID proof 2
+            if (isset($req->id_proof_2)) {
+                $idProofPath2 = storeAndUpdateFile($req, 'id_proof_path2', 'id_proof_path2', $chef, $path);
                 Chef::where("id", $chef->id)->update([
                     "id_proof_2" => $req->id_proof_2,
-                    "id_proof_path2" => Storage::disk('s3')->url($storedPath),
-                    "status" => 0
+                    "id_proof_path2" => $idProofPath2,
+                    'status' => 0
                 ]);
             }
 
-            // Store Additional Fields (Text)
+            // Handling text-type additional fields
             if (isset($req->typeTextData)) {
                 foreach ($req->typeTextData as $value) {
                     $data = json_decode($value);
-                    if (isset($data->value) && $data->value != "") {
+                    if (!empty($data->value)) {
                         ChefDocument::updateOrCreate(
-                            [
-                                "chef_id" => $chef->id,
-                                "document_field_id" => $data->id
-                            ],
-                            [
-                                "field_value" => $data->value
-                            ]
+                            ["chef_id" => $chef->id, "document_field_id" => $data->id],
+                            ["field_value" => $data->value]
                         );
                         Chef::where("id", $chef->id)->update(['status' => 0]);
                     }
                 }
             }
 
-            // Store Additional Fields (Files)
-            if (isset($req->files) && isset($req->id)) {
-                $fieldsArray = $req->input('id');
-                $filesArray = $req->file('files');
-
-                foreach ($fieldsArray as $index => $value) {
-                    if (isset($filesArray[$index])) {
-                        $storedPath = $filesArray[$index]->store($path, 's3');
-                        Storage::disk('s3')->setVisibility($storedPath, 'public');
+            // Handling file-type additional fields
+            if (isset($req->files, $req->id)) {
+                foreach ($req->input('id') as $index => $value) {
+                    if (isset($req->file('files')[$index])) {
+                        $storedPath = $req->file('files')[$index]->store($path, 's3');
+                        $fileUrl = Storage::disk('s3')->url($storedPath);
 
                         ChefDocument::updateOrCreate(
-                            [
-                                "chef_id" => $chef->id,
-                                "document_field_id" => $value
-                            ],
-                            [
-                                "field_value" => Storage::disk('s3')->url($storedPath)
-                            ]
+                            ["chef_id" => $chef->id, "document_field_id" => $value],
+                            ["field_value" => $fileUrl]
                         );
                         Chef::where("id", $chef->id)->update(['status' => 0]);
                     }
@@ -604,14 +588,12 @@ class ChefController extends Controller
                 'success' => true
             ], 200);
         } catch (\Exception $th) {
-            Log::error('Error updating documents: ' . $th->getMessage());
-            DB::rollback();
-            return response()->json([
-                'message' => 'Oops! Something went wrong.',
-                'success' => false
-            ], 500);
+            Log::error("Error updating documents: " . $th->getMessage());
+            DB::rollBack();
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
 
     function updateKitchen(Request $req)
     {
@@ -669,6 +651,7 @@ class ChefController extends Controller
         }
     }
 
+
     public function updateSpecialBenifits(Request $req)
     {
         try {
@@ -677,36 +660,40 @@ class ChefController extends Controller
                 return response()->json(['message' => 'Unauthorized access'], 401);
             }
 
-            // Define storage path with additional folder
             $path = "chef/{$chef->id}/specialbenefit";
-
             $chef = Chef::find($chef->id);
 
             if ($req->hasFile('are_you_a_file_path')) {
-                // Delete old file from S3 (if exists)
-                if (!empty($chef->are_you_a_file_path)) {
-                    Storage::disk('s3')->delete(str_replace(env('AWS_URL') . '/', '', $chef->are_you_a_file_path));
+                $oldFileUrl = $chef->are_you_a_file_path;
+
+                if (!empty($oldFileUrl)) {
+                    $oldFilePath = parse_url($oldFileUrl, PHP_URL_PATH);
+                    $oldFilePath = ltrim($oldFilePath, '/');
+
+                    Log::info("Checking file on S3: " . $oldFilePath);
+
+                    if (Storage::disk('s3')->exists($oldFilePath)) {
+                        Storage::disk('s3')->delete($oldFilePath);
+                        Log::info("Deleted old file from S3: " . $oldFilePath);
+                    } else {
+                        Log::error("File not found on S3: " . $oldFilePath);
+                    }
                 }
 
-                // Upload new file to S3 inside specialbenefit folder
-                $storedPath = $req->file('are_you_a_file_path')->store($path, 's3');
-                Storage::disk('s3')->setVisibility($storedPath, 'public'); // Make file public
+                $file = $req->file('are_you_a_file_path');
+                $storedPath = $file->store($path, ['disk' => 's3']);
+                Storage::disk('s3')->setVisibility($storedPath, 'public');
 
-                // Get public URL of the uploaded file
                 $s3Url = Storage::disk('s3')->url($storedPath);
+                Log::info("File uploaded successfully: " . $s3Url);
 
-                // Update database
-                Chef::where("id", $chef->id)->update([
+                $chef->update([
                     "are_you_a_file_path" => $s3Url,
                     "are_you_a" => $req->are_you_a,
                     "status" => 0
                 ]);
 
-                return response()->json([
-                    "message" => "Updated successfully",
-                    "success" => true,
-                    "file_url" => $s3Url
-                ], 200);
+                return response()->json(["message" => "Updated successfully", "success" => true], 200);
             } else {
                 return response()->json([
                     "message" => "Please upload proof of " . $req->are_you_a,
@@ -714,13 +701,13 @@ class ChefController extends Controller
                 ], 400);
             }
         } catch (\Exception $th) {
-            Log::error('Error updating special benefits: ' . $th->getMessage());
-            return response()->json([
-                'message' => 'Oops! Something went wrong.',
-                'success' => false
-            ], 500);
+            Log::error("Update Special Benefits Error: " . $th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
+
+
 
     function AddContactData(Request $req)
     {
@@ -1673,51 +1660,51 @@ class ChefController extends Controller
         try {
             DB::beginTransaction();
             $chef = auth()->guard('chef')->user();
-            // Retrieve the chef's data
             $chef = Chef::find($chef->id);
 
             if (!$chef) {
                 return response()->json(['message' => 'Chef not found', 'success' => false], 404);
             }
 
-            if ($req->is_taxable) {
+            // Update taxable status
+            if ($req->has('is_taxable')) {
                 $chef->is_taxable = $req->is_taxable;
                 $chef->save();
-                return response()->json(['message' => 'Chef is ' . $req->is_taxable == '1' ? 'taxable' : 'non taxable' , 'success' => false], 500);
+                return response()->json([
+                    'message' => 'Chef is ' . ($req->is_taxable == '1' ? 'taxable' : 'non-taxable'),
+                    'success' => true
+                ], 200);
             }
 
-            // Delete existing GST image if it exists
-            if ($req->hasFile('gst_image') && $chef->gst_image) {
-                $existingGstImagePath = public_path(str_replace(asset('storage/'), '', $chef->gst_image));
-                if (File::exists($existingGstImagePath)) {
-                    // Attempt to delete the file
-                    if (!unlink($existingGstImagePath)) {
-                        return response()->json(['message' => 'Failed to delete existing GST image', 'success' => false], 500);
-                    }
-                }
-            }
+            $path = 'TaxInformation';
 
-            // Delete existing QST image if it exists
-            if ($req->hasFile('qst_image') && $chef->qst_image) {
-                $existingQstImagePath = public_path(str_replace(asset('storage/'), '', $chef->qst_image));
-                if (File::exists($existingQstImagePath)) {
-                    // Attempt to delete the file
-                    if (!unlink($existingQstImagePath)) {
-                        return response()->json(['message' => 'Failed to delete existing QST image', 'success' => false], 500);
+            // Function to delete old files from S3 and upload new ones
+            function storeAndReplaceFile($request, $fileKey, $fieldKey, $chef, $path)
+            {
+                if ($request->hasFile($fileKey)) {
+                    // Delete old file from S3 if exists
+                    if ($chef->$fieldKey) {
+                        $oldFilePath = str_replace(Storage::disk('s3')->url(''), '', $chef->$fieldKey);
+                        Storage::disk('s3')->delete($oldFilePath);
                     }
+
+                    // Store new file in S3
+                    $storedPath = $request->file($fileKey)->store($path, 's3');
+
+                    // Return the new file URL
+                    return Storage::disk('s3')->url($storedPath);
                 }
+                return $chef->$fieldKey; // Keep old value if no new file
             }
 
             // Store new GST image
             if ($req->hasFile('gst_image')) {
-                $filename = $req->file('gst_image')->store('/chef/TaxInformation');
-                $chef->gst_image = asset('storage/' . $filename);
+                $chef->gst_image = storeAndReplaceFile($req, 'gst_image', 'gst_image', $chef, $path);
             }
 
             // Store new QST image
             if ($req->hasFile('qst_image')) {
-                $filenames = $req->file('qst_image')->store('/chef/TaxInformation');
-                $chef->qst_image = asset('storage/' . $filenames);
+                $chef->qst_image = storeAndReplaceFile($req, 'qst_image', 'qst_image', $chef, $path);
             }
 
             // Update GST and QST numbers
@@ -1726,14 +1713,17 @@ class ChefController extends Controller
             $chef->save();
 
             DB::commit();
-
             return response()->json(['message' => "Tax Information Updated Successfully", "success" => true], 200);
         } catch (\Exception $th) {
-            Log::error($th->getMessage());
+            Log::error("Error updating tax info: " . $th->getMessage());
             DB::rollback();
-            return response()->json(['message' => 'Something went wrong ! Trying editting the tax details again', 'success' => false], 500);
+            return response()->json([
+                'message' => 'Something went wrong! Try editing the tax details again',
+                'success' => false
+            ], 500);
         }
     }
+
 
     public function getChefOrders(Request $req)
     {
