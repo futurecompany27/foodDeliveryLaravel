@@ -1,22 +1,41 @@
-/.phpunit.cache
-/node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/
-/storage/*.key
-/storage/log
-vendor
-.env
-.env.backup 
-.env.production
+# Laravel-specific
+/vendor/
+/node_modules/
+.phpunit.cache
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
-auth.json
+.env
+.env.*
+.env.backup
+.env.production
+/auth.json
+
+# Laravel Storage and Caching
+/storage/
+!/storage/app/public
+/storage/logs/
+storage/logs/*.log
+/storage/framework/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/testing/
+storage/framework/views/
+/storage/oauth-private.key
+/storage/oauth-public.key
+/public/storage
+/public/hot
+
+# Laravel Build Files
+/public/build/
+/bootstrap/cache/
+
+# Editor and OS Files
+/.idea/
+/.vscode/
+/.fleet/
+/.DS_Store
+
+# Debugging Logs
 npm-debug.log
 yarn-error.log
-/.fleet
-/.idea
-/.vscode
-/storage
