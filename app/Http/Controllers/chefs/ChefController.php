@@ -762,27 +762,39 @@ class ChefController extends Controller
                 $OGfilePath = "";
                 $filename_thumb = "";
                 if ($req->hasFile('foodImage')) {
-                    $directoryPath = 'storage/foodItem/';
-                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
-                    if (file_exists(str_replace(env('filePath'), '', $foodData->dishImage))) {
-                        unlink(str_replace(env('filePath'), '', $foodData->dishImage));
-                        $foodData->dishImage = '';
-                    }
+                    $file = $req->file('foodImage');
 
-                    if (file_exists(str_replace(env('filePath'), '', $foodData->dishImageThumbnail))) {
-                        unlink(str_replace(env('filePath'), '', $foodData->dishImageThumbnail));
-                        $foodData->dishImageThumbnail = '';
-                    }
+                    // Get original file name and sanitize it
+                    $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME); // Get filename without extension
+                    $extension = $file->getClientOriginalExtension(); // Get file extension
 
-                    $image = Image::make($req->file('foodImage'));
-                    $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
-                    $OGfilePath = $directoryPath . $name_gen;
-                    $image->fit(800, 800)->save($OGfilePath);
-                    $filename_thumb = $directoryPathThumbnail . $name_gen;
-                    $image->fit(200, 200)->save($filename_thumb);
+                    // Remove spaces and special characters from filename
+                    $safeFileName = preg_replace('/[^A-Za-z0-9_-]/', '_', $originalName);
+                    $fileName = $safeFileName . '_' . time() . '.' . $extension; // Add timestamp to avoid duplicates
 
-                    $foodData->dishImage = asset($OGfilePath);
-                    $foodData->dishImageThumbnail = asset($filename_thumb);
+                    // Define S3 paths
+                    $originalPath = "foodItem/" . $fileName;
+                    $thumbnailPath = "foodItem/thumbnails/" . $fileName;
+
+                    // Store Original Image in S3
+                    Storage::disk('s3')->put($originalPath, file_get_contents($file), 'public');
+
+                    // Resize Image and Store in S3
+                    $thumbnail = Image::make($file)
+                        ->resize(200, 200, function ($constraint) {
+                            $constraint->aspectRatio(); // Keep aspect ratio
+                        })
+                        ->encode('jpg', 85); // Encode as JPG with 85% quality
+
+                    Storage::disk('s3')->put($thumbnailPath, (string) $thumbnail, 'public');
+
+                    // Get URLs
+                    $originalImageUrl = Storage::disk('s3')->url($originalPath);
+                    $thumbnailImageUrl = Storage::disk('s3')->url($thumbnailPath);
+
+                    // Debugging
+                    \Log::info('Original Image URL: ' . $originalImageUrl);
+                    \Log::info('Thumbnail Image URL: ' . $thumbnailImageUrl);
                 }
                 $foodData->save();
                 $chefDetail = Chef::find($chef->id);
@@ -849,29 +861,47 @@ class ChefController extends Controller
                 $OGfilePath = "";
                 $filename_thumb = "";
                 if ($req->hasFile('foodImage')) {
-                    $directoryPath = 'storage/foodItem/';
-                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
-                    if (!file_exists($directoryPath)) {
-                        mkdir($directoryPath, 0755, true);
-                    }
-                    if (!file_exists($directoryPathThumbnail)) {
-                        mkdir($directoryPathThumbnail, 0755, true);
-                    }
-                    $image = Image::make($req->file('foodImage'));
-                    $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
-                    $OGfilePath = $directoryPath . $name_gen;
-                    $image->fit(800, 800)->save($OGfilePath);
-                    $filename_thumb = $directoryPathThumbnail . $name_gen;
-                    $image->fit(200, 200)->save($filename_thumb);
+                    // Get the uploaded file
+                    $file = $req->file('foodImage');
+
+                    // Generate a unique filename and sanitize it
+                    $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $file->getClientOriginalExtension();
+                    $safeFileName = preg_replace('/[^A-Za-z0-9_-]/', '_', $originalName);
+                    $fileName = $safeFileName . '_' . time() . '.' . $extension;
+
+                    // Define S3 paths
+                    $originalPath = "foodItem/" . $fileName;
+                    $thumbnailPath = "foodItem/thumbnails/" . $fileName;
+
+                    // Create image instances
+                    $image = Image::make($file);
+
+                    // Resize and upload original image (800x800)
+                    $image->fit(800, 800)->encode($extension);
+                    Storage::disk('s3')->put($originalPath, (string) $image, 'public');
+
+                    // Resize and upload thumbnail image (200x200)
+                    $thumbnail = Image::make($file)->fit(200, 200)->encode($extension);
+                    Storage::disk('s3')->put($thumbnailPath, (string) $thumbnail, 'public');
+
+                    // Get S3 URLs
+                    $originalImageUrl = Storage::disk('s3')->url($originalPath);
+                    $thumbnailImageUrl = Storage::disk('s3')->url($thumbnailPath);
+
+                    // Debugging logs
+                    \Log::info('Original Image URL: ' . $originalImageUrl);
+                    \Log::info('Thumbnail Image URL: ' . $thumbnailImageUrl);
                 }
+
 
                 DB::beginTransaction();
                 $foodItem = new FoodItem();
                 $foodItem->chef_id = $chef->id;
                 $foodItem->dish_name = $req->dish_name;
                 $foodItem->description = $req->description;
-                $foodItem->dishImage = asset($OGfilePath);
-                $foodItem->dishImageThumbnail = asset($filename_thumb);
+                $foodItem->dishImage = $OGfilePath;
+                $foodItem->dishImageThumbnail = $filename_thumb;
                 $foodItem->regularDishAvailabilty = $req->regularDishAvailabilty;
                 $foodItem->from = $req->from;
                 $foodItem->to = $req->to;
