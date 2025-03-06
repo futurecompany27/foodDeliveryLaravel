@@ -879,28 +879,50 @@ class ChefController extends Controller
                 $OGfilePath = "";
                 $filename_thumb = "";
                 if ($req->hasFile('foodImage')) {
-                    $directoryPath = 'storage/foodItem/';
-                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
-                    if (file_exists(str_replace(env('filePath'), '', $foodData->dishImage))) {
-                        unlink(str_replace(env('filePath'), '', $foodData->dishImage));
-                        $foodData->dishImage = '';
-                    }
+                    $directoryPath = 'foodItem/';
+                    $directoryPathThumbnail = 'foodItem/thumbnail/';
 
-                    if (file_exists(str_replace(env('filePath'), '', $foodData->dishImageThumbnail))) {
-                        unlink(str_replace(env('filePath'), '', $foodData->dishImageThumbnail));
-                        $foodData->dishImageThumbnail = '';
-                    }
-
-                    $image = Image::make($req->file('foodImage'));
+                    // Generate unique filename
                     $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
-                    $OGfilePath = $directoryPath . $name_gen;
-                    $image->fit(800, 800)->save($OGfilePath);
-                    $filename_thumb = $directoryPathThumbnail . $name_gen;
-                    $image->fit(200, 200)->save($filename_thumb);
 
-                    $foodData->dishImage = asset($OGfilePath);
-                    $foodData->dishImageThumbnail = asset($filename_thumb);
+                    // Process image with Intervention/Image
+                    $image = Image::make($req->file('foodImage'))->fit(800, 800);
+                    $thumbImage = Image::make($req->file('foodImage'))->fit(200, 200);
+
+                    // Save images temporarily
+                    $OGfilePath = storage_path('app/public/' . $name_gen); // Full path for original image
+                    $filename_thumb = storage_path('app/public/thumb_' . $name_gen); // Full path for thumbnail
+
+                    $image->save($OGfilePath);
+                    $thumbImage->save($filename_thumb);
+
+                    // Upload to S3
+                    $s3 = AwsHelper::cred();
+                    $result1 = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $directoryPath . $name_gen,
+                        'Body'   =>  fopen($OGfilePath, 'r'),
+                        'ContentType' => $req->file('foodImage')->getMimeType(),
+                    ]);
+                    $url1 = $result1['ObjectURL'];
+
+                    $result = $s3->putObject([
+                        'Bucket'      => env('AWS_BUCKET'),
+                        'Key'         => $directoryPathThumbnail . $name_gen,
+                        'Body'        => fopen($filename_thumb, 'r'), // Now the file exists
+                        'ContentType' => $req->file('foodImage')->getMimeType(),
+                    ]);
+                    $url = $result['ObjectURL'];
+
+                    // Append new image URLs instead of replacing old ones
+                    $foodData->dishImage = $url1;
+                    $foodData->dishImageThumbnail =  $url;
+
+                    // Delete temporary files after upload to free space
+                    unlink($OGfilePath);
+                    unlink($filename_thumb);
                 }
+
                 $foodData->save();
                 $chefDetail = Chef::find($chef->id);
                 $chefDetail['flag'] = 2;
@@ -915,7 +937,7 @@ class ChefController extends Controller
                     [
                         'dish_name' => 'required',
                         'description' => 'required',
-                        'foodImage' => 'required|image|mimes:jpeg,png,jpg|max:100|dimensions:pixels=350x350',
+                        'foodImage' => 'required|image|mimes:jpeg,png,jpg|max:1024|dimensions:width=350,height=350',
                         'regularDishAvailabilty' => 'required',
                         'from' => 'nullable',
                         'to' => 'nullable',
@@ -931,7 +953,7 @@ class ChefController extends Controller
                         'serving_unit' => 'required',
                         'serving_person' => 'required',
                         'price' => 'required',
-                        'comments' => 'nullable|string|max:300|max:300:The comment must be less than 300 words',
+                        'comments' => 'nullable|string|max:300',
                     ],
                     [
                         'dish_name.required' => 'Please mention dish name',
@@ -956,6 +978,7 @@ class ChefController extends Controller
                         'serving_unit.required' => 'Please mention serving unit',
                         'serving_person.required' => 'Please mention the food sufficency',
                         'price.required' => 'Please mention the price of the food',
+                        'comments.max' => 'The comment must be less than 300 characters.',
                     ]
                 );
 
@@ -966,20 +989,44 @@ class ChefController extends Controller
                 $OGfilePath = "";
                 $filename_thumb = "";
                 if ($req->hasFile('foodImage')) {
-                    $directoryPath = 'storage/foodItem/';
-                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
-                    if (!file_exists($directoryPath)) {
-                        mkdir($directoryPath, 0755, true);
-                    }
-                    if (!file_exists($directoryPathThumbnail)) {
-                        mkdir($directoryPathThumbnail, 0755, true);
-                    }
-                    $image = Image::make($req->file('foodImage'));
+                    $directoryPath = 'foodItem/';
+                    $directoryPathThumbnail = 'foodItem/thumbnail/';
+
+                    // Generate unique filename
                     $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
-                    $OGfilePath = $directoryPath . $name_gen;
-                    $image->fit(800, 800)->save($OGfilePath);
-                    $filename_thumb = $directoryPathThumbnail . $name_gen;
-                    $image->fit(200, 200)->save($filename_thumb);
+
+                    // Process image with Intervention/Image
+                    $image = Image::make($req->file('foodImage'))->fit(800, 800);
+                    $thumbImage = Image::make($req->file('foodImage'))->fit(200, 200);
+
+                    // Save images temporarily
+                    $OGfilePath = storage_path('app/public/' . $name_gen); // Full path for original image
+                    $filename_thumb = storage_path('app/public/thumb_' . $name_gen); // Full path for thumbnail
+
+                    $image->save($OGfilePath);
+                    $thumbImage->save($filename_thumb);
+
+                    // Upload to S3
+                    $s3 = AwsHelper::cred();
+                    $result1 = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $directoryPath . $name_gen,
+                        'Body'   =>  fopen($OGfilePath, 'r'),
+                        'ContentType' => $req->file('foodImage')->getMimeType(),
+                    ]);
+                    $url1 = $result1['ObjectURL'];
+
+                    $result = $s3->putObject([
+                        'Bucket'      => env('AWS_BUCKET'),
+                        'Key'         => $directoryPathThumbnail . $name_gen,
+                        'Body'        => fopen($filename_thumb, 'r'), // Now the file exists
+                        'ContentType' => $req->file('foodImage')->getMimeType(),
+                    ]);
+                    $url = $result['ObjectURL'];
+
+                    // Delete temporary files after upload to free space
+                    unlink($OGfilePath);
+                    unlink($filename_thumb);
                 }
 
                 DB::beginTransaction();
@@ -987,8 +1034,8 @@ class ChefController extends Controller
                 $foodItem->chef_id = $chef->id;
                 $foodItem->dish_name = $req->dish_name;
                 $foodItem->description = $req->description;
-                $foodItem->dishImage = asset($OGfilePath);
-                $foodItem->dishImageThumbnail = asset($filename_thumb);
+                $foodItem->dishImage =$url1;
+                $foodItem->dishImageThumbnail = $url;;
                 $foodItem->regularDishAvailabilty = $req->regularDishAvailabilty;
                 $foodItem->from = $req->from;
                 $foodItem->to = $req->to;
@@ -1291,13 +1338,13 @@ class ChefController extends Controller
         $validator = Validator::make(
             $req->all(),
             [
-                // 'chef_id' => 'required',
+                'chef_id' => 'required',
                 'currentPassword' => 'required',
                 'newPassword' => 'required',
                 'confirmPassword' => 'required',
             ],
             [
-                // 'chef_id.required' => 'Please mention chef_id',
+                'chef_id.required' => 'Please mention chef_id',
                 'currentPassword.required' => 'Please mention current password',
                 'newPassword.required' => 'Please mention new password',
                 'confirmPassword.required' => 'Please mention confirm password',
@@ -1572,12 +1619,12 @@ class ChefController extends Controller
     function sendRequestForChefReviewDelete(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            // "chef_id" => 'required',
+            "chef_id" => 'required',
             "user_id" => 'required',
             "review_id" => 'required',
             "reason" => 'required',
         ], [
-            // "chef_id.required" => "Please fill chef id",
+            "chef_id.required" => "Please fill chef id",
             "user_id.required" => "Please fill user id",
             "review_id.required" => "Please fill review id",
             "reason.required" => "Please fill reason",
@@ -1611,12 +1658,12 @@ class ChefController extends Controller
     function sendRequestForUserBlacklist(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            // "chef_id" => 'required',
+            "chef_id" => 'required',
             "user_id" => 'required',
             "reason" => 'required',
             "review_id" => 'required',
         ], [
-            // "chef_id.required" => "Please fill chef id",
+            "chef_id.required" => "Please fill chef id",
             "user_id.required" => "Please fill user id",
             "review_id.required" => "Please fill review id",
             "reason.required" => "Please fill reason",
