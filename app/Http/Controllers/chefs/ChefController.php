@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\chefs;
 
+use App\Helpers\AwsHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\users\UserController;
 use App\Mail\FoodCertificateMail;
@@ -63,6 +64,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Notifications\Chef\ChefSendReviewToAdmin;
 use App\Notifications\Chef\FoodCertificateNotification;
 use App\Mail\HomeshefUserEmailVerificationMail;
+use Aws\S3\S3Client;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -296,23 +298,38 @@ class ChefController extends Controller
                 "state" => isset($req->state) ? $req->state : '',
                 'status' => 0
             ];
-            if ($req->hasFile('profile_pic')) {
-                $chefDetail = Chef::find($chefInfo->id);
-                $path = str_replace(url('storage'), 'public', $chefDetail->profile_pic);
 
-                if (isset($chefDetail->profile_pic) && File::exists($path)) {
-                    unlink($path);
+            if ($req->hasFile('profile_pic')) {
+                try {
+                    $file = $req->file('profile_pic');
+                    $fileName = 'profile_chef/' . time() . '_' . $file->getClientOriginalName();
+
+                    $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+                    // Get the public URL of the uploaded file
+                    $url = $result['ObjectURL'];
+
+                    // Log the result
+                    Log::info('S3 Upload Success', ['url' => $url]);
+
+                    // Save URL to database
+                    $update['profile_pic'] = $url;
+
+                } catch (\Exception $e) {
+                    Log::error('S3 Upload Failed', ['error' => $e->getMessage()]);
+                    return response()->json([
+                        "error" => $e->getMessage()
+                    ], 500);
                 }
-                $name_gen = hexdec(uniqid()) . '.' . $req->file('profile_pic')->getClientOriginalExtension();
-                if (!File::exists("storage/chef/")) {
-                    File::makeDirectory("storage/chef/", $mode = 0777, true, true);
-                }
-                $small_image = Image::make($req->file('profile_pic'))
-                    ->resize(100, 100)
-                    ->save("storage/chef/" . $name_gen);
-                $profile = asset('storage/chef/' . $name_gen);
-                $update['profile_pic'] = $profile;
             }
+
 
             Chef::where('id', $chefInfo->id)->update($update);
             return response()->json(["message" => "Profile updated successfully", "success" => true], 200);
@@ -503,8 +520,28 @@ class ChefController extends Controller
                 if (file_exists(str_replace(env('filePath'), '', $chef->address_proof_path))) {
                     unlink(str_replace(env('filePath'), '', $chef->address_proof_path));
                 }
+                $file = $req->file('address_proof_path');
+                $fileName = 'chef/'. $chef->id.'/documents' . time() . '_' . $file->getClientOriginalName();
+
+                    $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+                    // Get the public URL of the uploaded file
+                    $url = $result['ObjectURL'];
+
+                    // Log the result
+                    Log::info('S3 Upload Success', ['url' => $url]);
+
+                    // Save URL to database
+
                 $storedPath = $req->file('address_proof_path')->store($path, 'public');
-                Chef::where("id", $chef->id)->update(["address_proof_path" => asset('storage/' . $storedPath), "address_proof" => $req->address_proof, 'status' => 0]);
+                Chef::where("id", $chef->id)->update(["address_proof_path" => $url, "address_proof" => $req->address_proof, 'status' => 0]);
             }
 
             // store ID proof 1
@@ -512,8 +549,25 @@ class ChefController extends Controller
                 if (file_exists(str_replace(env('filePath'), '', $chef->id_proof_path1))) {
                     unlink(str_replace(env('filePath'), '', $chef->id_proof_path1));
                 }
+                $file = $req->file('id_proof_path1');
+                $fileName = 'chef/'. $chef->id.'/documents' . time() . '_' . $file->getClientOriginalName();
+
+                    $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+                    // Get the public URL of the uploaded file
+                    $url = $result['ObjectURL'];
+
+                    // Log the result
+                Log::info('S3 Upload Success', ['url' => $url]);
                 $storedPath = $req->file('id_proof_path1')->store($path, 'public');
-                Chef::where("id", $chef->id)->update(["id_proof_1" => $req->id_proof_1, "id_proof_path1" => asset('storage/' . $storedPath), 'status' => 0]);
+                Chef::where("id", $chef->id)->update(["id_proof_1" => $req->id_proof_1, "id_proof_path1" => $url, 'status' => 0]);
             }
 
             // store ID proof 2
@@ -521,8 +575,27 @@ class ChefController extends Controller
                 if (file_exists(str_replace(env('filePath'), '', $chef->id_proof_path1))) {
                     unlink(str_replace(env('filePath'), '', $chef->id_proof_path1));
                 }
+
+                $file = $req->file('id_proof_path1');
+                $fileName = 'chef/'. $chef->id.'/documents' . time() . '_' . $file->getClientOriginalName();
+
+                    $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+                    // Get the public URL of the uploaded file
+                    $url = $result['ObjectURL'];
+
+                    // Log the result
+                Log::info('S3 Upload Success', ['url' => $url]);
+
                 $storedPath = $req->file('id_proof_path2')->store($path, 'public');
-                Chef::where("id", $chef->id)->update(["id_proof_2" => $req->id_proof_2, "id_proof_path2" => asset('storage/' . $storedPath), 'status' => 0]);
+                Chef::where("id", $chef->id)->update(["id_proof_2" => $req->id_proof_2, "id_proof_path2" =>$url, 'status' => 0]);
             }
 
             // Additional fields which has values in string
@@ -605,16 +678,46 @@ class ChefController extends Controller
                 if (file_exists(str_replace(env('filePath'), '', $chef->chef_banner_image))) {
                     unlink(str_replace(env('filePath'), '', $chef->chef_banner_image));
                 }
-                $storedPath = $req->file('chef_banner_image')->store($path, 'public');
-                Chef::where("id", $chef->id)->update(["chef_banner_image" => asset('storage/' . $storedPath)]);
+                $file = $req->file('chef_banner_image');
+                $fileName = 'chef/kitchen' . $chef->id . time() . '_' . $file->getClientOriginalName();
+
+                    $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+                    // Get the public URL of the uploaded file
+                $url = $result['ObjectURL'];
+
+                // $storedPath = $req->file('chef_banner_image')->store($path, 'public');
+                Chef::where("id", $chef->id)->update(["chef_banner_image" => $url]);
             }
 
             if ($req->hasFile('chef_card_image')) {
                 if (file_exists(str_replace(env('filePath'), '', $chef->chef_card_image))) {
                     unlink(str_replace(env('filePath'), '', $chef->chef_card_image));
                 }
+                $file = $req->file('chef_card_image');
+                $fileName = 'chef/kitchen' . $chef->id . time() . '_' . $file->getClientOriginalName();
+
+                    $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+                    // Get the public URL of the uploaded file
+                $url = $result['ObjectURL'];
+
                 $storedPath = $req->file('chef_card_image')->store($path, 'public');
-                Chef::where("id", $chef->id)->update(["chef_card_image" => asset('storage/' . $storedPath)]);
+                Chef::where("id", $chef->id)->update(["chef_card_image" => $url]);
             }
 
             Log::info($req);
@@ -648,8 +751,22 @@ class ChefController extends Controller
                 if (file_exists(str_replace(env('filePath'), '', $chef->are_you_a_file_path))) {
                     unlink(str_replace(env('filePath'), '', $chef->are_you_a_file_path));
                 }
-                $storedPath = $req->file('are_you_a_file_path')->store($path, 'public');
-                Chef::where("id", $chef->id)->update(["are_you_a_file_path" => asset('storage/' . $storedPath), "are_you_a" => $req->are_you_a, 'status' => 0]);
+
+                $file = $req->file('are_you_a_file_path');
+                $fileName = 'chef/special_benifit' . $chef->id . time() . '_' . $file->getClientOriginalName();
+
+                    $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+                    // Get the public URL of the uploaded file
+                    $url = $result['ObjectURL'];
+                Chef::where("id", $chef->id)->update(["are_you_a_file_path" => $url, "are_you_a" => $req->are_you_a, 'status' => 0]);
                 return response()->json(["message" => "Updated successfully", "success" => true], 200);
             } else {
                 return response()->json(["message" => "Please upload proof of " . $req->are_you_a, "success" => false], 500);
@@ -762,28 +879,50 @@ class ChefController extends Controller
                 $OGfilePath = "";
                 $filename_thumb = "";
                 if ($req->hasFile('foodImage')) {
-                    $directoryPath = 'storage/foodItem/';
-                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
-                    if (file_exists(str_replace(env('filePath'), '', $foodData->dishImage))) {
-                        unlink(str_replace(env('filePath'), '', $foodData->dishImage));
-                        $foodData->dishImage = '';
-                    }
+                    $directoryPath = 'foodItem/';
+                    $directoryPathThumbnail = 'foodItem/thumbnail/';
 
-                    if (file_exists(str_replace(env('filePath'), '', $foodData->dishImageThumbnail))) {
-                        unlink(str_replace(env('filePath'), '', $foodData->dishImageThumbnail));
-                        $foodData->dishImageThumbnail = '';
-                    }
-
-                    $image = Image::make($req->file('foodImage'));
+                    // Generate unique filename
                     $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
-                    $OGfilePath = $directoryPath . $name_gen;
-                    $image->fit(800, 800)->save($OGfilePath);
-                    $filename_thumb = $directoryPathThumbnail . $name_gen;
-                    $image->fit(200, 200)->save($filename_thumb);
 
-                    $foodData->dishImage = asset($OGfilePath);
-                    $foodData->dishImageThumbnail = asset($filename_thumb);
+                    // Process image with Intervention/Image
+                    $image = Image::make($req->file('foodImage'))->fit(800, 800);
+                    $thumbImage = Image::make($req->file('foodImage'))->fit(200, 200);
+
+                    // Save images temporarily
+                    $OGfilePath = storage_path('app/public/' . $name_gen); // Full path for original image
+                    $filename_thumb = storage_path('app/public/thumb_' . $name_gen); // Full path for thumbnail
+
+                    $image->save($OGfilePath);
+                    $thumbImage->save($filename_thumb);
+
+                    // Upload to S3
+                    $s3 = AwsHelper::cred();
+                    $result1 = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $directoryPath . $name_gen,
+                        'Body'   =>  fopen($OGfilePath, 'r'),
+                        'ContentType' => $req->file('foodImage')->getMimeType(),
+                    ]);
+                    $url1 = $result1['ObjectURL'];
+
+                    $result = $s3->putObject([
+                        'Bucket'      => env('AWS_BUCKET'),
+                        'Key'         => $directoryPathThumbnail . $name_gen,
+                        'Body'        => fopen($filename_thumb, 'r'), // Now the file exists
+                        'ContentType' => $req->file('foodImage')->getMimeType(),
+                    ]);
+                    $url = $result['ObjectURL'];
+
+                    // Append new image URLs instead of replacing old ones
+                    $foodData->dishImage = $url1;
+                    $foodData->dishImageThumbnail =  $url;
+
+                    // Delete temporary files after upload to free space
+                    unlink($OGfilePath);
+                    unlink($filename_thumb);
                 }
+
                 $foodData->save();
                 $chefDetail = Chef::find($chef->id);
                 $chefDetail['flag'] = 2;
@@ -798,7 +937,7 @@ class ChefController extends Controller
                     [
                         'dish_name' => 'required',
                         'description' => 'required',
-                        'foodImage' => 'required|image|mimes:jpeg,png,jpg|max:100|dimensions:pixels=350x350',
+                        'foodImage' => 'required|image|mimes:jpeg,png,jpg|max:1024|dimensions:width=350,height=350',
                         'regularDishAvailabilty' => 'required',
                         'from' => 'nullable',
                         'to' => 'nullable',
@@ -814,7 +953,7 @@ class ChefController extends Controller
                         'serving_unit' => 'required',
                         'serving_person' => 'required',
                         'price' => 'required',
-                        'comments' => 'nullable|string|max:300|max:300:The comment must be less than 300 words',
+                        'comments' => 'nullable|string|max:300',
                     ],
                     [
                         'dish_name.required' => 'Please mention dish name',
@@ -839,6 +978,7 @@ class ChefController extends Controller
                         'serving_unit.required' => 'Please mention serving unit',
                         'serving_person.required' => 'Please mention the food sufficency',
                         'price.required' => 'Please mention the price of the food',
+                        'comments.max' => 'The comment must be less than 300 characters.',
                     ]
                 );
 
@@ -849,20 +989,44 @@ class ChefController extends Controller
                 $OGfilePath = "";
                 $filename_thumb = "";
                 if ($req->hasFile('foodImage')) {
-                    $directoryPath = 'storage/foodItem/';
-                    $directoryPathThumbnail = 'storage/foodItem/thumbnail/';
-                    if (!file_exists($directoryPath)) {
-                        mkdir($directoryPath, 0755, true);
-                    }
-                    if (!file_exists($directoryPathThumbnail)) {
-                        mkdir($directoryPathThumbnail, 0755, true);
-                    }
-                    $image = Image::make($req->file('foodImage'));
+                    $directoryPath = 'foodItem/';
+                    $directoryPathThumbnail = 'foodItem/thumbnail/';
+
+                    // Generate unique filename
                     $name_gen = hexdec(uniqid()) . '.' . $req->file('foodImage')->getClientOriginalExtension();
-                    $OGfilePath = $directoryPath . $name_gen;
-                    $image->fit(800, 800)->save($OGfilePath);
-                    $filename_thumb = $directoryPathThumbnail . $name_gen;
-                    $image->fit(200, 200)->save($filename_thumb);
+
+                    // Process image with Intervention/Image
+                    $image = Image::make($req->file('foodImage'))->fit(800, 800);
+                    $thumbImage = Image::make($req->file('foodImage'))->fit(200, 200);
+
+                    // Save images temporarily
+                    $OGfilePath = storage_path('app/public/' . $name_gen); // Full path for original image
+                    $filename_thumb = storage_path('app/public/thumb_' . $name_gen); // Full path for thumbnail
+
+                    $image->save($OGfilePath);
+                    $thumbImage->save($filename_thumb);
+
+                    // Upload to S3
+                    $s3 = AwsHelper::cred();
+                    $result1 = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $directoryPath . $name_gen,
+                        'Body'   =>  fopen($OGfilePath, 'r'),
+                        'ContentType' => $req->file('foodImage')->getMimeType(),
+                    ]);
+                    $url1 = $result1['ObjectURL'];
+
+                    $result = $s3->putObject([
+                        'Bucket'      => env('AWS_BUCKET'),
+                        'Key'         => $directoryPathThumbnail . $name_gen,
+                        'Body'        => fopen($filename_thumb, 'r'), // Now the file exists
+                        'ContentType' => $req->file('foodImage')->getMimeType(),
+                    ]);
+                    $url = $result['ObjectURL'];
+
+                    // Delete temporary files after upload to free space
+                    unlink($OGfilePath);
+                    unlink($filename_thumb);
                 }
 
                 DB::beginTransaction();
@@ -870,8 +1034,8 @@ class ChefController extends Controller
                 $foodItem->chef_id = $chef->id;
                 $foodItem->dish_name = $req->dish_name;
                 $foodItem->description = $req->description;
-                $foodItem->dishImage = asset($OGfilePath);
-                $foodItem->dishImageThumbnail = asset($filename_thumb);
+                $foodItem->dishImage =$url1;
+                $foodItem->dishImageThumbnail = $url;;
                 $foodItem->regularDishAvailabilty = $req->regularDishAvailabilty;
                 $foodItem->from = $req->from;
                 $foodItem->to = $req->to;
@@ -1174,13 +1338,13 @@ class ChefController extends Controller
         $validator = Validator::make(
             $req->all(),
             [
-                // 'chef_id' => 'required',
+                'chef_id' => 'required',
                 'currentPassword' => 'required',
                 'newPassword' => 'required',
                 'confirmPassword' => 'required',
             ],
             [
-                // 'chef_id.required' => 'Please mention chef_id',
+                'chef_id.required' => 'Please mention chef_id',
                 'currentPassword.required' => 'Please mention current password',
                 'newPassword.required' => 'Please mention new password',
                 'confirmPassword.required' => 'Please mention confirm password',
@@ -1455,12 +1619,12 @@ class ChefController extends Controller
     function sendRequestForChefReviewDelete(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            // "chef_id" => 'required',
+            "chef_id" => 'required',
             "user_id" => 'required',
             "review_id" => 'required',
             "reason" => 'required',
         ], [
-            // "chef_id.required" => "Please fill chef id",
+            "chef_id.required" => "Please fill chef id",
             "user_id.required" => "Please fill user id",
             "review_id.required" => "Please fill review id",
             "reason.required" => "Please fill reason",
@@ -1494,12 +1658,12 @@ class ChefController extends Controller
     function sendRequestForUserBlacklist(Request $req)
     {
         $validator = Validator::make($req->all(), [
-            // "chef_id" => 'required',
+            "chef_id" => 'required',
             "user_id" => 'required',
             "reason" => 'required',
             "review_id" => 'required',
         ], [
-            // "chef_id.required" => "Please fill chef id",
+            "chef_id.required" => "Please fill chef id",
             "user_id.required" => "Please fill user id",
             "review_id.required" => "Please fill review id",
             "reason.required" => "Please fill reason",

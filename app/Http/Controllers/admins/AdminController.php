@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admins;
 
+use App\Helpers\AwsHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\users\UserController;
 use App\Mail\MessageFromHomeplateTeamToChef;
@@ -376,8 +377,20 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         if ($req->hasFile('image')) {
-            $file = $req->file('image')->store("admin/food_category/", "public");
-            $filename = asset('storage/' . $file);
+            $file = $req->file('image');
+                $fileName = 'foodCategory/'  . time() . '_' . $file->getClientOriginalName();
+
+                $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+
+                $filename = $result['ObjectURL'];
         }
         try {
             $foodcategory = new FoodCategory();
@@ -415,14 +428,20 @@ class AdminController extends Controller
                 $updateData['commission'] = $req->commission ? $req->commission : 10;
             }
             if ($req->hasFile('image')) {
-                $images = $data->image;
-                str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
-                    unlink(str_replace(env('filePath'), '', $images));
-                }
-                $file = $req->file('image')->store("admin/food_category/", "public");
-                $filename = asset('storage/' . $file);
-                $updateData['image'] = $filename;
+                $file = $req->file('image');
+                $fileName = 'foodCategory/'  . time() . '_' . $file->getClientOriginalName();
+
+                $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+
+                $updateData['image'] = $result['ObjectURL'];
             }
             FoodCategory::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
@@ -484,14 +503,37 @@ class AdminController extends Controller
 
                 $big_image = $req->file('image');
 
-                $image_name = strtolower($req->allergy_name);
+                // Generate new image name
+                $image_name = strtolower(trim($req->allergy_name));
                 $new_name = str_replace(" ", "", $image_name);
                 $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
-                $big_img = Image::make($req->file('image'))
-                    ->resize(200, 200)
-                    ->save('storage/admin/allergen_icons/' . $name_gen);
 
-                $filename = asset("storage/admin/allergen_icons/" . $name_gen);
+                // Ensure temp folder exists
+                $tempFolder = storage_path('app/temp/');
+                if (!File::exists($tempFolder)) {
+                    File::makeDirectory($tempFolder, 0777, true);
+                }
+
+                // Save resized image temporarily
+                $tempPath = $tempFolder . $name_gen;
+                Image::make($big_image)->resize(200, 200)->save($tempPath);
+
+                // Define S3 file name
+                $fileName = 'allergen_icons/' . time() . '_' . $name_gen;
+
+                $s3 = AwsHelper::cred();
+
+                // Upload the resized image to S3
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($tempPath, 'r'),
+                    'ContentType' => $big_image->getMimeType(),
+                ]);
+
+
+                $filename= $result['ObjectURL'];
+
             }
             Allergy::insert([
                 'image' => $filename,
@@ -519,29 +561,57 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
-        if (!File::exists("storage/admin/allergen_icons/")) {
-            File::makeDirectory("storage/admin/allergen_icons/", $mode = 0777, true, true);
-        }
+
         try {
             $data = Allergy::where('id', $req->id)->first();
             $updateData = [];
-            if ($req->hasFile('image')) {
-                $images = $data->image;
-                str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
-                    unlink(str_replace(env('filePath'), '', $images));
-                }
-                if ($req->file('image') && isset($req->image)) {
 
-                    $big_image = $req->file('image');
-                    $image_name = strtolower($req->allergy_name);
-                    $new_name = str_replace(" ", "", $image_name);
-                    $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
-                    $big_img = Image::make($req->file('image'))
-                        ->resize(200, 200)
-                        ->save('storage/admin/allergen_icons/' . $name_gen);
-                    $filename = asset("storage/admin/allergen_icons/" . $name_gen);
-                    $updateData['image'] = $filename;
+            if ($req->hasFile('image')) {
+                // Remove the existing image
+                $images = $data->image;
+                $imagePath = str_replace(env('filePath'), '', $images);
+
+                if (File::exists(storage_path('app/' . $imagePath))) {
+                    File::delete(storage_path('app/' . $imagePath));
+                }
+
+                // Upload new image
+                $big_image = $req->file('image');
+
+                // Generate new image name
+                $image_name = strtolower(trim($req->allergy_name));
+                $new_name = str_replace(" ", "", $image_name);
+                $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
+
+                // Ensure temp folder exists
+                $tempFolder = storage_path('app/temp/');
+                if (!File::exists($tempFolder)) {
+                    File::makeDirectory($tempFolder, 0777, true);
+                }
+
+                // Save resized image temporarily
+                $tempPath = $tempFolder . $name_gen;
+                Image::make($big_image)->resize(200, 200)->save($tempPath);
+
+                // Define S3 file name
+                $fileName = 'allergen_icons/' . time() . '_' . $name_gen;
+
+                $s3 = AwsHelper::cred();
+
+                // Upload the resized image to S3
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($tempPath, 'r'),
+                    'ContentType' => $big_image->getMimeType(),
+                ]);
+
+                // Get the public URL of the uploaded file
+                $updateData['image'] = $result['ObjectURL'];
+
+                // Delete the local temp file
+                if (File::exists($tempPath)) {
+                    File::delete($tempPath);
                 }
             }
             if ($req->small_description) {
@@ -606,19 +676,48 @@ class AdminController extends Controller
             }
             DB::beginTransaction();
 
-            if ($req->file('image') && isset($req->image)) {
+            if ($req->hasFile('image')) {
 
+                // Upload new image
                 $big_image = $req->file('image');
 
-                $image_name = strtolower($req->diet_name);
+                // Generate new image name
+                $image_name = strtolower(trim($req->allergy_name));
                 $new_name = str_replace(" ", "", $image_name);
                 $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
-                $big_img = Image::make($req->file('image'))
-                    ->resize(200, 200)
-                    ->save('storage/admin/dietaries_icons/' . $name_gen);
 
-                $filename = asset("storage/admin/dietaries_icons/" . $name_gen);
+                // Ensure temp folder exists
+                $tempFolder = storage_path('app/temp/');
+                if (!File::exists($tempFolder)) {
+                    File::makeDirectory($tempFolder, 0777, true);
+                }
+
+                // Save resized image temporarily
+                $tempPath = $tempFolder . $name_gen;
+                Image::make($big_image)->resize(200, 200)->save($tempPath);
+
+                // Define S3 file name
+                $fileName = 'dietaries/' . time() . '_' . $name_gen;
+
+                $s3 = AwsHelper::cred();
+
+                // Upload the resized image to S3
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($tempPath, 'r'),
+                    'ContentType' => $big_image->getMimeType(),
+                ]);
+
+                // Get the public URL of the uploaded file
+                $filename = $result['ObjectURL'];
+
+                // Delete the local temp file
+                if (File::exists($tempPath)) {
+                    File::delete($tempPath);
+                }
             }
+
             Dietary::insert([
                 'diet_name' => strtolower($req->diet_name),
                 'small_description' => $req->small_description,
@@ -652,21 +751,51 @@ class AdminController extends Controller
             $data = Dietary::where('id', $req->id)->first();
             $updateData = [];
             if ($req->hasFile('image')) {
+                // Remove the existing image
                 $images = $data->image;
-                str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
-                    unlink(str_replace(env('filePath'), '', $images));
+                $imagePath = str_replace(env('filePath'), '', $images);
+
+                if (File::exists(storage_path('app/' . $imagePath))) {
+                    File::delete(storage_path('app/' . $imagePath));
                 }
-                if ($req->file('image') && isset($req->image)) {
-                    $big_image = $req->file('image');
-                    $image_name = strtolower($req->diet_name);
-                    $new_name = str_replace(" ", "", $image_name);
-                    $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
-                    $big_img = Image::make($req->file('image'))
-                        ->resize(200, 200)
-                        ->save('storage/admin/dietaries_icons/' . $name_gen);
-                    $filename = asset("storage/admin/dietaries_icons/" . $name_gen);
-                    $updateData['image'] = $filename;
+
+                // Upload new image
+                $big_image = $req->file('image');
+
+                // Generate new image name
+                $image_name = strtolower(trim($req->allergy_name));
+                $new_name = str_replace(" ", "", $image_name);
+                $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
+
+                // Ensure temp folder exists
+                $tempFolder = storage_path('app/temp/');
+                if (!File::exists($tempFolder)) {
+                    File::makeDirectory($tempFolder, 0777, true);
+                }
+
+                // Save resized image temporarily
+                $tempPath = $tempFolder . $name_gen;
+                Image::make($big_image)->resize(200, 200)->save($tempPath);
+
+                // Define S3 file name
+                $fileName = 'dietaries/' . time() . '_' . $name_gen;
+
+                $s3 = AwsHelper::cred();
+
+                // Upload the resized image to S3
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($tempPath, 'r'),
+                    'ContentType' => $big_image->getMimeType(),
+                ]);
+
+                // Get the public URL of the uploaded file
+                $updateData['image'] = $result['ObjectURL'];
+
+                // Delete the local temp file
+                if (File::exists($tempPath)) {
+                    File::delete($tempPath);
                 }
             }
             if ($req->diet_name) {
