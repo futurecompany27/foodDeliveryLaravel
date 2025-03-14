@@ -247,7 +247,8 @@ Route::prefix('user')->group(function () {
         Route::get("/getAllFoodTypes", 'getAllFoodTypes'); //without Auth can access
         Route::get("/getAllAllergens", 'getAllAllergens'); //without Auth can access
         Route::get("/getAllSiteSettings", 'getAllSiteSettings'); //without Auth can access
-        Route::get("/getSiteFeedback", 'getSiteFeedback'); //without Auth can access
+        Route::get("/getSiteFeedback", 'getSiteFeedback'); //without Auth can access\
+        Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
     });
 
     Route::group(['middleware' => 'auth.user'], function () {
@@ -307,7 +308,6 @@ Route::prefix('user')->group(function () {
             Route::post('/deleteUserChefReview', 'deleteUserChefReview');
             Route::post('/getAllUserChefReviewsbyStatus', 'getAllUserChefReviewsbyStatus');
 
-            Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
             Route::post('/getUserOrders', 'getUserOrders');
             Route::post('/getUserOrderDetails', 'getUserOrderDetails');
 
