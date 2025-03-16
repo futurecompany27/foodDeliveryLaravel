@@ -239,6 +239,7 @@ Route::prefix('user')->group(function () {
     });
     Route::controller(ChefController::class)->group(function () {
         Route::post('/getFoodItemsForCustomer', 'getFoodItemsForCustomer'); //without Auth can access make by sarita
+        Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
     });
     Route::controller(kitchentypeController::class)->group(function () {
         Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access
@@ -248,7 +249,6 @@ Route::prefix('user')->group(function () {
         Route::get("/getAllAllergens", 'getAllAllergens'); //without Auth can access
         Route::get("/getAllSiteSettings", 'getAllSiteSettings'); //without Auth can access
         Route::get("/getSiteFeedback", 'getSiteFeedback'); //without Auth can access\
-        Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
     });
 
     Route::group(['middleware' => 'auth.user'], function () {
