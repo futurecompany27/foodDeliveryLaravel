@@ -230,6 +230,7 @@ Route::prefix('user')->group(function () {
         Route::post('/recordNotFoundSubmit', 'recordNotFoundSubmit');
         Route::post('/changePassword', 'changePassword'); //without token
         Route::post('/getChefsByPostalCodeAndCuisineTypes', 'getChefsByPostalCodeAndCuisineTypes');
+        Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
         Route::controller(stripeController::class)->group(function () {
             Route::post('/retriveStripePaymentStatus', 'retriveStripePaymentStatus');
         });
@@ -239,7 +240,6 @@ Route::prefix('user')->group(function () {
     });
     Route::controller(ChefController::class)->group(function () {
         Route::post('/getFoodItemsForCustomer', 'getFoodItemsForCustomer'); //without Auth can access make by sarita
-        Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
     });
     Route::controller(kitchentypeController::class)->group(function () {
         Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access
