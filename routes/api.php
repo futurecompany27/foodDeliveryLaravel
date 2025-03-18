@@ -44,6 +44,7 @@ Route::prefix('chef')->group(function () {
     Route::controller(ChefController::class)->group(function () {
         Route::post('/ChefRegisteration', 'ChefRegisteration');
         Route::post('/ChefLogin', 'ChefLogin');
+        Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
     });
     Route::controller(kitchentypeController::class)->group(function () {
         Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
@@ -61,7 +62,6 @@ Route::prefix('chef')->group(function () {
             Route::get('/trackOrder', 'trackOrder');
             Route::get('/getAllTransactions', 'getAllTransactions');
             // Route::post('/calculate_tax', 'calculate_tax');
-            Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
         });
         Route::controller(UserController::class)->group(function () {
             Route::get('/getChefReview', 'getChefReview');
