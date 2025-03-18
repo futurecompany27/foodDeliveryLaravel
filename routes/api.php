@@ -60,6 +60,7 @@ Route::prefix('chef')->group(function () {
             Route::get('/trackOrder', 'trackOrder');
             Route::get('/getAllTransactions', 'getAllTransactions');
             // Route::post('/calculate_tax', 'calculate_tax');
+            Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
         });
         Route::controller(UserController::class)->group(function () {
             Route::get('/getChefReview', 'getChefReview');
@@ -87,7 +88,6 @@ Route::prefix('chef')->group(function () {
             Route::post('/chefLogout',  'chefLogout');
             Route::post('/chefRefreshToken',  'chefRefreshToken');
             Route::post('/getFoodItemsForCustomer', 'getFoodItemsForCustomer'); //without Auth can access make by sarita
-            Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
             Route::get('/getChefRegisterationRequest', 'getChefRegisterationRequest');
             Route::post('/getChefDetails', 'getChefDetails');
 
