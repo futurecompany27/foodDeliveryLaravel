@@ -1085,6 +1085,7 @@ class ChefController extends Controller
         }
         try {
             $where = ["chef_id" => $req->chef_id];
+
             if ($req->foodType) {
                 $where['foodTypeId'] = $req->foodType;
             }
@@ -1093,65 +1094,73 @@ class ChefController extends Controller
             } else {
                 $where['approved_status'] = 'approved';
             }
-            $query = FoodItem::with('category', 'heatingInstruction:id,title,description')->where($where);
+
+            // Start query and ensure it filters by chef_id first
+            $query = FoodItem::with('category', 'heatingInstruction:id,title,description')
+                ->where($where);
+
+            // Apply JSON_CONTAINS condition only if 'day' is provided
             if ($req->day) {
-                $query->orWhereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays,'\"$req->day\"')");
+                $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays, '\"$req->day\"')");
             }
 
-            $data = $query->get(['*']);
+            $data = $query->get();
+
             $chefData = Chef::where('id', $req->chef_id)->first(['chefAvailibilityWeek']);
+
             foreach ($data as &$value) {
-                // Allergy
+                // Allergies
                 if ($value['allergies']) {
-                    $AllergyArr = $value['allergies'];
-                    foreach ($AllergyArr as &$val) {
-                        $val = Allergy::select('id', 'image', 'allergy_name')->find($val);
-                    }
+                    $AllergyArr = array_map(function ($val) {
+                        return Allergy::select('id', 'image', 'allergy_name')->find($val);
+                    }, $value['allergies']);
                     $value['allergies'] = $AllergyArr;
                 }
 
-                // dietary
+                // Dietary
                 if ($value['dietary']) {
-                    $DieatryArr = $value['dietary'];
-                    foreach ($DieatryArr as &$val) {
-                        $val = Dietary::select('id', 'image', 'diet_name')->find($val);
-                    }
-                    $value['dietary'] = $DieatryArr;
+                    $DietaryArr = array_map(function ($val) {
+                        return Dietary::select('id', 'image', 'diet_name')->find($val);
+                    }, $value['dietary']);
+                    $value['dietary'] = $DietaryArr;
                 }
 
-                // Ingredient
+                // Ingredients
                 if ($value['ingredients']) {
-                    $IngredientArr = $value['ingredients'];
-                    foreach ($IngredientArr as &$val) {
-                        $val = Ingredient::select('ing_name')->find($val);
-                    }
+                    $IngredientArr = array_map(function ($val) {
+                        return Ingredient::select('ing_name')->find($val);
+                    }, $value['ingredients']);
                     $value['ingredients'] = $IngredientArr;
                 }
 
-                // geographical cuisines
+                // Geographical cuisines
                 if ($value['geographicalCuisine']) {
-                    $geographicalCuisine = $value['geographicalCuisine'];
-                    foreach ($geographicalCuisine as &$val) {
-                        $val = Kitchentype::select('kitchentype')->find($val);
-                    }
-                    $value['geographicalCuisine'] = $geographicalCuisine;
+                    $GeographicalCuisineArr = array_map(function ($val) {
+                        return Kitchentype::select('kitchentype')->find($val);
+                    }, $value['geographicalCuisine']);
+                    $value['geographicalCuisine'] = $GeographicalCuisineArr;
                 }
 
-                if ($chefData->chefAvailibilityWeek && in_array($req->todaysWeekDay, $chefData->chefAvailibilityWeek)) {
-                    // Determine availability based on the condition
-                    $value['available'] = $req->todaysWeekDay ? in_array($req->todaysWeekDay, $value->foodAvailibiltyOnWeekdays) : false;
-                } else {
-                    $value['available'] = false;
+                // Determine availability
+                $value['available'] = false;
+                if ($chefData && $chefData->chefAvailibilityWeek && in_array($req->todaysWeekDay, $chefData->chefAvailibilityWeek)) {
+                    $value['available'] = in_array($req->todaysWeekDay, $value->foodAvailibiltyOnWeekdays);
                 }
             }
+
             $chefData = Chef::select('rating')->where('id', $req->chef_id)->first();
-            return response()->json(["data" => $data, 'rating' => $chefData->rating, "success" => true], 200);
+
+            return response()->json([
+                "data" => $data,
+                "rating" => $chefData->rating ?? null,
+                "success" => true
+            ], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
 
     function getFoodItemsForCustomer(Request $req)
     {
