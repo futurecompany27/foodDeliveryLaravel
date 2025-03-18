@@ -45,9 +45,10 @@ Route::prefix('chef')->group(function () {
         Route::post('/ChefRegisteration', 'ChefRegisteration');
         Route::post('/ChefLogin', 'ChefLogin');
     });
-
+    Route::controller(kitchentypeController::class)->group(function () {
+        Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
+    });
     Route::group(['middleware' => 'auth.chef'], function ($router) {
-
         Route::controller(commonFunctions::class)->group(function () {
             Route::get("/getAllBankList", 'getAllBankList'); // chef panel
             Route::post("/getDocumentListAccToChefTypeAndState", 'getDocumentListAccToChefTypeAndState'); // chef panel
