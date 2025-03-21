@@ -77,7 +77,7 @@ Route::prefix('chef')->group(function () {
             Route::post('/markAsReadNotification', 'markAsReadNotification');
         });
         Route::controller(kitchentypeController::class)->group(function () {
-            // Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
+            Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
         });
         Route::controller(stripeController::class)->group(function () {
             Route::post('/stripe-checkout-transaction', 'stripeCheckout'); // chef panel
@@ -243,7 +243,7 @@ Route::prefix('user')->group(function () {
         Route::post('/getFoodItemsForCustomer', 'getFoodItemsForCustomer'); //without Auth can access make by sarita
     });
     Route::controller(kitchentypeController::class)->group(function () {
-        // Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access
+        Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access
     });
     Route::controller(commonFunctions::class)->group(function () {
         Route::get("/getAllFoodTypes", 'getAllFoodTypes'); //without Auth can access
@@ -519,7 +519,7 @@ Route::prefix('admin')->group(function () {
         });
         Route::controller(kitchentypeController::class)->group(function () {
             Route::post('/addKitchenTypes', 'addKitchenTypes');
-            // Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
+            Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
             Route::post('/updateKitchenTypes', 'updateKitchenTypes');
             Route::post('/deleteKitchenTypes', 'deleteKitchenTypes');
             Route::post('/updateKitchentypeStatus', 'updateKitchentypeStatus');
