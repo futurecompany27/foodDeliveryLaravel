@@ -48,8 +48,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Response;
 use Stripe\Customer;
 use Illuminate\Support\Facades\Cache;
-
-
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UserController extends Controller
 {
@@ -129,7 +128,12 @@ class UserController extends Controller
         }
         // Hide password again
         $userDetails->makeHidden('password');
-        return response()->json(['message' => 'Login Successfully!', 'user_id' => auth()->user()->id, 'token' => User::createToken($token), 'success' => true], 200);
+        return response()->json(['message' => 'Login Successfully!', 'user_id' => auth()->user()->id, 'token' => User::createToken($token), 'data' => [
+            'user_id' => $userDetails->id,
+            'firstName' => $userDetails->firstName, // Add First Name
+            'lastName' => $userDetails->lastName,   // Add Last Name
+            'token' => $token
+        ], 'success' => true], 200);
         // return User::createToken($token);
     }
 
@@ -165,7 +169,7 @@ class UserController extends Controller
             return response()->json([
                 'access_token' => $newToken,
                 'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 720, // 24 hours in seconds
+                'expires_in' => JWTAuth::factory()->getTTL() * 60, // Convert to seconds
                 'success' => true,
                 'message' => 'Token refreshed successfully!'
             ]);

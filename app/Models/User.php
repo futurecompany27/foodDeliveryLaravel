@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -75,7 +76,8 @@ class User extends Authenticatable implements JWTSubject
         return [
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('user')->factory()->getTTL() * 1440,
+            'expires_in' => JWTAuth::factory()->getTTL() * 60, // Convert to seconds
+            // 'expires_in' => auth('user')->factory()->getTTL() * 1440,
             'success' => true,
             'message' => 'Token generated successfully!'
         ];
