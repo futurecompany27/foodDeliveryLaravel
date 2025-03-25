@@ -49,6 +49,7 @@ Route::prefix('chef')->group(function () {
     Route::controller(kitchentypeController::class)->group(function () {
         Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
     });
+
     Route::group(['middleware' => 'auth.chef'], function ($router) {
         Route::controller(commonFunctions::class)->group(function () {
             Route::get("/getAllBankList", 'getAllBankList'); // chef panel
@@ -76,9 +77,7 @@ Route::prefix('chef')->group(function () {
             Route::post('/deleteNotification', 'deleteNotification');
             Route::post('/markAsReadNotification', 'markAsReadNotification');
         });
-        Route::controller(kitchentypeController::class)->group(function () {
-            Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
-        });
+
         Route::controller(stripeController::class)->group(function () {
             Route::post('/stripe-checkout-transaction', 'stripeCheckout'); // chef panel
             Route::post('/retriveCertificatePaymentStatus', 'retriveCertificatePaymentStatus'); // chef panel
