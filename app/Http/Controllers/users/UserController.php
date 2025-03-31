@@ -810,14 +810,24 @@ class UserController extends Controller
         }
     }
 
-    function googleSigin(Request $req)
+    public function googleSigin(Request $req)
     {
         try {
             $userExist = User::where('email', $req->email)->first();
+
             if ($userExist) {
-                return response()->json(['message' => 'You are logged in successfully', "data" => $userExist, 'success' => true], 200);
+                // Generate JWT token
+                $token = JWTAuth::fromUser($userExist);
+
+                return response()->json([
+                    'message' => 'You are logged in successfully',
+                    'data' => $userExist,
+                    'token' => $token, // Include JWT token in response
+                    'success' => true
+                ], 200);
             } else {
                 DB::beginTransaction();
+
                 $user = new User();
                 $user->firstName = $req->firstName;
                 $user->lastName = $req->lastName;
@@ -826,7 +836,11 @@ class UserController extends Controller
                 $user->social_type = $req->provider;
                 $user->email_verified_at = Carbon::now();
                 $user->save();
+
+                // Fetch user details
                 $userDetail = User::find($user->id);
+
+                // Send verification email (if enabled)
                 try {
                     if (config('services.is_mail_enable')) {
                         Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
@@ -834,12 +848,24 @@ class UserController extends Controller
                 } catch (Exception $e) {
                     Log::error($e);
                 }
+
+                // Notify all admins
                 $admins = Admin::all();
                 foreach ($admins as $admin) {
                     $admin->notify(new CustomerRegisterationNotification($userDetail));
                 }
+
                 DB::commit();
-                return response()->json(['message' => 'You are all set to start ordering your food now ! Thank you for registering with us', "data" => $userDetail, 'success' => true], 201);
+
+                // Generate JWT token for new user
+                $token = JWTAuth::fromUser($user);
+
+                return response()->json([
+                    'message' => 'You are all set to start ordering your food now! Thank you for registering with us.',
+                    'data' => $userDetail,
+                    'token' => $token, // Include JWT token
+                    'success' => true
+                ], 201);
             }
         } catch (\Exception $th) {
             Log::info($th->getMessage());
