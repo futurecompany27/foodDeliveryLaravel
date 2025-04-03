@@ -254,6 +254,7 @@ Route::prefix('user')->group(function () {
     Route::group(['middleware' => 'auth.user'], function () {
         Route::controller(AdminController::class)->group(function () {
             Route::post("/getAdminOrderDetailsById", 'getAdminOrderDetailsById'); //without Auth can access
+            Route::post('/ChefReviewInAdmin', 'ChefReviewInAdmin');
         });
         Route::controller(OrderController::class)->group(function () {
             // Route::post('/placeOrders', 'placeOrders');

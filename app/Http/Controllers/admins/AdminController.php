@@ -1953,48 +1953,48 @@ class AdminController extends Controller
         }
     }
 
-    // function ChefReviewInAdmin(Request $req)
-    // {
-    //     $validator = Validator::make(
-    //         $req->all(),
-    //         [
-    //             "user_id" => 'required|exists:users,id',
-    //             "chef_id" => 'required|exists:chefs,id',
-    //             "star_rating" => "required",
-    //             "message" => 'required',
-    //         ]
-    //     );
-    //     if ($validator->fails()) {
-    //         return response()->json(["message" =>  $validator->errors()->first(), "success" => false], 400);
-    //     }
-    //     try {
-    //         $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id, 'status' => 1])->first();
-    //         if ($reviewExist) {
-    //             ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);
-    //         } else {
-    //             $newReview = new ChefReview();
-    //             $newReview->user_id = $req->user_id;
-    //             $newReview->chef_id = $req->chef_id;
-    //             $newReview->star_rating = $req->star_rating;
-    //             $newReview->message = $req->message;
-    //             $newReview->save();
-    //         }
-    //         $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
-    //         $reviewDetails['date'] = Carbon::now();
-    //         $chef = Chef::find($req->chef_id);
-    //         $chef->notify(new NewChefReviewNotification($reviewDetails));
-    //         $admins = Admin::all();
-    //         foreach ($admins as $admin) {
-    //             $admin->notify(new NewReviewNotification($reviewDetails));
-    //         }
-    //         $this->updateChefrating($req->chef_id);
-    //         return response()->json(['message' => "Submitted successfully", "success" => true], 200);
-    //     } catch (\Exception $th) {
-    //         Log::info($th->getMessage());
-    //         DB::rollback();
-    //         return response()->json(['error' => $th->getMessage() . 'Oops! Something went wrong.', 'success' => false], 500);
-    //     }
-    // }
+    function ChefReviewInAdmin(Request $req)
+    {
+        $validator = Validator::make(
+            $req->all(),
+            [
+                "user_id" => 'required|exists:users,id',
+                "chef_id" => 'required|exists:chefs,id',
+                "star_rating" => "required",
+                "message" => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(["message" =>  $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id, 'status' => 1])->first();
+            if ($reviewExist) {
+                ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);
+            } else {
+                $newReview = new ChefReview();
+                $newReview->user_id = $req->user_id;
+                $newReview->chef_id = $req->chef_id;
+                $newReview->star_rating = $req->star_rating;
+                $newReview->message = $req->message;
+                $newReview->save();
+            }
+            $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
+            $reviewDetails['date'] = Carbon::now();
+            $chef = Chef::find($req->chef_id);
+            $chef->notify(new NewChefReviewNotification($reviewDetails));
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new NewReviewNotification($reviewDetails));
+            }
+            $this->updateChefrating($req->chef_id);
+            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+        } catch (\Exception $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => $th->getMessage() . 'Oops! Something went wrong.', 'success' => false], 500);
+        }
+    }
 
     // This function is used in ChefReviewInAdmin Founction
     function updateChefrating($chef_id)
