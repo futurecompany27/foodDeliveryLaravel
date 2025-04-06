@@ -2059,4 +2059,43 @@ class AdminController extends Controller
         $rating = $totalStars / $totalNoReview;
         Chef::where('id', $chef_id)->update(['rating' => $rating]);
     }
+
+
+    public function getChecklist(Request $request)
+    {
+        $chef_id = $request->query('chef_id');
+
+        if (!$chef_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chef ID is required.'
+            ], 400);
+        }
+
+        $checklistFields = [
+            'is_personal_details_completed',
+            'is_special_benefit_document_completed',
+            'is_document_details_completed',
+            'is_fhc_document_completed',
+            'is_rrc_certificate_document_completed',
+            'is_bank_detail_completed',
+            'is_social_detail_completed',
+            'is_kitchen_detail_completed',
+            'is_tax_document_completed',
+        ];
+
+        $chef = Chef::select(array_merge(['id'], $checklistFields))->find($chef_id);
+
+        if (!$chef) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chef not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $chef
+        ]);
+    }
 }

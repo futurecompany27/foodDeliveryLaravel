@@ -452,6 +452,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/getSubOrderByDriver', 'getSubOrderByDriver');
             Route::get('/getSubOrderAcceptedByChef', 'getSubOrderAcceptedByChef');
             Route::post('/storeChefChecklist', 'storeChefChecklist');
+            Route::get('/getChefChecklist', 'getChecklist');
             Route::post('/storeDriverChecklist', 'storeDriverChecklist');
             Route::post('/ChefReviewInAdmin', 'ChefReviewInAdmin');
         });
