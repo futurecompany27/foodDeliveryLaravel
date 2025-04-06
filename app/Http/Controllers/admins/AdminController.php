@@ -1882,28 +1882,29 @@ class AdminController extends Controller
 
     public function storeChefChecklist(Request $req)
     {
+        // Step 1: Validate only chef_id initially
         $validator = Validator::make($req->all(), [
             'chef_id' => 'required|exists:chefs,id',
-            'is_personal_details_completed' => 'sometimes|required|in:0,1',
-            'is_special_benefit_document_completed' => 'sometimes|required|in:0,1',
-            'is_document_details_completed' => 'sometimes|required|in:0,1',
-            'is_fhc_document_completed' => 'sometimes|required|in:0,1',
-            'is_rrc_certificate_document_completed' => 'sometimes|required|in:0,1',
-            'is_bank_detail_completed' => 'sometimes|required|in:0,1',
-            'is_social_detail_completed' => 'sometimes|required|in:0,1',
-            'is_kitchen_detail_completed' => 'sometimes|required|in:0,1',
-            'is_tax_document_completed' => 'sometimes|required|in:0,1'
         ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => "Validation failed", "errors" => $validator->errors()->first(), "success" => false], 400);
-        }
-        try {
-            $chefChecklist = Chef::find($req->chef_id);
 
-            if (!$chefChecklist) {
+        if ($validator->fails()) {
+            return response()->json([
+                "message" => "Validation failed",
+                "errors" => $validator->errors()->first(),
+                "success" => false
+            ], 400);
+        }
+
+        try {
+            $chef = Chef::find($req->chef_id);
+
+            if (!$chef) {
+                Log::error("Chef not found with ID: " . $req->chef_id);
                 return response()->json(['success' => false, 'message' => 'Chef not found'], 404);
             }
-            $chefChecklist->update($req->only([
+
+            // Step 2: Define allowed checklist fields
+            $allowedKeys = [
                 'is_personal_details_completed',
                 'is_special_benefit_document_completed',
                 'is_document_details_completed',
@@ -1913,13 +1914,63 @@ class AdminController extends Controller
                 'is_social_detail_completed',
                 'is_kitchen_detail_completed',
                 'is_tax_document_completed'
-            ]));
+            ];
 
-            return response()->json(['success' => true, 'message' => 'Chef checklist updated successfully', 'data' => $chefChecklist], 200);
+            // Step 3: Log incoming data
+            Log::info('Incoming request data', $req->all());
+
+            // Step 4: Filter and validate checklist fields
+            $updates = collect($req->only($allowedKeys))->map(function ($val, $key) use ($allowedKeys) {
+                return in_array($val, ['0', '1', 0, 1], true) ? (int) $val : null;
+            })->filter(fn($val) => $val !== null)->toArray();
+
+            // Step 5: Optional validation - if invalid values exist
+            foreach ($req->only($allowedKeys) as $key => $val) {
+                if (!in_array($val, ['0', '1', 0, 1], true)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Invalid value for $key. Allowed: 0 or 1."
+                    ], 422);
+                }
+            }
+
+            // Step 6: If nothing to update, return early
+            if (empty($updates)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No valid fields to update'
+                ], 422);
+            }
+
+            // Step 7: Log current and updated data
+            Log::info('Data to update', $updates);
+            Log::info('Before update', $chef->only(array_keys($updates)));
+
+            // Step 8: Update and log after
+            $chef->update($updates);
+            $chef->refresh();
+
+            Log::info('After update', $chef->only(array_keys($updates)));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Chef checklist updated successfully',
+                'data' => $chef
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+            Log::error('Exception occurred while updating chef checklist', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops! Something went wrong.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
+
+
 
     public function storeDriverChecklist(Request $req)
     {
