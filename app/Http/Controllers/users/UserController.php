@@ -1986,4 +1986,35 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function getPostalCode()
+    {
+        $user = auth()->guard('user')->user(); 
+
+        if ($user) {
+            return response()->json([
+                'postal_code' => $user->postal_code,
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+    }
+
+
+    public function updatePostalCode(Request $req)
+    {
+        try {
+            $user = auth()->guard('user')->user();
+            $update = [
+                'postal_code' => $req->postalCode,
+            ];
+            User::where('id', $user->id)->update($update);
+
+        } catch (Exception $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+        }
+    }
 }
