@@ -1987,13 +1987,14 @@ class UserController extends Controller
         }
     }
 
-    public function getPostalCode()
+    public function getPostalCode(Request $req)
     {
-        $user = auth()->guard('user')->user(); 
-
+        $user = auth()->guard('user')->user();
+        
         if ($user) {
             return response()->json([
                 'postal_code' => $user->postal_code,
+                'message' => 'Password changed successfully!',
             ], 200);
         } else {
             return response()->json([

@@ -314,7 +314,7 @@ Route::prefix('user')->group(function () {
             Route::get('/userOrderInvoicePDF', 'userOrderInvoicePDF');
             Route::post('/searchFood', 'searchFood');
 
-            Route::get('/getPostalCode', 'getPostalCode');
+            Route::post('/getPostalCode', 'getPostalCode');
             Route::post('/updatePostalCode', 'updatePostalCode');
 
         });
