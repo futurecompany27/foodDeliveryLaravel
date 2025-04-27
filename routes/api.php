@@ -314,6 +314,10 @@ Route::prefix('user')->group(function () {
 
             Route::get('/userOrderInvoicePDF', 'userOrderInvoicePDF');
             Route::post('/searchFood', 'searchFood');
+
+            Route::post('/getPostalCode', 'getPostalCode');
+            Route::post('/updatePostalCode', 'updatePostalCode');
+
         });
     });
     Route::controller(taxController::class)->group(function () {
