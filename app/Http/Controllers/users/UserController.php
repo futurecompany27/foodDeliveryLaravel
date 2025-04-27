@@ -1990,7 +1990,7 @@ class UserController extends Controller
     public function getPostalCode(Request $req)
     {
         $user = auth()->guard('user')->user();
-        
+
         if ($user) {
             return response()->json([
                 'postal_code' => $user->postal_code,
@@ -2009,13 +2009,19 @@ class UserController extends Controller
         try {
             $user = auth()->guard('user')->user();
             $update = [
-                'postal_code' => $req->postalCode,
+                'postal_code' => $req->postal_code,
             ];
             User::where('id', $user->id)->update($update);
+            return response()->json([
+                'message' => 'Postal Code Updated successfully!',
+            ], 200);
 
         } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
         }
     }
 }
