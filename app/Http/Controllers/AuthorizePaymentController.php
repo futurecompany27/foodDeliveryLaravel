@@ -15,8 +15,14 @@ class AuthorizePaymentController extends Controller
 
     public function createAnAcceptPaymentTransaction(Request $laravelRequest)
     {
+        $user = $laravelRequest->user();
+        $user_type = $laravelRequest->input('user_type');
+
         $opaqueData = $laravelRequest->input('opaqueData');
         $amount = $laravelRequest->input('amount');
+        $txn_type = $laravelRequest->input('transaction_type');
+        $txn_status = 'paid';
+        $txn_remark = $laravelRequest->input('remark');
 
         $merchantAuthentication = new AnetAPI\MerchantAuthenticationType();
         $merchantAuthentication->setName(env('AUTHORIZE_LOGIN_ID'));
@@ -64,5 +70,13 @@ class AuthorizePaymentController extends Controller
             $message = $response?->getMessages()?->getMessage()[0]?->getText() ?? 'Unknown error';
             return response()->json(['success' => false, 'error' => $message], 400);
         }
+    }
+
+    private function addTransaction(){
+
+    }
+
+    private function addOrder(){
+        
     }
 }
