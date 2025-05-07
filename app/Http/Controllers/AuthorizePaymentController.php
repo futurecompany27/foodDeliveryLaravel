@@ -16,6 +16,7 @@ class AuthorizePaymentController extends Controller
     public function createAnAcceptPaymentTransaction(Request $laravelRequest)
     {
         $opaqueData = $laravelRequest->input('opaqueData');
+        $amount = $laravelRequest->input('amount');
 
         $merchantAuthentication = new AnetAPI\MerchantAuthenticationType();
         $merchantAuthentication->setName(env('AUTHORIZE_LOGIN_ID'));
@@ -32,7 +33,7 @@ class AuthorizePaymentController extends Controller
 
         $transactionRequest = new AnetAPI\TransactionRequestType();
         $transactionRequest->setTransactionType("authCaptureTransaction");
-        $transactionRequest->setAmount(10.00); // Adjust amount
+        $transactionRequest->setAmount($amount);
         $transactionRequest->setPayment($paymentType);
 
         // ✅ Rename to avoid variable conflict
