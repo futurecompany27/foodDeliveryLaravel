@@ -6,6 +6,7 @@ use App\Http\Controllers\admins\kitchentypeController;
 use App\Http\Controllers\admins\regionController;
 use App\Http\Controllers\admins\shefTypesController;
 use App\Http\Controllers\admins\taxController;
+use App\Http\Controllers\AuthorizePaymentController;
 use App\Http\Controllers\chefs\ChefController;
 use App\Http\Controllers\drivers\DriverController;
 use App\Http\Controllers\StripeController;
@@ -36,9 +37,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/test', function () {
     return response()->json(['message' => 'Welcome to HomePlate', 'success' => true], 200);
 });
-
-
-
 
 Route::prefix('chef')->group(function () {
     Route::controller(ChefController::class)->group(function () {
@@ -569,4 +567,9 @@ Route::controller(commonFunctions::class)->group(function () {
     Route::get('/getOrderStatus', 'getOrderStatus');
     Route::get("getBankDetail", 'getBankDetail'); // chef panel
 
+});
+
+// Routes for authorize
+Route::prefix('/authorize-payment')->group(function(){
+    Route::get('', [AuthorizePaymentController::class, 'paymentTest']);
 });
