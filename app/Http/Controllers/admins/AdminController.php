@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admins;
 
+use App\Helpers\AwsHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\users\UserController;
 use App\Mail\MessageFromHomeplateTeamToChef;
@@ -376,8 +377,20 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         if ($req->hasFile('image')) {
-            $file = $req->file('image')->store("admin/food_category/", "public");
-            $filename = asset('storage/' . $file);
+            $file = $req->file('image');
+                $fileName = 'foodCategory/'  . time() . '_' . $file->getClientOriginalName();
+
+                $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+
+                $filename = $result['ObjectURL'];
         }
         try {
             $foodcategory = new FoodCategory();
@@ -415,14 +428,20 @@ class AdminController extends Controller
                 $updateData['commission'] = $req->commission ? $req->commission : 10;
             }
             if ($req->hasFile('image')) {
-                $images = $data->image;
-                str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
-                    unlink(str_replace(env('filePath'), '', $images));
-                }
-                $file = $req->file('image')->store("admin/food_category/", "public");
-                $filename = asset('storage/' . $file);
-                $updateData['image'] = $filename;
+                $file = $req->file('image');
+                $fileName = 'foodCategory/'  . time() . '_' . $file->getClientOriginalName();
+
+                $s3 = AwsHelper::cred();
+
+                    // Upload file to S3
+                    $result = $s3->putObject([
+                        'Bucket' => env('AWS_BUCKET'),
+                        'Key'    => $fileName,
+                        'Body'   => fopen($file->getPathname(), 'r'),
+                        'ContentType' => $file->getMimeType(),
+                    ]);
+
+                $updateData['image'] = $result['ObjectURL'];
             }
             FoodCategory::where('id', $req->id)->update($updateData);
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
@@ -484,14 +503,37 @@ class AdminController extends Controller
 
                 $big_image = $req->file('image');
 
-                $image_name = strtolower($req->allergy_name);
+                // Generate new image name
+                $image_name = strtolower(trim($req->allergy_name));
                 $new_name = str_replace(" ", "", $image_name);
                 $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
-                $big_img = Image::make($req->file('image'))
-                    ->resize(200, 200)
-                    ->save('storage/admin/allergen_icons/' . $name_gen);
 
-                $filename = asset("storage/admin/allergen_icons/" . $name_gen);
+                // Ensure temp folder exists
+                $tempFolder = storage_path('app/temp/');
+                if (!File::exists($tempFolder)) {
+                    File::makeDirectory($tempFolder, 0777, true);
+                }
+
+                // Save resized image temporarily
+                $tempPath = $tempFolder . $name_gen;
+                Image::make($big_image)->resize(200, 200)->save($tempPath);
+
+                // Define S3 file name
+                $fileName = 'allergen_icons/' . time() . '_' . $name_gen;
+
+                $s3 = AwsHelper::cred();
+
+                // Upload the resized image to S3
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($tempPath, 'r'),
+                    'ContentType' => $big_image->getMimeType(),
+                ]);
+
+
+                $filename= $result['ObjectURL'];
+
             }
             Allergy::insert([
                 'image' => $filename,
@@ -519,29 +561,57 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
-        if (!File::exists("storage/admin/allergen_icons/")) {
-            File::makeDirectory("storage/admin/allergen_icons/", $mode = 0777, true, true);
-        }
+
         try {
             $data = Allergy::where('id', $req->id)->first();
             $updateData = [];
-            if ($req->hasFile('image')) {
-                $images = $data->image;
-                str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
-                    unlink(str_replace(env('filePath'), '', $images));
-                }
-                if ($req->file('image') && isset($req->image)) {
 
-                    $big_image = $req->file('image');
-                    $image_name = strtolower($req->allergy_name);
-                    $new_name = str_replace(" ", "", $image_name);
-                    $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
-                    $big_img = Image::make($req->file('image'))
-                        ->resize(200, 200)
-                        ->save('storage/admin/allergen_icons/' . $name_gen);
-                    $filename = asset("storage/admin/allergen_icons/" . $name_gen);
-                    $updateData['image'] = $filename;
+            if ($req->hasFile('image')) {
+                // Remove the existing image
+                $images = $data->image;
+                $imagePath = str_replace(env('filePath'), '', $images);
+
+                if (File::exists(storage_path('app/' . $imagePath))) {
+                    File::delete(storage_path('app/' . $imagePath));
+                }
+
+                // Upload new image
+                $big_image = $req->file('image');
+
+                // Generate new image name
+                $image_name = strtolower(trim($req->allergy_name));
+                $new_name = str_replace(" ", "", $image_name);
+                $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
+
+                // Ensure temp folder exists
+                $tempFolder = storage_path('app/temp/');
+                if (!File::exists($tempFolder)) {
+                    File::makeDirectory($tempFolder, 0777, true);
+                }
+
+                // Save resized image temporarily
+                $tempPath = $tempFolder . $name_gen;
+                Image::make($big_image)->resize(200, 200)->save($tempPath);
+
+                // Define S3 file name
+                $fileName = 'allergen_icons/' . time() . '_' . $name_gen;
+
+                $s3 = AwsHelper::cred();
+
+                // Upload the resized image to S3
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($tempPath, 'r'),
+                    'ContentType' => $big_image->getMimeType(),
+                ]);
+
+                // Get the public URL of the uploaded file
+                $updateData['image'] = $result['ObjectURL'];
+
+                // Delete the local temp file
+                if (File::exists($tempPath)) {
+                    File::delete($tempPath);
                 }
             }
             if ($req->small_description) {
@@ -606,19 +676,48 @@ class AdminController extends Controller
             }
             DB::beginTransaction();
 
-            if ($req->file('image') && isset($req->image)) {
+            if ($req->hasFile('image')) {
 
+                // Upload new image
                 $big_image = $req->file('image');
 
-                $image_name = strtolower($req->diet_name);
+                // Generate new image name
+                $image_name = strtolower(trim($req->allergy_name));
                 $new_name = str_replace(" ", "", $image_name);
                 $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
-                $big_img = Image::make($req->file('image'))
-                    ->resize(200, 200)
-                    ->save('storage/admin/dietaries_icons/' . $name_gen);
 
-                $filename = asset("storage/admin/dietaries_icons/" . $name_gen);
+                // Ensure temp folder exists
+                $tempFolder = storage_path('app/temp/');
+                if (!File::exists($tempFolder)) {
+                    File::makeDirectory($tempFolder, 0777, true);
+                }
+
+                // Save resized image temporarily
+                $tempPath = $tempFolder . $name_gen;
+                Image::make($big_image)->resize(200, 200)->save($tempPath);
+
+                // Define S3 file name
+                $fileName = 'dietaries/' . time() . '_' . $name_gen;
+
+                $s3 = AwsHelper::cred();
+
+                // Upload the resized image to S3
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($tempPath, 'r'),
+                    'ContentType' => $big_image->getMimeType(),
+                ]);
+
+                // Get the public URL of the uploaded file
+                $filename = $result['ObjectURL'];
+
+                // Delete the local temp file
+                if (File::exists($tempPath)) {
+                    File::delete($tempPath);
+                }
             }
+
             Dietary::insert([
                 'diet_name' => strtolower($req->diet_name),
                 'small_description' => $req->small_description,
@@ -652,21 +751,51 @@ class AdminController extends Controller
             $data = Dietary::where('id', $req->id)->first();
             $updateData = [];
             if ($req->hasFile('image')) {
+                // Remove the existing image
                 $images = $data->image;
-                str_replace(env('filePath'), '', $images);
-                if (file_exists(str_replace(env('filePath'), '', $images))) {
-                    unlink(str_replace(env('filePath'), '', $images));
+                $imagePath = str_replace(env('filePath'), '', $images);
+
+                if (File::exists(storage_path('app/' . $imagePath))) {
+                    File::delete(storage_path('app/' . $imagePath));
                 }
-                if ($req->file('image') && isset($req->image)) {
-                    $big_image = $req->file('image');
-                    $image_name = strtolower($req->diet_name);
-                    $new_name = str_replace(" ", "", $image_name);
-                    $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
-                    $big_img = Image::make($req->file('image'))
-                        ->resize(200, 200)
-                        ->save('storage/admin/dietaries_icons/' . $name_gen);
-                    $filename = asset("storage/admin/dietaries_icons/" . $name_gen);
-                    $updateData['image'] = $filename;
+
+                // Upload new image
+                $big_image = $req->file('image');
+
+                // Generate new image name
+                $image_name = strtolower(trim($req->allergy_name));
+                $new_name = str_replace(" ", "", $image_name);
+                $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
+
+                // Ensure temp folder exists
+                $tempFolder = storage_path('app/temp/');
+                if (!File::exists($tempFolder)) {
+                    File::makeDirectory($tempFolder, 0777, true);
+                }
+
+                // Save resized image temporarily
+                $tempPath = $tempFolder . $name_gen;
+                Image::make($big_image)->resize(200, 200)->save($tempPath);
+
+                // Define S3 file name
+                $fileName = 'dietaries/' . time() . '_' . $name_gen;
+
+                $s3 = AwsHelper::cred();
+
+                // Upload the resized image to S3
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($tempPath, 'r'),
+                    'ContentType' => $big_image->getMimeType(),
+                ]);
+
+                // Get the public URL of the uploaded file
+                $updateData['image'] = $result['ObjectURL'];
+
+                // Delete the local temp file
+                if (File::exists($tempPath)) {
+                    File::delete($tempPath);
                 }
             }
             if ($req->diet_name) {
@@ -1753,28 +1882,29 @@ class AdminController extends Controller
 
     public function storeChefChecklist(Request $req)
     {
+        // Step 1: Validate only chef_id initially
         $validator = Validator::make($req->all(), [
             'chef_id' => 'required|exists:chefs,id',
-            'is_personal_details_completed' => 'sometimes|required|in:0,1',
-            'is_special_benefit_document_completed' => 'sometimes|required|in:0,1',
-            'is_document_details_completed' => 'sometimes|required|in:0,1',
-            'is_fhc_document_completed' => 'sometimes|required|in:0,1',
-            'is_rrc_certificate_document_completed' => 'sometimes|required|in:0,1',
-            'is_bank_detail_completed' => 'sometimes|required|in:0,1',
-            'is_social_detail_completed' => 'sometimes|required|in:0,1',
-            'is_kitchen_detail_completed' => 'sometimes|required|in:0,1',
-            'is_tax_document_completed' => 'sometimes|required|in:0,1'
         ]);
-        if ($validator->fails()) {
-            return response()->json(["message" => "Validation failed", "errors" => $validator->errors()->first(), "success" => false], 400);
-        }
-        try {
-            $chefChecklist = Chef::find($req->chef_id);
 
-            if (!$chefChecklist) {
+        if ($validator->fails()) {
+            return response()->json([
+                "message" => "Validation failed",
+                "errors" => $validator->errors()->first(),
+                "success" => false
+            ], 400);
+        }
+
+        try {
+            $chef = Chef::find($req->chef_id);
+
+            if (!$chef) {
+                Log::error("Chef not found with ID: " . $req->chef_id);
                 return response()->json(['success' => false, 'message' => 'Chef not found'], 404);
             }
-            $chefChecklist->update($req->only([
+
+            // Step 2: Define allowed checklist fields
+            $allowedKeys = [
                 'is_personal_details_completed',
                 'is_special_benefit_document_completed',
                 'is_document_details_completed',
@@ -1784,13 +1914,63 @@ class AdminController extends Controller
                 'is_social_detail_completed',
                 'is_kitchen_detail_completed',
                 'is_tax_document_completed'
-            ]));
+            ];
 
-            return response()->json(['success' => true, 'message' => 'Chef checklist updated successfully', 'data' => $chefChecklist], 200);
+            // Step 3: Log incoming data
+            Log::info('Incoming request data', $req->all());
+
+            // Step 4: Filter and validate checklist fields
+            $updates = collect($req->only($allowedKeys))->map(function ($val, $key) use ($allowedKeys) {
+                return in_array($val, ['0', '1', 0, 1], true) ? (int) $val : null;
+            })->filter(fn($val) => $val !== null)->toArray();
+
+            // Step 5: Optional validation - if invalid values exist
+            foreach ($req->only($allowedKeys) as $key => $val) {
+                if (!in_array($val, ['0', '1', 0, 1], true)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Invalid value for $key. Allowed: 0 or 1."
+                    ], 422);
+                }
+            }
+
+            // Step 6: If nothing to update, return early
+            if (empty($updates)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No valid fields to update'
+                ], 422);
+            }
+
+            // Step 7: Log current and updated data
+            Log::info('Data to update', $updates);
+            Log::info('Before update', $chef->only(array_keys($updates)));
+
+            // Step 8: Update and log after
+            $chef->update($updates);
+            $chef->refresh();
+
+            Log::info('After update', $chef->only(array_keys($updates)));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Chef checklist updated successfully',
+                'data' => $chef
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+            Log::error('Exception occurred while updating chef checklist', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops! Something went wrong.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
+
+
 
     public function storeDriverChecklist(Request $req)
     {
@@ -1824,48 +2004,48 @@ class AdminController extends Controller
         }
     }
 
-    // function ChefReviewInAdmin(Request $req)
-    // {
-    //     $validator = Validator::make(
-    //         $req->all(),
-    //         [
-    //             "user_id" => 'required|exists:users,id',
-    //             "chef_id" => 'required|exists:chefs,id',
-    //             "star_rating" => "required",
-    //             "message" => 'required',
-    //         ]
-    //     );
-    //     if ($validator->fails()) {
-    //         return response()->json(["message" =>  $validator->errors()->first(), "success" => false], 400);
-    //     }
-    //     try {
-    //         $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id, 'status' => 1])->first();
-    //         if ($reviewExist) {
-    //             ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);
-    //         } else {
-    //             $newReview = new ChefReview();
-    //             $newReview->user_id = $req->user_id;
-    //             $newReview->chef_id = $req->chef_id;
-    //             $newReview->star_rating = $req->star_rating;
-    //             $newReview->message = $req->message;
-    //             $newReview->save();
-    //         }
-    //         $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
-    //         $reviewDetails['date'] = Carbon::now();
-    //         $chef = Chef::find($req->chef_id);
-    //         $chef->notify(new NewChefReviewNotification($reviewDetails));
-    //         $admins = Admin::all();
-    //         foreach ($admins as $admin) {
-    //             $admin->notify(new NewReviewNotification($reviewDetails));
-    //         }
-    //         $this->updateChefrating($req->chef_id);
-    //         return response()->json(['message' => "Submitted successfully", "success" => true], 200);
-    //     } catch (\Exception $th) {
-    //         Log::info($th->getMessage());
-    //         DB::rollback();
-    //         return response()->json(['error' => $th->getMessage() . 'Oops! Something went wrong.', 'success' => false], 500);
-    //     }
-    // }
+    function ChefReviewInAdmin(Request $req)
+    {
+        $validator = Validator::make(
+            $req->all(),
+            [
+                "user_id" => 'required|exists:users,id',
+                "chef_id" => 'required|exists:chefs,id',
+                "star_rating" => "required",
+                "message" => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(["message" =>  $validator->errors()->first(), "success" => false], 400);
+        }
+        try {
+            $reviewExist = ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id, 'status' => 1])->first();
+            if ($reviewExist) {
+                ChefReview::where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->update(['star_rating' => $req->star_rating, 'message' => $req->message]);
+            } else {
+                $newReview = new ChefReview();
+                $newReview->user_id = $req->user_id;
+                $newReview->chef_id = $req->chef_id;
+                $newReview->star_rating = $req->star_rating;
+                $newReview->message = $req->message;
+                $newReview->save();
+            }
+            $reviewDetails = ChefReview::orderBy('created_at', 'desc')->with(['user', 'chef'])->where(['user_id' => $req->user_id, 'chef_id' => $req->chef_id])->first();
+            $reviewDetails['date'] = Carbon::now();
+            $chef = Chef::find($req->chef_id);
+            $chef->notify(new NewChefReviewNotification($reviewDetails));
+            $admins = Admin::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new NewReviewNotification($reviewDetails));
+            }
+            $this->updateChefrating($req->chef_id);
+            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+        } catch (\Exception $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json(['error' => $th->getMessage() . 'Oops! Something went wrong.', 'success' => false], 500);
+        }
+    }
 
     // This function is used in ChefReviewInAdmin Founction
     function updateChefrating($chef_id)
@@ -1878,5 +2058,44 @@ class AdminController extends Controller
         }
         $rating = $totalStars / $totalNoReview;
         Chef::where('id', $chef_id)->update(['rating' => $rating]);
+    }
+
+
+    public function getChecklist(Request $request)
+    {
+        $chef_id = $request->query('chef_id');
+
+        if (!$chef_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chef ID is required.'
+            ], 400);
+        }
+
+        $checklistFields = [
+            'is_personal_details_completed',
+            'is_special_benefit_document_completed',
+            'is_document_details_completed',
+            'is_fhc_document_completed',
+            'is_rrc_certificate_document_completed',
+            'is_bank_detail_completed',
+            'is_social_detail_completed',
+            'is_kitchen_detail_completed',
+            'is_tax_document_completed',
+        ];
+
+        $chef = Chef::select(array_merge(['id'], $checklistFields))->find($chef_id);
+
+        if (!$chef) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chef not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $chef
+        ]);
     }
 }

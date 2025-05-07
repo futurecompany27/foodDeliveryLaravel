@@ -245,138 +245,144 @@ class OrderController extends Controller
     }
 
 
-    function calculate_tax(Request $req)
+
+    public function calculate_tax(Request $req)
     {
+        // Decode and validate inputs
         $cartData = json_decode($req->cart_data);
         if ($cartData === null) {
             return response()->json(['error' => 'Invalid cart data'], 400);
         }
 
         $tax_types = json_decode($req->tax_type, true);
-        if ($tax_types === null || !isset($tax_types['tax_type']) || !isset($tax_types['tax_value'])) {
+        if (
+            $tax_types === null ||
+            !isset($tax_types['tax_type']) ||
+            !isset($tax_types['tax_value'])
+        ) {
             return response()->json(['error' => 'Invalid tax data'], 400);
         }
 
-        $order_total = $chef_commission_amount = $commission_percentage = $order_total_with_tax = 0;
-        $total_taxable_amount = 0;
-        $order_tax = [];
+        // Initialize accumulators
+        $total_taxable_amount   = 0;
+        $all_chef_taxes_detail  = [];
+        $all_driver_taxes_detail = [];
+        $order_tax              = [];
 
-        // commission tax calculation
-        $all_chef_taxes_detail = [];
+        // Fetch admin settings once
+        $adminsetting = AdminSetting::first();
 
+        // Loop through each chef’s cart segment
         foreach ($cartData as $card_value) {
-            // Initialize suborder_taxes and chef_commission_taxes for each chef
-            $suborder_taxes = [];
-            $chef_commission_taxes = [];
-            $driver_commission_taxes = []; // New array for driver commission taxes
-
             $foodItems = $card_value->foodItems;
-            $amount = 0;
-            $chef = Chef::find($card_value->chef_id);
-            $chef_tax_detail = [];
-            $driver_tax_detail = [];  // New variable for driver tax details
-            // Fetch admin settings
-            $adminsetting = AdminSetting::get()->first();
+            $amount    = 0;
+            $chef      = Chef::find($card_value->chef_id);
+            $is_taxable = (bool)$chef->is_tax_document_completed;
 
-            // chef commission detail
-            $areYouA = $chef->are_you_a;
-            $is_taxable = $chef->is_tax_document_completed;
-
-            if ($areYouA != "") {
-                $chef_comm = Str::lower(str_replace(' ', '', $areYouA)) . '_comm';
-                $commission_percentage = $adminsetting->$chef_comm;
-            } else {
-                $commission_percentage = $adminsetting->default_comm;
-            }
-            // Driver commission detail
-            $driver_commission_percentage = $adminsetting->default_comm;  // Assuming driver_comm exists in settings
-
-            // calculate sub total
+            // 1) Compute subtotal for this chef
             foreach ($foodItems as $food) {
                 $amount += $food->price * $food->quantity;
             }
 
-            $order_total += $amount;
-            // calculate commission amount
-            $chef_commission_amount = ($amount * $commission_percentage) / 100;
-            // calculate commission amount for driver
-            $driver_commission_amount = ($amount * $driver_commission_percentage) / 100;
+            // 2) Commission percentages
+            $areYouA = $chef->are_you_a;
+            if (!empty($areYouA)) {
+                $field = Str::lower(str_replace(' ', '', $areYouA)) . '_comm';
+                $commission_percentage = $adminsetting->$field ?? $adminsetting->default_comm;
+            } else {
+                $commission_percentage = $adminsetting->default_comm;
+            }
+            $driver_commission_percentage = $adminsetting->default_comm;
 
-            $array_count = count($tax_types['tax_type']);
+            // 3) Commission amounts
+            $chef_commission_amount   = round($amount * $commission_percentage   / 100, 2);
+            $driver_commission_amount = round($amount * $driver_commission_percentage / 100, 2);
 
-            $suborder_tax = 0;
-            for ($i = 0; $i < $array_count; $i++) {
-                $commissionTax = round(($chef_commission_amount * ($tax_types['tax_value'][$i] / 100)), 2);
-                Log::info('---$commissionTax---', [$commissionTax]);
+            // 4) Build per‑tax arrays
+            $suborder_taxes       = [];
+            $chef_commission_taxes   = [];
+            $driver_commission_taxes = [];
+
+            foreach ($tax_types['tax_type'] as $i => $type) {
+                $rate = $tax_types['tax_value'][$i];
+
+                // a) Chef commission tax
+                $chefTaxAmt = round($chef_commission_amount * ($rate / 100), 2);
                 $chef_commission_taxes[] = [
-                    $tax_types['tax_type'][$i] => $tax_types['tax_value'][$i],
-                    'Amount' => $commissionTax
-                ];
-                // Driver commission tax calculation
-                $driverCommissionTax = round(($driver_commission_amount * ($tax_types['tax_value'][$i] / 100)), 2);  // Driver commission tax calculation
-                $driver_commission_taxes[] = [
-                    $tax_types['tax_type'][$i] => $tax_types['tax_value'][$i],
-                    'Amount' => $driverCommissionTax
+                    $type   => $rate,
+                    'Amount'=> $chefTaxAmt,
                 ];
 
-                if ($is_taxable) {
-                    // when chef is a taxpayer
-                    $suborder_tax += round(($amount * ($tax_types['tax_value'][$i] / 100)), 2);
-                    $suborder_taxes[] = [$tax_types['tax_type'][$i] => $tax_types['tax_value'][$i], 'Amount' => $suborder_tax];
-                    Log::info('suborder_taxes', [$suborder_taxes]);
-                } else {
-                    // when chef is not a taxpayer
-                    $suborder_taxes[] = [$tax_types['tax_type'][$i] => $tax_types['tax_value'][$i], 'Amount' => 0];
-                }
+                // b) Driver commission tax
+                $driverTaxAmt = round($driver_commission_amount * ($rate / 100), 2);
+                $driver_commission_taxes[] = [
+                    $type   => $rate,
+                    'Amount'=> $driverTaxAmt,
+                ];
+
+                // c) Suborder tax (only if chef is taxable)
+                $subTaxAmt = $is_taxable
+                    ? round($amount * ($rate / 100), 2)
+                    : 0;
+                $suborder_taxes[] = [
+                    $type   => $rate,
+                    'Amount'=> $subTaxAmt,
+                ];
             }
 
+            // 5) If chef is taxable, add to total taxable base
             if ($is_taxable) {
                 $total_taxable_amount += $amount;
-                Log::info('total_taxable_amount', [$total_taxable_amount]);
             }
 
-            $chef_tax_detail = [
-                'chef_id' => $card_value->chef_id,
-                'suborder_tax' => $suborder_taxes,
-                'commission_tax' => $chef_commission_taxes,
-                'commission_amount' => $chef_commission_amount,
-                'commission_percentage' => $commission_percentage,
-                'is_tax_applicable' => $is_taxable,
-                'foods_total' => $amount
-            ];
-            $all_chef_taxes_detail[] = $chef_tax_detail;
-
-            // Driver tax details
-            $driver_tax_detail = [
-                // 'driver_id' => $card_value->driver_id,  // Assuming there's a driver_id in the cartData
-                'commission_tax' => $driver_commission_taxes,
-                'commission_amount' => $driver_commission_amount,
-                'commission_percentage' => $driver_commission_percentage
+            // 6) Collect this chef’s detail
+            $all_chef_taxes_detail[] = [
+                'chef_id'            => $card_value->chef_id,
+                'suborder_tax'       => $suborder_taxes,
+                'commission_tax'     => $chef_commission_taxes,
+                'commission_amount'  => $chef_commission_amount,
+                'commission_percentage'=> $commission_percentage,
+                'is_tax_applicable'  => $is_taxable ? 1 : 0,
+                'foods_total'        => $amount,
             ];
 
-            $all_driver_taxes_detail[] = $driver_tax_detail;
-            Log::info('driver_tax_detail/////////', [$all_driver_taxes_detail]);
+            // 7) Collect driver detail
+            $all_driver_taxes_detail[] = [
+                'commission_tax'      => $driver_commission_taxes,
+                'commission_amount'   => $driver_commission_amount,
+                'commission_percentage'=> $driver_commission_percentage,
+            ];
         }
 
-        for ($i = 0; $i < $array_count; $i++) {
-            if ($total_taxable_amount > 0) {
-                $order_total_with_tax = round(($total_taxable_amount * ($tax_types['tax_value'][$i] / 100)), 2);
-                $order_tax[] = [$tax_types['tax_type'][$i] => $tax_types['tax_value'][$i], 'Amount' => $order_total_with_tax];
-            } else {
-                // If no chefs are taxable, set Amount to 0 for all tax types
-                $order_tax[] = [$tax_types['tax_type'][$i] => $tax_types['tax_value'][$i], 'Amount' => 0];
-            }
+        // 8) Build order‑level tax array
+        foreach ($tax_types['tax_type'] as $i => $type) {
+            $rate = $tax_types['tax_value'][$i];
+            $amt  = $total_taxable_amount > 0
+                ? round($total_taxable_amount * ($rate / 100), 2)
+                : 0;
+
+            $order_tax[] = [
+                $type   => $rate,
+                'Amount'=> $amt,
+            ];
         }
 
+        // 9) Prepare response payload
         $data = [
-            'tax_type' => $tax_types,
-            'total_tax' => $suborder_tax,
-            'order_tax' => $order_tax,
+            'tax_type'      => $tax_types,
+            'total_tax'     => $total_taxable_amount > 0
+                                ? round($total_taxable_amount * array_sum($tax_types['tax_value']) / 100, 2)
+                                : 0,
+            'order_tax'     => $order_tax,
             'sub_order_tax' => $all_chef_taxes_detail,
-            'driver_tax' => $all_driver_taxes_detail  // Include driver tax details in the response
+            'driver_tax'    => $all_driver_taxes_detail,
         ];
 
-        return response()->json(['message' => 'Calculation done', 'data' => $data, 'success' => true], 200);
+        return response()->json([
+            'message' => 'Calculation done',
+            'data'    => $data,
+            'success' => true
+        ], 200);
     }
 
 

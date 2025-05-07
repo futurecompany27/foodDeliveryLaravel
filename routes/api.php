@@ -44,10 +44,13 @@ Route::prefix('chef')->group(function () {
     Route::controller(ChefController::class)->group(function () {
         Route::post('/ChefRegisteration', 'ChefRegisteration');
         Route::post('/ChefLogin', 'ChefLogin');
+        Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
+    });
+    Route::controller(kitchentypeController::class)->group(function () {
+        Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
     });
 
     Route::group(['middleware' => 'auth.chef'], function ($router) {
-
         Route::controller(commonFunctions::class)->group(function () {
             Route::get("/getAllBankList", 'getAllBankList'); // chef panel
             Route::post("/getDocumentListAccToChefTypeAndState", 'getDocumentListAccToChefTypeAndState'); // chef panel
@@ -74,9 +77,7 @@ Route::prefix('chef')->group(function () {
             Route::post('/deleteNotification', 'deleteNotification');
             Route::post('/markAsReadNotification', 'markAsReadNotification');
         });
-        Route::controller(kitchentypeController::class)->group(function () {
-            Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
-        });
+
         Route::controller(stripeController::class)->group(function () {
             Route::post('/stripe-checkout-transaction', 'stripeCheckout'); // chef panel
             Route::post('/retriveCertificatePaymentStatus', 'retriveCertificatePaymentStatus'); // chef panel
@@ -87,7 +88,6 @@ Route::prefix('chef')->group(function () {
             Route::post('/chefLogout',  'chefLogout');
             Route::post('/chefRefreshToken',  'chefRefreshToken');
             Route::post('/getFoodItemsForCustomer', 'getFoodItemsForCustomer'); //without Auth can access make by sarita
-            Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
             Route::get('/getChefRegisterationRequest', 'getChefRegisterationRequest');
             Route::post('/getChefDetails', 'getChefDetails');
 
@@ -230,6 +230,7 @@ Route::prefix('user')->group(function () {
         Route::post('/recordNotFoundSubmit', 'recordNotFoundSubmit');
         Route::post('/changePassword', 'changePassword'); //without token
         Route::post('/getChefsByPostalCodeAndCuisineTypes', 'getChefsByPostalCodeAndCuisineTypes');
+        Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
         Route::controller(stripeController::class)->group(function () {
             Route::post('/retriveStripePaymentStatus', 'retriveStripePaymentStatus');
         });
@@ -247,12 +248,13 @@ Route::prefix('user')->group(function () {
         Route::get("/getAllFoodTypes", 'getAllFoodTypes'); //without Auth can access
         Route::get("/getAllAllergens", 'getAllAllergens'); //without Auth can access
         Route::get("/getAllSiteSettings", 'getAllSiteSettings'); //without Auth can access
-        Route::get("/getSiteFeedback", 'getSiteFeedback'); //without Auth can access
+        Route::get("/getSiteFeedback", 'getSiteFeedback'); //without Auth can access\
     });
 
     Route::group(['middleware' => 'auth.user'], function () {
         Route::controller(AdminController::class)->group(function () {
             Route::post("/getAdminOrderDetailsById", 'getAdminOrderDetailsById'); //without Auth can access
+            Route::post('/ChefReviewInAdmin', 'ChefReviewInAdmin');
         });
         Route::controller(OrderController::class)->group(function () {
             // Route::post('/placeOrders', 'placeOrders');
@@ -307,12 +309,15 @@ Route::prefix('user')->group(function () {
             Route::post('/deleteUserChefReview', 'deleteUserChefReview');
             Route::post('/getAllUserChefReviewsbyStatus', 'getAllUserChefReviewsbyStatus');
 
-            Route::post('/calculateDistanceUsingTwoLatlong', 'calculateDistanceUsingTwoLatlong');
             Route::post('/getUserOrders', 'getUserOrders');
             Route::post('/getUserOrderDetails', 'getUserOrderDetails');
 
             Route::get('/userOrderInvoicePDF', 'userOrderInvoicePDF');
             Route::post('/searchFood', 'searchFood');
+
+            Route::post('/getPostalCode', 'getPostalCode');
+            Route::post('/updatePostalCode', 'updatePostalCode');
+
         });
     });
     Route::controller(taxController::class)->group(function () {
@@ -451,6 +456,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/getSubOrderByDriver', 'getSubOrderByDriver');
             Route::get('/getSubOrderAcceptedByChef', 'getSubOrderAcceptedByChef');
             Route::post('/storeChefChecklist', 'storeChefChecklist');
+            Route::get('/getChefChecklist', 'getChecklist');
             Route::post('/storeDriverChecklist', 'storeDriverChecklist');
             Route::post('/ChefReviewInAdmin', 'ChefReviewInAdmin');
         });

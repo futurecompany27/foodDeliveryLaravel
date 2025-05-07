@@ -48,8 +48,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Response;
 use Stripe\Customer;
 use Illuminate\Support\Facades\Cache;
-
-
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UserController extends Controller
 {
@@ -129,7 +128,12 @@ class UserController extends Controller
         }
         // Hide password again
         $userDetails->makeHidden('password');
-        return response()->json(['message' => 'Login Successfully!', 'user_id' => auth()->user()->id, 'token' => User::createToken($token), 'success' => true], 200);
+        return response()->json(['message' => 'Login Successfully!', 'user_id' => auth()->user()->id, 'token' => User::createToken($token), 'data' => [
+            'user_id' => $userDetails->id,
+            'firstName' => $userDetails->firstName, // Add First Name
+            'lastName' => $userDetails->lastName,   // Add Last Name
+            'token' => $token
+        ], 'success' => true], 200);
         // return User::createToken($token);
     }
 
@@ -165,7 +169,7 @@ class UserController extends Controller
             return response()->json([
                 'access_token' => $newToken,
                 'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 720, // 24 hours in seconds
+                'expires_in' => JWTAuth::factory()->getTTL() * 60, // Convert to seconds
                 'success' => true,
                 'message' => 'Token refreshed successfully!'
             ]);
@@ -806,14 +810,24 @@ class UserController extends Controller
         }
     }
 
-    function googleSigin(Request $req)
+    public function googleSigin(Request $req)
     {
         try {
             $userExist = User::where('email', $req->email)->first();
+
             if ($userExist) {
-                return response()->json(['message' => 'You are logged in successfully', "data" => $userExist, 'success' => true], 200);
+                // Generate JWT token
+                $token = JWTAuth::fromUser($userExist);
+
+                return response()->json([
+                    'message' => 'You are logged in successfully',
+                    'data' => $userExist,
+                    'token' => $token, // Include JWT token in response
+                    'success' => true
+                ], 200);
             } else {
                 DB::beginTransaction();
+
                 $user = new User();
                 $user->firstName = $req->firstName;
                 $user->lastName = $req->lastName;
@@ -822,7 +836,11 @@ class UserController extends Controller
                 $user->social_type = $req->provider;
                 $user->email_verified_at = Carbon::now();
                 $user->save();
+
+                // Fetch user details
                 $userDetail = User::find($user->id);
+
+                // Send verification email (if enabled)
                 try {
                     if (config('services.is_mail_enable')) {
                         Mail::to(trim($req->email))->send(new HomeshefUserEmailVerificationMail($userDetail));
@@ -830,12 +848,24 @@ class UserController extends Controller
                 } catch (Exception $e) {
                     Log::error($e);
                 }
+
+                // Notify all admins
                 $admins = Admin::all();
                 foreach ($admins as $admin) {
                     $admin->notify(new CustomerRegisterationNotification($userDetail));
                 }
+
                 DB::commit();
-                return response()->json(['message' => 'You are all set to start ordering your food now ! Thank you for registering with us', "data" => $userDetail, 'success' => true], 201);
+
+                // Generate JWT token for new user
+                $token = JWTAuth::fromUser($user);
+
+                return response()->json([
+                    'message' => 'You are all set to start ordering your food now! Thank you for registering with us.',
+                    'data' => $userDetail,
+                    'token' => $token, // Include JWT token
+                    'success' => true
+                ], 201);
             }
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -1954,6 +1984,44 @@ class UserController extends Controller
                 'success' => false,
                 'message' => 'Oops! Something went wrong, please try again!',
             ], 500);
+        }
+    }
+
+    public function getPostalCode(Request $req)
+    {
+        $user = auth()->guard('user')->user();
+
+        if ($user) {
+            return response()->json([
+                'postal_code' => $user->postal_code,
+                'message' => 'Password changed successfully!',
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+    }
+
+
+    public function updatePostalCode(Request $req)
+    {
+        try {
+            $user = auth()->guard('user')->user();
+            $update = [
+                'postal_code' => $req->postal_code,
+            ];
+            User::where('id', $user->id)->update($update);
+            return response()->json([
+                'message' => 'Postal Code Updated successfully!',
+            ], 200);
+
+        } catch (Exception $th) {
+            Log::info($th->getMessage());
+            DB::rollback();
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
         }
     }
 }

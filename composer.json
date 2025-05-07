@@ -15,6 +15,7 @@
         "laravel/sanctum": "^3.2",
         "laravel/socialite": "^5.12",
         "laravel/tinker": "^2.8",
+        "league/flysystem-aws-s3-v3": "^3.29",
         "onecentlin/laravel-adminer": "^6.1",
         "stripe/stripe-php": "^10.21",
         "tymon/jwt-auth": "^2.1"
@@ -33,7 +34,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/AwsHelper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
