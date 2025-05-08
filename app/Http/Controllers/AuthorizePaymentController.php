@@ -80,6 +80,7 @@ class AuthorizePaymentController extends Controller
 
     private function addTransaction($transaction_type, $user_type, $user_id, $remark, $status, $amount, $tx_no)
     {
+        // TODO: Validation required
         $transaction = new Transaction();
         $transaction->user_type = $user_type;
         $transaction->transaction_type = $transaction_type;
