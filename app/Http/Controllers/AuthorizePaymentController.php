@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use net\authorize\api\contract\v1 as AnetAPI;
 use net\authorize\api\controller as AnetController;
@@ -54,6 +55,11 @@ class AuthorizePaymentController extends Controller
         if ($response !== null && $response->getMessages()->getResultCode() === "Ok") {
             $tresponse = $response->getTransactionResponse();
             if ($tresponse !== null && $tresponse->getResponseCode() === "1") {
+                try {
+                    $this->addTransaction($txn_type, $user_type, $user->id, $txn_remark, $txn_status, $amount, $tresponse->getTransId());
+                } catch (\Throwable $th) {
+                    throw $th;
+                }
                 return response()->json([
                     'success' => true,
                     'transaction_id' => $tresponse->getTransId(),
@@ -72,11 +78,21 @@ class AuthorizePaymentController extends Controller
         }
     }
 
-    private function addTransaction(){
+    private function addTransaction($transaction_type, $user_type, $user_id, $remark, $status, $amount, $tx_no)
+    {
+        $transaction = new Transaction();
+        $transaction->user_type = $user_type;
+        $transaction->transaction_type = $transaction_type;
+        $transaction->user_id = $user_id;
+        $transaction->remark = $remark;
+        $transaction->status = $status;
+        $transaction->amount = $amount;
+        $transaction->txn_no = $tx_no;
+        $transaction->save();
 
+        return $transaction;
     }
 
-    private function addOrder(){
-        
-    }
+
+    private function addOrder() {}
 }
