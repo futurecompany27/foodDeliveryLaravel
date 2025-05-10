@@ -35,7 +35,6 @@ class AuthorizePaymentController extends Controller
     {
         $user = $laravelRequest->user();
 
-        return $this->getTransactionListForCustomerRequest($user->id);
         $user_type = $laravelRequest->user_type;
 
         $opaqueData = $laravelRequest->opaqueData;
