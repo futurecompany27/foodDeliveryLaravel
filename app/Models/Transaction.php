@@ -9,6 +9,10 @@ class Transaction extends Model
 {
     use HasFactory;
 
+    const TYPE_ORDER = 1;
+    const TYPE_HANDLER_CERTIFICATE = 2;
+    const TYPE_LICENSE_CERTIFICATE = 3;
+
     protected $fillable = [
         'transaction_type', 
         'user_type', 
@@ -19,6 +23,12 @@ class Transaction extends Model
         'payment_log',
         'payment_id',
         'txn_no'
+    ];
+
+    public $types = [
+        self::TYPE_ORDER => 'Customer Order',
+        self::TYPE_HANDLER_CERTIFICATE => 'Food Handler Certificate',
+        self::TYPE_LICENSE_CERTIFICATE => 'Restaurant & Retail Licence Certificate'
     ];
 
 
