@@ -25,7 +25,7 @@ class Transaction extends Model
         'txn_no'
     ];
 
-    public $types = [
+    public static $types = [
         self::TYPE_ORDER => 'Customer Order',
         self::TYPE_HANDLER_CERTIFICATE => 'Food Handler Certificate',
         self::TYPE_LICENSE_CERTIFICATE => 'Restaurant & Retail Licence Certificate'
