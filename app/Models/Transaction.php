@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use net\authorize\api\contract\v1 as AnetAPI;
+use net\authorize\api\controller as AnetController;
 class Transaction extends Model
 {
     use HasFactory;
@@ -48,6 +49,41 @@ class Transaction extends Model
         while(self::where('txn_no', $transactionNo)->exists());
 
         return $transactionNo;
+    }
+
+    private function getTransactionListForCustomerRequest($customerProfileId)
+    {
+        /* Create a merchantAuthenticationType object with authentication details
+       retrieved from the constants file */
+        $merchantAuthentication = new AnetAPI\MerchantAuthenticationType();
+        $merchantAuthentication->setName(env('AUTHORIZE_LOGIN_ID'));
+        $merchantAuthentication->setTransactionKey(env('AUTHORIZE_TRANSACTION_KEY'));
+
+        $request = new AnetAPI\GetUnsettledTransactionListRequest();
+        $request->setMerchantAuthentication($merchantAuthentication);
+        $controller = new AnetController\GetUnsettledTransactionListController($request);
+        $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::SANDBOX);
+
+        $controller = new AnetController\GetTransactionListController($request);
+
+        $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::SANDBOX);
+
+        if (($response != null) && ($response->getMessages()->getResultCode() == "Ok")) {
+            $transIds = [];
+            $res = $response->getTransactions();
+            if($res){
+                foreach($res as $tx){
+                    $transIds[] = $tx->getTransId();
+                }
+            }   
+            return $transIds;
+        } else {
+            echo "ERROR :  Invalid response\n";
+            $errorMessages = $response->getMessages()->getMessage();
+            echo "Response : " . $errorMessages[0]->getCode() . "  " . $errorMessages[0]->getText() . "\n";
+        }
+
+        return $response;
     }
 
 }
