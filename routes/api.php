@@ -570,7 +570,9 @@ Route::controller(commonFunctions::class)->group(function () {
 });
 
 // Routes for authorize
-Route::prefix('/authorize-payment')->group(function(){
-    Route::get('', [AuthorizePaymentController::class, 'paymentTest']);
-    Route::post('accept-payment', [AuthorizePaymentController::class, 'createAnAcceptPaymentTransaction']);
+Route::group(['middleware' => 'auth.user'], function () {
+    Route::prefix('/authorize-payment')->group(function(){
+        Route::get('', [AuthorizePaymentController::class, 'paymentTest']);
+        Route::post('accept-payment', [AuthorizePaymentController::class, 'createAnAcceptPaymentTransaction']);
+    });
 });
