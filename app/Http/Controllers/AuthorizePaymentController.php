@@ -57,12 +57,16 @@ class AuthorizePaymentController extends Controller
         $paymentType = new AnetAPI\PaymentType();
         $paymentType->setOpaqueData($opaquePayment);
 
+        $customerData = new AnetAPI\CustomerDataType();
+        $customerData->setId($user->id);
+        $customerData->setEmail($user->email);
+
         $transactionRequest = new AnetAPI\TransactionRequestType();
         $transactionRequest->setTransactionType("authCaptureTransaction");
         $transactionRequest->setAmount($amount);
         $transactionRequest->setPayment($paymentType);
+        $transactionRequest->setCustomer($customerData);
 
-        // ✅ Rename to avoid variable conflict
         $apiRequest = new AnetAPI\CreateTransactionRequest();
         $apiRequest->setMerchantAuthentication($merchantAuthentication);
         $apiRequest->setRefId($refId);
@@ -88,6 +92,7 @@ class AuthorizePaymentController extends Controller
                     'transaction_id' => $tresponse->getTransId(),
                     'auth_code' => $tresponse->getAuthCode(),
                     'message' => $tresponse->getMessages()[0]->getDescription(),
+                    'tresponse' => $tresponse
                 ]);
             } else {
                 return response()->json([
@@ -101,9 +106,12 @@ class AuthorizePaymentController extends Controller
         }
     }
 
+    public function getTransactionList(){
+
+    }
+
     private function addTransaction($transaction_type, $user_type, $user_id, $remark, $status, $amount, $tx_no)
     {
-        // TODO: Validation required
         $transaction = new Transaction();
         $transaction->user_type = $user_type;
         $transaction->transaction_type = $transaction_type;
