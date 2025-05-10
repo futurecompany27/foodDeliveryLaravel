@@ -74,13 +74,15 @@ class AuthorizePaymentController extends Controller
         if ($response !== null && $response->getMessages()->getResultCode() === "Ok") {
             $tresponse = $response->getTransactionResponse();
             if ($tresponse !== null && $tresponse->getResponseCode() === "1") {
-                // Adding transaction
-                $this->addTransaction($txn_type, $user_type, $user->id, $txn_remark, $txn_status, $amount, $tresponse->getTransId());
-
+                
                 // Order data will only come for customer, or else for chef certificate no order will be generated
                 if($orderData){
+                    $txn_type = Transaction::TYPE_ORDER;
                     $this->addOrder($user ,$orderData, $tresponse->getTransId());
                 }
+
+                // Adding transaction
+                $this->addTransaction($txn_type, $user_type, $user->id, $txn_remark, $txn_status, $amount, $tresponse->getTransId());
                 return response()->json([
                     'success' => true,
                     'transaction_id' => $tresponse->getTransId(),
