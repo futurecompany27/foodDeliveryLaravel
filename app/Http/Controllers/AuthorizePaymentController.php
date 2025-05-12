@@ -125,8 +125,8 @@ class AuthorizePaymentController extends Controller
         $refId = uniqid('REF-');
 
         $payPalType = new AnetAPI\PayPalType();
-        $payPalType->setSuccessUrl(env('FRONTEND_DOMAIN') );
-        $payPalType->setCancelUrl(env('FRONTEND_DOMAIN'));
+        $payPalType->setSuccessUrl(env('FRONTEND_DOMAIN') . "?status=success&type=" . $laravelRequest->type);
+        $payPalType->setCancelUrl(env('FRONTEND_DOMAIN') . "?status=fail");
 
         $paymentOne = new AnetAPI\PaymentType();
         $paymentOne->setPayPal($payPalType);
@@ -134,7 +134,7 @@ class AuthorizePaymentController extends Controller
         $transactionRequestType = new AnetAPI\TransactionRequestType();
 		$transactionRequestType->setTransactionType( "authCaptureTransaction");
 		$transactionRequestType->setPayment($paymentOne);
-		$transactionRequestType->setAmount(30);
+		$transactionRequestType->setAmount($laravelRequest->amount);
         
 		$request = new AnetAPI\CreateTransactionRequest();
 		$request->setMerchantAuthentication($merchantAuthentication);
@@ -146,7 +146,7 @@ class AuthorizePaymentController extends Controller
         if ($response != null) {
             if ($response->getMessages()->getResultCode() == "Ok") {
                 $tresponse = $response->getTransactionResponse();
-                Cache::put('paypal_payment_' . $user->id, $tresponse->getTransId(), now()->addMinutes(1440)); // store cache in 24 hr
+                Cache::put('paypal_payment_' . $user->id, ['amount' => $laravelRequest->amount, 'transaction_id' => $tresponse->getTransId()], now()->addMinutes(1440)); 
 
                 //Returning the response url
                 return $tresponse->getSecureAcceptance();
@@ -167,58 +167,74 @@ class AuthorizePaymentController extends Controller
     }
 
     public function checkPaymentStatus(Request $laravelRequest)
-{
-    $user = $laravelRequest->user();
-    $transId = Cache::get('paypal_payment_' . $user->id);
+    {
+        $user = $laravelRequest->user();
+        $cacheData = Cache::get('paypal_payment_' . $user->id);
 
-    $merchantAuthentication = new AnetAPI\MerchantAuthenticationType();
-    $merchantAuthentication->setName(env('AUTHORIZE_LOGIN_ID'));
-    $merchantAuthentication->setTransactionKey(env('AUTHORIZE_TRANSACTION_KEY'));
+        $merchantAuthentication = new AnetAPI\MerchantAuthenticationType();
+        $merchantAuthentication->setName(env('AUTHORIZE_LOGIN_ID'));
+        $merchantAuthentication->setTransactionKey(env('AUTHORIZE_TRANSACTION_KEY'));
 
-    $refId = 'ref' . time();
+        $refId = 'ref' . time();
 
-    //create a transaction of type get details
-    $transactionRequestType = new AnetAPI\TransactionRequestType();
-    $transactionRequestType->setTransactionType( "getDetailsTransaction"); 
-    
-    //replace following transaction ID with your transaction ID for which the details are required
-    $transactionRequestType->setRefTransId($transId);
+        //create a transaction of type get details
+        $transactionRequestType = new AnetAPI\TransactionRequestType();
+        $transactionRequestType->setTransactionType("getDetailsTransaction");
 
-    // Create the payment data for a paypal account
-    $payPalType = new AnetAPI\PayPalType();
-    $payPalType->setCancelUrl(env('FRONTEND_DOMAIN'));
-    $payPalType->setSuccessUrl(env('FRONTEND_DOMAIN'));
-    $paymentOne = new AnetAPI\PaymentType();
-    $paymentOne->setPayPal($payPalType);
+        //replace following transaction ID with your transaction ID for which the details are required
+        $transactionRequestType->setRefTransId($cacheData['transaction_id']);
 
-    $transactionRequestType->setPayment($paymentOne);
+        // Create the payment data for a paypal account
+        $payPalType = new AnetAPI\PayPalType();
+        $payPalType->setCancelUrl(env('FRONTEND_DOMAIN'));
+        $payPalType->setSuccessUrl(env('FRONTEND_DOMAIN'));
+        $paymentOne = new AnetAPI\PaymentType();
+        $paymentOne->setPayPal($payPalType);
 
-    //create a transaction request
-    $request = new AnetAPI\CreateTransactionRequest();
-    $request->setMerchantAuthentication($merchantAuthentication);
-    $request->setRefId( $refId);
-    $request->setTransactionRequest( $transactionRequestType);
+        $transactionRequestType->setPayment($paymentOne);
 
-    $controller = new AnetController\CreateTransactionController($request);
+        //create a transaction request
+        $request = new AnetAPI\CreateTransactionRequest();
+        $request->setMerchantAuthentication($merchantAuthentication);
+        $request->setRefId($refId);
+        $request->setTransactionRequest($transactionRequestType);
 
-    //execute the api call to get transaction details
-    $response = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
+        $controller = new AnetController\CreateTransactionController($request);
 
-    if ($response !== null && $response->getMessages()->getResultCode() == "Ok") {
-        $transaction = $response->getTransactionResponse();
-        Cache::delete('paypal_payment_' . $user->id);
-        return $transaction;
-        // return response()->json([
-        //     'status' => $transaction->getTransactionStatus(), // e.g., "settledSuccessfully", "capturedPendingSettlement"
-        //     'amount' => $transaction->getAuthAmount(),
-        //     'paymentMethod' => $transaction->getPayment()->getPayPal() ? "PayPal" : "Other"
-        // ]);
-    } else {
-        return response()->json([
-            'error' => $response->getMessages()->getMessage()[0]->getText()
-        ], 422);
+        //execute the api call to get transaction details
+        $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::SANDBOX);
+
+        if ($response !== null && $response->getMessages()->getResultCode() == "Ok") {
+            $transaction = $response->getTransactionResponse();
+            Cache::delete('paypal_payment_' . $user->id);
+            $txnType = $laravelRequest->transaction_type;
+            $orderData = $laravelRequest->order_data;
+            if($txnType == "order"){
+                $transaction_type = Transaction::TYPE_ORDER;
+            }else if($txnType == "handler_certificate"){
+                $transaction_type = Transaction::TYPE_HANDLER_CERTIFICATE;
+            } else {
+                $transaction_type = Transaction::TYPE_LICENSE_CERTIFICATE;
+            }
+
+            $this->addTransaction($transaction_type, $laravelRequest->user_type, $user->id, '', "paid", $cacheData['amount'], $cacheData['transaction_id']);
+
+            if($orderData){
+                $this->addOrder($user, $orderData, $cacheData['transaction_id']);
+            }
+
+            return $transaction;
+            // return response()->json([
+            //     'status' => $transaction->getTransactionStatus(), // e.g., "settledSuccessfully", "capturedPendingSettlement"
+            //     'amount' => $transaction->getAuthAmount(),
+            //     'paymentMethod' => $transaction->getPayment()->getPayPal() ? "PayPal" : "Other"
+            // ]);
+        } else {
+            return response()->json([
+                'error' => $response->getMessages()->getMessage()[0]->getText()
+            ], 422);
+        }
     }
-}
 
     private function addTransaction($transaction_type, $user_type, $user_id, $remark, $status, $amount, $tx_no)
     {

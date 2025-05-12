@@ -575,6 +575,6 @@ Route::group(['middleware' => 'auth.user'], function () {
         Route::get('', [AuthorizePaymentController::class, 'paymentTest']);
         Route::post('accept-payment', [AuthorizePaymentController::class, 'createAnAcceptPaymentTransaction']);
         Route::post('paypal-payment', [AuthorizePaymentController::class, 'paypalTransaction']);
-        Route::get('paypal-payment-status', [AuthorizePaymentController::class, 'checkPaymentStatus']);
+        Route::post('paypal-payment-status', [AuthorizePaymentController::class, 'checkPaymentStatus']);
     });
 });
