@@ -1798,40 +1798,6 @@ class ChefController extends Controller
                 return response()->json(['message' => 'Chef is ' . ($req->is_taxable == '1' ? 'taxable' : 'non taxable') , 'success' => false], 500);
             }
 
-            // // Delete existing GST image if it exists
-            // if ($req->hasFile('gst_image') && $chef->gst_image) {
-            //     $existingGstImagePath = public_path(str_replace(asset('storage/'), '', $chef->gst_image));
-            //     if (File::exists($existingGstImagePath)) {
-            //         // Attempt to delete the file
-            //         if (!unlink($existingGstImagePath)) {
-            //             return response()->json(['message' => 'Failed to delete existing GST image', 'success' => false], 500);
-            //         }
-            //     }
-            // }
-
-            // // Delete existing QST image if it exists
-            // if ($req->hasFile('qst_image') && $chef->qst_image) {
-            //     $existingQstImagePath = public_path(str_replace(asset('storage/'), '', $chef->qst_image));
-            //     if (File::exists($existingQstImagePath)) {
-            //         // Attempt to delete the file
-            //         if (!unlink($existingQstImagePath)) {
-            //             return response()->json(['message' => 'Failed to delete existing QST image', 'success' => false], 500);
-            //         }
-            //     }
-            // }
-
-            // // Store new GST image
-            // if ($req->hasFile('gst_image')) {
-            //     $filename = $req->file('gst_image')->store('/chef/TaxInformation');
-            //     $chef->gst_image = asset('storage/' . $filename);
-            // }
-
-            // // Store new QST image
-            // if ($req->hasFile('qst_image')) {
-            //     $filenames = $req->file('qst_image')->store('/chef/TaxInformation');
-            //     $chef->qst_image = asset('storage/' . $filenames);
-            // }
-
             // Store new GST image
             if ($req->hasFile('gst_image')) {
                 $file = $req->file('gst_image');
