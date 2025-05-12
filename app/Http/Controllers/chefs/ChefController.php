@@ -1787,48 +1787,121 @@ class ChefController extends Controller
             // Retrieve the chef's data
             $chef = Chef::find($chef->id);
 
+
             if (!$chef) {
                 return response()->json(['message' => 'Chef not found', 'success' => false], 404);
             }
 
-            if ($req->is_taxable) {
+            if ($req->is_taxable != '1') {
                 $chef->is_taxable = $req->is_taxable;
                 $chef->save();
-                return response()->json(['message' => 'Chef is ' . $req->is_taxable == '1' ? 'taxable' : 'non taxable' , 'success' => false], 500);
+                return response()->json(['message' => 'Chef is ' . ($req->is_taxable == '1' ? 'taxable' : 'non taxable') , 'success' => false], 500);
             }
 
-            // Delete existing GST image if it exists
-            if ($req->hasFile('gst_image') && $chef->gst_image) {
-                $existingGstImagePath = public_path(str_replace(asset('storage/'), '', $chef->gst_image));
-                if (File::exists($existingGstImagePath)) {
-                    // Attempt to delete the file
-                    if (!unlink($existingGstImagePath)) {
-                        return response()->json(['message' => 'Failed to delete existing GST image', 'success' => false], 500);
-                    }
-                }
-            }
+            // // Delete existing GST image if it exists
+            // if ($req->hasFile('gst_image') && $chef->gst_image) {
+            //     $existingGstImagePath = public_path(str_replace(asset('storage/'), '', $chef->gst_image));
+            //     if (File::exists($existingGstImagePath)) {
+            //         // Attempt to delete the file
+            //         if (!unlink($existingGstImagePath)) {
+            //             return response()->json(['message' => 'Failed to delete existing GST image', 'success' => false], 500);
+            //         }
+            //     }
+            // }
 
-            // Delete existing QST image if it exists
-            if ($req->hasFile('qst_image') && $chef->qst_image) {
-                $existingQstImagePath = public_path(str_replace(asset('storage/'), '', $chef->qst_image));
-                if (File::exists($existingQstImagePath)) {
-                    // Attempt to delete the file
-                    if (!unlink($existingQstImagePath)) {
-                        return response()->json(['message' => 'Failed to delete existing QST image', 'success' => false], 500);
-                    }
-                }
-            }
+            // // Delete existing QST image if it exists
+            // if ($req->hasFile('qst_image') && $chef->qst_image) {
+            //     $existingQstImagePath = public_path(str_replace(asset('storage/'), '', $chef->qst_image));
+            //     if (File::exists($existingQstImagePath)) {
+            //         // Attempt to delete the file
+            //         if (!unlink($existingQstImagePath)) {
+            //             return response()->json(['message' => 'Failed to delete existing QST image', 'success' => false], 500);
+            //         }
+            //     }
+            // }
+
+            // // Store new GST image
+            // if ($req->hasFile('gst_image')) {
+            //     $filename = $req->file('gst_image')->store('/chef/TaxInformation');
+            //     $chef->gst_image = asset('storage/' . $filename);
+            // }
+
+            // // Store new QST image
+            // if ($req->hasFile('qst_image')) {
+            //     $filenames = $req->file('qst_image')->store('/chef/TaxInformation');
+            //     $chef->qst_image = asset('storage/' . $filenames);
+            // }
 
             // Store new GST image
             if ($req->hasFile('gst_image')) {
-                $filename = $req->file('gst_image')->store('/chef/TaxInformation');
-                $chef->gst_image = asset('storage/' . $filename);
+                $file = $req->file('gst_image');
+                $s3 = AwsHelper::cred();
+                // If there's already an image saved, delete it
+                if (!empty($chef->gst_image)) {
+                    $parsedUrl = parse_url($chef->gst_image, PHP_URL_PATH);
+                    $oldKey = ltrim($parsedUrl, '/'); // remove leading slash
+
+                    try {
+                        $s3->deleteObject([
+                            'Bucket' => env('AWS_BUCKET'),
+                            'Key'    => $oldKey,
+                        ]);
+                        Log::info('Old GST image deleted from S3', ['key' => $oldKey]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to delete old GST image from S3', ['error' => $e->getMessage()]);
+                    }
+                }
+                // Upload new image
+                $fileName = $file->store('/chef/TaxInformation');
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
+
+                $url = $result['ObjectURL'];
+
+                Log::info('S3 Upload Success', ['url' => $url]);
+
+                // Save URL to database
+                $chef->gst_image = $url;
             }
 
             // Store new QST image
             if ($req->hasFile('qst_image')) {
-                $filenames = $req->file('qst_image')->store('/chef/TaxInformation');
-                $chef->qst_image = asset('storage/' . $filenames);
+                $file = $req->file('qst_image');
+                $s3 = AwsHelper::cred();
+                // If there's already an image saved, delete it
+                if (!empty($chef->qst_image)) {
+                    $parsedUrl = parse_url($chef->qst_image, PHP_URL_PATH);
+                    $oldKey = ltrim($parsedUrl, '/'); // remove leading slash
+
+                    try {
+                        $s3->deleteObject([
+                            'Bucket' => env('AWS_BUCKET'),
+                            'Key'    => $oldKey,
+                        ]);
+                        Log::info('Old QST image deleted from S3', ['key' => $oldKey]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to delete old QST image from S3', ['error' => $e->getMessage()]);
+                    }
+                }
+                // Upload new image
+                $fileName = $file->store('/chef/TaxInformation');
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
+
+                $url = $result['ObjectURL'];
+
+                Log::info('S3 Upload Success', ['url' => $url]);
+
+                // Save URL to database
+                $chef->qst_image = $url;
             }
 
             // Update GST and QST numbers
