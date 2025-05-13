@@ -88,6 +88,17 @@ class ChefController extends Controller
         }
         try {
             DB::beginTransaction();
+
+             // Check if the email or mobile is already used in the chefs table
+             $chefExist = Chef::where("email", $req->email)->first();
+             if ($chefExist) {
+                 return response()->json(['message' => "This email is already register Please use another email!", "success" => false], 400);
+             }
+             $chefExist = Chef::where('mobile', str_replace("-", "", $req->mobile))->first();
+             if ($chefExist) {
+                 return response()->json(['message' => "This mobile no is already register Please use another mobileno!", "success" => false], 400);
+             }
+             
             $checkPinCode = Pincode::where([
                 'pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3),
                 'status' => 1
@@ -101,15 +112,7 @@ class ChefController extends Controller
                 ], 200);
             }
 
-            // Check if the email or mobile is already used in the chefs table
-            $chefExist = Chef::where("email", $req->email)->first();
-            if ($chefExist) {
-                return response()->json(['message' => "This email is already register Please use another email!", "success" => false], 400);
-            }
-            $chefExist = Chef::where('mobile', str_replace("-", "", $req->mobile))->first();
-            if ($chefExist) {
-                return response()->json(['message' => "This mobile no is already register Please use another mobileno!", "success" => false], 400);
-            }
+
 
             // Check if the email or mobile is already used in the users table
             $userExist = User::where("email", $req->email)->orWhere('mobile', str_replace("-", "", $req->mobile))->first();
