@@ -96,7 +96,7 @@ class shefTypesController extends Controller
     public function getAllShefTypes()
     {
         try {
-            $data = ShefType::all();
+            $data = ShefType::where('status', 1)->get();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());

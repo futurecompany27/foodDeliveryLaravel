@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\DriverPasswordResetOtp;
 use App\Mail\DriverSendOTP;
 use App\Mail\SendOtpToEmail;
+use App\Models\Chef;
 use App\Models\Driver;
 use App\Models\Otp;
 use App\Models\User;
@@ -28,6 +29,16 @@ class otpController extends Controller
                 //$otp_msg = $otp . "+is+your+one+time+verification+code+for+Homeplate";
                 //$url = "https://platform.clickatell.com/messages/http/send?apiKey=WzKPQFifSAe-c5nFp7SynQ==&to=1" . $req->mobile . "&content=" . $otp_msg;
                 //$response = Http::get($url);
+                $cleanMobile = str_replace("-", "", $req->mobile);
+                // Check if the mobile number already exists in the chefs table
+                $existingChef = Chef::where('mobile', $cleanMobile)->first();
+
+                if ($existingChef) {
+                    return response()->json([
+                        'message' => 'Mobile number already exists',
+                        'success' => false
+                    ], 409); 
+                }
                 Otp::updateOrCreate(
                     ['mobile' => str_replace("-", "", $req->mobile)],
                     ['otp_number' => $otp]
@@ -182,7 +193,7 @@ class otpController extends Controller
                 return response()->json(['message' => "Your email is verified successfully.", 'success' => true], 200);
             }
             return response()->json(['message' => "Invalid request.", 'success' => false], 500);
-            
+
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
