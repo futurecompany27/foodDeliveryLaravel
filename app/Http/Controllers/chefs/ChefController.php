@@ -579,7 +579,7 @@ class ChefController extends Controller
                     unlink(str_replace(env('filePath'), '', $chef->id_proof_path1));
                 }
 
-                $file = $req->file('id_proof_path1');
+                $file = $req->file('id_proof_path2');
                 $fileName = 'chef/'. $chef->id.'/documents' . time() . '_' . $file->getClientOriginalName();
 
                     $s3 = AwsHelper::cred();
