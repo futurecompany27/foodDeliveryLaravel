@@ -46,17 +46,24 @@ Route::prefix('chef')->group(function () {
         Route::post('/ChefLogin', 'ChefLogin');
         Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
     });
+
+    Route::controller(commonFunctions::class)->group(function () {
+        Route::get("/getAllBankList", 'getAllBankList'); // chef panel
+        Route::post("/getDocumentListAccToChefTypeAndState", 'getDocumentListAccToChefTypeAndState'); // chef panel
+        Route::post('/sendPasswordResetLink', 'sendPasswordResetLink'); // chef panel
+        Route::post('/changePasswordwithToken', 'changePasswordwithToken'); // chef panel
+    });
     Route::controller(kitchentypeController::class)->group(function () {
         Route::get('/getKitchenTypes', 'getKitchenTypes'); //without Auth can access // chef panel
     });
 
     Route::group(['middleware' => 'auth.chef'], function ($router) {
-        Route::controller(commonFunctions::class)->group(function () {
-            Route::get("/getAllBankList", 'getAllBankList'); // chef panel
-            Route::post("/getDocumentListAccToChefTypeAndState", 'getDocumentListAccToChefTypeAndState'); // chef panel
-            Route::post('/sendPasswordResetLink', 'sendPasswordResetLink'); // chef panel
-            Route::post('/changePasswordwithToken', 'changePasswordwithToken'); // chef panel
-        });
+        // Route::controller(commonFunctions::class)->group(function () {
+        //     Route::get("/getAllBankList", 'getAllBankList'); // chef panel
+        //     Route::post("/getDocumentListAccToChefTypeAndState", 'getDocumentListAccToChefTypeAndState'); // chef panel
+        //     Route::post('/sendPasswordResetLink', 'sendPasswordResetLink'); // chef panel
+        //     Route::post('/changePasswordwithToken', 'changePasswordwithToken'); // chef panel
+        // });
         Route::controller(OrderController::class)->group(function () {
             // Route::post('/placeOrders', 'placeOrders');
             // Route::post('/acceptOrRejectOrder', 'acceptOrRejectOrder');
