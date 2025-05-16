@@ -86,19 +86,25 @@ class ChefController extends Controller
         if ($validator->fails()) {
             return response()->json(['success' => false, 'error' => $validator->errors()->first()], 400);
         }
+
+        function normalizeMobile($mobile) {
+            return preg_replace('/[^0-9]/', '', $mobile); // removes all non-digit characters
+        }
         try {
             DB::beginTransaction();
 
              // Check if the email or mobile is already used in the chefs table
-             $chefExist = Chef::where("email", $req->email)->first();
+            $chefExist = Chef::where("email", $req->email)->first();
              if ($chefExist) {
                  return response()->json(['message' => "This email is already register Please use another email!", "success" => false], 400);
              }
-             $chefExist = Chef::where('mobile', str_replace("-", "", $req->mobile))->first();
+
+            $normalizedMobile = normalizeMobile($req->mobile);
+            $chefExist = Chef::where('mobile', $normalizedMobile)->first();
              if ($chefExist) {
-                 return response()->json(['message' => "This mobile no is already register Please use another mobileno!", "success" => false], 400);
+                 return response()->json(['message' => "This mobile no is already register Please use another mobile no!", "success" => false], 400);
              }
-             
+
             $checkPinCode = Pincode::where([
                 'pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3),
                 'status' => 1
