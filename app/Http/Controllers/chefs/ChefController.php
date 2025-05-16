@@ -101,9 +101,14 @@ class ChefController extends Controller
 
             $normalizedMobile = normalizeMobile($req->mobile);
             $chefExist = Chef::where('mobile', $normalizedMobile)->first();
-             if ($chefExist) {
-                 return response()->json(['message' => "This mobile no is already register Please use another mobile no!", "success" => false], 400);
-             }
+            if ($chefExist) {
+                 return response()->json(['message' => "This mobile no is already register Please use another mobile number!", "success" => false], 400);
+            }
+
+            $userExist = User::where('mobile', $normalizedMobile)->first();
+            if ($userExist) {
+                 return response()->json(['message' => "This mobile no is already register Please use another mobile number!", "success" => false], 400);
+            }
 
             $checkPinCode = Pincode::where([
                 'pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3),
