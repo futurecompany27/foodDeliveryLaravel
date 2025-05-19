@@ -976,7 +976,7 @@ class ChefController extends Controller
                         'image.image' => 'The uploaded file is not a valid image.',
                         'image.mime' => 'The uploaded image must be a JPEG, BMP, or PNG file.',
                         'image.max' => 'The uploaded image size must be under 100 KB.',
-                        'image.dimensions' => 'The uploaded image must be at least 350x350 pixels.',
+                        'image.dimensions' => 'The uploaded image must be at least 300x300 pixels.',
                         'foodImage.image' => 'Please select image file only',
                         'regularDishAvailabilty.required' => 'Please mention regularity of the dish',
                         'foodAvailibiltyOnWeekdays.required' => 'Please mention weekdays availablity of the food',
