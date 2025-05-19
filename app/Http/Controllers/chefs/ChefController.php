@@ -951,7 +951,7 @@ class ChefController extends Controller
                     [
                         'dish_name' => 'required',
                         'description' => 'required',
-                        'foodImage' => 'required|image|mimes:jpeg,png,jpg|max:1024|dimensions:width=350,height=350',
+                        'foodImage' => 'required|image|mimes:jpeg,png,jpg|max:1024|dimensions:width=300,height=300',
                         'regularDishAvailabilty' => 'required',
                         'from' => 'nullable',
                         'to' => 'nullable',
