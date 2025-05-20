@@ -101,7 +101,6 @@ class AuthorizePaymentController extends Controller
                 if($txn_type == "Restaurant & Retail Licence Certificate"){
                     $txn_type = Transaction::TYPE_LICENSE_CERTIFICATE;
                 }
-
                 // Adding transaction
                 $this->addTransaction($txn_type, $user_type, $user->id, $txn_remark, $txn_status, $amount, $tresponse->getTransId());
                 return response()->json([
@@ -261,6 +260,13 @@ class AuthorizePaymentController extends Controller
             $chef = Chef::where(['id' => $user_id])->first();
             if ($chef) {
                 $chef->update(['is_hfc_paid' => '1']);
+            }
+        }
+
+        if ($transaction_type == Transaction::TYPE_LICENSE_CERTIFICATE) {
+            $chef = Chef::where(['id' => $user_id])->first();
+            if ($chef) {
+                $chef->update(['is_rrc_paid' => '1']);
             }
         }
 
