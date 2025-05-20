@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use net\authorize\api\contract\v1 as AnetAPI;
 use net\authorize\api\controller as AnetController;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use PhpParser\Error;
+use PhpParser\Node\Stmt\Return_;
 
 class AuthorizePaymentController extends Controller
 {
@@ -35,10 +37,13 @@ class AuthorizePaymentController extends Controller
 
     public function createAnAcceptPaymentTransaction(Request $laravelRequest)
     {
-
         $user = $laravelRequest->user();
 
         $user_type = $laravelRequest->user_type;
+
+        if($user_type == "chef"){
+            $user = Auth::guard('chef')->user();
+        }
 
         $opaqueData = $laravelRequest->opaqueData;
         $amount = $laravelRequest->amount;
@@ -66,7 +71,7 @@ class AuthorizePaymentController extends Controller
         $customerData->setEmail($user->email);
 
         $transactionRequest = new AnetAPI\TransactionRequestType();
-        $transactionRequest->setTransactionType("authCaptureTransaction");
+        $transactionRequest->setTransactionType(transactionType: "authCaptureTransaction");
         $transactionRequest->setAmount($amount);
         $transactionRequest->setPayment($paymentType);
         $transactionRequest->setCustomer($customerData);
@@ -89,6 +94,14 @@ class AuthorizePaymentController extends Controller
                     $this->addOrder($user ,$orderData, $tresponse->getTransId());
                 }
 
+                if($txn_type == "Food Handler Certificate"){
+                    $txn_type = Transaction::TYPE_HANDLER_CERTIFICATE;
+                }
+
+                if($txn_type == "Restaurant & Retail Licence Certificate"){
+                    $txn_type = Transaction::TYPE_LICENSE_CERTIFICATE;
+                }
+
                 // Adding transaction
                 $this->addTransaction($txn_type, $user_type, $user->id, $txn_remark, $txn_status, $amount, $tresponse->getTransId());
                 return response()->json([
@@ -101,7 +114,7 @@ class AuthorizePaymentController extends Controller
             } else {
                 return response()->json([
                     'success' => false,
-                    'error' => $tresponse ? $tresponse->getErrors()[0]->getErrorText() : 'Transaction failed.',
+                    'error' => $tresponse ,
                 ], 400);
             }
         } else {
@@ -211,7 +224,6 @@ class AuthorizePaymentController extends Controller
             } else {
                 $transaction_type = Transaction::TYPE_LICENSE_CERTIFICATE;
             }
-
             $this->addTransaction($transaction_type, $laravelRequest->user_type, $user->id, '', "paid", $cacheData['amount'], $cacheData['transaction_id']);
 
             if($orderData){
@@ -244,6 +256,13 @@ class AuthorizePaymentController extends Controller
         $transaction->amount = $amount;
         $transaction->txn_no = $tx_no;
         $transaction->save();
+
+        if ($transaction_type == Transaction::TYPE_HANDLER_CERTIFICATE) {
+            $chef = Chef::where(['id' => $user_id])->first();
+            if ($chef) {
+                $chef->update(['is_hfc_paid' => '1']);
+            }
+        }
 
         return $transaction;
     }
