@@ -1103,10 +1103,9 @@ class ChefController extends Controller
             if ($req->foodType) {
                 $where['foodTypeId'] = $req->foodType;
             }
+
             if ($req->approved) {
                 $where['approved_status'] = $req->approved;
-            } else {
-                $where['approved_status'] = 'approved';
             }
 
             // Start query and ensure it filters by chef_id first
@@ -1116,6 +1115,7 @@ class ChefController extends Controller
             // Apply JSON_CONTAINS condition only if 'day' is provided
             if ($req->day) {
                 $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays, '\"$req->day\"')");
+
             }
 
             $data = $query->get();
