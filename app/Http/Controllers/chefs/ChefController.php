@@ -86,19 +86,30 @@ class ChefController extends Controller
         if ($validator->fails()) {
             return response()->json(['success' => false, 'error' => $validator->errors()->first()], 400);
         }
+
+        function normalizeMobile($mobile) {
+            return preg_replace('/[^0-9]/', '', $mobile); // removes all non-digit characters
+        }
         try {
             DB::beginTransaction();
 
              // Check if the email or mobile is already used in the chefs table
-             $chefExist = Chef::where("email", $req->email)->first();
+            $chefExist = Chef::where("email", $req->email)->first();
              if ($chefExist) {
                  return response()->json(['message' => "This email is already register Please use another email!", "success" => false], 400);
              }
-             $chefExist = Chef::where('mobile', str_replace("-", "", $req->mobile))->first();
-             if ($chefExist) {
-                 return response()->json(['message' => "This mobile no is already register Please use another mobileno!", "success" => false], 400);
-             }
-             
+
+            $normalizedMobile = normalizeMobile($req->mobile);
+            $chefExist = Chef::where('mobile', $normalizedMobile)->first();
+            if ($chefExist) {
+                 return response()->json(['message' => "This mobile no is already register Please use another mobile number!", "success" => false], 400);
+            }
+
+            $userExist = User::where('mobile', $normalizedMobile)->first();
+            if ($userExist) {
+                 return response()->json(['message' => "This mobile no is already register Please use another mobile number!", "success" => false], 400);
+            }
+
             $checkPinCode = Pincode::where([
                 'pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3),
                 'status' => 1
@@ -1092,10 +1103,9 @@ class ChefController extends Controller
             if ($req->foodType) {
                 $where['foodTypeId'] = $req->foodType;
             }
+
             if ($req->approved) {
                 $where['approved_status'] = $req->approved;
-            } else {
-                $where['approved_status'] = 'approved';
             }
 
             // Start query and ensure it filters by chef_id first
@@ -1105,6 +1115,7 @@ class ChefController extends Controller
             // Apply JSON_CONTAINS condition only if 'day' is provided
             if ($req->day) {
                 $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays, '\"$req->day\"')");
+
             }
 
             $data = $query->get();
