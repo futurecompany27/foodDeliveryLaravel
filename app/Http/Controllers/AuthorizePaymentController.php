@@ -124,7 +124,12 @@ class AuthorizePaymentController extends Controller
 
     public function paypalTransaction(Request $laravelRequest){
 
+        // return 1;
         $user = $laravelRequest->user();
+
+        if(!$user){
+            $user = Auth::guard('chef')->user();   
+        }
 
         if(!$laravelRequest->amount){
             throw new Error("Please provide payment");
@@ -182,6 +187,10 @@ class AuthorizePaymentController extends Controller
     public function checkPaymentStatus(Request $laravelRequest)
     {
         $user = $laravelRequest->user();
+        if(!$user){
+            $user = Auth::guard('chef')->user();   
+        }
+
         $cacheData = Cache::get('paypal_payment_' . $user->id);
         $payerID = $laravelRequest->payer_id;
 
