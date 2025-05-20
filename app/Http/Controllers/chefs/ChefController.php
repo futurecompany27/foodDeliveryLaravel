@@ -88,6 +88,17 @@ class ChefController extends Controller
         }
         try {
             DB::beginTransaction();
+
+             // Check if the email or mobile is already used in the chefs table
+             $chefExist = Chef::where("email", $req->email)->first();
+             if ($chefExist) {
+                 return response()->json(['message' => "This email is already register Please use another email!", "success" => false], 400);
+             }
+             $chefExist = Chef::where('mobile', str_replace("-", "", $req->mobile))->first();
+             if ($chefExist) {
+                 return response()->json(['message' => "This mobile no is already register Please use another mobileno!", "success" => false], 400);
+             }
+             
             $checkPinCode = Pincode::where([
                 'pincode' => substr(str_replace(" ", "", strtoupper($req->postal_code)), 0, 3),
                 'status' => 1
@@ -101,15 +112,7 @@ class ChefController extends Controller
                 ], 200);
             }
 
-            // Check if the email or mobile is already used in the chefs table
-            $chefExist = Chef::where("email", $req->email)->first();
-            if ($chefExist) {
-                return response()->json(['message' => "This email is already register Please use another email!", "success" => false], 400);
-            }
-            $chefExist = Chef::where('mobile', str_replace("-", "", $req->mobile))->first();
-            if ($chefExist) {
-                return response()->json(['message' => "This mobile no is already register Please use another mobileno!", "success" => false], 400);
-            }
+
 
             // Check if the email or mobile is already used in the users table
             $userExist = User::where("email", $req->email)->orWhere('mobile', str_replace("-", "", $req->mobile))->first();
@@ -576,7 +579,7 @@ class ChefController extends Controller
                     unlink(str_replace(env('filePath'), '', $chef->id_proof_path1));
                 }
 
-                $file = $req->file('id_proof_path1');
+                $file = $req->file('id_proof_path2');
                 $fileName = 'chef/'. $chef->id.'/documents' . time() . '_' . $file->getClientOriginalName();
 
                     $s3 = AwsHelper::cred();
@@ -937,7 +940,7 @@ class ChefController extends Controller
                     [
                         'dish_name' => 'required',
                         'description' => 'required',
-                        'foodImage' => 'required|image|mimes:jpeg,png,jpg|max:1024|dimensions:width=350,height=350',
+                        'foodImage' => 'required|image|mimes:jpeg,png,jpg|max:1024|dimensions:width=300,height=300',
                         'regularDishAvailabilty' => 'required',
                         'from' => 'nullable',
                         'to' => 'nullable',
@@ -962,7 +965,7 @@ class ChefController extends Controller
                         'image.image' => 'The uploaded file is not a valid image.',
                         'image.mime' => 'The uploaded image must be a JPEG, BMP, or PNG file.',
                         'image.max' => 'The uploaded image size must be under 100 KB.',
-                        'image.dimensions' => 'The uploaded image must be at least 350x350 pixels.',
+                        'image.dimensions' => 'The uploaded image must be at least 300x300 pixels.',
                         'foodImage.image' => 'Please select image file only',
                         'regularDishAvailabilty.required' => 'Please mention regularity of the dish',
                         'foodAvailibiltyOnWeekdays.required' => 'Please mention weekdays availablity of the food',
@@ -1085,6 +1088,7 @@ class ChefController extends Controller
         }
         try {
             $where = ["chef_id" => $req->chef_id];
+
             if ($req->foodType) {
                 $where['foodTypeId'] = $req->foodType;
             }
@@ -1093,65 +1097,73 @@ class ChefController extends Controller
             } else {
                 $where['approved_status'] = 'approved';
             }
-            $query = FoodItem::with('category', 'heatingInstruction:id,title,description')->where($where);
+
+            // Start query and ensure it filters by chef_id first
+            $query = FoodItem::with('category', 'heatingInstruction:id,title,description')
+                ->where($where);
+
+            // Apply JSON_CONTAINS condition only if 'day' is provided
             if ($req->day) {
-                $query->orWhereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays,'\"$req->day\"')");
+                $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays, '\"$req->day\"')");
             }
 
-            $data = $query->get(['*']);
+            $data = $query->get();
+
             $chefData = Chef::where('id', $req->chef_id)->first(['chefAvailibilityWeek']);
+
             foreach ($data as &$value) {
-                // Allergy
+                // Allergies
                 if ($value['allergies']) {
-                    $AllergyArr = $value['allergies'];
-                    foreach ($AllergyArr as &$val) {
-                        $val = Allergy::select('id', 'image', 'allergy_name')->find($val);
-                    }
+                    $AllergyArr = array_map(function ($val) {
+                        return Allergy::select('id', 'image', 'allergy_name')->find($val);
+                    }, $value['allergies']);
                     $value['allergies'] = $AllergyArr;
                 }
 
-                // dietary
+                // Dietary
                 if ($value['dietary']) {
-                    $DieatryArr = $value['dietary'];
-                    foreach ($DieatryArr as &$val) {
-                        $val = Dietary::select('id', 'image', 'diet_name')->find($val);
-                    }
-                    $value['dietary'] = $DieatryArr;
+                    $DietaryArr = array_map(function ($val) {
+                        return Dietary::select('id', 'image', 'diet_name')->find($val);
+                    }, $value['dietary']);
+                    $value['dietary'] = $DietaryArr;
                 }
 
-                // Ingredient
+                // Ingredients
                 if ($value['ingredients']) {
-                    $IngredientArr = $value['ingredients'];
-                    foreach ($IngredientArr as &$val) {
-                        $val = Ingredient::select('ing_name')->find($val);
-                    }
+                    $IngredientArr = array_map(function ($val) {
+                        return Ingredient::select('ing_name')->find($val);
+                    }, $value['ingredients']);
                     $value['ingredients'] = $IngredientArr;
                 }
 
-                // geographical cuisines
+                // Geographical cuisines
                 if ($value['geographicalCuisine']) {
-                    $geographicalCuisine = $value['geographicalCuisine'];
-                    foreach ($geographicalCuisine as &$val) {
-                        $val = Kitchentype::select('kitchentype')->find($val);
-                    }
-                    $value['geographicalCuisine'] = $geographicalCuisine;
+                    $GeographicalCuisineArr = array_map(function ($val) {
+                        return Kitchentype::select('kitchentype')->find($val);
+                    }, $value['geographicalCuisine']);
+                    $value['geographicalCuisine'] = $GeographicalCuisineArr;
                 }
 
-                if ($chefData->chefAvailibilityWeek && in_array($req->todaysWeekDay, $chefData->chefAvailibilityWeek)) {
-                    // Determine availability based on the condition
-                    $value['available'] = $req->todaysWeekDay ? in_array($req->todaysWeekDay, $value->foodAvailibiltyOnWeekdays) : false;
-                } else {
-                    $value['available'] = false;
+                // Determine availability
+                $value['available'] = false;
+                if ($chefData && $chefData->chefAvailibilityWeek && in_array($req->todaysWeekDay, $chefData->chefAvailibilityWeek)) {
+                    $value['available'] = in_array($req->todaysWeekDay, $value->foodAvailibiltyOnWeekdays);
                 }
             }
+
             $chefData = Chef::select('rating')->where('id', $req->chef_id)->first();
-            return response()->json(["data" => $data, 'rating' => $chefData->rating, "success" => true], 200);
+
+            return response()->json([
+                "data" => $data,
+                "rating" => $chefData->rating ?? null,
+                "success" => true
+            ], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
 
     function getFoodItemsForCustomer(Request $req)
     {
@@ -1778,48 +1790,87 @@ class ChefController extends Controller
             // Retrieve the chef's data
             $chef = Chef::find($chef->id);
 
+
             if (!$chef) {
                 return response()->json(['message' => 'Chef not found', 'success' => false], 404);
             }
 
-            if ($req->is_taxable) {
+            if ($req->is_taxable != '1') {
                 $chef->is_taxable = $req->is_taxable;
                 $chef->save();
-                return response()->json(['message' => 'Chef is ' . $req->is_taxable == '1' ? 'taxable' : 'non taxable' , 'success' => false], 500);
-            }
-
-            // Delete existing GST image if it exists
-            if ($req->hasFile('gst_image') && $chef->gst_image) {
-                $existingGstImagePath = public_path(str_replace(asset('storage/'), '', $chef->gst_image));
-                if (File::exists($existingGstImagePath)) {
-                    // Attempt to delete the file
-                    if (!unlink($existingGstImagePath)) {
-                        return response()->json(['message' => 'Failed to delete existing GST image', 'success' => false], 500);
-                    }
-                }
-            }
-
-            // Delete existing QST image if it exists
-            if ($req->hasFile('qst_image') && $chef->qst_image) {
-                $existingQstImagePath = public_path(str_replace(asset('storage/'), '', $chef->qst_image));
-                if (File::exists($existingQstImagePath)) {
-                    // Attempt to delete the file
-                    if (!unlink($existingQstImagePath)) {
-                        return response()->json(['message' => 'Failed to delete existing QST image', 'success' => false], 500);
-                    }
-                }
+                return response()->json(['message' => 'Chef is ' . ($req->is_taxable == '1' ? 'taxable' : 'non taxable') , 'success' => false], 500);
             }
 
             // Store new GST image
             if ($req->hasFile('gst_image')) {
-                $filename = $req->file('gst_image')->store('/chef/TaxInformation');
-                $chef->gst_image = asset('storage/' . $filename);
+                $file = $req->file('gst_image');
+                $s3 = AwsHelper::cred();
+                // If there's already an image saved, delete it
+                if (!empty($chef->gst_image)) {
+                    $parsedUrl = parse_url($chef->gst_image, PHP_URL_PATH);
+                    $oldKey = ltrim($parsedUrl, '/'); // remove leading slash
+
+                    try {
+                        $s3->deleteObject([
+                            'Bucket' => env('AWS_BUCKET'),
+                            'Key'    => $oldKey,
+                        ]);
+                        Log::info('Old GST image deleted from S3', ['key' => $oldKey]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to delete old GST image from S3', ['error' => $e->getMessage()]);
+                    }
+                }
+                // Upload new image
+                $fileName = $file->store('/chef/TaxInformation');
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
+
+                $url = $result['ObjectURL'];
+
+                Log::info('S3 Upload Success', ['url' => $url]);
+
+                // Save URL to database
+                $chef->gst_image = $url;
             }
 
             // Store new QST image
             if ($req->hasFile('qst_image')) {
-                $filenames = $req->file('qst_image')->store('/chef/TaxInformation');
-                $chef->qst_image = asset('storage/' . $filenames);
+                $file = $req->file('qst_image');
+                $s3 = AwsHelper::cred();
+                // If there's already an image saved, delete it
+                if (!empty($chef->qst_image)) {
+                    $parsedUrl = parse_url($chef->qst_image, PHP_URL_PATH);
+                    $oldKey = ltrim($parsedUrl, '/'); // remove leading slash
+
+                    try {
+                        $s3->deleteObject([
+                            'Bucket' => env('AWS_BUCKET'),
+                            'Key'    => $oldKey,
+                        ]);
+                        Log::info('Old QST image deleted from S3', ['key' => $oldKey]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to delete old QST image from S3', ['error' => $e->getMessage()]);
+                    }
+                }
+                // Upload new image
+                $fileName = $file->store('/chef/TaxInformation');
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
+
+                $url = $result['ObjectURL'];
+
+                Log::info('S3 Upload Success', ['url' => $url]);
+
+                // Save URL to database
+                $chef->qst_image = $url;
             }
 
             // Update GST and QST numbers
