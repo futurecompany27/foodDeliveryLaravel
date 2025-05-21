@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\TransactionMail;
 use App\Models\Transaction;
+use App\Notifications\admin\TransactionNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -269,6 +271,7 @@ class AuthorizePaymentController extends Controller
             $chef = Chef::where(['id' => $user_id])->first();
             if ($chef) {
                 $chef->update(['is_hfc_paid' => '1']);
+                $this->sendEmailAndNotification($chef, $transaction);
             }
         }
 
@@ -497,7 +500,18 @@ class AuthorizePaymentController extends Controller
         }
     }
 
+    private function sendEmailAndNotification($chef, $txn)
+    {
 
+        if (config('services.is_mail_enable')) {
+            Mail::to($chef->email)->send(new TransactionMail($chef, $txn));
+        }
+
+        $admins = Admin::all(['*']);
+        foreach ($admins as $admin) {
+            $admin->notify(new TransactionNotification($chef, $txn));
+        }
+    }
 
     
 }
