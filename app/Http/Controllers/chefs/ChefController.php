@@ -98,6 +98,11 @@ class ChefController extends Controller
              if ($chefExist) {
                  return response()->json(['message' => "This email is already register Please use another email!", "success" => false], 400);
              }
+             $chefExist = Chef::where('mobile', str_replace("-", "", $req->mobile))->first();
+             if ($chefExist) {
+                 return response()->json(['message' => "This mobile no is already register Please use another mobileno!", "success" => false], 400);
+             }
+
 
             $normalizedMobile = normalizeMobile($req->mobile);
             $chefExist = Chef::where('mobile', $normalizedMobile)->first();
@@ -1521,29 +1526,43 @@ class ChefController extends Controller
         }
     }
 
-    function VerifyChefEmail(Request $req)
+    public function VerifyChefEmail(Request $req)
     {
         try {
-            $chef = auth()->guard('chef')->user();
-            $checkVerification = Chef::find($chef->id);
+            $checkVerification = Chef::find($req->id);
+
+            if (!$checkVerification) {
+                return response()->json(['message' => 'Chef not found', 'success' => false], 404);
+            }
+
             if ($checkVerification->email_verified_at) {
-                return response()->json(['message' => 'Email has been already verified successfully', 'status' => 1, 'success' => true], 200);
+                return response()->json([
+                    'message' => 'Email has already been verified successfully',
+                    'status' => 1,
+                    'success' => true
+                ], 200);
             } else {
-                Chef::where('id', $chef->id)->update(['email_verified_at' => Carbon::now(), 'is_email_verified' => 1]);
-                $chefDetails = Chef::find($chef->id);
+                 Chef::where('id', $req->id)->update(['email_verified_at' => Carbon::now(), 'is_email_verified' => 1]);
                 try {
                     if (config('services.is_mail_enable')) {
-                        Mail::to(trim($chefDetails->email))->send(new HomeshefChefEmailVerifiedSuccessfully($chefDetails));
+                        Mail::to(trim($checkVerification->email))
+                            ->send(new HomeshefChefEmailVerifiedSuccessfully($checkVerification));
                     }
                 } catch (\Exception $e) {
-                    Log::error($e);
+                    Log::error('Mail error: ' . $e->getMessage());
                 }
-                return response()->json(['message' => 'Email has been verified successfully', 'success' => true], 200);
+
+                return response()->json([
+                    'message' => 'Email has been verified successfully',
+                    'success' => true
+                ], 200);
             }
         } catch (\Exception $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['error' => 'Oops! Something went wrong', 'success' => false], 500);
+            Log::error('VerifyChefEmail error: ' . $th->getMessage());
+            return response()->json([
+                'error' => 'Oops! Something went wrong',
+                'success' => false
+            ], 500);
         }
     }
 

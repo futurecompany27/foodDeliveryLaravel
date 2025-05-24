@@ -43,6 +43,7 @@ Route::prefix('chef')->group(function () {
         Route::post('/ChefRegisteration', 'ChefRegisteration');
         Route::post('/ChefLogin', 'ChefLogin');
         Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
+        Route::post('/VerifyChefEmail', 'VerifyChefEmail');
     });
 
     Route::controller(commonFunctions::class)->group(function () {
@@ -126,7 +127,6 @@ Route::prefix('chef')->group(function () {
             Route::post('/getAllPendingRequest', 'getAllPendingRequest');
             Route::post('/getApprovedUpdaterequest', 'getApprovedUpdaterequest');
             Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
-            Route::post('/VerifyChefEmail', 'VerifyChefEmail');
 
             Route::post('/sendRequestForChefReviewDelete', 'sendRequestForChefReviewDelete');
             Route::post('/sendRequestForUserBlacklist', 'sendRequestForUserBlacklist');
