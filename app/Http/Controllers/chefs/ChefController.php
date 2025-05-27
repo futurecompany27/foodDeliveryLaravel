@@ -1033,7 +1033,7 @@ class ChefController extends Controller
                     $result = $s3->putObject([
                         'Bucket'      => env('AWS_BUCKET'),
                         'Key'         => $directoryPathThumbnail . $name_gen,
-                        'Body'        => fopen($filename_thumb, 'r'), // Now the file exists
+                        'Body'        => fopen($filename_thumb, 'r'),
                         'ContentType' => $req->file('foodImage')->getMimeType(),
                     ]);
                     $url = $result['ObjectURL'];
@@ -1758,40 +1758,57 @@ class ChefController extends Controller
 
     public function addChefSuggestions(Request $req)
     {
-        if (!file_exists('storage/chef/suggestions')) {
-            mkdir('storage/chef/suggestions', 0755, true);
-        }
         try {
             $chef = auth()->guard('chef')->user();
             DB::beginTransaction();
-            $storedPath = $req->file('sample_pic')->store('chef/suggestions', 'public');
-            $filename = asset('/storage', $storedPath);
 
+            if ($req->hasFile('sample_pic')) {
+                $file = $req->file('sample_pic');
+                $filename = 'chef/suggestions/' . uniqid() . '_' . $file->getClientOriginalName();
+
+                // Upload to S3
+                $s3 = AwsHelper::cred();
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key' => $filename,
+                    'Body' => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
+
+                // Get public S3 URL
+                $fileUrl = $result['ObjectURL'];
+            } else {
+                throw new \Exception("No file uploaded.");
+            }
+
+            // Save suggestion
             $chefsuggestion = new ChefSuggestion();
             $chefsuggestion->related_to = $req->related_to;
             $chefsuggestion->message = $req->message;
-            $chefsuggestion->sample_pic = $filename;
+            $chefsuggestion->sample_pic = $fileUrl; // Store S3 URL
             $chefsuggestion->chef_id = $chef->id;
             $chefsuggestion->save();
 
-            $chef = Chef::find($chef->id);
+            // Chef details
             $chefDetail['id'] = $chef->id;
             $chefDetail['firstName'] = $chef->firstName;
             $chefDetail['lastName'] = $chef->lastName;
 
-            $admins = Admin::all(['*']);
+            // Notify all admins
+            $admins = Admin::all();
             foreach ($admins as $admin) {
                 $admin->notify(new chefSuggestionNotifications($chefDetail));
             }
 
             DB::commit();
-            return response()->json(['message' => 'Suggestion Added successfully', "success" => true], 200);
+            return response()->json(['message' => 'Suggestion Added successfully', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
+            DB::rollBack();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
+
 
     public function updateChefTaxInformation(Request $req)
     {
@@ -1826,9 +1843,9 @@ class ChefController extends Controller
                             'Bucket' => env('AWS_BUCKET'),
                             'Key'    => $oldKey,
                         ]);
-                        Log::info('Old GST image deleted from S3', ['key' => $oldKey]);
+                        // Log::info('Old GST image deleted from S3', ['key' => $oldKey]);
                     } catch (\Exception $e) {
-                        Log::error('Failed to delete old GST image from S3', ['error' => $e->getMessage()]);
+                        // Log::error('Failed to delete old GST image from S3', ['error' => $e->getMessage()]);
                     }
                 }
                 // Upload new image
