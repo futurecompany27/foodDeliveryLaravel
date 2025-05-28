@@ -967,7 +967,7 @@ class ChefController extends Controller
                         'serving_unit' => 'required',
                         'serving_person' => 'required',
                         'price' => 'required',
-                        'comments' => 'nullable|string|max:300',
+                        'comments' => 'nullable|string|max:350',
                     ],
                     [
                         'dish_name.required' => 'Please mention dish name',
@@ -992,7 +992,7 @@ class ChefController extends Controller
                         'serving_unit.required' => 'Please mention serving unit',
                         'serving_person.required' => 'Please mention the food sufficency',
                         'price.required' => 'Please mention the price of the food',
-                        'comments.max' => 'The comment must be less than 300 characters.',
+                        'comments.max' => 'The comment must be less than 350 characters.',
                     ]
                 );
 
