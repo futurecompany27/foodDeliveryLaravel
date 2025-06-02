@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Transaction;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -59,7 +60,7 @@ class TransactionMail extends Mailable
             ->view('transaction_mail', [
                 'id' => $this->txn->id,
                 'subject'=> ($this->txn->remark),
-                'transaction_type' => ($this->txn->transaction_type),
+                'transaction_type' => (Transaction::$types[$this->txn->transaction_type]),
                 'firstName' => ucfirst($this->chef->firstName),
                 'lastName' => ucfirst($this->chef->lastName)
             ]);

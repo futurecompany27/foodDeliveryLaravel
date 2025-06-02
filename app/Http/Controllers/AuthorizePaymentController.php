@@ -89,7 +89,7 @@ class AuthorizePaymentController extends Controller
         if ($response !== null && $response->getMessages()->getResultCode() === "Ok") {
             $tresponse = $response->getTransactionResponse();
             if ($tresponse !== null && $tresponse->getResponseCode() === "1") {
-                
+
                 // Order data will only come for customer, or else for chef certificate no order will be generated
                 if($orderData){
                     $txn_type = Transaction::TYPE_ORDER;
@@ -130,7 +130,7 @@ class AuthorizePaymentController extends Controller
         $user = $laravelRequest->user();
 
         if(!$user){
-            $user = Auth::guard('chef')->user();   
+            $user = Auth::guard('chef')->user();
         }
 
         if(!$laravelRequest->amount){
@@ -154,7 +154,7 @@ class AuthorizePaymentController extends Controller
 		$transactionRequestType->setTransactionType( "authCaptureTransaction");
 		$transactionRequestType->setPayment($paymentOne);
 		$transactionRequestType->setAmount($laravelRequest->amount);
-        
+
 		$request = new AnetAPI\CreateTransactionRequest();
 		$request->setMerchantAuthentication($merchantAuthentication);
 		$request->setTransactionRequest( $transactionRequestType);
@@ -165,7 +165,7 @@ class AuthorizePaymentController extends Controller
         if ($response != null) {
             if ($response->getMessages()->getResultCode() == "Ok") {
                 $tresponse = $response->getTransactionResponse();
-                Cache::put('paypal_payment_' . $user->id, ['amount' => $laravelRequest->amount, 'transaction_id' => $tresponse->getTransId()], now()->addMinutes(1440)); 
+                Cache::put('paypal_payment_' . $user->id, ['amount' => $laravelRequest->amount, 'transaction_id' => $tresponse->getTransId()], now()->addMinutes(1440));
 
                 //Returning the response url
                 return $tresponse->getSecureAcceptance();
@@ -178,7 +178,7 @@ class AuthorizePaymentController extends Controller
 
                 if ($tresponse != null && $tresponse->getErrors() != null) {
                     return $tresponse->getErrors();
-                } 
+                }
                 return $response;
             }
         } else {
@@ -190,7 +190,7 @@ class AuthorizePaymentController extends Controller
     {
         $user = $laravelRequest->user();
         if(!$user){
-            $user = Auth::guard('chef')->user();   
+            $user = Auth::guard('chef')->user();
         }
 
         $cacheData = Cache::get('paypal_payment_' . $user->id);
@@ -279,6 +279,7 @@ class AuthorizePaymentController extends Controller
             $chef = Chef::where(['id' => $user_id])->first();
             if ($chef) {
                 $chef->update(['is_rrc_paid' => '1']);
+                $this->sendEmailAndNotification($chef, $transaction);
             }
         }
 
@@ -512,6 +513,4 @@ class AuthorizePaymentController extends Controller
             $admin->notify(new TransactionNotification($chef, $txn));
         }
     }
-
-    
 }
