@@ -70,6 +70,7 @@ class Kernel extends HttpKernel
         'auth.chef' => \App\Http\Middleware\ChefAuthenticate::class,
         'auth.user' => \App\Http\Middleware\UserAuthenticate::class,
         'auth.admin' => \App\Http\Middleware\AdminAuthenticate::class,
+        'auth.payment' => \App\Http\Middleware\PaymentAuthenticate::class,
 
     ];
 }

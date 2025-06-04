@@ -11,7 +11,7 @@
 <body>
     <b>Hi {{ ucfirst($firstName) }} {{ ucfirst($lastName) }}</b>
     <br>
-    <p>Thanks for {{ $transaction_type }}</p>
+    <p>Thanks for your payment. You have successfully paid for the <strong>{{ $transaction_type }}</strong>.</p>
     <br>
 
     <p style="margin: 0px; padding: 0px">Regards,</p>
