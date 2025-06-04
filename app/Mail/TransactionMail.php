@@ -56,13 +56,14 @@ class TransactionMail extends Mailable
 
     public function build()
     {
-        return $this->subject($this->txn->transaction . ' Tansaction Mail')
+        return $this->subject($this->txn->transaction . 'Payment Confirmation - ' . (Transaction::$types[$this->txn->transaction_type]))
             ->view('transaction_mail', [
                 'id' => $this->txn->id,
                 'subject'=> ($this->txn->remark),
                 'transaction_type' => (Transaction::$types[$this->txn->transaction_type]),
                 'firstName' => ucfirst($this->chef->firstName),
-                'lastName' => ucfirst($this->chef->lastName)
+                'lastName' => ucfirst($this->chef->lastName),
+                'amount' => number_format($this->txn->amount, 2)
             ]);
     }
 }
