@@ -502,11 +502,13 @@ class OrderController extends Controller
             if ($userType === 'chef') {
                 $transactions = Transaction::where('user_type', 'chef')
                     ->where('user_id', $userId)->orderBy('created_at', 'desc')->get();
+
+                $transactionsData = $this->mapTransactions($transactions);
                 $totalCount = Transaction::where('user_type', 'chef')
                     ->where('user_id', $userId)
                     ->count();
 
-                return response()->json(['success' => true, 'message' => 'data fetched', 'total' => $totalCount, 'data' => $transactions], 200);
+                return response()->json(['success' => true, 'message' => 'data fetched', 'total' => $totalCount, 'data' => $transactionsData], 200);
             } elseif ($userType === 'driver') {
                 $transactions = Transaction::where('user_type', 'driver')
                     ->where('user_id', $userId)->orderBy('created_at', 'desc')->get();
@@ -522,6 +524,17 @@ class OrderController extends Controller
         $transactions = Transaction::with(['chef:id,firstName,lastName' ?? 'driver:id,firstName,lastName'])->orderBy('created_at', 'desc')->get();
         $totalcount = Transaction::count();
 
+        $transactionsData = $this->mapTransactions($transactions);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transactions fetched successfully.',
+            'total' => $totalcount,
+            'data' => $transactionsData
+        ], 200);
+    }
+
+    private function mapTransactions($transactions){
         $mappedTransactions = $transactions->map(function ($transaction) {
             $data = $transaction->toArray(); 
         
@@ -534,12 +547,6 @@ class OrderController extends Controller
         
             return $data;
         });
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Transactions fetched successfully.',
-            'total' => $totalcount,
-            'data' => $mappedTransactions
-        ], 200);
+        return $mappedTransactions;
     }
 }
