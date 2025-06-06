@@ -411,6 +411,7 @@ class ChefController extends Controller
             Chef::where('id', $req->id)->update(['status' => $req->status]);
             $chefDetail = Chef::find($req->id);
             $chefDetail->notify(new ChefStatusUpdateNotification($chefDetail));
+            RequestForUpdateDetails::where('chef_id', $req->id)->delete();
             try {
                 if (config('services.is_mail_enable')) {
                     Mail::to(trim($chefDetail->email))->send(new HomeshefChefStatusChangeMail($chefDetail));
