@@ -14,10 +14,8 @@
         <p>Your account on the Homeplate is now deactivated.</p>
         <p>For further enquiry kindy mail to support@homehef.com</p>
     @elseif($status === 1)
-        <p>Now you <b>Activate</b> on Homeplate</p>
-        <p>Welcome to Homeplate. We're thrilled to see you here!
-            We're confident that our Food Ordering System will help you to grow your business.</p>
-        <p>Now you can add your kitchen food.</p>
+        <p>Welcome to homeplate. We're thrilled to see you here !</p>
+        <p>We're delighted to have you on board. Our Food Ordering System is designed to support the growth of your business. You're now ready to add your kitchen's offerings.</p>
         <p>For further enquiry kindy mail to support@homehef.com</p>
     @elseif($status === 2)
         <p>Homeplate send your account detail to Inreview</p>
