@@ -37,7 +37,7 @@ class otpController extends Controller
                     return response()->json([
                         'message' => 'Mobile number already exists',
                         'success' => false
-                    ], 409); 
+                    ], 409);
                 }
                 Otp::updateOrCreate(
                     ['mobile' => str_replace("-", "", $req->mobile)],
@@ -141,7 +141,7 @@ class otpController extends Controller
                     //     return response()->json(['message' => "OTP has expired! Please request a new OTP.", 'success' => false], 400);
                     // }
 
-                    return response()->json(['message' => ("Your " . ($req->mobile ? "Mobile No. " . $req->mobile : "account") . " has been verified."), 'success' => true], 200);
+                    return response()->json(['message' => ("Your " . ($req->mobile ? "Mobile No. +1 " . $req->mobile : "account") . " has been verified."), 'success' => true], 200);
                 } else {
                     return response()->json(['message' => "OTP is invalid ! Try again", "success" => false], 500);
                 }
