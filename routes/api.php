@@ -388,6 +388,8 @@ Route::prefix('admin')->group(function () {
             Route::post('/updateFoodItemAppprovedStatus', 'updateFoodItemAppprovedStatus');
             Route::post('/getChefDetails', 'getChefDetails');
             Route::post('/updateChefOrderStatus', 'updateChefOrderStatus');
+            Route::get('/chefAlternativeNumbers', 'getAlternativeNumbersForChef');
+
         });
         Route::controller(AdminController::class)->group(function () {
             Route::get('/adminProfile', 'adminProfile');

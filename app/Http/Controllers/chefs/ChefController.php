@@ -2496,4 +2496,16 @@ class ChefController extends Controller
             return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
         }
     }
+
+    public function getAlternativeNumbersForChef(Request $req)
+    {
+        try {
+            $alternativeNumbers = ChefAlternativeContact::where(['chef_id' =>
+            $req->chef_id])->get();
+
+            return response()->json(['success' => true, 'data' => $alternativeNumbers], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+        }
+    }
 }
