@@ -881,6 +881,7 @@ class ChefController extends Controller
             if ($req->food_id) {
                 $foodData = FoodItem::find($req->food_id);
                 $foodData->fill($req->all());
+                $foodData['approved_status'] = 'pending';
                 $foodData['foodAvailibiltyOnWeekdays'] = json_decode($req->foodAvailibiltyOnWeekdays);
                 $foodData['geographicalCuisine'] = json_decode($req->geographicalCuisine);
                 if ($req->otherCuisine) {
