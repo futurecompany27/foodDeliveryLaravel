@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->integer('transaction_type')->change();
-        });
+
     }
 
     /**
@@ -21,8 +19,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->string('transaction_type')->change();
-        });
+        // Schema::table('transactions', function (Blueprint $table) {
+        //     $table->string('transaction_type')->change();
+        // });
     }
 };

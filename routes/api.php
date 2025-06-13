@@ -44,6 +44,8 @@ Route::prefix('chef')->group(function () {
         Route::post('/ChefLogin', 'ChefLogin');
         Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
         Route::post('/VerifyChefEmail', 'VerifyChefEmail');
+        Route::post('/storeChefStory', 'storeChefStory'); // Store chef story
+        Route::post('/getChefStory', 'getChefStory'); // Get chef story
     });
 
     Route::controller(commonFunctions::class)->group(function () {
