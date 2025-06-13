@@ -37,7 +37,7 @@ class otpController extends Controller
                     return response()->json([
                         'message' => 'Mobile number already exists',
                         'success' => false
-                    ], 409); 
+                    ], 409);
                 }
                 Otp::updateOrCreate(
                     ['mobile' => str_replace("-", "", $req->mobile)],
@@ -197,6 +197,87 @@ class otpController extends Controller
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        }
+    }
+
+    function verifyChefMobile(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                'phone' => 'required',
+                'otp' => 'required|digits:4',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+            }
+
+            $cleanMobile = str_replace("-", "", $req->mobile);
+            $verified = Otp::where(["mobile" => $cleanMobile, "otp_number" => $req->otp])->first();
+
+            if (!$verified) {
+                return response()->json(['message' => "Invalid OTP.", 'success' => false], 400);
+            }
+
+            // Check if the OTP is expired (older than 2 minutes)
+            $otpCreatedAt = Carbon::parse($verified->updated_at);
+            $currentTime = Carbon::now();
+
+            if ($otpCreatedAt->diffInMinutes($currentTime) > 2) {
+                return response()->json(['message' => "OTP has expired! Please request a new OTP.", 'success' => false], 400);
+            }
+
+            // Find the chef and update mobile verification status
+            $chef = Chef::where('mobile', $cleanMobile)->first();
+            if (!$chef) {
+                return response()->json(['message' => "Chef not found.", 'success' => false], 404);
+            }
+
+            $chef->is_mobile_verified = 1;
+            $chef->save();
+
+            return response()->json([
+                'message' => "Your mobile number has been verified successfully.",
+                'success' => true
+            ], 200);
+
+        } catch (\Exception $th) {
+            Log::error('Error verifying chef mobile: ' . $th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        }
+    }
+
+    public function sendChefPrimaryMobileOTP(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                'phone' => 'required'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+            }
+
+            $otp = rand(1000, 9999);
+            $cleanMobile = str_replace("-", "", $req->mobile);
+
+            // Store or update OTP for this mobile
+            Otp::updateOrCreate(
+                ['mobile' => $cleanMobile],
+                ['otp_number' => $otp]
+            );
+
+            // TODO: Integrate SMS sending here if needed
+
+            return response()->json([
+                'message' => "An OTP has been sent to your mobile no. +1 " . $req->mobile,
+                'otp' => $otp, // Remove in production!
+                'success' => true
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Error sending OTP to chef primary mobile: ' . $e->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }

@@ -546,6 +546,8 @@ Route::controller(otpController::class)->group(function () {
     Route::post('/verifyOtp', 'verifyOtp'); // without token Used in Driver/Delivery Panel
     Route::post('/driverSendOTP', 'driverSendOTP'); // Used in Driver/Delivery Panel
     Route::post('/DriverOtp', 'DriverOtp'); // Used in Driver/Delivery Panel
+    Route::post('/verifyChefMobile', 'verifyChefMobile'); // Verify chef's mobile number
+    Route::post('/sendChefPrimaryMobileOTP', 'sendChefPrimaryMobileOTP'); // Send OTP for chef's primary mobile
 });
 
 
