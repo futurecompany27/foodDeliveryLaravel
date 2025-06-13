@@ -941,7 +941,8 @@ class ChefController extends Controller
                     unlink($OGfilePath);
                     unlink($filename_thumb);
                 }
-
+                // Always set approved_status to 'pending' on update
+                $foodData->approved_status = 'Unapproved';
                 $foodData->save();
                 $chefDetail = Chef::find($chef->id);
                 $chefDetail['flag'] = 2;
@@ -975,28 +976,6 @@ class ChefController extends Controller
                         'comments' => 'nullable|string|max:350',
                     ],
                     [
-                        'dish_name.required' => 'Please mention dish name',
-                        'description.required' => 'Please add dish discription',
-                        'foodImage.required' => 'Please add dish image',
-                        'image.image' => 'The uploaded file is not a valid image.',
-                        'image.mime' => 'The uploaded image must be a JPEG, BMP, or PNG file.',
-                        'image.max' => 'The uploaded image size must be under 100 KB.',
-                        'image.dimensions' => 'The uploaded image must be at least 300x300 pixels.',
-                        'foodImage.image' => 'Please select image file only',
-                        'regularDishAvailabilty.required' => 'Please mention regularity of the dish',
-                        'foodAvailibiltyOnWeekdays.required' => 'Please mention weekdays availablity of the food',
-                        'orderLimit.required' => 'Please mention order limit',
-                        'orderLimit.numeric' => 'order limit must be in number only',
-                        'foodTypeId.required' => 'Please select food type',
-                        'spicyLevel.required' => 'Please select spicy level of the food',
-                        'heating_instruction_id.required' => 'Please select heating instruction option',
-                        'heating_instruction_description.required' => 'Please enter food heading instruction',
-                        'package.required' => 'Please select package type',
-                        'size.required' => 'Please enter package size',
-                        'expiresIn.required' => 'Please mention the expirey period of the food',
-                        'serving_unit.required' => 'Please mention serving unit',
-                        'serving_person.required' => 'Please mention the food sufficency',
-                        'price.required' => 'Please mention the price of the food',
                         'comments.max' => 'The comment must be less than 350 characters.',
                     ]
                 );
@@ -1078,6 +1057,8 @@ class ChefController extends Controller
                 $foodItem->serving_person = $req->serving_person;
                 $foodItem->price = $req->price;
                 $foodItem->comments = isset($req->comments) ? $req->comments : '';
+                // Always set approved_status to 'pending' on create
+                $foodItem->approved_status = 'pending';
                 $foodItem->save();
                 DB::commit();
                 $chefDetail = Chef::find($chef->id);
