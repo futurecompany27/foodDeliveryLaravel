@@ -2508,4 +2508,61 @@ class ChefController extends Controller
             return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
         }
     }
+
+    public function storeChefStory(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'chef_id' => 'required|exists:chefs,id',
+            'experience' => 'required|string',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:2048',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+        try {
+            $fileUrl = null;
+            if ($req->hasFile('file')) {
+                $file = $req->file('file');
+                $file_name = strtolower(trim(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)));
+                $new_name = str_replace(' ', '', $file_name);
+                $name_gen = $new_name . '.' . $file->getClientOriginalExtension();
+                $fileName = 'chef/story/' . $req->chef_id . '/' . time() . '_' . $file->getClientOriginalName();
+                $s3 = \App\Helpers\AwsHelper::cred();
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
+                $fileUrl = $result['ObjectURL'];
+            }
+            $story = \App\Models\ChefStory::updateOrCreate(
+                ['chef_id' => $req->chef_id],
+                [
+                    'experience' => $req->experience,
+                    'file' => $fileUrl,
+                ]
+            );
+            return response()->json(['success' => true, 'message' => 'Chef story saved successfully.', 'data' => $story], 200);
+        } catch (\Exception $e) {
+            \Log::error('Error saving chef story: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+        }
+    }
+
+    public function getChefStory(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'chef_id' => 'required|exists:chefs,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+        $story = \App\Models\ChefStory::where('chef_id', $req->chef_id)->first();
+        if ($story) {
+            return response()->json(['success' => true, 'data' => $story], 200);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Chef story not found.'], 404);
+        }
+    }
 }

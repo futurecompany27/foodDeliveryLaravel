@@ -91,6 +91,11 @@ class Chef extends Authenticatable implements JWTSubject
         return $this->hasOne(Transaction::class);
     }
 
+    public function story()
+    {
+        return $this->hasOne(ChefStory::class, 'chef_id', 'id');
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
