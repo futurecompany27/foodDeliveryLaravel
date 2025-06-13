@@ -522,11 +522,24 @@ class OrderController extends Controller
         $transactions = Transaction::with(['chef:id,firstName,lastName' ?? 'driver:id,firstName,lastName'])->orderBy('created_at', 'desc')->get();
         $totalcount = Transaction::count();
 
+        $mappedTransactions = $transactions->map(function ($transaction) {
+            $data = $transaction->toArray(); 
+        
+            $data['transaction_type'] = match ($transaction->transaction_type) {
+                Transaction::TYPE_ORDER => Transaction::$types[Transaction::TYPE_ORDER],
+                Transaction::TYPE_HANDLER_CERTIFICATE => Transaction::$types[Transaction::TYPE_HANDLER_CERTIFICATE],
+                Transaction::TYPE_LICENSE_CERTIFICATE => Transaction::$types[Transaction::TYPE_LICENSE_CERTIFICATE],
+                default => 'Unknown',
+            };
+        
+            return $data;
+        });
+
         return response()->json([
             'success' => true,
             'message' => 'Transactions fetched successfully.',
             'total' => $totalcount,
-            'data' => $transactions
+            'data' => $mappedTransactions
         ], 200);
     }
 }

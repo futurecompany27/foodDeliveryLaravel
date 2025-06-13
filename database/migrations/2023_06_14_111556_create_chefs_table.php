@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('chefs', function (Blueprint $table) {
             $table->id();
             $table->enum('is_hfc_paid', [0,1])->default('0')->comment('status: 0->unpaid, 1->paid');
-            $table->enum('is_rcc_paid', [0,1])->default('0')->comment('status: 0->unpaid, 1->paid');
+            $table->enum('is_rrc_paid', [0,1])->default('0')->comment('status: 0->unpaid, 1->paid');
             $table->tinyInteger('is_taxable')->default('0')->comment('taxable: 0->not taxable, 1->taxable');
             $table->string('firstName');
             $table->string('lastName');
