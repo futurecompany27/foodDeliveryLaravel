@@ -942,7 +942,8 @@ class ChefController extends Controller
                     unlink($OGfilePath);
                     unlink($filename_thumb);
                 }
-
+                // Always set approved_status to 'pending' on update
+                $foodData->approved_status = 'Unapproved';
                 $foodData->save();
                 $chefDetail = Chef::find($chef->id);
                 $chefDetail['flag'] = 2;
@@ -973,32 +974,10 @@ class ChefController extends Controller
                         'serving_unit' => 'required',
                         'serving_person' => 'required',
                         'price' => 'required',
-                        'comments' => 'nullable|string|max:300',
+                        'comments' => 'nullable|string|max:350',
                     ],
                     [
-                        'dish_name.required' => 'Please mention dish name',
-                        'description.required' => 'Please add dish discription',
-                        'foodImage.required' => 'Please add dish image',
-                        'image.image' => 'The uploaded file is not a valid image.',
-                        'image.mime' => 'The uploaded image must be a JPEG, BMP, or PNG file.',
-                        'image.max' => 'The uploaded image size must be under 100 KB.',
-                        'image.dimensions' => 'The uploaded image must be at least 300x300 pixels.',
-                        'foodImage.image' => 'Please select image file only',
-                        'regularDishAvailabilty.required' => 'Please mention regularity of the dish',
-                        'foodAvailibiltyOnWeekdays.required' => 'Please mention weekdays availablity of the food',
-                        'orderLimit.required' => 'Please mention order limit',
-                        'orderLimit.numeric' => 'order limit must be in number only',
-                        'foodTypeId.required' => 'Please select food type',
-                        'spicyLevel.required' => 'Please select spicy level of the food',
-                        'heating_instruction_id.required' => 'Please select heating instruction option',
-                        'heating_instruction_description.required' => 'Please enter food heading instruction',
-                        'package.required' => 'Please select package type',
-                        'size.required' => 'Please enter package size',
-                        'expiresIn.required' => 'Please mention the expirey period of the food',
-                        'serving_unit.required' => 'Please mention serving unit',
-                        'serving_person.required' => 'Please mention the food sufficency',
-                        'price.required' => 'Please mention the price of the food',
-                        'comments.max' => 'The comment must be less than 300 characters.',
+                        'comments.max' => 'The comment must be less than 350 characters.',
                     ]
                 );
 
@@ -1079,6 +1058,8 @@ class ChefController extends Controller
                 $foodItem->serving_person = $req->serving_person;
                 $foodItem->price = $req->price;
                 $foodItem->comments = isset($req->comments) ? $req->comments : '';
+                // Always set approved_status to 'pending' on create
+                $foodItem->approved_status = 'pending';
                 $foodItem->save();
                 DB::commit();
                 $chefDetail = Chef::find($chef->id);
@@ -1109,9 +1090,10 @@ class ChefController extends Controller
             if ($req->foodType) {
                 $where['foodTypeId'] = $req->foodType;
             }
-
             if ($req->approved) {
                 $where['approved_status'] = $req->approved;
+            } else {
+                $where['approved_status'] = 'approved';
             }
 
             // Start query and ensure it filters by chef_id first
@@ -1121,7 +1103,6 @@ class ChefController extends Controller
             // Apply JSON_CONTAINS condition only if 'day' is provided
             if ($req->day) {
                 $query->whereRaw("JSON_CONTAINS(foodAvailibiltyOnWeekdays, '\"$req->day\"')");
-
             }
 
             $data = $query->get();
@@ -2507,6 +2488,75 @@ class ChefController extends Controller
             return response()->json(['success' => true, 'data' => $alternativeNumbers], 200);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+        }
+    }
+
+    public function getAlternativeNumbersForChef(Request $req)
+    {
+        try {
+            $alternativeNumbers = ChefAlternativeContact::where(['chef_id' =>
+            $req->chef_id])->get();
+
+            return response()->json(['success' => true, 'data' => $alternativeNumbers], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+        }
+    }
+
+    public function storeChefStory(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'chef_id' => 'required|exists:chefs,id',
+            'experience' => 'required|string',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:2048',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+        try {
+            $fileUrl = null;
+            if ($req->hasFile('file')) {
+                $file = $req->file('file');
+                $file_name = strtolower(trim(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)));
+                $new_name = str_replace(' ', '', $file_name);
+                $name_gen = $new_name . '.' . $file->getClientOriginalExtension();
+                $fileName = 'chef/story/' . $req->chef_id . '/' . time() . '_' . $file->getClientOriginalName();
+                $s3 = \App\Helpers\AwsHelper::cred();
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key'    => $fileName,
+                    'Body'   => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
+                $fileUrl = $result['ObjectURL'];
+            }
+            $story = \App\Models\ChefStory::updateOrCreate(
+                ['chef_id' => $req->chef_id],
+                [
+                    'experience' => $req->experience,
+                    'file' => $fileUrl,
+                ]
+            );
+            return response()->json(['success' => true, 'message' => 'Chef story saved successfully.', 'data' => $story], 200);
+        } catch (\Exception $e) {
+            \Log::error('Error saving chef story: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
+        }
+    }
+
+    public function getChefStory(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'chef_id' => 'required|exists:chefs,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+        $story = \App\Models\ChefStory::where('chef_id', $req->chef_id)->first();
+        if ($story) {
+            return response()->json(['success' => true, 'data' => $story], 200);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Chef story not found.'], 404);
         }
     }
 }

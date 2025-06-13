@@ -44,6 +44,8 @@ Route::prefix('chef')->group(function () {
         Route::post('/ChefLogin', 'ChefLogin');
         Route::post('/chefRegisterationRequest', 'chefRegisterationRequest');
         Route::post('/VerifyChefEmail', 'VerifyChefEmail');
+        Route::post('/storeChefStory', 'storeChefStory'); // Store chef story
+        Route::post('/getChefStory', 'getChefStory'); // Get chef story
     });
 
     Route::controller(commonFunctions::class)->group(function () {
@@ -389,6 +391,7 @@ Route::prefix('admin')->group(function () {
             Route::post('/getChefDetails', 'getChefDetails');
             Route::post('/updateChefOrderStatus', 'updateChefOrderStatus');
             Route::get('/chefAlternativeNumbers', 'getAlternativeNumbersForChef');
+
         });
         Route::controller(AdminController::class)->group(function () {
             Route::get('/adminProfile', 'adminProfile');
@@ -545,6 +548,8 @@ Route::controller(otpController::class)->group(function () {
     Route::post('/verifyOtp', 'verifyOtp'); // without token Used in Driver/Delivery Panel
     Route::post('/driverSendOTP', 'driverSendOTP'); // Used in Driver/Delivery Panel
     Route::post('/DriverOtp', 'DriverOtp'); // Used in Driver/Delivery Panel
+    Route::post('/verifyChefMobile', 'verifyChefMobile'); // Verify chef's mobile number
+    Route::post('/sendChefPrimaryMobileOTP', 'sendChefPrimaryMobileOTP'); // Send OTP for chef's primary mobile
 });
 
 
