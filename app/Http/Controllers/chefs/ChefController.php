@@ -942,7 +942,7 @@ class ChefController extends Controller
                     unlink($filename_thumb);
                 }
                 // Always set approved_status to 'pending' on update
-                $foodData->approved_status = 'Unapproved';
+                $foodData->approved_status = 'pending';
                 $foodData->save();
                 $chefDetail = Chef::find($chef->id);
                 $chefDetail['flag'] = 2;
@@ -1092,7 +1092,7 @@ class ChefController extends Controller
             if ($req->approved) {
                 $where['approved_status'] = $req->approved;
             } else {
-                $where['approved_status'] = 'approved';
+                // $where['approved_status'] = 'approved';
             }
 
             // Start query and ensure it filters by chef_id first
@@ -1620,15 +1620,15 @@ class ChefController extends Controller
                 'firstName' => ucfirst($foodItem['chef']->firstName),
                 'lastName' => ucfirst($foodItem['chef']->lastName),
                 'food_name' => $foodItem['dish_name'],
+                'approved_status' => $foodItem['approved_status'],
             ];
-            if ($foodItem['approved_status'] == 'approved') {
-                try {
-                    if (config('services.is_mail_enable')) {
-                        Mail::to(trim($chefDetail['email']))->send(new HomeshefFoodItemStatusChange($chefDetail));
-                    }
-                } catch (\Exception $e) {
-                    Log::error($e);
+            // Always send email for any status change
+            try {
+                if (config('services.is_mail_enable')) {
+                    Mail::to(trim($chefDetail['email']))->send(new HomeshefFoodItemStatusChange($chefDetail));
                 }
+            } catch (\Exception $e) {
+                Log::error($e);
             }
             $chef->notify(new foodItemstatusChangeMail($chefDetail));
             return response()->json(["message" => 'Updated successfully', "success" => true], 200);
