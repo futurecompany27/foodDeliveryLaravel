@@ -949,7 +949,7 @@ class ChefController extends Controller
                 $chefDetail['flag'] = 2;
                 $admins = Admin::all();
                 foreach ($admins as $admin) {
-                    $admin->notify(new ChefFoodItemNotification($chefDetail));
+                    $admin->notify(new ChefFoodItemNotification($chefDetail, '/admin/chef-orders?chef_id=' . $chef->id));
                 }
                 return response()->json(['message' => 'Item updated successfully', 'success' => true], 200);
             } else {
