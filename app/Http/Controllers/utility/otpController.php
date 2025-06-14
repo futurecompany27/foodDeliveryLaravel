@@ -270,6 +270,12 @@ class otpController extends Controller
 
             // TODO: Integrate SMS sending here if needed
 
+            if(env('SEND_SMS')){
+                $otp_msg = $otp . "+is+your+one+time+verification+code+for+Homeplate";
+                $url = "https://platform.clickatell.com/messages/http/send?apiKey=WzKPQFifSAe-c5nFp7SynQ==&to=1" . $req->mobile . "&content=" . $otp_msg;
+                $response = Http::get($url);
+            }
+
             return response()->json([
                 'message' => "An OTP has been sent to your mobile no. +1 " . $req->mobile,
                 'otp' => $otp, // Remove in production!
