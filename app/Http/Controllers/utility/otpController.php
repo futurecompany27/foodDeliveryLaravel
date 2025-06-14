@@ -205,7 +205,7 @@ class otpController extends Controller
     {
         try {
             $validator = Validator::make($req->all(), [
-                'phone' => 'required',
+                'mobile' => 'required',
                 'otp' => 'required|digits:4',
             ]);
 
@@ -239,7 +239,7 @@ class otpController extends Controller
 
             return response()->json([
                 'message' => "Your mobile number has been verified successfully.",
-                'success' => true
+                'success' => true,
             ], 200);
 
         } catch (\Exception $th) {
@@ -252,7 +252,7 @@ class otpController extends Controller
     {
         try {
             $validator = Validator::make($req->all(), [
-                'phone' => 'required'
+                'mobile' => 'required'
             ]);
 
             if ($validator->fails()) {
