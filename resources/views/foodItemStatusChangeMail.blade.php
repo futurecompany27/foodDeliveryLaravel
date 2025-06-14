@@ -10,11 +10,15 @@
 
 
     <b>Hello {{ ucwords($firstName) }} {{ ucfirst($lastName) }},</b>
-    <p>Congratulations ! Your dish - <b>{{ $food_name }}</b> has been approved by our Admin. You can
-        check the same on the website. You can edit the details anytime you want but will have to wait till the admin
-        approves it again. It wont take us much time though.
-
-        Hope you have a pleasant time.</p>
+    <p>
+        @if($approved_status == 'approved')
+            Congratulations! Your dish - <b>{{ $food_name }}</b> has been approved by our Admin. You can check the same on the website. You can edit the details anytime you want but will have to wait till the admin approves it again. It won't take us much time though.
+        @elseif($approved_status == 'unapproved')
+            We regret to inform you that your dish - <b>{{ $food_name }}</b> has been rejected by our Admin. Please review and update the details accordingly And Please connect with us on <a href="mailto:support@homeplate.ca">support@homeplate.ca</a> for any further assistance.
+        @else
+            Your dish - <b>{{ $food_name }}</b> is currently pending approval. We will notify you once it is reviewed.
+        @endif
+    </p>
 
     <br>
     <br>

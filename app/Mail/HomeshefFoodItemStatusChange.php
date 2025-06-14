@@ -30,6 +30,7 @@ class HomeshefFoodItemStatusChange extends Mailable
                 'firstName' => $this->chef['firstName'],
                 'lastName' => $this->chef['lastName'],
                 'food_name' => $this->chef['food_name'],
+                'approved_status' => $this->chef['approved_status'],
             ]);
     }
 }
