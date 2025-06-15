@@ -84,7 +84,7 @@ class AuthorizePaymentController extends Controller
         $apiRequest->setTransactionRequest($transactionRequest);
 
         $controller = new AnetController\CreateTransactionController($apiRequest);
-        $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::SANDBOX);
+        $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::PRODUCTION);
 
         if ($response !== null && $response->getMessages()->getResultCode() === "Ok") {
             $tresponse = $response->getTransactionResponse();
