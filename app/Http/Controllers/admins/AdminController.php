@@ -1290,7 +1290,7 @@ class AdminController extends Controller
         try {
             $totalRecords = Contact::count();
             $skip = $req->page * 10;
-            $data = Contact::with('chef')->skip($skip)->take(10)->get();
+            $data = Contact::with('chef')->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());

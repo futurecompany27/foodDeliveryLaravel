@@ -270,7 +270,7 @@ class commonFunctions extends Controller
         try {
             $totalRecords = ScheduleCall::count();
             $skip = $req->page * 10;
-            $data = ScheduleCall::with('chef')->skip($skip)->take(10)->get();
+            $data = ScheduleCall::with('chef')->get();
             return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
