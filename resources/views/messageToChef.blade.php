@@ -11,15 +11,10 @@
 <body>
 
     <p>Hi, {{ $chef_name }}</p>
-    <br>
-    <br>
     <p><b>{{ $subject }}</b></p>
-    <p>{{ $body }}</p>
-
+    <p>{!! $body !!}</p>
     <br>
     <br>
-    <br>
-
     <p style="margin: 0px; padding: 0px">Regards,</p>
     <p style="margin: 0px; padding: 0px">Homeplate Team</p>
     <img src="{{ env('filePath') . 'storage/admin/new_logos/main-logo-mail.png' }}" class="object-fit-cover img-fluid"
