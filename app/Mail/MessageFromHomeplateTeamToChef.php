@@ -32,6 +32,6 @@ class MessageFromHomeplateTeamToChef extends Mailable
     {
         return $this
         ->subject('Message From Homeplate Team to Chef')
-        ->view('MessageToChef', ['chef_name' => $this->mail['chef_name'],'subject' => $this->mail['subject'], 'body' => $this->mail['body']]);
+        ->view('messageToChef', ['chef_name' => $this->mail['chef_name'],'subject' => $this->mail['subject'], 'body' => $this->mail['body']]);
     }
 }
