@@ -2142,7 +2142,7 @@ class ChefController extends Controller
             'signature.max' => 'The signature image size must not exceed 100KB.'
         ]);
         if ($validator->fails())
-            return response()->json(['success' => false, 'error' => $validator->errors()->first()], 400);
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
 
         if (!file_exists('storage/chef/food_license')) {
             mkdir('storage/chef/food_license', 0755, true);
