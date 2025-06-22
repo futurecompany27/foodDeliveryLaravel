@@ -259,9 +259,12 @@ class otpController extends Controller
                 return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
             }
 
-            $otp = rand(1000, 9999);
+            $otp = "1111";
             $cleanMobile = str_replace("-", "", $req->mobile);
 
+            if(env('SEND_SMS')){
+                $otp = rand(1000, 9999);
+            }
             // Store or update OTP for this mobile
             Otp::updateOrCreate(
                 ['mobile' => $cleanMobile],
