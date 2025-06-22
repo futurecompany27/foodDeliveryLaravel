@@ -1456,15 +1456,16 @@ class AdminController extends Controller
 
     function getAllRequestForChefReviewDeletion()
     {
-        try {
-            $TotalRecords = ChefReviewDeleteRequest::where(['status' => 0])->count();
-            $data = ChefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at')->where(['status' => 0])->get();
-            return response()->json(['data' => $data, 'TotalRecords' => $TotalRecords, 'success' => true], 200);
-        } catch (\Exception $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
-        }
+        // try {
+        //     $TotalRecords = ChefReviewDeleteRequest::where(['status' => 0])->count();
+        //     $data = ChefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at')->where(['status' => 0])->get();
+        //     return response()->json(['data' => $data, 'TotalRecords' => $TotalRecords, 'success' => true], 200);
+        // } catch (\Exception $th) {
+        //     Log::info($th->getMessage());
+        //     DB::rollback();
+        //     return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        // }
+        return response()->json(['data' => [], 'TotalRecords' => 0, 'success' => true], 200);
     }
 
     function updateStatusOfChefReviewDeleteRequest(Request $req)
