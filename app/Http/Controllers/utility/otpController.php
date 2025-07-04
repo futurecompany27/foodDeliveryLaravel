@@ -259,12 +259,10 @@ class otpController extends Controller
                 return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
             }
 
-            $otp = "1111";
+            // $otp = rand(1000, 9999);
+            $otp = 1111;
             $cleanMobile = str_replace("-", "", $req->mobile);
 
-            if(env('SEND_SMS')){
-                $otp = rand(1000, 9999);
-            }
             // Store or update OTP for this mobile
             Otp::updateOrCreate(
                 ['mobile' => $cleanMobile],
@@ -274,6 +272,7 @@ class otpController extends Controller
             // TODO: Integrate SMS sending here if needed
 
             if(env('SEND_SMS')){
+                $otp = rand(1000, 9999);
                 $otp_msg = $otp . "+is+your+one+time+verification+code+for+Homeplate";
                 $url = "https://platform.clickatell.com/messages/http/send?apiKey=WzKPQFifSAe-c5nFp7SynQ==&to=1" . $req->mobile . "&content=" . $otp_msg;
                 $response = Http::get($url);
