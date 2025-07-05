@@ -155,6 +155,7 @@ Route::prefix('chef')->group(function () {
             Route::get('/packageInstructionPDF', 'packageInstructionPDF'); // chef panel
             Route::post('/deletePendingRequest', 'deletePendingRequest');
             Route::get('/orderInvoicePDF', 'orderInvoicePDF');
+            Route::get('/chefAlternativeNumbers', 'getAlternativeNumbersForChef');
         });
         Route::controller(notificationController::class)->group(function () {
             Route::post('/getUnreadNotificationAccordingToUserTypes', 'getUnreadNotificationAccordingToUserTypes'); // chef panel
