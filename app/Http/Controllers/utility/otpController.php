@@ -280,7 +280,8 @@ class otpController extends Controller
 
             return response()->json([
                 'message' => "An OTP has been sent to your mobile no. +1 " . $req->mobile,
-                'success' => true
+                'success' => true,
+                'otp' => $otp
             ], 200);
 
         } catch (\Exception $e) {
