@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\admins\AdminController;
 use App\Http\Controllers\admins\chefDocumentsController;
 use App\Http\Controllers\admins\kitchentypeController;
@@ -590,5 +591,15 @@ Route::group(['middleware' => 'auth.payment'], function () {
         Route::post('accept-payment', [AuthorizePaymentController::class, 'createAnAcceptPaymentTransaction']);
         Route::post('paypal-payment', [AuthorizePaymentController::class, 'paypalTransaction']);
         Route::post('paypal-payment-status', [AuthorizePaymentController::class, 'checkPaymentStatus']);
+    });
+});
+
+Route::prefix('admin')->group(function () {
+    Route::controller(CouponController::class)->group(function () {
+        Route::get('/coupons', 'index');
+        Route::post('/coupons', 'store');
+        Route::get('/coupons/{id}', 'show');
+        Route::put('/coupons/{id}', 'update');
+        Route::delete('/coupons/{id}', 'destroy');
     });
 });
