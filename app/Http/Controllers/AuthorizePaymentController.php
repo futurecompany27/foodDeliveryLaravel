@@ -84,7 +84,7 @@ class AuthorizePaymentController extends Controller
         $apiRequest->setTransactionRequest($transactionRequest);
 
         $controller = new AnetController\CreateTransactionController($apiRequest);
-        $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::PRODUCTION);
+        $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::SANDBOX);
 
         if ($response !== null && $response->getMessages()->getResultCode() === "Ok") {
             $tresponse = $response->getTransactionResponse();
@@ -160,7 +160,7 @@ class AuthorizePaymentController extends Controller
 		$request->setTransactionRequest( $transactionRequestType);
         $request->setRefId( $refId);
 		$controller = new AnetController\CreateTransactionController($request);
-		$response = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::PRODUCTION);
+		$response = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
         // return  $response->getTransactionResponse();
         if ($response != null) {
             if ($response->getMessages()->getResultCode() == "Ok") {
@@ -219,7 +219,7 @@ class AuthorizePaymentController extends Controller
 
         $request->setTransactionRequest($transactionRequestType);
         $controller = new AnetController\CreateTransactionController($request);
-        $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::PRODUCTION);
+        $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::SANDBOX);
 
         if ($response !== null && $response->getMessages()->getResultCode() == "Ok") {
             $transaction = $response->getTransactionResponse();
