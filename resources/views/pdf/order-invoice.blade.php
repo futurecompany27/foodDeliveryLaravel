@@ -173,7 +173,7 @@
                     <td>{!! $data->amount !!} CA$</td>
 
                 </tr>
-                @php
+                <!-- @php
                     $totalTax = 0;
                 @endphp
 
@@ -200,16 +200,16 @@
                             @endforeach
                         </tr>
                     @endforeach
-                @endif
+                @endif -->
 
 
-                <tr>
+                <!-- <tr>
                     <td></td>
                     <td></td>
                     <td colspan="2"><strong> Total + Tax</strong></td>
                     <td><strong> {{ number_format($data->amount + $totalTax, 2) }} CA$ </strong></td>
 
-                </tr>
+                </tr> -->
 
                 {{-- EXPENSES PART --}}
                 <tr>
@@ -242,7 +242,6 @@
                                 <td colspan="2">{{ $key }} on commission ({{ $value }}%)</td>
                             @else
                                 <td>{!! number_format($value, 2) !!} CA$</td>
-                                {{ $totalTax = +$value }}
                             @endif
                         @endforeach
                     </tr>
@@ -285,10 +284,17 @@
                 </tr>
                 <tr>
                     @php
-                        $grandTotal = $data->amount;
-                        $tipAmount = $data['tip_amount'];
-                        // Assuming $totalCommission is calculated somewhere in your code
-                        $finalTotal = $grandTotal + $tipAmount - $data->chef_commission_amount;
+                        $taxOnCommissionAmount = 0;
+                        if (is_array($commissionTaxes)) {
+                            foreach ($commissionTaxes as $tax) {
+                                foreach ($tax as $key => $value) {
+                                    if ($key == 'Amount') {
+                                        $taxOnCommissionAmount += $value;
+                                    }
+                                }
+                            }
+                        }
+                        $finalTotal = $data->amount + $data['tip_amount'] - $data->chef_commission_amount - $taxOnCommissionAmount;
                     @endphp
                     <td style="text-align: left;" colspan="2"><strong>Total Earning</strong></td>
                     <td></td>
@@ -304,8 +310,8 @@
 
 
         <div class="footer">
-            <p><strong>*** Total Earnings = (Total + Tax) + Tips + Promotion – (Expenses / Commission & Tax On
-                    Commission) ***</strong></p>
+            <!-- <p><strong>*** Total Earnings = (Total + Tax) + Tips + Promotion – (Expenses / Commission & Tax On Commission) ***</strong></p> -->
+            <p><strong>*** Total Earnings = Total + Tip Amount + Promotion – (Expenses / Commission & Tax On Commission) ***</strong></p>
         </div>
 
 
