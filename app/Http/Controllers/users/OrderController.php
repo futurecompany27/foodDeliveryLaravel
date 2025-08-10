@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Models\Driver;
 
 class OrderController extends Controller
 {
@@ -278,6 +279,9 @@ class OrderController extends Controller
             $amount    = 0;
             $chef      = Chef::find($card_value->chef_id);
             $is_taxable = (bool)$chef->is_tax_document_completed;
+            $driver      = Driver::find($card_value->driver_id);
+            $driver_is_taxable =  isset($driver) ? (bool)$driver->is_tax_document_completed : false;
+
 
             // 1) Compute subtotal for this chef
             foreach ($foodItems as $food) {
@@ -318,7 +322,11 @@ class OrderController extends Controller
                 ];
 
                 // b) Driver commission tax
-                $driverTaxAmt = round($driver_commission_amount * ($rate / 100), 2);
+                if($driver_is_taxable == true) {
+                    $driverTaxAmt = round($driver_commission_amount * ($rate / 100), 2);
+                } else {
+                    $driverTaxAmt = 0;
+                }
                 $driver_commission_taxes[] = [
                     $type   => $rate,
                     'Amount'=> $driverTaxAmt,
