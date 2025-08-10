@@ -2024,4 +2024,58 @@ class UserController extends Controller
             ], 404);
         }
     }
+
+    public function calculateDistanceForChefs(Request $req){
+        $userPostalCode = $req->user_postal_code;
+        $chefDetails = $req->chef_details;
+        $userLatLong = $this->get_lat_long($userPostalCode);
+        $lat1 = $userLatLong['lat'];
+        $long1 = $userLatLong['long'];
+
+        $chefDistances = [];
+
+        $adminDetails = Adminsetting::first(['base_price', 'min_shipping_charges']);
+        $base_price = $adminDetails->base_price;
+        $minShip = $adminDetails->min_shipping_charges;
+        foreach($chefDetails as $chef){
+
+            $latLong = $this->get_lat_long($chef['postal_code']);
+            $lat2 = $latLong['lat'];
+            $long2 = $latLong['long'];
+
+            $chefDistance = $this->calculateDistance($lat1, $long1, $lat2, $long2);
+            $mainShipPrice = $chefDistance * $base_price;
+
+            if($mainShipPrice < $minShip){
+                $mainShipPrice = $minShip;
+            }
+
+            $chefDistances[] = [
+                'chef_name' => $chef['name'],
+                'shipping_charge' => $mainShipPrice
+            ];
+        }
+
+        return $chefDistances;
+    }
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2, $unit = "K") {
+        $theta = $lon1 - $lon2;
+        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +
+                cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+                cos(num: deg2rad($theta));
+        $dist = acos($dist);
+        $dist = rad2deg($dist);
+        $miles = $dist * 60 * 1.1515;
+    
+        if ($unit == "K") {
+            $distance = $miles * 1.609344;
+        } elseif ($unit == "N") {
+            $distance = $miles * 0.8684;
+        } else {
+            $distance = $miles;
+        }
+    
+        return round($distance, 2); 
+    }
 }
