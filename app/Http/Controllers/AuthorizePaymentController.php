@@ -425,7 +425,7 @@ class AuthorizePaymentController extends Controller
                         $add['tip'] = 0;
                         $add['tip_type'] = 'No Tip';
                     } else {
-                        $add['tip'] = $tip;
+                        $add['tip'] = (int) str_replace('%', '', $tip);
                         $add['tip_type'] = 'Percentage';
                     }
                     $add['tip_amount'] = $fixTip;
