@@ -307,10 +307,10 @@ class OrderController extends Controller
                 $rate = $tax_types['tax_value'][$i];
 
                 // a) Chef commission tax
-                if($is_taxable){
+                if($is_taxable == true) {
                     $chefTaxAmt = round($chef_commission_amount * ($rate / 100), 2);
-                    }else{
-                    $chefTaxAmt = 0.00;
+                } else {
+                    $chefTaxAmt = 0;
                 }
                 $chef_commission_taxes[] = [
                     $type   => $rate,

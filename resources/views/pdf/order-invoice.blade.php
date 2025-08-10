@@ -239,7 +239,7 @@
                         <td></td>
                         @foreach ($tax as $key => $value)
                             @if ($key != 'Amount')
-                                <td colspan="2">{{ $key }} on commission ({{ $value }}%)</td>
+                                <td colspan="2">{{ $key }} on commission ({{ number_format($value, 3) }}%)</td>
                             @else
                                 <td>{!! number_format($value, 2) !!} CA$</td>
                             @endif
