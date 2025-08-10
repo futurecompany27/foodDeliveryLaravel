@@ -307,7 +307,11 @@ class OrderController extends Controller
                 $rate = $tax_types['tax_value'][$i];
 
                 // a) Chef commission tax
-                $chefTaxAmt = round($chef_commission_amount * ($rate / 100), 2);
+                if($is_taxable == true) {
+                    $chefTaxAmt = round($chef_commission_amount * ($rate / 100), 2);
+                } else {
+                    $chefTaxAmt = 0;
+                }
                 $chef_commission_taxes[] = [
                     $type   => $rate,
                     'Amount'=> $chefTaxAmt,
@@ -537,15 +541,15 @@ class OrderController extends Controller
 
     private function mapTransactions($transactions){
         $mappedTransactions = $transactions->map(function ($transaction) {
-            $data = $transaction->toArray(); 
-        
+            $data = $transaction->toArray();
+
             $data['transaction_type'] = match ($transaction->transaction_type) {
                 Transaction::TYPE_ORDER => Transaction::$types[Transaction::TYPE_ORDER],
                 Transaction::TYPE_HANDLER_CERTIFICATE => Transaction::$types[Transaction::TYPE_HANDLER_CERTIFICATE],
                 Transaction::TYPE_LICENSE_CERTIFICATE => Transaction::$types[Transaction::TYPE_LICENSE_CERTIFICATE],
                 default => 'Unknown',
             };
-        
+
             return $data;
         });
         return $mappedTransactions;
