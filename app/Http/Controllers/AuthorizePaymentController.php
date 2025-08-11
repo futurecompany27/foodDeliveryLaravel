@@ -419,13 +419,13 @@ class AuthorizePaymentController extends Controller
                     $tip = $card_value['tip'] ?? 'noTip';
                     $fixTip = $card_value['fixedTip'] ?? 0;
                     if ($tip == 'fixedAmount') {
-                        $add['tip'] = $tip;
+                        $add['tip'] = $fixTip;
                         $add['tip_type'] = 'Fixed';
                     } elseif ($tip == 'noTip') {
                         $add['tip'] = 0;
                         $add['tip_type'] = 'No Tip';
                     } else {
-                        $add['tip'] = $tip;
+                        $add['tip'] = (int) str_replace('%', '', $tip);
                         $add['tip_type'] = 'Percentage';
                     }
                     $add['tip_amount'] = $fixTip;
