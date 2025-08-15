@@ -333,6 +333,7 @@ class AuthorizePaymentController extends Controller
                 'user_mobile_no' => str_replace("-", "", $req['user_mobile_no']),
                 'username' => $req['username'],
                 'created_at' => Carbon::now(),
+                'shipping' => $req['shipping'],
             ]);
 
             // Generate order ID and update the order record

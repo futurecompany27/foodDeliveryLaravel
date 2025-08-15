@@ -245,6 +245,7 @@ Route::prefix('user')->group(function () {
         Route::controller(OrderController::class)->group(function () {
             Route::post('/placeOrders', 'placeOrders');
         });
+        Route::post('/shippingDistances', 'calculateDistanceForChefs');
     });
     Route::controller(ChefController::class)->group(function () {
         Route::post('/getFoodItemsForCustomer', 'getFoodItemsForCustomer'); //without Auth can access make by sarita
