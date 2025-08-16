@@ -68,6 +68,24 @@
             outline: 1px solid rgba(29, 28, 28, 0.829);
         }
 
+        .expense-category {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+
+        .expense-item {
+            padding-left: 20px;
+        }
+
+        .expense-amount {
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .red-text {
+            color: red;
+        }
+
         hr {
             margin: 3px;
             padding: 0px;
@@ -214,11 +232,9 @@
                 {{-- EXPENSES PART --}}
                 <tr>
                     <td style="background-color: #666;" colspan="5"></td>
-
                 </tr>
                 <tr>
-                    <td style="text-align: start;" colspan="5">Expenses</td>
-
+                    <td style="text-align: start; font-weight: bold;" colspan="5">Expense</td>
                 </tr>
                 @php
                     $commissionTaxes = is_string($data->chef_commission_taxes)
@@ -226,26 +242,36 @@
                         : $data->chef_commission_taxes;
                     $chefTotalTax = 0;
                 @endphp
+                
+                {{-- Commission Section --}}
                 <tr>
-                    <td></td>
-                    <td></td>
-                    <td colspan="2">Commission ({{ $data->chef_commission }}%)</td>
-                    <td>{{ $data->chef_commission_amount }} CA$</td>
+                    <td rowspan="{{ count($commissionTaxes) + 1 }}" class="expense-category" style="vertical-align: top;">Commission</td>
+                    <td class="expense-item">Commission({{ $data->chef_commission }}%)</td>
+                    <td colspan="3" class="expense-amount">{{ $data->chef_commission_amount }} CA$</td>
                 </tr>
 
                 @foreach ($commissionTaxes as $tax)
                     <tr>
-                        <td></td>
-                        <td></td>
                         @foreach ($tax as $key => $value)
                             @if ($key != 'Amount')
-                                <td colspan="2">{{ $key }} on commission ({{ floor((float) $value * 1000) / 1000 }}%)</td>
+                                <td class="expense-item">{{ $key }} on Commission({{ floor((float) $value * 1000) / 1000 }}%)</td>
                             @else
-                                <td>{!! number_format($value, 2) !!} CA$</td>
+                                <td colspan="3" class="expense-amount">{!! number_format($value, 2) !!} CA$</td>
                             @endif
                         @endforeach
                     </tr>
                 @endforeach
+
+                <tr>
+                    <td style="background-color: #666;" colspan="5"></td>
+
+                </tr>
+                {{-- Service Charges Section --}}
+                <tr>
+                    <td class="expense-category" style="vertical-align: top;">Service Charges</td>
+                    <td class="expense-item">Service Charges</td>
+                    <td colspan="3" class="expense-amount">{{ $serviceCharges }} CA$</td>
+                </tr>
 
 
                 {{-- PROMOTION --}}
@@ -293,7 +319,7 @@
                                 }
                             }
                         }
-                        $finalTotal = $data->amount + $data['tip_amount'] - $data->chef_commission_amount - $taxOnCommissionAmount;
+                        $finalTotal = $data->amount + $data['tip_amount'] - $data->chef_commission_amount - $taxOnCommissionAmount - $serviceCharges;
                     @endphp
                     <td style="text-align: left;" colspan="2"><strong>Total Earning</strong></td>
                     <td></td>
@@ -310,7 +336,7 @@
 
         <div class="footer">
             <!-- <p><strong>*** Total Earnings = (Total + Tax) + Tips + Promotion – (Expenses / Commission & Tax On Commission) ***</strong></p> -->
-            <p><strong>*** Total Earnings = Total + Tip Amount + Promotion – (Expenses / Commission & Tax On Commission) ***</strong></p>
+            <p><strong>*** Total Earnings = Total + Tip Amount + Promotion – (Expenses / Commission & Tax On Commission & Service Charges) ***</strong></p>
         </div>
 
 

@@ -2452,7 +2452,11 @@ class ChefController extends Controller
                 return response()->json(['success' => false, 'message' => 'Sub order not found'], 404);
             }
 
-            $pdf = Pdf::loadView('pdf.order-invoice', compact('data'));
+            // Fetch admin settings for service charges
+            $adminSettings = \App\Models\Adminsetting::latest()->first();
+            $serviceCharges = $adminSettings ? $adminSettings->chef_service_charges : 0;
+
+            $pdf = Pdf::loadView('pdf.order-invoice', compact('data', 'serviceCharges'));
             $pdf->getDomPDF()->setPaper('a4', 'portrait');
             return $pdf->download('customer-order-invoice.pdf');
             // return response($pdf->download('order-invoice.pdf'))
