@@ -2052,7 +2052,8 @@ class UserController extends Controller
 
             $chefDistances[] = [
                 'chef_name' => $chef['name'],
-                'shipping_charge' => $mainShipPrice
+                'shipping_charge' => $mainShipPrice,
+                'chefDistance' => $chefDistance
             ];
         }
 
