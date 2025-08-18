@@ -281,7 +281,7 @@
 
                 </tr>
                 <tr>
-                    <td style="text-align: start;" colspan="5">Promotion</td>
+                    <td style="text-align: start;" colspan="5">Tips and Promotions</td>
 
                 </tr>
                 <tr>
