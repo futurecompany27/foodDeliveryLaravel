@@ -2026,22 +2026,22 @@ class UserController extends Controller
     }
 
     public function calculateDistanceForChefs(Request $req){
-        $userPostalCode = $req->user_postal_code;
+
         $chefDetails = $req->chef_details;
-        $userLatLong = $this->get_lat_long($userPostalCode);
-        $lat1 = $userLatLong['lat'];
-        $long1 = $userLatLong['long'];
+
+        $lat1 = $req->latitude;
+        $long1 = $req->longitude;
 
         $chefDistances = [];
 
         $adminDetails = Adminsetting::first(['base_price', 'min_shipping_charges']);
         $base_price = $adminDetails->base_price;
         $minShip = $adminDetails->min_shipping_charges;
+
         foreach($chefDetails as $chef){
 
-            $latLong = $this->get_lat_long($chef['postal_code']);
-            $lat2 = $latLong['lat'];
-            $long2 = $latLong['long'];
+            $lat2 = $chef['latitude'];
+            $long2 = $chef['longitude'];
 
             $chefDistance = $this->calculateDistance($lat1, $long1, $lat2, $long2);
             $mainShipPrice = $chefDistance * $base_price;
