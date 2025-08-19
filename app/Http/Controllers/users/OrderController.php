@@ -554,4 +554,277 @@ class OrderController extends Controller
         });
         return $mappedTransactions;
     }
+
+    /**
+     * Get comprehensive order summary data for frontend
+     * 
+     * @param Request $req
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOrderSummaryData(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'order_id' => 'required|string',
+        ], [
+            'order_id.required' => 'Order ID is required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first(), 
+                'success' => false
+            ], 400);
+        }
+
+        try {
+            $order = Order::where('order_id', $req->order_id)->first();
+            
+            if (!$order) {
+                return response()->json([
+                    'message' => 'Order not found', 
+                    'success' => false
+                ], 404);
+            }
+
+            $orderSummaryData = $order->generateOrderSummaryData();
+
+            return response()->json([
+                'message' => 'Order summary data retrieved successfully',
+                'success' => true,
+                'data' => $orderSummaryData
+            ], 200);
+
+        } catch (\Exception $th) {
+            Log::error('Error getting order summary data: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Something went wrong while retrieving order summary data',
+                'success' => false,
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get order summary data for multiple orders
+     * 
+     * @param Request $req
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMultipleOrdersSummaryData(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'order_ids' => 'required|array',
+            'order_ids.*' => 'string',
+        ], [
+            'order_ids.required' => 'Order IDs array is required',
+            'order_ids.array' => 'Order IDs must be an array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first(), 
+                'success' => false
+            ], 400);
+        }
+
+        try {
+            $orders = Order::whereIn('order_id', $req->order_ids)->get();
+            
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'message' => 'No orders found', 
+                    'success' => false
+                ], 404);
+            }
+
+            $ordersSummaryData = [];
+            foreach ($orders as $order) {
+                $ordersSummaryData[] = $order->generateOrderSummaryData();
+            }
+
+            return response()->json([
+                'message' => 'Orders summary data retrieved successfully',
+                'success' => true,
+                'data' => $ordersSummaryData
+            ], 200);
+
+        } catch (\Exception $th) {
+            Log::error('Error getting multiple orders summary data: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Something went wrong while retrieving orders summary data',
+                'success' => false,
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all orders summary data with pagination
+     * 
+     * @param Request $req
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAllOrdersSummaryData(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'status' => 'nullable|string',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+        ], [
+            'page.integer' => 'Page must be a number',
+            'page.min' => 'Page must be at least 1',
+            'per_page.integer' => 'Per page must be a number',
+            'per_page.min' => 'Per page must be at least 1',
+            'per_page.max' => 'Per page cannot exceed 100',
+            'date_to.after_or_equal' => 'End date must be after or equal to start date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first(), 
+                'success' => false
+            ], 400);
+        }
+
+        try {
+            $page = $req->page ?? 1;
+            $perPage = $req->per_page ?? 10;
+            
+            // Build query
+            $query = Order::with(['subOrders.chefs', 'subOrders.driver', 'user']);
+            
+            // Apply filters
+            if ($req->status) {
+                $query->where('payment_status', $req->status);
+            }
+            
+            if ($req->date_from) {
+                $query->whereDate('order_date', '>=', $req->date_from);
+            }
+            
+            if ($req->date_to) {
+                $query->whereDate('order_date', '<=', $req->date_to);
+            }
+            
+            // Get paginated orders
+            $orders = $query->orderBy('order_date', 'desc')
+                           ->paginate($perPage, ['*'], 'page', $page);
+            
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'message' => 'No orders found', 
+                    'success' => false
+                ], 404);
+            }
+
+            // Generate summary data for each order
+            $ordersSummaryData = [];
+            foreach ($orders as $order) {
+                $ordersSummaryData[] = $order->generateOrderSummaryData();
+            }
+
+            // Calculate totals for all orders in current page
+            $pageTotals = $this->calculatePageTotals($ordersSummaryData);
+
+            return response()->json([
+                'message' => 'Orders summary data retrieved successfully',
+                'success' => true,
+                'data' => [
+                    'orders' => $ordersSummaryData,
+                    'pagination' => [
+                        'current_page' => $orders->currentPage(),
+                        'last_page' => $orders->lastPage(),
+                        'per_page' => $orders->perPage(),
+                        'total' => $orders->total(),
+                        'from' => $orders->firstItem(),
+                        'to' => $orders->lastItem(),
+                        'has_more_pages' => $orders->hasMorePages(),
+                    ],
+                    'page_totals' => $pageTotals,
+                    'filters_applied' => [
+                        'status' => $req->status,
+                        'date_from' => $req->date_from,
+                        'date_to' => $req->date_to,
+                    ]
+                ]
+            ], 200);
+
+        } catch (\Exception $th) {
+            Log::error('Error getting all orders summary data: ' . $th->getMessage());
+            return response()->json([
+                'message' => 'Something went wrong while retrieving orders summary data',
+                'success' => false,
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculate totals for all orders in a page
+     * 
+     * @param array $ordersSummaryData
+     * @return array
+     */
+    private function calculatePageTotals($ordersSummaryData)
+    {
+        $totals = [
+            'total_orders' => count($ordersSummaryData),
+            'total_order_amount' => 0,
+            'total_commission_for_all_chefs' => 0,
+            'total_tax_amount_for_all_chef_gst' => 0,
+            'total_tax_amount_for_all_chef_qst' => 0,
+            'total_commission_from_chef' => 0,
+            'total_commission_for_driver' => 0,
+            'total_tax_amount_for_driver_gst' => 0,
+            'total_tax_amount_for_driver_qst' => 0,
+            'total_commission_from_driver' => 0,
+            'total_service_charges_from_all_chef' => 0,
+            'total_service_charges_for_driver_gst' => 0,
+            'total_service_charges_for_driver_qst' => 0,
+            'total_service_charges_from_chef' => 0,
+            'total_service_charges_from_drivers' => 0,
+            'total_service_charges_for_chef_tps' => 0,
+            'total_service_charges_for_chef_qst' => 0,
+            'total_service_charges_from_drivers' => 0,
+            'total_chef_earning' => 0,
+            'total_driver_earning' => 0,
+            'total_admin_earning' => 0,
+        ];
+
+        foreach ($ordersSummaryData as $orderData) {
+            $summary = $orderData['summary'];
+            
+            $totals['total_order_amount'] += $orderData['order_amount'];
+            $totals['total_commission_for_all_chefs'] += $summary['commission_for_all_chefs'];
+            $totals['total_tax_amount_for_all_chef_gst'] += $summary['tax_amount_for_all_chef_gst'];
+            $totals['total_tax_amount_for_all_chef_qst'] += $summary['tax_amount_for_all_chef_qst'];
+            $totals['total_commission_from_chef'] += $summary['total_commission_from_chef'];
+            $totals['total_commission_for_driver'] += $summary['commission_for_driver'];
+            $totals['total_tax_amount_for_driver_gst'] += $summary['tax_amount_for_driver_gst'];
+            $totals['total_tax_amount_for_driver_qst'] += $summary['tax_amount_for_driver_qst'];
+            $totals['total_commission_from_driver'] += $summary['total_commission_from_driver'];
+            $totals['total_service_charges_from_all_chef'] += $summary['service_charges_from_all_chef'];
+            $totals['total_service_charges_for_driver_gst'] += $summary['service_charges_for_driver_gst'];
+            $totals['total_service_charges_for_driver_qst'] += $summary['service_charges_for_driver_qst'];
+            $totals['total_service_charges_from_chef'] += $summary['total_service_charges_from_chef'];
+            $totals['total_service_charges_from_drivers'] += $summary['service_charges_from_drivers'];
+            $totals['total_service_charges_for_chef_tps'] += $summary['service_charges_for_chef_tps'];
+            $totals['total_service_charges_for_chef_qst'] += $summary['service_charges_for_chef_qst'];
+            $totals['total_service_charges_from_drivers'] += $summary['total_service_charges_from_drivers'];
+            $totals['total_chef_earning'] += $summary['total_chef_earning'];
+            $totals['total_driver_earning'] += $summary['total_driver_earning'];
+            $totals['total_admin_earning'] += $summary['total_admin_earning'];
+        }
+
+        // Round all totals to 2 decimal places
+        foreach ($totals as $key => $value) {
+            if ($key !== 'total_orders') {
+                $totals[$key] = round($value, 2);
+            }
+        }
+
+        return $totals;
+    }
 }

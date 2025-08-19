@@ -363,6 +363,9 @@ Route::prefix('admin')->group(function () {
             // Route::post('/acceptOrRejectOrder', 'acceptOrRejectOrder');
             Route::get('/trackOrder', 'trackOrder');
             Route::get('/getAllTransactions', 'getAllTransactions');
+            Route::post('/getOrderSummaryData', 'getOrderSummaryData');
+            Route::post('/getMultipleOrdersSummaryData', 'getMultipleOrdersSummaryData');
+            Route::post('/getAllOrdersSummaryData', 'getAllOrdersSummaryData');
             // Route::post('/calculate_tax', 'calculate_tax');
         });
         Route::controller(commonFunctions::class)->group(function () {
