@@ -121,6 +121,8 @@ class CartController extends Controller
                             $chefData['chefName'] = $chef->kitchen_name;
                             $chefData['chefAvailibilityWeek'] = $chef->chefAvailibilityWeek;
                             $chefData['postal_code'] = $chef->postal_code;
+                            $chefData['latitude'] = $chef->latitude;
+                            $chefData['longitude'] = $chef->longitude;
                             $foodItems = $chef['foodItems'];
 
                             // Check if foodItems is an array
