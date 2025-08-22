@@ -1381,7 +1381,7 @@ class UserController extends Controller
         try {
             $dateList = [];
 
-            for ($i = 0; $i <= 30; $i++) {
+            for ($i = 1; $i <= 30; $i++) {
                 $date = now()->addDays($i);
                 $dayName = $date->shortDayName;
 
