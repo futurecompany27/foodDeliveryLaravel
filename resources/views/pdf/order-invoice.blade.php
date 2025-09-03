@@ -111,7 +111,7 @@
     <div class="row">
         <div class="col-6">
             <div class="text-start">
-                <img src="{{ public_path('storage/admin/new_logos/main-logo-mail.png') }}" width="100"
+                <img src="{{ public_path('/storage/admin/new_logos/main-logo-mail.png') }}" width="100"
                     alt="">
             </div>
             <div style="margin-top:5px"> Date: {{ \Carbon\Carbon::now()->format('d-M-Y') }}</div>
