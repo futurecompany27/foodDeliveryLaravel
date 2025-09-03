@@ -111,7 +111,7 @@
     <div class="row">
         <div class="col-6">
             <div class="text-start">
-                <img src="{{ public_path('/storage/admin/new_logos/main-logo-mail.png') }}" width="100"
+                <img src="{{ public_path('storage/admin/new_logos/main-logo-mail.png') }}" width="100"
                     alt="">
             </div>
             <div style="margin-top:5px"> Date: {{ \Carbon\Carbon::now()->format('d-M-Y') }}</div>
@@ -242,7 +242,7 @@
                         : $data->chef_commission_taxes;
                     $chefTotalTax = 0;
                 @endphp
-                
+
                 {{-- Commission Section --}}
                 <tr>
                     <td rowspan="{{ count($commissionTaxes) + 1 }}" class="expense-category" style="vertical-align: top;">Commission</td>
@@ -280,15 +280,11 @@
                     <td style="background-color: #666;" colspan="5"></td>
 
                 </tr>
-                <tr>
-                    <td style="text-align: start;" colspan="5">Tips and Promotions</td>
 
-                </tr>
                 <tr>
-                    <td></td>
-                    <td></td>
-                    <td colspan="2">Tip Amount</td>
-                    <td>
+                    <td rowspan="2" class="expense-category" style="vertical-align: top;">Tips and Promotions</td>
+                    <td class="expense-item">Tip Amount</td>
+                    <td colspan="3" class="expense-amount">
                         @if ($data['tip_amount'] == 0)
                             0.00 CA$
                         @else
@@ -298,10 +294,8 @@
 
                 </tr>
                 <tr>
-                    <td></td>
-                    <td></td>
-                    <td colspan="2">Promotion</td>
-                    <td> - </td>
+                    <td class="expense-item">Promotion</td>
+                    <td colspan="3" class="expense-amount"> - </td>
                 </tr>
 
                 <tr>
