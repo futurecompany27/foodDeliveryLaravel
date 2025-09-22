@@ -16,6 +16,8 @@ class SubOrders extends Model
         'chef_commission',
         'chef_commission_amount',
         'chef_commission_taxes',
+        'chef_service_charge_amount',
+        'chef_service_charge_taxes',
         'chef_sale_taxes',
         'driver_commission',
         'driver_commission_amount',
