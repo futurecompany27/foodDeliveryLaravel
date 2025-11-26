@@ -334,7 +334,8 @@ class AuthorizePaymentController extends Controller
                 'username' => $req['username'],
                 'created_at' => Carbon::now(),
                 'shipping' => $req['shipping'],
-                'shipping_tax' => is_array($req['shipping_tax']) ? json_encode($req['shipping_tax']) : $req['shipping_tax'],
+                'shipping_tax_gst' => $req['shipping_tax_gst'],
+                'shipping_tax_qst' => $req['shipping_tax_qst'],
             ]);
 
             // Generate order ID and update the order record
