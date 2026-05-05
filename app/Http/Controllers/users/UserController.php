@@ -632,7 +632,6 @@ class UserController extends Controller
             $lat_long_result_array = $this->get_lat_long($req->postal_code);
             $selected_postal_code[] = '';
             if ($lat_long_result_array["result"] == 1) {
-                /***** Now from the customer postal code we need to find the ******/
                 $selected_postal_code = $this->findout_postal_with_radius($lat_long_result_array["lat"], $lat_long_result_array["long"]);
                 foreach ($selected_postal_code as &$value) {
                     $value = str_replace(" ", "", strtoupper($value));
@@ -640,13 +639,24 @@ class UserController extends Controller
             }
 
             $cuisine = Kitchentype::find($req->kitchen_type_id);
+
             $query = Chef::where(function ($q) use ($selected_postal_code) {
                 foreach ($selected_postal_code as $postalCode) {
                     $q->orWhere('postal_code', 'like', $postalCode . '%');
                 }
-            })->where('status', 1)->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)->whereJsonContains('kitchen_types', $cuisine->kitchentype)->where('chefAvailibilityStatus', 1)->whereHas('foodItems', function ($query) use ($req) {
-                $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
-            });
+            })
+                ->where('status', 1)
+                ->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)
+                ->where('chefAvailibilityStatus', 1)
+                ->whereHas('foodItems', function ($query) use ($req) {
+                    $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+                });
+
+            // ✅ ONLY CHANGE: skip kitchen filter if id = 1
+            if ($cuisine->kitchentype != "All") {
+                $query->whereJsonContains('kitchen_types', $cuisine->kitchentype);
+            }
+
             if ($req->refresh) {
                 $skip = ($req->page + 1) * 12;
                 $data = $query->limit($skip)->get();
@@ -654,7 +664,9 @@ class UserController extends Controller
                 $skip = $req->page * 12;
                 $data = $query->skip($skip)->limit(12)->get();
             }
+
             $total = $query->count();
+
             return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
         } catch (Exception $th) {
             Log::info($th->getMessage());
