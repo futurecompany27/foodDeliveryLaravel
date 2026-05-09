@@ -105,11 +105,15 @@ class kitchentypeController extends Controller
     {
         try {
             if ($req->admin) {
-                $kitchenTyepData = Kitchentype::all();
+                $kitchenTyepData = Kitchentype::orderByRaw("kitchentype = 'All' DESC")->get();
             } else {
-                $kitchenTyepData = Kitchentype::where('status', 1)->get();
+                $kitchenTyepData = Kitchentype::where('status', 1)
+                    ->orderByRaw("kitchentype = 'All' DESC")
+                    ->get();
             }
+
             return response()->json(["data" => $kitchenTyepData, "success" => true], 200);
+
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
