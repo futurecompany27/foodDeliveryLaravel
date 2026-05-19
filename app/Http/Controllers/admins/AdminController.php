@@ -1860,11 +1860,21 @@ class AdminController extends Controller
     public function getSubOrderAcceptedByChef(Request $req)
     {
         try {
-            // Fetch sub-orders with status "accepted" or '3'
-            $subOrders = SubOrders::whereIn('status', ['accepted', '3'])->get();
+            // Fetch sub-orders with status "accepted" or '3', joining chef and user tables to get their full names
+            $subOrders = SubOrders::leftJoin('chefs', 'sub_orders.chef_id', '=', 'chefs.id')
+                ->leftJoin('orders', 'sub_orders.order_id', '=', 'orders.order_id')
+                ->leftJoin('users', 'orders.user_id', '=', 'users.id')
+                ->whereIn('sub_orders.status', ['accepted', '3'])
+                ->select(
+                    'sub_orders.*',
+                    DB::raw("CONCAT(chefs.firstName, ' ', chefs.lastName) as chef_full_name"),
+                    DB::raw("CONCAT(users.firstName, ' ', users.lastName) as user_full_name")
+                )
+                ->get();
 
             return response()->json(['success' => true, 'data' => $subOrders], 200);
         } catch (\Exception $e) {
+            Log::error('Error fetching suborders accepted by chef: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Oops! Something went wrong.'], 500);
         }
     }
