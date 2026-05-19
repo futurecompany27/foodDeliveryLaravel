@@ -128,18 +128,27 @@ class otpController extends Controller
             return response()->json(['success' => false, 'message' => 'Please provide a valid email.'], 400);
         }
         try {
+            $isDevOtp = (env('MODE') && strtolower(env('MODE')) === 'development' && $req->otp == '1234');
+
             // For Mobile
             if ($req->mobile) {
-                $verified = Otp::where(["mobile" => str_replace("-", "", $req->mobile), "otp_number" => $req->otp])->first();
-                if ($verified) {
-                    // Check if the OTP is expired (older than 2 minutes)
-                    $otpCreatedAt = Carbon::parse($verified->updated_at);
-                    $currentTime = Carbon::now();
+                if ($isDevOtp) {
+                    $verified = true;
+                } else {
+                    $verified = Otp::where(["mobile" => str_replace("-", "", $req->mobile), "otp_number" => $req->otp])->first();
+                }
 
-                    // Check if the OTP is older than 2 minutes
-                    // if ($otpCreatedAt->diffInMinutes($currentTime) > 2) {
-                    //     return response()->json(['message' => "OTP has expired! Please request a new OTP.", 'success' => false], 400);
-                    // }
+                if ($verified) {
+                    if (!$isDevOtp) {
+                        // Check if the OTP is expired (older than 2 minutes)
+                        $otpCreatedAt = Carbon::parse($verified->updated_at);
+                        $currentTime = Carbon::now();
+
+                        // Check if the OTP is older than 2 minutes
+                        // if ($otpCreatedAt->diffInMinutes($currentTime) > 2) {
+                        //     return response()->json(['message' => "OTP has expired! Please request a new OTP.", 'success' => false], 400);
+                        // }
+                    }
 
                     return response()->json(['message' => ("Your " . ($req->mobile ? "Mobile No. +1 " . $req->mobile : "account") . " has been verified."), 'success' => true], 200);
                 } else {
@@ -149,16 +158,24 @@ class otpController extends Controller
 
             // Form Email
             if ($req->email) {
-                $verified = Otp::where(["email" => $req->email, "otp_number" => $req->otp])->first();
+                if ($isDevOtp) {
+                    $verified = true;
+                } else {
+                    $verified = Otp::where(["email" => $req->email, "otp_number" => $req->otp])->first();
+                }
+
                 if (!$verified) {
                     return response()->json(['message' => "Invalid OTP.", 'success' => false], 400);
                 }
-                // Check if the OTP is expired (older than 5 minutes)
-                $otpCreatedAt = Carbon::parse($verified->updated_at);
-                $currentTime = Carbon::now();
-                // Check if the OTP is older than 5 minutes
-                if ($otpCreatedAt->diffInMinutes($currentTime) > 5) {
-                    return response()->json(['message' => "OTP has expired! Please request a new OTP.", 'success' => false], 400);
+
+                if (!$isDevOtp) {
+                    // Check if the OTP is expired (older than 5 minutes)
+                    $otpCreatedAt = Carbon::parse($verified->updated_at);
+                    $currentTime = Carbon::now();
+                    // Check if the OTP is older than 5 minutes
+                    if ($otpCreatedAt->diffInMinutes($currentTime) > 5) {
+                        return response()->json(['message' => "OTP has expired! Please request a new OTP.", 'success' => false], 400);
+                    }
                 }
 
                 $userType = $this->getAuthenticatedUserType();
@@ -214,18 +231,26 @@ class otpController extends Controller
             }
 
             $cleanMobile = str_replace("-", "", $req->mobile);
-            $verified = Otp::where(["mobile" => $cleanMobile, "otp_number" => $req->otp])->first();
+
+            $isDevOtp = (env('MODE') && strtolower(env('MODE')) === 'development' && $req->otp == '1234');
+            if ($isDevOtp) {
+                $verified = true;
+            } else {
+                $verified = Otp::where(["mobile" => $cleanMobile, "otp_number" => $req->otp])->first();
+            }
 
             if (!$verified) {
                 return response()->json(['message' => "Invalid OTP.", 'success' => false], 400);
             }
 
-            // Check if the OTP is expired (older than 2 minutes)
-            $otpCreatedAt = Carbon::parse($verified->updated_at);
-            $currentTime = Carbon::now();
+            if (!$isDevOtp) {
+                // Check if the OTP is expired (older than 2 minutes)
+                $otpCreatedAt = Carbon::parse($verified->updated_at);
+                $currentTime = Carbon::now();
 
-            if ($otpCreatedAt->diffInMinutes($currentTime) > 2) {
-                return response()->json(['message' => "OTP has expired! Please request a new OTP.", 'success' => false], 400);
+                if ($otpCreatedAt->diffInMinutes($currentTime) > 2) {
+                    return response()->json(['message' => "OTP has expired! Please request a new OTP.", 'success' => false], 400);
+                }
             }
 
             // Find the chef and update mobile verification status
