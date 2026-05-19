@@ -368,15 +368,18 @@ Route::prefix('admin')->group(function () {
         Route::controller(commonFunctions::class)->group(function () {
             Route::get("/getAllScheduleCall", 'getAllScheduleCall'); // admin panel
             Route::get("/getAllDriverScheduleCall", 'getAllDriverScheduleCall'); // admin panel
+            Route::post('/deleteSiteFeedback', 'deleteSiteFeedback');
         });
         Route::controller(UserController::class)->group(function () {
             Route::get('/getUserContact', 'getUserContact');
             Route::post('/updateUserDetailStatus', 'updateUserDetailStatus');
             Route::get('/getRecordNotFound', 'getRecordNotFound');
+            Route::post('/deleteRecordNotFound', 'deleteRecordNotFound');
             Route::get('/getChefReview', 'getChefReview');
             Route::post('/getAllUserFoodReviewsbyStatus', 'getAllUserFoodReviewsbyStatus');
             Route::post('/addOrUpdateFoodReview', 'addOrUpdateFoodReview');
             Route::post('/updateContactStatus', 'updateContactStatus');
+            Route::post('/deleteUserContact', 'deleteUserContact');
         });
         Route::controller(ChefController::class)->group(function () {
             Route::post('/deleteChefSchedule', 'deleteChefSchedule');
