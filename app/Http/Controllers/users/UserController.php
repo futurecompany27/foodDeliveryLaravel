@@ -951,6 +951,13 @@ class UserController extends Controller
         }
     }
 
+    public function deleteRecordNotFound(Request $req)
+    {
+        $req->validate(['id' => 'required|integer|exists:no_record_found,id']);
+        NoRecordFound::where('id', $req->id)->delete();
+        return response()->json(['message' => 'Record deleted successfully', 'success' => true], 200);
+    }
+
     function addUpdateShippingAddress(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -1227,6 +1234,13 @@ class UserController extends Controller
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
+    }
+
+    function deleteUserContact(Request $req)
+    {
+        $req->validate(['id' => 'required|integer|exists:user_contacts,id']);
+        UserContact::where('id', $req->id)->delete();
+        return response()->json(['message' => 'Contact deleted successfully', 'success' => true], 200);
     }
 
     function ChefReview(Request $req)

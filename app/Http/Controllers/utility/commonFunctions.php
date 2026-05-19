@@ -274,6 +274,13 @@ class commonFunctions extends Controller
         }
     }
 
+    public function deleteSiteFeedback(Request $req)
+    {
+        $req->validate(['id' => 'required|integer|exists:feedbacks,id']);
+        Feedback::where('id', $req->id)->delete();
+        return response()->json(['message' => 'Testimonial deleted successfully', 'success' => true], 200);
+    }
+
     function getAllScheduleCall(Request $req)
     {
         try {
