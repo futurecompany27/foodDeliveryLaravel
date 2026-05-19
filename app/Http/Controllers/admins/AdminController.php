@@ -1619,15 +1619,15 @@ class AdminController extends Controller
     {
         try {
             $query = Order::query();
+            if ($req->user_id) {
+                $query->where('user_id', $req->user_id);
+            }
             if ($req->filter) {
                 if ($req->from_date) {
                     $query->whereDate('created_at', '>=', $req->from_date);
                 }
                 if ($req->to_date) {
                     $query->whereDate('created_at', '<=', $req->to_date);
-                }
-                if ($req->user_id) {
-                    $query->where('user_id', $req->user_id);
                 }
                 if ($req->chef_id) {
                     $query->whereHas('subOrders', function ($subQuery) use ($req) {
