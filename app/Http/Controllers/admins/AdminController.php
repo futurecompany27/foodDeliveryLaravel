@@ -365,6 +365,9 @@ class AdminController extends Controller
 
     public function addFoodTypes(Request $req)
     {
+        if ($req->commission === '' || $req->commission === null) {
+            $req->merge(['commission' => null]);
+        }
         $validator = Validator::make($req->all(), [
             "category" => 'required',
             "commission" => 'nullable|integer|between:1,100',
@@ -393,9 +396,7 @@ class AdminController extends Controller
 
             $foodcategory = new FoodCategory();
             $foodcategory->category = trim($req->category);
-            if ($req->filled('commission')) {
-                $foodcategory->commission = $req->commission;
-            }
+            $foodcategory->commission = $req->commission ?? 10;
             $foodcategory->image = $result['ObjectURL'];
             $foodcategory->save();
             return response()->json(["message" => "Submitted successfully", "success" => true], 200);
@@ -410,6 +411,9 @@ class AdminController extends Controller
 
     public function updateFoodTypes(Request $req)
     {
+        if ($req->commission === '' || $req->commission === null) {
+            $req->merge(['commission' => null]);
+        }
         $validator = Validator::make($req->all(), [
             "id" => 'required',
             "category" => 'required',
