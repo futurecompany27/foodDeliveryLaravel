@@ -79,6 +79,7 @@ Route::prefix('chef')->group(function () {
         Route::controller(AdminController::class)->group(function () {
             Route::get('/getAdminSettings', 'getAdminSettings');
             Route::get('/getAllUsers', 'getAllUsers');
+            Route::get('/getTemplates', 'getTemplates');
         });
         Route::controller(notificationController::class)->group(function () {
             Route::post('/getUnreadNotificationAccordingToUserTypes', 'getUnreadNotificationAccordingToUserTypes'); // chef panel
