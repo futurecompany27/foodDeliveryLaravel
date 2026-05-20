@@ -1792,6 +1792,7 @@ class AdminController extends Controller
                 $newTemplate->category = $req->category;
                 $newTemplate->name = $req->name;
                 $newTemplate->template = $req->template;
+                $newTemplate->status = 1;
                 $newTemplate->save();
                 return response()->json(['message' => 'Added template successfully', 'success' => true], 200);
             }
@@ -1806,8 +1807,8 @@ class AdminController extends Controller
     {
         try {
             $query = PackingTemplates::query();
-            if ($req->status) {
-                $query->where('status', $req->status);
+            if ($req->filled('status')) {
+                $query->where('status', (int) $req->status);
             }
             $data = $query->get();
             return response()->json(['data' => $data, 'success' => true], 200);

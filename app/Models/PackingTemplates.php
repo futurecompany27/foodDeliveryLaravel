@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class PackingTemplates extends Model
 {
     use HasFactory;
-    protected $fillable = ['template','category','name'];
+    protected $fillable = ['template', 'category', 'name', 'status'];
 
 }
