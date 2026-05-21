@@ -1337,7 +1337,7 @@ class UserController extends Controller
 
             // Pagination logic
             $totalRecords = $query->count();
-            $skip = $req->page * 10;
+            $skip = ((int) ($req->page ?? 0)) * 10;
             $data = $query->skip($skip)->take(10)->with('user:firstName,lastName,id')->get();
 
             // $totalRecords = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->count();

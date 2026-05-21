@@ -365,10 +365,13 @@ class AdminController extends Controller
 
     public function addFoodTypes(Request $req)
     {
+        if ($req->commission === '' || $req->commission === null) {
+            $req->merge(['commission' => null]);
+        }
         $validator = Validator::make($req->all(), [
             "category" => 'required',
             "commission" => 'nullable|integer|between:1,100',
-            "image" => 'required',
+            "image" => 'required|file',
         ], [
             "category.required" => "Please fill category",
             "image.required" => "Please fill image",
@@ -376,70 +379,75 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
-        if ($req->hasFile('image')) {
-            $file = $req->file('image');
-                $fileName = 'foodCategory/'  . time() . '_' . $file->getClientOriginalName();
-
-                $s3 = AwsHelper::cred();
-
-                    // Upload file to S3
-                    $result = $s3->putObject([
-                        'Bucket' => env('AWS_BUCKET'),
-                        'Key'    => $fileName,
-                        'Body'   => fopen($file->getPathname(), 'r'),
-                        'ContentType' => $file->getMimeType(),
-                    ]);
-
-                $filename = $result['ObjectURL'];
-        }
         try {
-            $foodcategory = new FoodCategory();
-            $foodcategory->category = $req->category;
-            // Check if 'commission' is provided; if not, set a default value
-            $foodcategory->commission = $req->commission ?? 10;
+            if (!$req->hasFile('image')) {
+                return response()->json(["message" => "Please fill image", "success" => false], 400);
+            }
+            $file = $req->file('image');
+            $fileName = 'foodCategory/' . time() . '_' . $file->getClientOriginalName();
 
-            $foodcategory->image = $filename;
+            $s3 = AwsHelper::cred();
+            $result = $s3->putObject([
+                'Bucket' => env('AWS_BUCKET'),
+                'Key' => $fileName,
+                'Body' => fopen($file->getPathname(), 'r'),
+                'ContentType' => $file->getMimeType(),
+            ]);
+
+            $foodcategory = new FoodCategory();
+            $foodcategory->category = trim($req->category);
+            $foodcategory->commission = $req->commission ?? 10;
+            $foodcategory->image = $result['ObjectURL'];
             $foodcategory->save();
             return response()->json(["message" => "Submitted successfully", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+            $message = str_contains($th->getMessage(), 'client configuration')
+                ? 'Image upload is not configured. Please contact support.'
+                : 'Oops! Something went wrong.';
+            return response()->json(['message' => $message, 'success' => false], 500);
         }
     }
 
     public function updateFoodTypes(Request $req)
     {
+        if ($req->commission === '' || $req->commission === null) {
+            $req->merge(['commission' => null]);
+        }
         $validator = Validator::make($req->all(), [
             "id" => 'required',
+            "category" => 'required',
+            "commission" => 'nullable|integer|between:1,100',
+            "image" => 'nullable|file',
         ], [
             "id.required" => "Please fill id",
+            "category.required" => "Please fill category",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = FoodCategory::where('id', $req->id)->first();
-            $updateData = [];
-            if ($req->category) {
-                $updateData['category'] = $req->category;
+            if (!$data) {
+                return response()->json(['message' => 'Food type not found.', 'success' => false], 404);
             }
-            if ($req->commission) {
-                $updateData['commission'] = $req->commission ? $req->commission : 10;
+            $updateData = [
+                'category' => trim($req->category),
+            ];
+            if ($req->filled('commission')) {
+                $updateData['commission'] = $req->commission;
             }
             if ($req->hasFile('image')) {
                 $file = $req->file('image');
-                $fileName = 'foodCategory/'  . time() . '_' . $file->getClientOriginalName();
+                $fileName = 'foodCategory/' . time() . '_' . $file->getClientOriginalName();
 
                 $s3 = AwsHelper::cred();
-
-                    // Upload file to S3
-                    $result = $s3->putObject([
-                        'Bucket' => env('AWS_BUCKET'),
-                        'Key'    => $fileName,
-                        'Body'   => fopen($file->getPathname(), 'r'),
-                        'ContentType' => $file->getMimeType(),
-                    ]);
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key' => $fileName,
+                    'Body' => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
 
                 $updateData['image'] = $result['ObjectURL'];
             }
@@ -447,8 +455,10 @@ class AdminController extends Controller
             return response()->json(['message' => "Updated Successfully", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+            $message = str_contains($th->getMessage(), 'client configuration')
+                ? 'Image upload is not configured. Please contact support.'
+                : 'Oops! Something went wrong.';
+            return response()->json(['message' => $message, 'success' => false], 500);
         }
     }
 
@@ -1454,18 +1464,19 @@ class AdminController extends Controller
         }
     }
 
-    function getAllRequestForChefReviewDeletion()
+    function getAllRequestForChefReviewDeletion(Request $req)
     {
-        // try {
-        //     $TotalRecords = ChefReviewDeleteRequest::where(['status' => 0])->count();
-        //     $data = ChefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at')->where(['status' => 0])->get();
-        //     return response()->json(['data' => $data, 'TotalRecords' => $TotalRecords, 'success' => true], 200);
-        // } catch (\Exception $th) {
-        //     Log::info($th->getMessage());
-        //     DB::rollback();
-        //     return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
-        // }
-        return response()->json(['data' => [], 'TotalRecords' => 0, 'success' => true], 200);
+        try {
+            $query = ChefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at');
+            if ($req->filled('status') && $req->status !== 'all') {
+                $query->where('status', $req->status);
+            }
+            $data = $query->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $data->count(), 'success' => true], 200);
+        } catch (\Exception $th) {
+            Log::info($th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        }
     }
 
     function updateStatusOfChefReviewDeleteRequest(Request $req)
@@ -1781,6 +1792,7 @@ class AdminController extends Controller
                 $newTemplate->category = $req->category;
                 $newTemplate->name = $req->name;
                 $newTemplate->template = $req->template;
+                $newTemplate->status = 1;
                 $newTemplate->save();
                 return response()->json(['message' => 'Added template successfully', 'success' => true], 200);
             }
@@ -1795,8 +1807,8 @@ class AdminController extends Controller
     {
         try {
             $query = PackingTemplates::query();
-            if ($req->status) {
-                $query->where('status', $req->status);
+            if ($req->filled('status')) {
+                $query->where('status', (int) $req->status);
             }
             $data = $query->get();
             return response()->json(['data' => $data, 'success' => true], 200);
