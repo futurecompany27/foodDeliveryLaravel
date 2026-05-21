@@ -502,6 +502,11 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->file('image')->getSize() >= 5120) {
+            return response()->json(["message" => "Image size must be less than 5 KB.", "success" => false], 400);
+        }
+
         try {
             $path = "storage/admin/allergen_icons/";
             if (!File::exists($path)) {
@@ -570,6 +575,10 @@ class AdminController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+
+        if ($req->hasFile('image') && $req->file('image')->getSize() >= 5120) {
+            return response()->json(["message" => "Image size must be less than 5 KB.", "success" => false], 400);
         }
 
         try {
@@ -679,6 +688,11 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->file('image')->getSize() >= 5120) {
+            return response()->json(["message" => "Image size must be less than 5 KB.", "success" => false], 400);
+        }
+
         try {
             $path = "storage/admin/dietaries_icons/";
             if (!File::exists($path)) {
@@ -692,7 +706,7 @@ class AdminController extends Controller
                 $big_image = $req->file('image');
 
                 // Generate new image name
-                $image_name = strtolower(trim($req->allergy_name));
+                $image_name = strtolower(trim($req->diet_name));
                 $new_name = str_replace(" ", "", $image_name);
                 $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
 
@@ -754,6 +768,11 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->hasFile('image') && $req->file('image')->getSize() >= 5120) {
+            return response()->json(["message" => "Image size must be less than 5 KB.", "success" => false], 400);
+        }
+
         if (!File::exists("storage/admin/dietaries_icons/")) {
             File::makeDirectory("storage/admin/dietaries_icons/", $mode = 0777, true, true);
         }

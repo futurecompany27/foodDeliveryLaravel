@@ -29,9 +29,16 @@ class kitchentypeController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => $validator->errors(),
+                'message' => $validator->errors()->first(),
                 "success" => false
             ], 422);
+        }
+
+        if ($req->hasFile('image')) {
+            $size = @getimagesize($req->file('image')->getPathname());
+            if (!$size || $size[0] !== 150 || $size[1] !== 150) {
+                return response()->json(['message' => 'Image size must be 150 x 150 px.', 'success' => false], 400);
+            }
         }
 
         try {
@@ -131,6 +138,14 @@ class kitchentypeController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->hasFile('image')) {
+            $size = @getimagesize($req->file('image')->getPathname());
+            if (!$size || $size[0] !== 150 || $size[1] !== 150) {
+                return response()->json(['message' => 'Image size must be 150 x 150 px.', 'success' => false], 400);
+            }
+        }
+
         if (!File::exists("storage/admin/kitchentype/")) {
             File::makeDirectory("storage/admin/kitchentype/", $mode = 0777, true, true);
         }
