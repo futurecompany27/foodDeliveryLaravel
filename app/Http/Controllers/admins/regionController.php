@@ -78,7 +78,7 @@ class regionController extends Controller
         try {
             $countryCheck = State::where('country_id', $req->id)->first();
             if ($countryCheck) {
-                return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => true], 200);
+                return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => false], 400);
             }
             Country::where('id', $req->id)->delete();
             return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
@@ -275,7 +275,7 @@ class regionController extends Controller
         try {
             $checkCity = Pincode::where('city_id', $req->id)->first();
             if ($checkCity) {
-                return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => true], 200);
+                return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => false], 400);
             }
             $data = City::where('id', $req->id)->first();
             City::where('id', $req->id)->delete();
