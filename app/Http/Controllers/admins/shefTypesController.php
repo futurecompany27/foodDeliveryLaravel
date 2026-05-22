@@ -80,12 +80,15 @@ class shefTypesController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $sheftype = ShefSubType::where('type_id', $req->id);
-            if($sheftype){
-                $sheftype ->delete();
-                return response()->json(['message' => 'Chef type deleted successfully.', "success" => true], 200);
+            $shefType = ShefType::find($req->id);
+            if (!$shefType) {
+                return response()->json(['message' => 'Chef type not found.', 'success' => false], 404);
             }
-            return response()->json(['message' => 'ShefType not found', "success" => false], 400);
+            DB::beginTransaction();
+            ShefSubType::where('type_id', $req->id)->delete();
+            $shefType->delete();
+            DB::commit();
+            return response()->json(['message' => 'Chef type deleted successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
