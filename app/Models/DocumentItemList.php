@@ -25,4 +25,15 @@ class DocumentItemList extends Model
     {
         return $this->hasMany(DocumentItemField::class, 'document_item_list_id', 'id');
     }
+
+    public static function booted()
+    {
+        static::deleting(function ($documentItem) {
+            DocumentItemField::where('document_item_list_id', $documentItem->id)
+                ->get()
+                ->each(function ($field) {
+                    $field->delete();
+                });
+        });
+    }
 }
