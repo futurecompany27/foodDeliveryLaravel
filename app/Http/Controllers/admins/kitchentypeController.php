@@ -179,7 +179,7 @@ class kitchentypeController extends Controller
 
             }
             Kitchentype::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Kitchen type updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -205,7 +205,7 @@ class kitchentypeController extends Controller
                 unlink(str_replace(env('filePath'), '', $images));
             }
             Kitchentype::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Kitchen type deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -231,7 +231,7 @@ class kitchentypeController extends Controller
             }
             // $updateData = $req->status;
             Kitchentype::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Kitchen type status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();

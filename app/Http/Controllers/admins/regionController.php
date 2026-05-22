@@ -57,7 +57,7 @@ class regionController extends Controller
         try {
             $updateData = $req->all();
             Country::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Country updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -81,7 +81,7 @@ class regionController extends Controller
                 return response()->json(['message' => 'This entry cannot be deleted as it is in use.', "success" => false], 400);
             }
             Country::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Country deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -166,7 +166,7 @@ class regionController extends Controller
         }
         try {
             State::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "State updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -191,7 +191,7 @@ class regionController extends Controller
             }
             $data = State::where('id', $req->id)->first();
             State::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'State deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -254,7 +254,7 @@ class regionController extends Controller
             $data = City::where('id', $req->id)->first();
             $updateData = $req->all();
             City::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "City updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -279,7 +279,7 @@ class regionController extends Controller
             }
             $data = City::where('id', $req->id)->first();
             City::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'City deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -333,7 +333,7 @@ class regionController extends Controller
             $Pincode->longitude = $req->long;
             $Pincode->save();
             DB::commit();
-            return response()->json(["message" => "Postal Code Added Successfully ", "success" => true], 200);
+            return response()->json(["message" => "Postal code added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -362,7 +362,7 @@ class regionController extends Controller
             $updateData['latitude'] = $req->lat;
             $updateData['longitude'] = $req->long;
             Pincode::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Postal code updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -405,7 +405,7 @@ class regionController extends Controller
             }
             // check postol code in multiple table like driver, chef
             Pincode::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Pincode Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Postal code deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -464,7 +464,7 @@ class regionController extends Controller
                 $updateData['status'] = $req->status;
             }
             Country::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Country status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -489,7 +489,7 @@ class regionController extends Controller
                 $updateData['status'] = $req->status;
             }
             State::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "State status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -515,7 +515,7 @@ class regionController extends Controller
             }
             // $updateData = $req->status;
             City::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "City status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();

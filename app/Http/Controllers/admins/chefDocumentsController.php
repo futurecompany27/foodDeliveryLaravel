@@ -47,7 +47,7 @@ class chefDocumentsController extends Controller
                 'chef_type' => trim($req->chef_type)
             ]);
             DB::commit();
-            return response()->json(["message" => "Added successfully", "success" => true], 200);
+            return response()->json(["message" => "Chef document item added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -85,7 +85,7 @@ class chefDocumentsController extends Controller
                 $updateData['chef_type'] = $req->chef_type;
             }
             DocumentItemList::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef document item updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -105,7 +105,7 @@ class chefDocumentsController extends Controller
         }
         try {
             DocumentItemList::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Chef document item deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -150,7 +150,7 @@ class chefDocumentsController extends Controller
             }
             // $updateData = $req->status;
             DocumentItemList::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef document item status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -223,7 +223,7 @@ class chefDocumentsController extends Controller
             }
             Log::info($updateData);
             DocumentItemField::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef document field updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -243,7 +243,7 @@ class chefDocumentsController extends Controller
         }
         try {
             DocumentItemField::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Chef document field deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();

@@ -226,7 +226,7 @@ class commonFunctions extends Controller
                 $admin->notify(new NewFeedback($feedback));
             }
 
-            return response()->json(['message' => "Feedback submitted successfully", "success" => true], 200);
+            return response()->json(['message' => "Testimonial submitted successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -266,7 +266,7 @@ class commonFunctions extends Controller
         }
         try {
             Feedback::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Testimonial updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -278,7 +278,7 @@ class commonFunctions extends Controller
     {
         $req->validate(['id' => 'required|integer|exists:feedbacks,id']);
         Feedback::where('id', $req->id)->delete();
-        return response()->json(['message' => 'Testimonial deleted successfully', 'success' => true], 200);
+        return response()->json(['message' => 'Testimonial deleted successfully.', 'success' => true], 200);
     }
 
     function getAllScheduleCall(Request $req)
@@ -310,7 +310,7 @@ class commonFunctions extends Controller
         }
         try {
             ScheduleCall::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Schedule call updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -347,7 +347,7 @@ class commonFunctions extends Controller
         }
         try {
             DriverScheduleCall::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Schedule call updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();

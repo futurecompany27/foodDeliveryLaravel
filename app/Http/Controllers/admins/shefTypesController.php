@@ -93,10 +93,14 @@ class shefTypesController extends Controller
         }
     }
 
-    public function getAllShefTypes()
+    public function getAllShefTypes(Request $req)
     {
         try {
-            $data = ShefType::where('status', 1)->get();
+            $query = ShefType::query();
+            if (!$req->boolean('include_inactive')) {
+                $query->where('status', 1);
+            }
+            $data = $query->orderBy('id', 'desc')->get();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -123,7 +127,7 @@ class shefTypesController extends Controller
             }
             // $updateData = $req->status;
             ShefType::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Chef type updated successfully.", "success" => true], 200);
+            return response()->json(['message' => "Chef type status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -214,10 +218,14 @@ class shefTypesController extends Controller
         }
     }
 
-    public function getAllShefSubTypes()
+    public function getAllShefSubTypes(Request $req)
     {
         try {
-            $data = ShefSubType::with('shef_type:id,name')->get();
+            $query = ShefSubType::query();
+            if (!$req->boolean('include_inactive')) {
+                $query->where('status', 1);
+            }
+            $data = $query->with('shef_type:id,name')->orderBy('id', 'desc')->get();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -244,7 +252,7 @@ class shefTypesController extends Controller
             }
             // $updateData = $req->status;
             ShefSubType::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Chef subtype updated successfully.", "success" => true], 200);
+            return response()->json(['message' => "Chef subtype status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
