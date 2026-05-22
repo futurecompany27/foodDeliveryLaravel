@@ -316,14 +316,18 @@ class regionController extends Controller
         if (!$req->pincode || !$req->city_id) {
             return response()->json(['message' => 'Please fill all the fields', 'success' => false], 400);
         }
+        $pincode = str_replace(' ', '', strtoupper($req->pincode));
+        if (!preg_match('/^[A-Z][0-9][A-Z][0-9][A-Z][0-9]$/', $pincode)) {
+            return response()->json(['message' => 'Postal code must be 6 alphanumeric characters (e.g. A1A1A1).', 'success' => false], 400);
+        }
         try {
             DB::beginTransaction();
-            $pincodeExist = Pincode::where("pincode", $req->pincode)->first();
+            $pincodeExist = Pincode::where("pincode", $pincode)->first();
             if ($pincodeExist) {
                 return response()->json(["message" => 'Pincode is already exist!', "success" => false], 400);
             }
             $Pincode = new Pincode;
-            $Pincode->pincode = str_replace(" ", "", (strtoupper($req->pincode)));
+            $Pincode->pincode = $pincode;
             $Pincode->city_id = $req->city_id;
             $Pincode->latitude = $req->lat;
             $Pincode->longitude = $req->long;
@@ -348,8 +352,12 @@ class regionController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            $pincode = str_replace(' ', '', strtoupper($req->pincode ?? ''));
+            if ($req->pincode && !preg_match('/^[A-Z][0-9][A-Z][0-9][A-Z][0-9]$/', $pincode)) {
+                return response()->json(['message' => 'Postal code must be 6 alphanumeric characters (e.g. A1A1A1).', 'success' => false], 400);
+            }
             $updateData = [];
-            $updateData['pincode'] = str_replace(" ", "", (strtoupper($req->pincode)));
+            $updateData['pincode'] = $pincode;
             $updateData['city_id'] = $req->city_id;
             $updateData['latitude'] = $req->lat;
             $updateData['longitude'] = $req->long;
