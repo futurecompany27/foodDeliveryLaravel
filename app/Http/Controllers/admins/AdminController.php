@@ -166,8 +166,26 @@ class AdminController extends Controller
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
+            "phone_one" => 'required|regex:/^[0-9]{10,12}$/',
+            "email" => 'required|email',
+            "company_name" => 'required',
+            "company_address" => 'required',
+            "copyright" => 'required',
+            "created_by_company" => 'required',
+            "created_by_company_link" => 'required',
+            "phone_two" => 'nullable|regex:/^[0-9]{10,12}$/',
         ], [
             "id.required" => "Please fill id",
+            "phone_one.required" => "Phone number is required.",
+            "phone_one.regex" => "Phone number must be 10 to 12 digits.",
+            "email.required" => "Company email is required.",
+            "email.email" => "Please enter a valid email.",
+            "company_name.required" => "Company name is required.",
+            "company_address.required" => "Company address is required.",
+            "copyright.required" => "Copyright is required.",
+            "created_by_company.required" => "Developed by is required.",
+            "created_by_company_link.required" => "URL of IT company is required.",
+            "phone_two.regex" => "Phone number 2 must be 10 to 12 digits.",
         ]);
 
         if ($validator->fails()) {

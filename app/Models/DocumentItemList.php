@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DocumentItemList extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $table = "document_item_lists";
     protected $fillable = ['id', 'state_id', 'document_item_name', 'chef_type', 'reference_links', 'additional_links', 'detail_information', 'status'];
 
