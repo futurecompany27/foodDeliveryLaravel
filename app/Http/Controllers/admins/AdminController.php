@@ -166,8 +166,26 @@ class AdminController extends Controller
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
+            "phone_one" => 'required|regex:/^[0-9]{10,12}$/',
+            "email" => 'required|email',
+            "company_name" => 'required',
+            "company_address" => 'required',
+            "copyright" => 'required',
+            "created_by_company" => 'required',
+            "created_by_company_link" => 'required',
+            "phone_two" => 'nullable|regex:/^[0-9]{10,12}$/',
         ], [
             "id.required" => "Please fill id",
+            "phone_one.required" => "Phone number is required.",
+            "phone_one.regex" => "Phone number must be 10 to 12 digits.",
+            "email.required" => "Company email is required.",
+            "email.email" => "Please enter a valid email.",
+            "company_name.required" => "Company name is required.",
+            "company_address.required" => "Company address is required.",
+            "copyright.required" => "Copyright is required.",
+            "created_by_company.required" => "Developed by is required.",
+            "created_by_company_link.required" => "URL of IT company is required.",
+            "phone_two.regex" => "Phone number 2 must be 10 to 12 digits.",
         ]);
 
         if ($validator->fails()) {
@@ -178,7 +196,7 @@ class AdminController extends Controller
             if ($data) {
                 $updateData = $req->all();
                 Sitesetting::where('id', $req->id)->update($updateData);
-                return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+                return response()->json(['message' => "Site settings updated successfully.", "success" => true], 200);
             } else {
                 $siteSeting = new Sitesetting();
                 $siteSeting->phone_one = $req->phone_one;
@@ -194,7 +212,7 @@ class AdminController extends Controller
                 $siteSeting->created_by_company_link = $req->created_by_company_link;
                 $siteSeting->created_by_company = $req->created_by_company;
                 $siteSeting->save();
-                return response()->json(['message' => "Added Successfully", "success" => true], 200);
+                return response()->json(['message' => "Site settings added successfully.", "success" => true], 200);
             }
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -216,7 +234,7 @@ class AdminController extends Controller
         try {
             $data = Sitesetting::where('id', $req->id)->first();
             $data->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Site settings deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -296,7 +314,7 @@ class AdminController extends Controller
             $adminSetting->certificate_handling_cost = $req->certificate_handling_cost;
 
             $adminSetting->save();
-            return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+            return response()->json(["message" => "Admin settings added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -324,7 +342,7 @@ class AdminController extends Controller
             $updateData = $req->all();
 
             Adminsetting::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Admin settings updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -344,7 +362,7 @@ class AdminController extends Controller
         }
         try {
             Adminsetting::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Admin settings deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -399,7 +417,7 @@ class AdminController extends Controller
             $foodcategory->commission = $req->commission ?? 10;
             $foodcategory->image = $result['ObjectURL'];
             $foodcategory->save();
-            return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+            return response()->json(["message" => "Food type added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             $message = str_contains($th->getMessage(), 'client configuration')
@@ -452,7 +470,7 @@ class AdminController extends Controller
                 $updateData['image'] = $result['ObjectURL'];
             }
             FoodCategory::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Food type updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             $message = str_contains($th->getMessage(), 'client configuration')
@@ -480,7 +498,7 @@ class AdminController extends Controller
                 unlink(str_replace(env('filePath'), '', $images));
             }
             FoodCategory::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Food type deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -502,6 +520,11 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->file('image')->getSize() >= 1024) {
+            return response()->json(["message" => "Image size must be less than 1 KB.", "success" => false], 400);
+        }
+
         try {
             $path = "storage/admin/allergen_icons/";
             if (!File::exists($path)) {
@@ -553,7 +576,7 @@ class AdminController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(["message" => "Added successfully", "success" => true], 201);
+            return response()->json(["message" => "Allergy added successfully.", "success" => true], 201);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -570,6 +593,10 @@ class AdminController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+
+        if ($req->hasFile('image') && $req->file('image')->getSize() >= 1024) {
+            return response()->json(["message" => "Image size must be less than 1 KB.", "success" => false], 400);
         }
 
         try {
@@ -631,7 +658,7 @@ class AdminController extends Controller
                 $updateData['allergy_name'] = $req->allergy_name;
             }
             Allergy::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Allergy updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -657,7 +684,7 @@ class AdminController extends Controller
                 unlink(str_replace(env('filePath'), '', $images));
             }
             Allergy::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Allergy deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -679,6 +706,11 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->file('image')->getSize() >= 1024) {
+            return response()->json(["message" => "Image size must be less than 1 KB.", "success" => false], 400);
+        }
+
         try {
             $path = "storage/admin/dietaries_icons/";
             if (!File::exists($path)) {
@@ -692,7 +724,7 @@ class AdminController extends Controller
                 $big_image = $req->file('image');
 
                 // Generate new image name
-                $image_name = strtolower(trim($req->allergy_name));
+                $image_name = strtolower(trim($req->diet_name));
                 $new_name = str_replace(" ", "", $image_name);
                 $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
 
@@ -736,7 +768,7 @@ class AdminController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(["message" => "Added successfully", "success" => true], 201);
+            return response()->json(["message" => "Dietary preference added successfully.", "success" => true], 201);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -754,6 +786,11 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->hasFile('image') && $req->file('image')->getSize() >= 1024) {
+            return response()->json(["message" => "Image size must be less than 1 KB.", "success" => false], 400);
+        }
+
         if (!File::exists("storage/admin/dietaries_icons/")) {
             File::makeDirectory("storage/admin/dietaries_icons/", $mode = 0777, true, true);
         }
@@ -815,7 +852,7 @@ class AdminController extends Controller
                 $updateData['small_description'] = $req->small_description;
             }
             Dietary::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Dietary preference updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -841,7 +878,7 @@ class AdminController extends Controller
                 unlink(str_replace(env('filePath'), '', $images));
             }
             Dietary::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Dietary preference deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -866,7 +903,7 @@ class AdminController extends Controller
             $heating->title = $req->title;
             $heating->description = $req->description;
             $heating->save();
-            return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+            return response()->json(["message" => "Heating instruction added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -888,7 +925,7 @@ class AdminController extends Controller
             $data = HeatingInstruction::where('id', $req->id)->first();
             $updateData = $req->all();
             HeatingInstruction::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Heating instruction updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -909,7 +946,7 @@ class AdminController extends Controller
         try {
             $data = HeatingInstruction::where('id', $req->id)->first();
             HeatingInstruction::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Heating instruction deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -935,7 +972,7 @@ class AdminController extends Controller
             }
             // $updateData = $req->status;
             HeatingInstruction::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Heating instruction status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -961,7 +998,7 @@ class AdminController extends Controller
                 $ingredient = new Ingredient();
                 $ingredient->ing_name = $req->ing_name;
                 $ingredient->save();
-                return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+                return response()->json(["message" => "Ingredient added successfully.", "success" => true], 200);
             }
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -984,7 +1021,7 @@ class AdminController extends Controller
             $data = Ingredient::where('id', $req->id)->first();
             $updateData = $req->all();
             Ingredient::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Ingredient updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1005,7 +1042,7 @@ class AdminController extends Controller
         try {
             $data = Ingredient::where('id', $req->id)->first();
             Ingredient::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Ingredient deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1031,7 +1068,7 @@ class AdminController extends Controller
             }
             // $updateData = $req->status;
             Ingredient::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Ingredient status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1323,7 +1360,7 @@ class AdminController extends Controller
         }
         try {
             Contact::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Contact status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1456,7 +1493,7 @@ class AdminController extends Controller
         }
         try {
             RequestForUpdateDetails::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Change request status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1501,7 +1538,7 @@ class AdminController extends Controller
             }
             $UserController = new UserController;
             $UserController->updateChefrating($chefReviewDeleteRequest->chef_id);
-            return response()->json(["message" => 'Updated successfully', 'success' => true], 200);
+            return response()->json(["message" => 'Chef review delete request status updated successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1849,7 +1886,7 @@ class AdminController extends Controller
         }
         try {
             PackingTemplates::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Food packaging template deleted successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1861,7 +1898,7 @@ class AdminController extends Controller
     {
         try {
             $subOrder = SubOrders::whereIn('status', ['3', 'approve'])->get();
-            return response()->json(['message' => 'Deleted successfully', 'success' => true, 'data' => $subOrder], 200);
+            return response()->json(['message' => 'Chef accepted sub-orders fetched successfully.', 'success' => true, 'data' => $subOrder], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -2062,7 +2099,7 @@ class AdminController extends Controller
                 $admin->notify(new NewReviewNotification($reviewDetails));
             }
             $this->updateChefrating($req->chef_id);
-            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef review submitted successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();

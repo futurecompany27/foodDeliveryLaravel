@@ -419,7 +419,7 @@ class ChefController extends Controller
             } catch (\Exception $e) {
                 Log::error($e);
             }
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Details updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -482,7 +482,7 @@ class ChefController extends Controller
             }
             $chef->status = 0;
             $chef->save();
-            return response()->json(['message' => 'Updated successfully', "success" => true], 200);
+            return response()->json(['message' => 'Social media links updated successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -518,7 +518,7 @@ class ChefController extends Controller
             $chef->institution_number = $req->institution_number;
             $chef->status = 0;
             $chef->save();
-            return response()->json(['message' => "Updated successfully", "success" => true], 200);
+            return response()->json(['message' => "Bank details updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -662,7 +662,7 @@ class ChefController extends Controller
             }
 
             DB::commit();
-            return response()->json(['message' => "Updated successfully", 'success' => true], 200);
+            return response()->json(['message' => "Documents updated successfully.", 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -750,7 +750,7 @@ class ChefController extends Controller
 
             Chef::where('id', $chef->id)->update($update);
             DB::commit();
-            return response()->json(["message" => "Updated successfully", "success" => true], 200);
+            return response()->json(["message" => "Kitchen details updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -787,7 +787,7 @@ class ChefController extends Controller
                     // Get the public URL of the uploaded file
                     $url = $result['ObjectURL'];
                 Chef::where("id", $chef->id)->update(["are_you_a_file_path" => $url, "are_you_a" => $req->are_you_a, 'status' => 0]);
-                return response()->json(["message" => "Updated successfully", "success" => true], 200);
+                return response()->json(["message" => "Special benefits updated successfully.", "success" => true], 200);
             } else {
                 return response()->json(["message" => "Please upload proof of " . $req->are_you_a, "success" => false], 500);
             }
@@ -951,7 +951,7 @@ class ChefController extends Controller
                 foreach ($admins as $admin) {
                     $admin->notify(new ChefFoodItemNotification($chefDetail));
                 }
-                return response()->json(['message' => 'Item updated successfully', 'success' => true], 200);
+                return response()->json(['message' => 'Food item updated successfully.', 'success' => true], 200);
             } else {
                 $validator = Validator::make(
                     $req->all(),
@@ -1286,7 +1286,7 @@ class ChefController extends Controller
         }
         try {
             FoodItem::where('id', $req->food_id)->update(['foodAvailibiltyOnWeekdays' => $req->weekAvailibilty]);
-            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Week availibilty updated successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1335,7 +1335,7 @@ class ChefController extends Controller
         }
         try {
             ChefAlternativeContact::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Alternative contact number updated successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1406,7 +1406,7 @@ class ChefController extends Controller
                 $admin->notify(new ChefSendReviewToAdmin($chef));
             }
 
-            return response()->json(['message' => 'Request Submitted successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Profile review request submitted successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1632,7 +1632,7 @@ class ChefController extends Controller
                 Log::error($e);
             }
             $chef->notify(new foodItemstatusChangeMail($chefDetail));
-            return response()->json(["message" => 'Updated successfully', "success" => true], 200);
+            return response()->json(["message" => 'Food item status updated successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1749,7 +1749,7 @@ class ChefController extends Controller
                 unlink(str_replace(env('filePath'), '', $img));
             }
             FoodItem::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Item deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Food item deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1802,7 +1802,7 @@ class ChefController extends Controller
             }
 
             DB::commit();
-            return response()->json(['message' => 'Suggestion Added successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Chef suggestion added successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollBack();
@@ -1909,7 +1909,7 @@ class ChefController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => "Tax Information Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Tax information updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::error($th->getMessage());
             DB::rollback();
@@ -2025,7 +2025,7 @@ class ChefController extends Controller
                 'updated_at' => Carbon::now()
             ]);
 
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Order status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -2057,7 +2057,7 @@ class ChefController extends Controller
                 }
                 $storedPath = $req->file('story_img')->store($path, 'public');
                 Chef::where("id", $req->chef_id)->update(["story_img" => asset('storage/' . $storedPath), "story" => $req->story]);
-                return response()->json(["message" => "Updated successfully", "success" => true], 200);
+                return response()->json(["message" => "Chef story updated successfully.", "success" => true], 200);
             } else {
                 return response()->json(["message" => "Please upload image", "success" => false], 500);
             }
@@ -2120,7 +2120,7 @@ class ChefController extends Controller
             }
             // Save the changes
             $chefDetail->save();
-            return response()->json(['message' => "Food Certificate Status Updated Successfully", "success" => true, 'data' => $chefDetail], 200);
+            return response()->json(['message' => "Food certificate status updated successfully.", "success" => true, 'data' => $chefDetail], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -2335,7 +2335,7 @@ class ChefController extends Controller
             $chef = Chef::find($request->id);
             $chef->delete();
 
-            return response()->json(['success' => true, 'message' => 'Chef deleted successfully'], 200);
+            return response()->json(['success' => true, 'message' => 'Chef deleted successfully.'], 200);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error($e);

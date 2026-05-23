@@ -424,7 +424,7 @@ class DriverController extends Controller
             $driver->save();
 
             DB::commit();
-            return response()->json(['message' => "Tax Information Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Driver tax information updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -496,7 +496,7 @@ class DriverController extends Controller
                 $storedPath = $req->file('criminal_report')->store($path, 'public');
                 Driver::where('id', $driver->id)->update(['criminal_report' => asset('storage/' . $storedPath), 'status' => 0]);
             }
-            return response()->json(['message' => 'updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Criminal report updated successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -597,7 +597,7 @@ class DriverController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new DriverContactUsNotification($contactUs));
             }
-            return response()->json(['message' => 'Submitted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Driver contact form submitted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1073,7 +1073,7 @@ class DriverController extends Controller
             } catch (\Exception $e) {
                 Log::error($e);
             }
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Driver profile status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1098,7 +1098,7 @@ class DriverController extends Controller
                 $admin->notify(new DriverSendReviewToAdmin($driver));
             }
 
-            return response()->json(['message' => 'Request Submitted successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Driver profile review request submitted successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();

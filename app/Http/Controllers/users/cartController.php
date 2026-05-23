@@ -59,7 +59,7 @@ class CartController extends Controller
             //     }
             // }
 
-            return response()->json(["message" => "Added successfully", "success" => true], 200);
+            return response()->json(["message" => "Item added to cart successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -198,9 +198,9 @@ class CartController extends Controller
                     }
                 }
                 Cart::where("user_id", $user->id)->update(["cartData" => $cartData]);
-                return response()->json(["message" => "updated successfully", "success" => true], 200);
+                return response()->json(["message" => "Cart updated successfully.", "success" => true], 200);
             } else {
-                return response()->json(["message" => "updated successfully", "success" => true], 200);
+                return response()->json(["message" => "Cart updated successfully.", "success" => true], 200);
             }
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -324,7 +324,7 @@ class CartController extends Controller
         try {
             $user = auth()->guard('user')->user();
             Cart::where("user_id", $user->id)->update(['cartDeliveryDate' => $req->cartDeliveryDate]);
-            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Cart delivery date updated successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
