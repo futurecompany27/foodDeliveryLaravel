@@ -394,6 +394,9 @@ Route::prefix('admin')->group(function () {
             Route::post('/getChefOrders', 'getChefOrders');
             Route::get('/orderInvoicePDF', 'orderInvoicePDF'); //chefcontroller
             Route::get('/getFoodLicenseList', 'getFoodLicenseList');
+            Route::post('/updateFoodLicenseStatus', 'updateFoodLicenseStatus');
+            Route::post('/deleteFoodLicense', 'deleteFoodLicense');
+            Route::post('/getFoodLicenseData', 'getFoodLicenseData');
             Route::post('/updateFoodItemAppprovedStatus', 'updateFoodItemAppprovedStatus');
             Route::post('/getChefDetails', 'getChefDetails');
             Route::post('/updateChefOrderStatus', 'updateChefOrderStatus');
