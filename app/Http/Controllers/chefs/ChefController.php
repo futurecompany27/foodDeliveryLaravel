@@ -1598,6 +1598,26 @@ class ChefController extends Controller
         }
     }
 
+    function deleteChefRegisterationRequest(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|integer|exists:shef_registeration_requests,id',
+        ], [
+            'id.required' => 'Please provide request id',
+            'id.exists' => 'Chef registration request not found',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first(), 'success' => false], 400);
+        }
+        try {
+            ShefRegisterationRequest::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Chef registration request deleted successfully.', 'success' => true], 200);
+        } catch (\Exception $th) {
+            Log::info($th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
+        }
+    }
+
     function updateFoodItemAppprovedStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -2273,17 +2293,17 @@ class ChefController extends Controller
         try {
             $chefs = FoodLicense::with(['chef:id,firstName,lastName,email,mobile'])->get();
 
-            $chefStatus = [
+            $statusLabels = [
                 0 => 'Verification Pending',
-                1 => 'Verified by Homeplate',
-                2 => 'Submitted to Govt',
-                3 => 'Issued by Govt',
+                1 => 'Approved by Homeplate',
+                2 => 'Wrong/Incomplete Data Submitted',
+                3 => 'Form Submitted to Govt',
                 4 => 'Rejected by Govt',
-                5 => 'Wrong Data Submitted',
+                5 => 'Certificate Issued by Govt',
             ];
-            $chefs->transform(function ($chef) use ($chefStatus) {
-                $chef->status = $chefStatus[$chef->status];
-                return $chef;
+            $chefs->transform(function ($license) use ($statusLabels) {
+                $license->status_label = $statusLabels[$license->status] ?? 'Unknown';
+                return $license;
             });
 
             return response()->json(['message' => 'Food license data retrieved successfully', 'food_license' => $chefs], 200);
@@ -2293,6 +2313,67 @@ class ChefController extends Controller
         }
     }
 
+
+    public function updateFoodLicenseStatus(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:food_licenses,id',
+            'status' => 'required|in:0,1,2,3,4,5',
+        ], [
+            'id.required' => 'Please provide the food license ID.',
+            'status.required' => 'Please select a status.',
+            'status.in' => 'Invalid status selected.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+
+        try {
+            $license = FoodLicense::find($request->id);
+            if (!$license) {
+                return response()->json(['success' => false, 'message' => 'Food license not found'], 404);
+            }
+            // food_licenses.status is a MySQL ENUM stored as string ('0'..'5')
+            $license->status = (string) $request->status;
+            $license->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Food certificate status updated successfully.',
+                'data' => $license,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong. Please try again.'], 500);
+        }
+    }
+
+    public function deleteFoodLicense(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer',
+        ], [
+            'id.required' => 'Please provide the food license ID.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 400);
+        }
+
+        try {
+            $license = FoodLicense::find($request->id);
+            if (!$license) {
+                return response()->json(['success' => false, 'message' => 'Food license not found'], 404);
+            }
+            $license->delete(); // soft delete (deleted_at)
+
+            return response()->json(['success' => true, 'message' => 'Food certificate removed successfully.'], 200);
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json(['success' => false, 'message' => 'Oops! Something went wrong. Please try again.'], 500);
+        }
+    }
 
     public function getFoodLicenseData(Request $request)
     {
