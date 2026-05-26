@@ -386,6 +386,7 @@ Route::prefix('admin')->group(function () {
             Route::post('/deleteChefSchedule', 'deleteChefSchedule');
             Route::post('/getAllPendingRequest', 'getAllPendingRequest');
             Route::get('/getChefRegisterationRequest', 'getChefRegisterationRequest');
+            Route::post('/deleteChefRegisterationRequest', 'deleteChefRegisterationRequest');
             Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
             Route::post('/getMyFoodItems', 'getMyFoodItems');
             Route::post('/deleteChef', 'deleteChef');

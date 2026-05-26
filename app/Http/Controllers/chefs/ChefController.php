@@ -1598,6 +1598,26 @@ class ChefController extends Controller
         }
     }
 
+    function deleteChefRegisterationRequest(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|integer|exists:shef_registeration_requests,id',
+        ], [
+            'id.required' => 'Please provide request id',
+            'id.exists' => 'Chef registration request not found',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first(), 'success' => false], 400);
+        }
+        try {
+            ShefRegisterationRequest::where('id', $req->id)->delete();
+            return response()->json(['message' => 'Chef registration request deleted successfully.', 'success' => true], 200);
+        } catch (\Exception $th) {
+            Log::info($th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong', 'success' => false], 500);
+        }
+    }
+
     function updateFoodItemAppprovedStatus(Request $req)
     {
         $validator = Validator::make($req->all(), [
