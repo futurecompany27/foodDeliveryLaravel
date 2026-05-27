@@ -200,7 +200,7 @@ class UserController extends Controller
             }
             // $updateData = $req->status;
             User::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "User detail updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -951,6 +951,13 @@ class UserController extends Controller
         }
     }
 
+    public function deleteRecordNotFound(Request $req)
+    {
+        $req->validate(['id' => 'required|integer|exists:no_record_found,id']);
+        NoRecordFound::where('id', $req->id)->delete();
+        return response()->json(['message' => 'Search record deleted successfully.', 'success' => true], 200);
+    }
+
     function addUpdateShippingAddress(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -1185,7 +1192,7 @@ class UserController extends Controller
             foreach ($admins as $admin) {
                 $admin->notify(new CustomerContactUsNotification($contactUSDetails));
             }
-            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+            return response()->json(['message' => "Contact form submitted successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1207,7 +1214,7 @@ class UserController extends Controller
         }
         try {
             UserContact::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Contact updated successfully.", "success" => true], 200);
         } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1227,6 +1234,13 @@ class UserController extends Controller
             DB::rollback();
             return response()->json(['error' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
+    }
+
+    function deleteUserContact(Request $req)
+    {
+        $req->validate(['id' => 'required|integer|exists:user_contacts,id']);
+        UserContact::where('id', $req->id)->delete();
+        return response()->json(['message' => 'Contact deleted successfully', 'success' => true], 200);
     }
 
     function ChefReview(Request $req)
@@ -1265,7 +1279,7 @@ class UserController extends Controller
                 $admin->notify(new NewReviewNotification($reviewDetails));
             }
             $this->updateChefrating($req->chef_id);
-            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef review submitted successfully.", "success" => true], 200);
         } catch (Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1297,7 +1311,7 @@ class UserController extends Controller
         }
         try {
             ChefReview::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Chef review deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1323,7 +1337,7 @@ class UserController extends Controller
 
             // Pagination logic
             $totalRecords = $query->count();
-            $skip = $req->page * 10;
+            $skip = ((int) ($req->page ?? 0)) * 10;
             $data = $query->skip($skip)->take(10)->with('user:firstName,lastName,id')->get();
 
             // $totalRecords = ChefReview::where(['chef_id' => $req->chef_id, 'status' => 1])->count();
@@ -1564,7 +1578,7 @@ class UserController extends Controller
                     return response()->json(['message' => 'Chef details not found for food item ID:' . ($req->food_id), 'success' => false], 400);
                 }
 
-                return response()->json(['message' => 'Review updated successfully', 'success' => true], 200);
+                return response()->json(['message' => 'Food review updated successfully.', 'success' => true], 200);
             } else {
                 $chefDetail = FoodItem::with('chef')->find($req->food_id);
                 $message = ' sent a food review to you on ';
@@ -1573,7 +1587,7 @@ class UserController extends Controller
                 } else {
                     return response()->json(['message' => 'Chef details not found for food item ID:' . ($req->food_id), 'success' => false], 400);
                 }
-                return response()->json(['message' => 'Added successfully', 'success' => true], 200);
+                return response()->json(['message' => 'Food review added successfully.', 'success' => true], 200);
             }
         } catch (Exception $th) {
             Log::info($th->getMessage());
@@ -1672,7 +1686,7 @@ class UserController extends Controller
         }
         try {
             UserFoodReview::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Food review status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1700,7 +1714,7 @@ class UserController extends Controller
                 }
             }
             UserFoodReview::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Food review deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1755,7 +1769,7 @@ class UserController extends Controller
             }
             // $updateData = $req->status;
             UserChefReview::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef review status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1775,7 +1789,7 @@ class UserController extends Controller
         }
         try {
             UserChefReview::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Chef review deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -2025,7 +2039,7 @@ class UserController extends Controller
             ];
             User::where('id', $user->id)->update($update);
             return response()->json([
-                'message' => 'Postal Code Updated successfully!',
+                'message' => 'Postal code updated successfully.',
             ], 200);
 
         } catch (Exception $th) {
@@ -2084,7 +2098,7 @@ class UserController extends Controller
         $dist = acos($dist);
         $dist = rad2deg($dist);
         $miles = $dist * 60 * 1.1515;
-    
+
         if ($unit == "K") {
             $distance = $miles * 1.609344;
         } elseif ($unit == "N") {
@@ -2092,7 +2106,7 @@ class UserController extends Controller
         } else {
             $distance = $miles;
         }
-    
-        return round($distance, 2); 
+
+        return round($distance, 2);
     }
 }

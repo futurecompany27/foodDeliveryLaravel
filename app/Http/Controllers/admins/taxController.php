@@ -22,7 +22,7 @@ class taxController extends Controller
             'tax_type.string' => 'Only letters allowed',
         ]);
         if ($validatedData->fails()) {
-            return response()->json(['message' => $validatedData->errors(), "success" => false], 400);
+            return response()->json(['message' => $validatedData->errors()->first(), "success" => false], 400);
         }
         try {
             DB::beginTransaction();
@@ -31,7 +31,7 @@ class taxController extends Controller
                 'tax_type' => strtoupper($req->tax_type),
             ]);
             DB::commit();
-            return response()->json(['message' => "Added successfully", "success" => true], 200);
+            return response()->json(['message' => "Tax type added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -53,15 +53,15 @@ class taxController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            if ($req->tax_type) {
-                $updateData['tax_type'] = strtoupper($req->tax_type);
+            $tax = Tax::where('id', $req->id)->first();
+            if (!$tax) {
+                return response()->json(['message' => 'Tax type not found.', 'success' => false], 404);
             }
-            $data = Tax::where('id', $req->id)->first();
-            Tax::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            $tax->tax_type = strtoupper(trim($req->tax_type));
+            $tax->save();
+            return response()->json(['message' => 'Tax type updated successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
@@ -112,7 +112,7 @@ class taxController extends Controller
             // Proceed with deletion
             try {
                 $tax->delete();
-                return response()->json(['message' => 'Tax deleted successfully.', 'success' => true], 200);
+                return response()->json(['message' => 'Tax type deleted successfully.', 'success' => true], 200);
             } catch (\Exception $th) {
                 Log::info($th->getMessage());
                 DB::rollback();
@@ -130,13 +130,16 @@ class taxController extends Controller
                 return response()->json(['data' => $tax, 'success' => true], 200);
             } else {
                 $totalRecords = Tax::count();
-                $skip = $req->page * 10;
-                $data = Tax::skip($skip)->take(10)->get();
+                if ($req->filled('page')) {
+                    $skip = (int) $req->page * 10;
+                    $data = Tax::skip($skip)->take(10)->get();
+                } else {
+                    $data = Tax::orderBy('tax_type')->get();
+                }
                 return response()->json(['data' => $data, 'TotalRecords' => $totalRecords, 'success' => true], 200);
             }
         } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }

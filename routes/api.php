@@ -79,6 +79,7 @@ Route::prefix('chef')->group(function () {
         Route::controller(AdminController::class)->group(function () {
             Route::get('/getAdminSettings', 'getAdminSettings');
             Route::get('/getAllUsers', 'getAllUsers');
+            Route::get('/getTemplates', 'getTemplates');
         });
         Route::controller(notificationController::class)->group(function () {
             Route::post('/getUnreadNotificationAccordingToUserTypes', 'getUnreadNotificationAccordingToUserTypes'); // chef panel
@@ -368,20 +369,24 @@ Route::prefix('admin')->group(function () {
         Route::controller(commonFunctions::class)->group(function () {
             Route::get("/getAllScheduleCall", 'getAllScheduleCall'); // admin panel
             Route::get("/getAllDriverScheduleCall", 'getAllDriverScheduleCall'); // admin panel
+            Route::post('/deleteSiteFeedback', 'deleteSiteFeedback');
         });
         Route::controller(UserController::class)->group(function () {
             Route::get('/getUserContact', 'getUserContact');
             Route::post('/updateUserDetailStatus', 'updateUserDetailStatus');
             Route::get('/getRecordNotFound', 'getRecordNotFound');
+            Route::post('/deleteRecordNotFound', 'deleteRecordNotFound');
             Route::get('/getChefReview', 'getChefReview');
             Route::post('/getAllUserFoodReviewsbyStatus', 'getAllUserFoodReviewsbyStatus');
             Route::post('/addOrUpdateFoodReview', 'addOrUpdateFoodReview');
             Route::post('/updateContactStatus', 'updateContactStatus');
+            Route::post('/deleteUserContact', 'deleteUserContact');
         });
         Route::controller(ChefController::class)->group(function () {
             Route::post('/deleteChefSchedule', 'deleteChefSchedule');
             Route::post('/getAllPendingRequest', 'getAllPendingRequest');
             Route::get('/getChefRegisterationRequest', 'getChefRegisterationRequest');
+            Route::post('/deleteChefRegisterationRequest', 'deleteChefRegisterationRequest');
             Route::post('/updateChefDetailsStatus', 'updateChefDetailsStatus');
             Route::post('/getMyFoodItems', 'getMyFoodItems');
             Route::post('/deleteChef', 'deleteChef');
@@ -389,6 +394,9 @@ Route::prefix('admin')->group(function () {
             Route::post('/getChefOrders', 'getChefOrders');
             Route::get('/orderInvoicePDF', 'orderInvoicePDF'); //chefcontroller
             Route::get('/getFoodLicenseList', 'getFoodLicenseList');
+            Route::post('/updateFoodLicenseStatus', 'updateFoodLicenseStatus');
+            Route::post('/deleteFoodLicense', 'deleteFoodLicense');
+            Route::post('/getFoodLicenseData', 'getFoodLicenseData');
             Route::post('/updateFoodItemAppprovedStatus', 'updateFoodItemAppprovedStatus');
             Route::post('/getChefDetails', 'getChefDetails');
             Route::post('/updateChefOrderStatus', 'updateChefOrderStatus');
@@ -454,6 +462,7 @@ Route::prefix('admin')->group(function () {
 
             Route::get('/getAllSubOrderDetails', 'getAllSubOrderDetails');
             Route::post('/getAllOrderDetails', 'getAllOrderDetails');
+            Route::post('/getAllOrdersSummaryData', 'getAllOrdersSummaryData');
             Route::post('/getAdminOrderDetailsById', 'getAdminOrderDetailsById');
             Route::post('/getAdminSubOrderDetailsById', 'getAdminSubOrderDetailsById');
 

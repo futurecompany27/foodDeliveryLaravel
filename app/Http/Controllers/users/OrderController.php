@@ -455,7 +455,7 @@ class OrderController extends Controller
                 }
             }
 
-            return response()->json(['message' => 'Updated successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Order status updated successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();

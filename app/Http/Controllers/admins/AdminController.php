@@ -166,8 +166,26 @@ class AdminController extends Controller
     {
         $validator = Validator::make($req->all(), [
             "id" => 'required',
+            "phone_one" => 'required|regex:/^[0-9]{10,12}$/',
+            "email" => 'required|email',
+            "company_name" => 'required',
+            "company_address" => 'required',
+            "copyright" => 'required',
+            "created_by_company" => 'required',
+            "created_by_company_link" => 'required',
+            "phone_two" => 'nullable|regex:/^[0-9]{10,12}$/',
         ], [
             "id.required" => "Please fill id",
+            "phone_one.required" => "Phone number is required.",
+            "phone_one.regex" => "Phone number must be 10 to 12 digits.",
+            "email.required" => "Company email is required.",
+            "email.email" => "Please enter a valid email.",
+            "company_name.required" => "Company name is required.",
+            "company_address.required" => "Company address is required.",
+            "copyright.required" => "Copyright is required.",
+            "created_by_company.required" => "Developed by is required.",
+            "created_by_company_link.required" => "URL of IT company is required.",
+            "phone_two.regex" => "Phone number 2 must be 10 to 12 digits.",
         ]);
 
         if ($validator->fails()) {
@@ -178,7 +196,7 @@ class AdminController extends Controller
             if ($data) {
                 $updateData = $req->all();
                 Sitesetting::where('id', $req->id)->update($updateData);
-                return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+                return response()->json(['message' => "Site settings updated successfully.", "success" => true], 200);
             } else {
                 $siteSeting = new Sitesetting();
                 $siteSeting->phone_one = $req->phone_one;
@@ -194,7 +212,7 @@ class AdminController extends Controller
                 $siteSeting->created_by_company_link = $req->created_by_company_link;
                 $siteSeting->created_by_company = $req->created_by_company;
                 $siteSeting->save();
-                return response()->json(['message' => "Added Successfully", "success" => true], 200);
+                return response()->json(['message' => "Site settings added successfully.", "success" => true], 200);
             }
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -216,7 +234,7 @@ class AdminController extends Controller
         try {
             $data = Sitesetting::where('id', $req->id)->first();
             $data->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Site settings deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -296,7 +314,7 @@ class AdminController extends Controller
             $adminSetting->certificate_handling_cost = $req->certificate_handling_cost;
 
             $adminSetting->save();
-            return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+            return response()->json(["message" => "Admin settings added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -324,7 +342,7 @@ class AdminController extends Controller
             $updateData = $req->all();
 
             Adminsetting::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Admin settings updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -344,7 +362,7 @@ class AdminController extends Controller
         }
         try {
             Adminsetting::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Admin settings deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -365,10 +383,13 @@ class AdminController extends Controller
 
     public function addFoodTypes(Request $req)
     {
+        if ($req->commission === '' || $req->commission === null) {
+            $req->merge(['commission' => null]);
+        }
         $validator = Validator::make($req->all(), [
             "category" => 'required',
             "commission" => 'nullable|integer|between:1,100',
-            "image" => 'required',
+            "image" => 'required|file',
         ], [
             "category.required" => "Please fill category",
             "image.required" => "Please fill image",
@@ -376,79 +397,86 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
-        if ($req->hasFile('image')) {
-            $file = $req->file('image');
-                $fileName = 'foodCategory/'  . time() . '_' . $file->getClientOriginalName();
-
-                $s3 = AwsHelper::cred();
-
-                    // Upload file to S3
-                    $result = $s3->putObject([
-                        'Bucket' => env('AWS_BUCKET'),
-                        'Key'    => $fileName,
-                        'Body'   => fopen($file->getPathname(), 'r'),
-                        'ContentType' => $file->getMimeType(),
-                    ]);
-
-                $filename = $result['ObjectURL'];
-        }
         try {
-            $foodcategory = new FoodCategory();
-            $foodcategory->category = $req->category;
-            // Check if 'commission' is provided; if not, set a default value
-            $foodcategory->commission = $req->commission ?? 10;
+            if (!$req->hasFile('image')) {
+                return response()->json(["message" => "Please fill image", "success" => false], 400);
+            }
+            $file = $req->file('image');
+            $fileName = 'foodCategory/' . time() . '_' . $file->getClientOriginalName();
 
-            $foodcategory->image = $filename;
+            $s3 = AwsHelper::cred();
+            $result = $s3->putObject([
+                'Bucket' => env('AWS_BUCKET'),
+                'Key' => $fileName,
+                'Body' => fopen($file->getPathname(), 'r'),
+                'ContentType' => $file->getMimeType(),
+            ]);
+
+            $foodcategory = new FoodCategory();
+            $foodcategory->category = trim($req->category);
+            $foodcategory->commission = $req->commission ?? 10;
+            $foodcategory->image = $result['ObjectURL'];
             $foodcategory->save();
-            return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+            return response()->json(["message" => "Food type added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+            $message = str_contains($th->getMessage(), 'client configuration')
+                ? 'Image upload is not configured. Please contact support.'
+                : 'Oops! Something went wrong.';
+            return response()->json(['message' => $message, 'success' => false], 500);
         }
     }
 
     public function updateFoodTypes(Request $req)
     {
+        if ($req->commission === '' || $req->commission === null) {
+            $req->merge(['commission' => null]);
+        }
         $validator = Validator::make($req->all(), [
             "id" => 'required',
+            "category" => 'required',
+            "commission" => 'nullable|integer|between:1,100',
+            "image" => 'nullable|file',
         ], [
             "id.required" => "Please fill id",
+            "category.required" => "Please fill category",
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
             $data = FoodCategory::where('id', $req->id)->first();
-            $updateData = [];
-            if ($req->category) {
-                $updateData['category'] = $req->category;
+            if (!$data) {
+                return response()->json(['message' => 'Food type not found.', 'success' => false], 404);
             }
-            if ($req->commission) {
-                $updateData['commission'] = $req->commission ? $req->commission : 10;
+            $updateData = [
+                'category' => trim($req->category),
+            ];
+            if ($req->filled('commission')) {
+                $updateData['commission'] = $req->commission;
             }
             if ($req->hasFile('image')) {
                 $file = $req->file('image');
-                $fileName = 'foodCategory/'  . time() . '_' . $file->getClientOriginalName();
+                $fileName = 'foodCategory/' . time() . '_' . $file->getClientOriginalName();
 
                 $s3 = AwsHelper::cred();
-
-                    // Upload file to S3
-                    $result = $s3->putObject([
-                        'Bucket' => env('AWS_BUCKET'),
-                        'Key'    => $fileName,
-                        'Body'   => fopen($file->getPathname(), 'r'),
-                        'ContentType' => $file->getMimeType(),
-                    ]);
+                $result = $s3->putObject([
+                    'Bucket' => env('AWS_BUCKET'),
+                    'Key' => $fileName,
+                    'Body' => fopen($file->getPathname(), 'r'),
+                    'ContentType' => $file->getMimeType(),
+                ]);
 
                 $updateData['image'] = $result['ObjectURL'];
             }
             FoodCategory::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Food type updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
-            DB::rollback();
-            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+            $message = str_contains($th->getMessage(), 'client configuration')
+                ? 'Image upload is not configured. Please contact support.'
+                : 'Oops! Something went wrong.';
+            return response()->json(['message' => $message, 'success' => false], 500);
         }
     }
 
@@ -470,7 +498,7 @@ class AdminController extends Controller
                 unlink(str_replace(env('filePath'), '', $images));
             }
             FoodCategory::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Food type deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -492,6 +520,11 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->file('image')->getSize() >= 1024) {
+            return response()->json(["message" => "Image size must be less than 1 KB.", "success" => false], 400);
+        }
+
         try {
             $path = "storage/admin/allergen_icons/";
             if (!File::exists($path)) {
@@ -543,7 +576,7 @@ class AdminController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(["message" => "Added successfully", "success" => true], 201);
+            return response()->json(["message" => "Allergy added successfully.", "success" => true], 201);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -560,6 +593,10 @@ class AdminController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
+        }
+
+        if ($req->hasFile('image') && $req->file('image')->getSize() >= 1024) {
+            return response()->json(["message" => "Image size must be less than 1 KB.", "success" => false], 400);
         }
 
         try {
@@ -621,7 +658,7 @@ class AdminController extends Controller
                 $updateData['allergy_name'] = $req->allergy_name;
             }
             Allergy::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Allergy updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -647,7 +684,7 @@ class AdminController extends Controller
                 unlink(str_replace(env('filePath'), '', $images));
             }
             Allergy::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Allergy deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -669,6 +706,11 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->file('image')->getSize() >= 1024) {
+            return response()->json(["message" => "Image size must be less than 1 KB.", "success" => false], 400);
+        }
+
         try {
             $path = "storage/admin/dietaries_icons/";
             if (!File::exists($path)) {
@@ -682,7 +724,7 @@ class AdminController extends Controller
                 $big_image = $req->file('image');
 
                 // Generate new image name
-                $image_name = strtolower(trim($req->allergy_name));
+                $image_name = strtolower(trim($req->diet_name));
                 $new_name = str_replace(" ", "", $image_name);
                 $name_gen = $new_name . "." . $big_image->getClientOriginalExtension();
 
@@ -726,7 +768,7 @@ class AdminController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(["message" => "Added successfully", "success" => true], 201);
+            return response()->json(["message" => "Dietary preference added successfully.", "success" => true], 201);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -744,6 +786,11 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
+
+        if ($req->hasFile('image') && $req->file('image')->getSize() >= 1024) {
+            return response()->json(["message" => "Image size must be less than 1 KB.", "success" => false], 400);
+        }
+
         if (!File::exists("storage/admin/dietaries_icons/")) {
             File::makeDirectory("storage/admin/dietaries_icons/", $mode = 0777, true, true);
         }
@@ -805,7 +852,7 @@ class AdminController extends Controller
                 $updateData['small_description'] = $req->small_description;
             }
             Dietary::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Dietary preference updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -831,7 +878,7 @@ class AdminController extends Controller
                 unlink(str_replace(env('filePath'), '', $images));
             }
             Dietary::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Dietary preference deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -856,7 +903,7 @@ class AdminController extends Controller
             $heating->title = $req->title;
             $heating->description = $req->description;
             $heating->save();
-            return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+            return response()->json(["message" => "Heating instruction added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -878,7 +925,7 @@ class AdminController extends Controller
             $data = HeatingInstruction::where('id', $req->id)->first();
             $updateData = $req->all();
             HeatingInstruction::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Heating instruction updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -899,7 +946,7 @@ class AdminController extends Controller
         try {
             $data = HeatingInstruction::where('id', $req->id)->first();
             HeatingInstruction::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Heating instruction deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -925,7 +972,7 @@ class AdminController extends Controller
             }
             // $updateData = $req->status;
             HeatingInstruction::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Heating instruction status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -951,7 +998,7 @@ class AdminController extends Controller
                 $ingredient = new Ingredient();
                 $ingredient->ing_name = $req->ing_name;
                 $ingredient->save();
-                return response()->json(["message" => "Submitted successfully", "success" => true], 200);
+                return response()->json(["message" => "Ingredient added successfully.", "success" => true], 200);
             }
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -974,7 +1021,7 @@ class AdminController extends Controller
             $data = Ingredient::where('id', $req->id)->first();
             $updateData = $req->all();
             Ingredient::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Ingredient updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -995,7 +1042,7 @@ class AdminController extends Controller
         try {
             $data = Ingredient::where('id', $req->id)->first();
             Ingredient::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Ingredient deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1021,7 +1068,7 @@ class AdminController extends Controller
             }
             // $updateData = $req->status;
             Ingredient::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Ingredient status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1313,7 +1360,7 @@ class AdminController extends Controller
         }
         try {
             Contact::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Contact status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1446,7 +1493,7 @@ class AdminController extends Controller
         }
         try {
             RequestForUpdateDetails::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Change request status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1454,18 +1501,19 @@ class AdminController extends Controller
         }
     }
 
-    function getAllRequestForChefReviewDeletion()
+    function getAllRequestForChefReviewDeletion(Request $req)
     {
-        // try {
-        //     $TotalRecords = ChefReviewDeleteRequest::where(['status' => 0])->count();
-        //     $data = ChefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at')->where(['status' => 0])->get();
-        //     return response()->json(['data' => $data, 'TotalRecords' => $TotalRecords, 'success' => true], 200);
-        // } catch (\Exception $th) {
-        //     Log::info($th->getMessage());
-        //     DB::rollback();
-        //     return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
-        // }
-        return response()->json(['data' => [], 'TotalRecords' => 0, 'success' => true], 200);
+        try {
+            $query = ChefReviewDeleteRequest::with(['user', 'chef', 'review'])->orderByDesc('created_at');
+            if ($req->filled('status') && $req->status !== 'all') {
+                $query->where('status', $req->status);
+            }
+            $data = $query->get();
+            return response()->json(['data' => $data, 'TotalRecords' => $data->count(), 'success' => true], 200);
+        } catch (\Exception $th) {
+            Log::info($th->getMessage());
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
+        }
     }
 
     function updateStatusOfChefReviewDeleteRequest(Request $req)
@@ -1490,7 +1538,7 @@ class AdminController extends Controller
             }
             $UserController = new UserController;
             $UserController->updateChefrating($chefReviewDeleteRequest->chef_id);
-            return response()->json(["message" => 'Updated successfully', 'success' => true], 200);
+            return response()->json(["message" => 'Chef review delete request status updated successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1619,15 +1667,15 @@ class AdminController extends Controller
     {
         try {
             $query = Order::query();
+            if ($req->user_id) {
+                $query->where('user_id', $req->user_id);
+            }
             if ($req->filter) {
                 if ($req->from_date) {
                     $query->whereDate('created_at', '>=', $req->from_date);
                 }
                 if ($req->to_date) {
                     $query->whereDate('created_at', '<=', $req->to_date);
-                }
-                if ($req->user_id) {
-                    $query->where('user_id', $req->user_id);
                 }
                 if ($req->chef_id) {
                     $query->whereHas('subOrders', function ($subQuery) use ($req) {
@@ -1781,6 +1829,7 @@ class AdminController extends Controller
                 $newTemplate->category = $req->category;
                 $newTemplate->name = $req->name;
                 $newTemplate->template = $req->template;
+                $newTemplate->status = 1;
                 $newTemplate->save();
                 return response()->json(['message' => 'Added template successfully', 'success' => true], 200);
             }
@@ -1795,8 +1844,8 @@ class AdminController extends Controller
     {
         try {
             $query = PackingTemplates::query();
-            if ($req->status) {
-                $query->where('status', $req->status);
+            if ($req->filled('status')) {
+                $query->where('status', (int) $req->status);
             }
             $data = $query->get();
             return response()->json(['data' => $data, 'success' => true], 200);
@@ -1837,7 +1886,7 @@ class AdminController extends Controller
         }
         try {
             PackingTemplates::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', 'success' => true], 200);
+            return response()->json(['message' => 'Food packaging template deleted successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -1849,7 +1898,7 @@ class AdminController extends Controller
     {
         try {
             $subOrder = SubOrders::whereIn('status', ['3', 'approve'])->get();
-            return response()->json(['message' => 'Deleted successfully', 'success' => true, 'data' => $subOrder], 200);
+            return response()->json(['message' => 'Chef accepted sub-orders fetched successfully.', 'success' => true, 'data' => $subOrder], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -2050,7 +2099,7 @@ class AdminController extends Controller
                 $admin->notify(new NewReviewNotification($reviewDetails));
             }
             $this->updateChefrating($req->chef_id);
-            return response()->json(['message' => "Submitted successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef review submitted successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -2108,5 +2157,274 @@ class AdminController extends Controller
             'success' => true,
             'data' => $chef
         ]);
+    }
+
+    public function getAllOrdersSummaryData(Request $req)
+    {
+        try {
+            $adminSettings = Adminsetting::latest()->first();
+            $chefServiceCharge = (float) ($adminSettings->chef_service_charges ?? 0);
+            $driverServiceCharge = (float) ($adminSettings->driver_service_charges ?? 0);
+
+            $query = Order::query()->with('subOrders')->orderByDesc('created_at');
+
+            if ($req->filled('date_from')) {
+                $query->whereDate('created_at', '>=', $req->date_from);
+            }
+            if ($req->filled('date_to')) {
+                $query->whereDate('created_at', '<=', $req->date_to);
+            }
+            if ($req->filled('status')) {
+                $query->where('payment_status', $req->status);
+            }
+
+            $orderRows = $query->get();
+            $orders = [];
+            $pageTotals = $this->emptyOrderSummaryTotals();
+
+            foreach ($orderRows as $order) {
+                $summary = $this->buildOrderIncomeSummary($order, $chefServiceCharge, $driverServiceCharge);
+                $orders[] = [
+                    'order_no' => $order->order_id,
+                    'date' => $order->created_at,
+                    'order_amount' => round((float) ($order->grand_total ?? 0), 2),
+                    'summary' => $summary,
+                ];
+                $this->accumulateOrderSummaryTotals($pageTotals, $summary);
+            }
+
+            foreach ($pageTotals as $key => $value) {
+                $pageTotals[$key] = round((float) $value, 2);
+            }
+
+            return response()->json([
+                'success' => true,
+                'TotalRecords' => count($orders),
+                'data' => [
+                    'orders' => $orders,
+                    'page_totals' => $pageTotals,
+                ],
+            ], 200);
+        } catch (\Exception $th) {
+            Log::error($th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops! Something went wrong.',
+            ], 500);
+        }
+    }
+
+    private function emptyOrderSummaryTotals(): array
+    {
+        return [
+            'commission_for_all_chefs' => 0,
+            'tax_amount_for_all_chef_gst' => 0,
+            'tax_amount_for_all_chef_qst' => 0,
+            'total_commission_from_chef' => 0,
+            'commission_for_driver' => 0,
+            'tax_amount_for_driver_gst' => 0,
+            'tax_amount_for_driver_qst' => 0,
+            'total_commission_from_driver' => 0,
+            'service_charges_from_all_chef' => 0,
+            'service_charges_for_driver_gst' => 0,
+            'service_charges_for_driver_qst' => 0,
+            'total_service_charges_from_chef' => 0,
+            'service_charges_from_drivers' => 0,
+            'service_charges_for_chef_tps' => 0,
+            'service_charges_for_chef_qst' => 0,
+            'total_service_charges_from_drivers' => 0,
+            'total_chef_earning' => 0,
+            'total_driver_earning' => 0,
+            'total_admin_earning' => 0,
+        ];
+    }
+
+    private function buildOrderIncomeSummary(Order $order, float $chefServiceCharge, float $driverServiceCharge): array
+    {
+        $summary = $this->emptyOrderSummaryTotals();
+        $subOrders = $order->subOrders ?? collect();
+        $taxRates = $this->resolveOrderTaxRates($order->tax_types);
+
+        foreach ($subOrders as $subOrder) {
+            $chefCommission = (float) ($subOrder->chef_commission_amount ?? 0);
+            $chefGst = $this->sumTaxAmounts($subOrder->chef_commission_taxes, 'GST');
+            $chefQst = $this->sumTaxAmounts($subOrder->chef_commission_taxes, 'QST');
+
+            $driverCommission = (float) ($subOrder->driver_commission_amount ?? 0);
+            $driverGst = $this->sumTaxAmounts($subOrder->driver_commission_taxes, 'GST');
+            $driverQst = $this->sumTaxAmounts($subOrder->driver_commission_taxes, 'QST');
+
+            $chefServiceBase = $chefServiceCharge;
+            $driverServiceBase = $subOrder->driver_id ? $driverServiceCharge : 0;
+            $chefServiceGst = round($chefServiceBase * ($taxRates['GST'] / 100), 2);
+            $chefServiceQst = round($chefServiceBase * ($taxRates['QST'] / 100), 2);
+            $driverServiceGst = round($driverServiceBase * ($taxRates['GST'] / 100), 2);
+            $driverServiceQst = round($driverServiceBase * ($taxRates['QST'] / 100), 2);
+
+            $chefCommissionTaxTotal = $chefGst + $chefQst;
+            $chefEarning = round(
+                (float) ($subOrder->amount ?? 0)
+                + (float) ($subOrder->tip_amount ?? 0)
+                - $chefCommission
+                - $chefCommissionTaxTotal
+                - $chefServiceBase,
+                2
+            );
+
+            $driverCommissionTaxTotal = $driverGst + $driverQst;
+            $driverEarning = round(
+                (float) ($subOrder->tip_amount ?? 0)
+                - $driverCommission
+                - $driverCommissionTaxTotal
+                - $driverServiceBase,
+                2
+            );
+
+            $summary['commission_for_all_chefs'] += $chefCommission;
+            $summary['tax_amount_for_all_chef_gst'] += $chefGst;
+            $summary['tax_amount_for_all_chef_qst'] += $chefQst;
+            $summary['commission_for_driver'] += $driverCommission;
+            $summary['tax_amount_for_driver_gst'] += $driverGst;
+            $summary['tax_amount_for_driver_qst'] += $driverQst;
+            $summary['service_charges_from_all_chef'] += $chefServiceBase;
+            $summary['service_charges_for_driver_gst'] += $chefServiceGst;
+            $summary['service_charges_for_driver_qst'] += $chefServiceQst;
+            $summary['service_charges_from_drivers'] += $driverServiceBase;
+            $summary['service_charges_for_chef_tps'] += $driverServiceGst;
+            $summary['service_charges_for_chef_qst'] += $driverServiceQst;
+            $summary['total_chef_earning'] += $chefEarning;
+            $summary['total_driver_earning'] += $driverEarning;
+        }
+
+        $summary['total_commission_from_chef'] =
+            $summary['commission_for_all_chefs']
+            + $summary['tax_amount_for_all_chef_gst']
+            + $summary['tax_amount_for_all_chef_qst'];
+
+        $summary['total_commission_from_driver'] =
+            $summary['commission_for_driver']
+            + $summary['tax_amount_for_driver_gst']
+            + $summary['tax_amount_for_driver_qst'];
+
+        $summary['total_service_charges_from_chef'] =
+            $summary['service_charges_from_all_chef']
+            + $summary['service_charges_for_driver_gst']
+            + $summary['service_charges_for_driver_qst'];
+
+        $summary['total_service_charges_from_drivers'] =
+            $summary['service_charges_from_drivers']
+            + $summary['service_charges_for_chef_tps']
+            + $summary['service_charges_for_chef_qst'];
+
+        $summary['total_admin_earning'] =
+            $summary['total_commission_from_chef']
+            + $summary['total_commission_from_driver']
+            + $summary['total_service_charges_from_chef']
+            + $summary['total_service_charges_from_drivers'];
+
+        foreach ($summary as $key => $value) {
+            $summary[$key] = round((float) $value, 2);
+        }
+
+        return $summary;
+    }
+
+    private function accumulateOrderSummaryTotals(array &$totals, array $summary): void
+    {
+        foreach ($summary as $key => $value) {
+            if (array_key_exists($key, $totals)) {
+                $totals[$key] += (float) $value;
+            }
+        }
+    }
+
+    private function resolveOrderTaxRates($taxTypes): array
+    {
+        $rates = ['GST' => 0.0, 'QST' => 0.0];
+        $decoded = is_string($taxTypes) ? json_decode($taxTypes, true) : $taxTypes;
+
+        if (!is_array($decoded)) {
+            return $rates;
+        }
+
+        if (isset($decoded['tax_type'], $decoded['tax_value']) && is_array($decoded['tax_type'])) {
+            foreach ($decoded['tax_type'] as $index => $type) {
+                $rate = (float) ($decoded['tax_value'][$index] ?? 0);
+                if ($this->taxTypeMatches((string) $type, 'GST')) {
+                    $rates['GST'] = $rate;
+                }
+                if ($this->taxTypeMatches((string) $type, 'QST')) {
+                    $rates['QST'] = $rate;
+                }
+            }
+            return $rates;
+        }
+
+        foreach ($decoded as $tax) {
+            if (!is_array($tax)) {
+                continue;
+            }
+            foreach ($tax as $key => $value) {
+                if ($key === 'Amount') {
+                    continue;
+                }
+                if ($this->taxTypeMatches((string) $key, 'GST')) {
+                    $rates['GST'] = (float) $value;
+                }
+                if ($this->taxTypeMatches((string) $key, 'QST')) {
+                    $rates['QST'] = (float) $value;
+                }
+            }
+        }
+
+        return $rates;
+    }
+
+    private function sumTaxAmounts($taxJson, ?string $match = null): float
+    {
+        if (empty($taxJson)) {
+            return 0.0;
+        }
+
+        $taxes = is_string($taxJson) ? json_decode($taxJson, true) : $taxJson;
+        if (!is_array($taxes)) {
+            return 0.0;
+        }
+
+        $sum = 0.0;
+        foreach ($taxes as $tax) {
+            if (!is_array($tax)) {
+                continue;
+            }
+
+            $type = null;
+            foreach ($tax as $key => $value) {
+                if ($key === 'Amount') {
+                    if ($match === null || ($type && $this->taxTypeMatches($type, $match))) {
+                        $sum += (float) $value;
+                    }
+                } else {
+                    $type = (string) $key;
+                }
+            }
+        }
+
+        return round($sum, 2);
+    }
+
+    private function taxTypeMatches(string $type, string $match): bool
+    {
+        $type = strtoupper($type);
+        $match = strtoupper($match);
+
+        if ($match === 'GST') {
+            return str_contains($type, 'GST') || str_contains($type, 'TPS');
+        }
+
+        if ($match === 'QST') {
+            return str_contains($type, 'QST') || str_contains($type, 'TVQ');
+        }
+
+        return str_contains($type, $match);
     }
 }
