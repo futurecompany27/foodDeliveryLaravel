@@ -408,7 +408,8 @@ class ChefController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            Chef::where('id', $req->id)->update(['status' => $req->status]);
+            $status = (int) $req->status;
+            Chef::where('id', $req->id)->update(['status' => $status]);
             $chefDetail = Chef::find($req->id);
             $chefDetail->notify(new ChefStatusUpdateNotification($chefDetail));
             RequestForUpdateDetails::where('chef_id', $req->id)->delete();
@@ -419,7 +420,11 @@ class ChefController extends Controller
             } catch (\Exception $e) {
                 Log::error($e);
             }
-            return response()->json(['message' => "Details updated successfully.", "success" => true], 200);
+            return response()->json([
+                'message' => "Details updated successfully.",
+                'success' => true,
+                'data' => ['id' => $chefDetail->id, 'status' => (string) $chefDetail->status],
+            ], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
