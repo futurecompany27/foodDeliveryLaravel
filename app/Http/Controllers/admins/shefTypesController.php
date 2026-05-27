@@ -34,7 +34,7 @@ class shefTypesController extends Controller
             ]);
             DB::commit();
 
-            return response()->json(['message' => 'Chef type created successfully', "success" => true], 200);
+            return response()->json(['message' => 'Chef type added successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -61,7 +61,7 @@ class shefTypesController extends Controller
             }
             $data = ShefType::where('id', $req->id)->first();
             ShefType::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef type updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -80,12 +80,15 @@ class shefTypesController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            $sheftype = ShefSubType::where('type_id', $req->id);
-            if($sheftype){
-                $sheftype ->delete();
-                return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            $shefType = ShefType::find($req->id);
+            if (!$shefType) {
+                return response()->json(['message' => 'Chef type not found.', 'success' => false], 404);
             }
-            return response()->json(['message' => 'ShefType not found', "success" => false], 400);
+            DB::beginTransaction();
+            ShefSubType::where('type_id', $req->id)->delete();
+            $shefType->delete();
+            DB::commit();
+            return response()->json(['message' => 'Chef type deleted successfully.', 'success' => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -93,10 +96,14 @@ class shefTypesController extends Controller
         }
     }
 
-    public function getAllShefTypes()
+    public function getAllShefTypes(Request $req)
     {
         try {
-            $data = ShefType::where('status', 1)->get();
+            $query = ShefType::query();
+            if (!$req->boolean('include_inactive')) {
+                $query->where('status', 1);
+            }
+            $data = $query->orderBy('id', 'desc')->get();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -123,7 +130,7 @@ class shefTypesController extends Controller
             }
             // $updateData = $req->status;
             ShefType::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef type status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -156,7 +163,7 @@ class shefTypesController extends Controller
                 'updated_at' => Carbon::now()->format('d-m-y h:m:i')
             ]);
             DB::commit();
-            return response()->json(['message' => 'Chef subtype Added Successfully', "success" => true], 200);
+            return response()->json(['message' => 'Chef subtype added successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -186,7 +193,7 @@ class shefTypesController extends Controller
             }
             $data = ShefSubType::where('id', $req->id)->first();
             ShefSubType::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef subtype updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -206,7 +213,7 @@ class shefTypesController extends Controller
         }
         try {
             ShefSubType::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            return response()->json(['message' => 'Chef subtype deleted successfully.', "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -214,10 +221,14 @@ class shefTypesController extends Controller
         }
     }
 
-    public function getAllShefSubTypes()
+    public function getAllShefSubTypes(Request $req)
     {
         try {
-            $data = ShefSubType::with('shef_type:id,name')->get();
+            $query = ShefSubType::query();
+            if (!$req->boolean('include_inactive')) {
+                $query->where('status', 1);
+            }
+            $data = $query->with('shef_type:id,name')->orderBy('id', 'desc')->get();
             return response()->json(["data" => $data, "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
@@ -244,7 +255,7 @@ class shefTypesController extends Controller
             }
             // $updateData = $req->status;
             ShefSubType::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef subtype status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();

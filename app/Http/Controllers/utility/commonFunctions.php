@@ -171,22 +171,32 @@ class commonFunctions extends Controller
         $validator = Validator::make(
             $req->all(),
             [
-                "images" => 'required',
-                "are_you_a" => 'required',
-                "name" => 'required',
-                "email" => 'required',
-                "profession" => 'required',
-                "message" => "required",
+                "source" => 'required|in:feedback_form',
+                "images" => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:5120',
+                "are_you_a" => 'required|in:Customer,Chef',
+                "name" => ['required', 'regex:/^[a-zA-Z\s]+$/'],
+                "email" => 'required|email',
+                "profession" => ['required', 'regex:/^[a-zA-Z\s]+$/'],
+                "message" => "required|string|max:2000",
                 "star_rating" => "required|integer|min:1|max:5",
             ],
             [
-                "images.required" => "Please fill images",
+                "source.required" => "Invalid submission source",
+                "source.in" => "Invalid submission source",
+                "images.required" => "Please upload a profile photo",
+                "images.image" => "Profile photo must be a valid image",
+                "images.mimes" => "Profile photo must be JPEG, PNG, GIF, or WebP",
+                "images.max" => "Profile photo must be smaller than 5MB",
                 "are_you_a.required" => "Please fill Are you a?",
+                "are_you_a.in" => "Please select Customer or Chef",
                 "name.required" => "Please fill name",
+                "name.regex" => "Name should only contain letters",
                 "email.required" => "Please select email",
+                "email.email" => "Please enter a valid email",
                 "profession.required" => "Please select profession",
+                "profession.regex" => "Profession should only contain letters",
                 "message.required" => "Please fill message",
-                "star_rating" => "Please fill star_rating",
+                "star_rating.required" => "Please select a star rating",
             ]
         );
 
@@ -203,8 +213,7 @@ class commonFunctions extends Controller
             $newFeedback = new Feedback();
             $newFeedback->images = asset('storage/' . $imagePath);
             $newFeedback->are_you_a = $req->are_you_a;
-            $newFeedback->firstName = $req->firstName;
-            $newFeedback->lastName = $req->lastName;
+            $newFeedback->name = $req->name;
             $newFeedback->email = $req->email;
             $newFeedback->profession = $req->profession;
             $newFeedback->message = $req->message;
@@ -217,7 +226,7 @@ class commonFunctions extends Controller
                 $admin->notify(new NewFeedback($feedback));
             }
 
-            return response()->json(['message' => "Feedback submitted successfully", "success" => true], 200);
+            return response()->json(['message' => "Testimonial submitted successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -257,12 +266,19 @@ class commonFunctions extends Controller
         }
         try {
             Feedback::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Testimonial updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
+    }
+
+    public function deleteSiteFeedback(Request $req)
+    {
+        $req->validate(['id' => 'required|integer|exists:feedbacks,id']);
+        Feedback::where('id', $req->id)->delete();
+        return response()->json(['message' => 'Testimonial deleted successfully.', 'success' => true], 200);
     }
 
     function getAllScheduleCall(Request $req)
@@ -294,7 +310,7 @@ class commonFunctions extends Controller
         }
         try {
             ScheduleCall::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Schedule call updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -331,7 +347,7 @@ class commonFunctions extends Controller
         }
         try {
             DriverScheduleCall::where('id', $req->id)->update(['status' => $req->status]);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Schedule call updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();

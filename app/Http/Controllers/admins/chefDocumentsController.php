@@ -47,7 +47,7 @@ class chefDocumentsController extends Controller
                 'chef_type' => trim($req->chef_type)
             ]);
             DB::commit();
-            return response()->json(["message" => "Added successfully", "success" => true], 200);
+            return response()->json(["message" => "Chef document item added successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -85,7 +85,7 @@ class chefDocumentsController extends Controller
                 $updateData['chef_type'] = $req->chef_type;
             }
             DocumentItemList::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef document item updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -104,11 +104,27 @@ class chefDocumentsController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            DocumentItemList::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            $documentItem = DocumentItemList::find($req->id);
+            if (!$documentItem) {
+                return response()->json(['message' => 'Document item not found.', 'success' => false], 404);
+            }
+            DB::beginTransaction();
+            $documentItem->delete();
+            DB::commit();
+            return response()->json(['message' => 'Chef document item deleted successfully.', 'success' => true], 200);
+        } catch (\Illuminate\Database\QueryException $th) {
+            DB::rollBack();
+            Log::error('deleteDocumentItemNameAccToChefType: ' . $th->getMessage());
+            if ((int) $th->getCode() === 23000) {
+                return response()->json([
+                    'message' => 'This entry cannot be deleted as it is in use.',
+                    'success' => false
+                ], 400);
+            }
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         } catch (\Exception $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
+            DB::rollBack();
+            Log::error('deleteDocumentItemNameAccToChefType: ' . $th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
@@ -150,7 +166,7 @@ class chefDocumentsController extends Controller
             }
             // $updateData = $req->status;
             DocumentItemList::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef document item status updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -223,7 +239,7 @@ class chefDocumentsController extends Controller
             }
             Log::info($updateData);
             DocumentItemField::where('id', $req->id)->update($updateData);
-            return response()->json(['message' => "Updated Successfully", "success" => true], 200);
+            return response()->json(['message' => "Chef document field updated successfully.", "success" => true], 200);
         } catch (\Exception $th) {
             Log::info($th->getMessage());
             DB::rollback();
@@ -242,11 +258,23 @@ class chefDocumentsController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
-            DocumentItemField::where('id', $req->id)->delete();
-            return response()->json(['message' => 'Deleted successfully', "success" => true], 200);
+            $field = DocumentItemField::find($req->id);
+            if (!$field) {
+                return response()->json(['message' => 'Document field not found.', 'success' => false], 404);
+            }
+            $field->delete();
+            return response()->json(['message' => 'Chef document field deleted successfully.', 'success' => true], 200);
+        } catch (\Illuminate\Database\QueryException $th) {
+            Log::error('deleteDynamicFieldsForChef: ' . $th->getMessage());
+            if ((int) $th->getCode() === 23000) {
+                return response()->json([
+                    'message' => 'This entry cannot be deleted as it is in use.',
+                    'success' => false
+                ], 400);
+            }
+            return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         } catch (\Exception $th) {
-            Log::info($th->getMessage());
-            DB::rollback();
+            Log::error('deleteDynamicFieldsForChef: ' . $th->getMessage());
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
