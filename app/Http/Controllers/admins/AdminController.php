@@ -2158,4 +2158,273 @@ class AdminController extends Controller
             'data' => $chef
         ]);
     }
+
+    public function getAllOrdersSummaryData(Request $req)
+    {
+        try {
+            $adminSettings = Adminsetting::latest()->first();
+            $chefServiceCharge = (float) ($adminSettings->chef_service_charges ?? 0);
+            $driverServiceCharge = (float) ($adminSettings->driver_service_charges ?? 0);
+
+            $query = Order::query()->with('subOrders')->orderByDesc('created_at');
+
+            if ($req->filled('date_from')) {
+                $query->whereDate('created_at', '>=', $req->date_from);
+            }
+            if ($req->filled('date_to')) {
+                $query->whereDate('created_at', '<=', $req->date_to);
+            }
+            if ($req->filled('status')) {
+                $query->where('payment_status', $req->status);
+            }
+
+            $orderRows = $query->get();
+            $orders = [];
+            $pageTotals = $this->emptyOrderSummaryTotals();
+
+            foreach ($orderRows as $order) {
+                $summary = $this->buildOrderIncomeSummary($order, $chefServiceCharge, $driverServiceCharge);
+                $orders[] = [
+                    'order_no' => $order->order_id,
+                    'date' => $order->created_at,
+                    'order_amount' => round((float) ($order->grand_total ?? 0), 2),
+                    'summary' => $summary,
+                ];
+                $this->accumulateOrderSummaryTotals($pageTotals, $summary);
+            }
+
+            foreach ($pageTotals as $key => $value) {
+                $pageTotals[$key] = round((float) $value, 2);
+            }
+
+            return response()->json([
+                'success' => true,
+                'TotalRecords' => count($orders),
+                'data' => [
+                    'orders' => $orders,
+                    'page_totals' => $pageTotals,
+                ],
+            ], 200);
+        } catch (\Exception $th) {
+            Log::error($th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops! Something went wrong.',
+            ], 500);
+        }
+    }
+
+    private function emptyOrderSummaryTotals(): array
+    {
+        return [
+            'commission_for_all_chefs' => 0,
+            'tax_amount_for_all_chef_gst' => 0,
+            'tax_amount_for_all_chef_qst' => 0,
+            'total_commission_from_chef' => 0,
+            'commission_for_driver' => 0,
+            'tax_amount_for_driver_gst' => 0,
+            'tax_amount_for_driver_qst' => 0,
+            'total_commission_from_driver' => 0,
+            'service_charges_from_all_chef' => 0,
+            'service_charges_for_driver_gst' => 0,
+            'service_charges_for_driver_qst' => 0,
+            'total_service_charges_from_chef' => 0,
+            'service_charges_from_drivers' => 0,
+            'service_charges_for_chef_tps' => 0,
+            'service_charges_for_chef_qst' => 0,
+            'total_service_charges_from_drivers' => 0,
+            'total_chef_earning' => 0,
+            'total_driver_earning' => 0,
+            'total_admin_earning' => 0,
+        ];
+    }
+
+    private function buildOrderIncomeSummary(Order $order, float $chefServiceCharge, float $driverServiceCharge): array
+    {
+        $summary = $this->emptyOrderSummaryTotals();
+        $subOrders = $order->subOrders ?? collect();
+        $taxRates = $this->resolveOrderTaxRates($order->tax_types);
+
+        foreach ($subOrders as $subOrder) {
+            $chefCommission = (float) ($subOrder->chef_commission_amount ?? 0);
+            $chefGst = $this->sumTaxAmounts($subOrder->chef_commission_taxes, 'GST');
+            $chefQst = $this->sumTaxAmounts($subOrder->chef_commission_taxes, 'QST');
+
+            $driverCommission = (float) ($subOrder->driver_commission_amount ?? 0);
+            $driverGst = $this->sumTaxAmounts($subOrder->driver_commission_taxes, 'GST');
+            $driverQst = $this->sumTaxAmounts($subOrder->driver_commission_taxes, 'QST');
+
+            $chefServiceBase = $chefServiceCharge;
+            $driverServiceBase = $subOrder->driver_id ? $driverServiceCharge : 0;
+            $chefServiceGst = round($chefServiceBase * ($taxRates['GST'] / 100), 2);
+            $chefServiceQst = round($chefServiceBase * ($taxRates['QST'] / 100), 2);
+            $driverServiceGst = round($driverServiceBase * ($taxRates['GST'] / 100), 2);
+            $driverServiceQst = round($driverServiceBase * ($taxRates['QST'] / 100), 2);
+
+            $chefCommissionTaxTotal = $chefGst + $chefQst;
+            $chefEarning = round(
+                (float) ($subOrder->amount ?? 0)
+                + (float) ($subOrder->tip_amount ?? 0)
+                - $chefCommission
+                - $chefCommissionTaxTotal
+                - $chefServiceBase,
+                2
+            );
+
+            $driverCommissionTaxTotal = $driverGst + $driverQst;
+            $driverEarning = round(
+                (float) ($subOrder->tip_amount ?? 0)
+                - $driverCommission
+                - $driverCommissionTaxTotal
+                - $driverServiceBase,
+                2
+            );
+
+            $summary['commission_for_all_chefs'] += $chefCommission;
+            $summary['tax_amount_for_all_chef_gst'] += $chefGst;
+            $summary['tax_amount_for_all_chef_qst'] += $chefQst;
+            $summary['commission_for_driver'] += $driverCommission;
+            $summary['tax_amount_for_driver_gst'] += $driverGst;
+            $summary['tax_amount_for_driver_qst'] += $driverQst;
+            $summary['service_charges_from_all_chef'] += $chefServiceBase;
+            $summary['service_charges_for_driver_gst'] += $chefServiceGst;
+            $summary['service_charges_for_driver_qst'] += $chefServiceQst;
+            $summary['service_charges_from_drivers'] += $driverServiceBase;
+            $summary['service_charges_for_chef_tps'] += $driverServiceGst;
+            $summary['service_charges_for_chef_qst'] += $driverServiceQst;
+            $summary['total_chef_earning'] += $chefEarning;
+            $summary['total_driver_earning'] += $driverEarning;
+        }
+
+        $summary['total_commission_from_chef'] =
+            $summary['commission_for_all_chefs']
+            + $summary['tax_amount_for_all_chef_gst']
+            + $summary['tax_amount_for_all_chef_qst'];
+
+        $summary['total_commission_from_driver'] =
+            $summary['commission_for_driver']
+            + $summary['tax_amount_for_driver_gst']
+            + $summary['tax_amount_for_driver_qst'];
+
+        $summary['total_service_charges_from_chef'] =
+            $summary['service_charges_from_all_chef']
+            + $summary['service_charges_for_driver_gst']
+            + $summary['service_charges_for_driver_qst'];
+
+        $summary['total_service_charges_from_drivers'] =
+            $summary['service_charges_from_drivers']
+            + $summary['service_charges_for_chef_tps']
+            + $summary['service_charges_for_chef_qst'];
+
+        $summary['total_admin_earning'] =
+            $summary['total_commission_from_chef']
+            + $summary['total_commission_from_driver']
+            + $summary['total_service_charges_from_chef']
+            + $summary['total_service_charges_from_drivers'];
+
+        foreach ($summary as $key => $value) {
+            $summary[$key] = round((float) $value, 2);
+        }
+
+        return $summary;
+    }
+
+    private function accumulateOrderSummaryTotals(array &$totals, array $summary): void
+    {
+        foreach ($summary as $key => $value) {
+            if (array_key_exists($key, $totals)) {
+                $totals[$key] += (float) $value;
+            }
+        }
+    }
+
+    private function resolveOrderTaxRates($taxTypes): array
+    {
+        $rates = ['GST' => 0.0, 'QST' => 0.0];
+        $decoded = is_string($taxTypes) ? json_decode($taxTypes, true) : $taxTypes;
+
+        if (!is_array($decoded)) {
+            return $rates;
+        }
+
+        if (isset($decoded['tax_type'], $decoded['tax_value']) && is_array($decoded['tax_type'])) {
+            foreach ($decoded['tax_type'] as $index => $type) {
+                $rate = (float) ($decoded['tax_value'][$index] ?? 0);
+                if ($this->taxTypeMatches((string) $type, 'GST')) {
+                    $rates['GST'] = $rate;
+                }
+                if ($this->taxTypeMatches((string) $type, 'QST')) {
+                    $rates['QST'] = $rate;
+                }
+            }
+            return $rates;
+        }
+
+        foreach ($decoded as $tax) {
+            if (!is_array($tax)) {
+                continue;
+            }
+            foreach ($tax as $key => $value) {
+                if ($key === 'Amount') {
+                    continue;
+                }
+                if ($this->taxTypeMatches((string) $key, 'GST')) {
+                    $rates['GST'] = (float) $value;
+                }
+                if ($this->taxTypeMatches((string) $key, 'QST')) {
+                    $rates['QST'] = (float) $value;
+                }
+            }
+        }
+
+        return $rates;
+    }
+
+    private function sumTaxAmounts($taxJson, ?string $match = null): float
+    {
+        if (empty($taxJson)) {
+            return 0.0;
+        }
+
+        $taxes = is_string($taxJson) ? json_decode($taxJson, true) : $taxJson;
+        if (!is_array($taxes)) {
+            return 0.0;
+        }
+
+        $sum = 0.0;
+        foreach ($taxes as $tax) {
+            if (!is_array($tax)) {
+                continue;
+            }
+
+            $type = null;
+            foreach ($tax as $key => $value) {
+                if ($key === 'Amount') {
+                    if ($match === null || ($type && $this->taxTypeMatches($type, $match))) {
+                        $sum += (float) $value;
+                    }
+                } else {
+                    $type = (string) $key;
+                }
+            }
+        }
+
+        return round($sum, 2);
+    }
+
+    private function taxTypeMatches(string $type, string $match): bool
+    {
+        $type = strtoupper($type);
+        $match = strtoupper($match);
+
+        if ($match === 'GST') {
+            return str_contains($type, 'GST') || str_contains($type, 'TPS');
+        }
+
+        if ($match === 'QST') {
+            return str_contains($type, 'QST') || str_contains($type, 'TVQ');
+        }
+
+        return str_contains($type, $match);
+    }
 }

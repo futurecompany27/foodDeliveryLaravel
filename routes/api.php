@@ -462,6 +462,7 @@ Route::prefix('admin')->group(function () {
 
             Route::get('/getAllSubOrderDetails', 'getAllSubOrderDetails');
             Route::post('/getAllOrderDetails', 'getAllOrderDetails');
+            Route::post('/getAllOrdersSummaryData', 'getAllOrdersSummaryData');
             Route::post('/getAdminOrderDetailsById', 'getAdminOrderDetailsById');
             Route::post('/getAdminSubOrderDetailsById', 'getAdminSubOrderDetailsById');
 
