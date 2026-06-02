@@ -721,7 +721,7 @@ class UserController extends Controller
                 });
 
             // ✅ ONLY CHANGE: skip kitchen filter if id = 1
-            if ($cuisine->kitchentype != "All") {
+            if ($cuisine->kitchentype != "All" || $cuisine->kitchentype != "all") {
                 $query->whereJsonContains('kitchen_types', $cuisine->kitchentype);
             }
 
