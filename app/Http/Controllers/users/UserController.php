@@ -419,21 +419,78 @@ class UserController extends Controller
                 }
 
                 if ($req->filter == 'true') {
+
                     $minPrice = $req->input('min');
                     $maxPrice = $req->input('max') > 300 ? 99999999999999999 : $req->input('max');
-                    $skip = $req->page * 12;
 
-                    $query = Chef::whereIn('postal_code', $selected_postal_code)
-                        ->where('status', 1)
-                        ->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay)
-                        ->where('chefAvailibilityStatus', 1);
+                        // Log::info('================ FILTER DEBUG START ================');
+                        // Log::info('Postal Code', [$req->postal_code]);
+                        // Log::info('Selected Postal Codes', $selected_postal_code);
+                        // Log::info('Price Range', [
+                        //     'min' => $minPrice,
+                        //     'max' => $maxPrice
+                        // ]);
+                        // Log::info('Today Week Day', [$req->todaysWeekDay]);
 
+                    // STEP 1
+                    $query = Chef::where(function ($q) use ($selected_postal_code) {
+                        foreach ($selected_postal_code as $postalCode) {
+                            $q->orWhere('postal_code', 'like', $postalCode . '%');
+                        }
+                    });
+
+                    // Log::info('After Postal Code Filter Count', [$query->count()]);
+                    // Log::info('Chef IDs After Postal Filter', [$query->pluck('id')->toArray()]);
+
+                    // STEP 2
+                    $query->where('status', 1);
+
+                    // Log::info('After Status Filter Count', [$query->count()]);
+                    // Log::info('Chef IDs After Status Filter', [$query->pluck('id')->toArray()]);
+
+                    // STEP 3
+                    $query->whereJsonContains('chefAvailibilityWeek', $req->todaysWeekDay);
+
+                    // Log::info('After Availability Week Filter Count', [$query->count()]);
+                    // Log::info('Chef IDs After Availability Week Filter', [$query->pluck('id')->toArray()]);
+
+                    // STEP 4
+                    $query->where('chefAvailibilityStatus', 1);
+
+                    // Log::info('After Availability Status Filter Count', [$query->count()]);
+                    // Log::info('Chef IDs After Availability Status Filter', [$query->pluck('id')->toArray()]);
+
+                    // STEP 5
                     if ($req->rating) {
                         $query->where('rating', '<=', intval($req->rating));
+
+                        // Log::info('After Rating Filter Count', [$query->count()]);
+                        // Log::info('Chef IDs After Rating Filter', [$query->pluck('id')->toArray()]);
                     }
 
+                    // FOOD ITEMS DEBUG
+                    $foods = FoodItem::whereJsonContains(
+                        'foodAvailibiltyOnWeekdays',
+                        $req->todaysWeekDay
+                    )
+                        ->where('price', '>=', $minPrice)
+                        ->where('price', '<=', $maxPrice)
+                        ->get([
+                            'id',
+                            'chef_id',
+                            'dish_name',
+                            'price'
+                        ]);
+
+                    // Log::info('Matching Food Items', [$foods->toArray()]);
+
+                    // STEP 6
                     $query->whereHas('foodItems', function ($query) use ($maxPrice, $minPrice, $req) {
-                        $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay)
+
+                        $query->whereJsonContains(
+                            'foodAvailibiltyOnWeekdays',
+                            $req->todaysWeekDay
+                        )
                             ->where('price', '>=', $minPrice)
                             ->where('price', '<=', $maxPrice);
 
@@ -451,17 +508,28 @@ class UserController extends Controller
 
                         if ($req->query) {
                             $search = mb_strtolower(trim($req->input('query')));
-                            $query->whereRaw('LOWER(`dish_name`) LIKE ?', ['%' . $search . '%']);
+                            $query->whereRaw(
+                                'LOWER(`dish_name`) LIKE ?',
+                                ['%' . $search . '%']
+                            );
                         }
                     });
+
+                    // Log::info('After FoodItems Filter Count', [$query->count()]);
+                    // Log::info('Chef IDs After FoodItems Filter', [$query->pluck('id')->toArray()]);
 
                     $total = $query->count();
                     $data = $query->get();
 
-                    // Store the result in cache
-                    Cache::put($cacheKey, ['data' => $data, 'total' => $total, 'success' => true], now()->addMinutes(1440));
+                    // Log::info('FINAL Count', [$total]);
+                    // Log::info('FINAL Chef IDs', [$data->pluck('id')->toArray()]);
+                    // Log::info('================ FILTER DEBUG END ================');
 
-                    return response()->json(['data' => $data, 'total' => $total, 'success' => true], 200);
+                    return response()->json([
+                        'data' => $data,
+                        'total' => $total,
+                        'success' => true
+                    ], 200);
                 } else {
                     Log::info("///////ELSE PART///////////", [$selected_postal_code]);
 
