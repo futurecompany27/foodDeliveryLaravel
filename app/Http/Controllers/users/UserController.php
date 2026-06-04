@@ -2075,9 +2075,6 @@ class UserController extends Controller
         return $max > 300 ? 99999999999999999 : $max;
     }
 
-    /**
-     * Chef rating filter: OR when multiple star levels are selected (AND with other chef filters).
-     */
     private function applyChefRatingFilter($query, $rating): void
     {
         if ($rating === null || $rating === '') {
@@ -2094,10 +2091,7 @@ class UserController extends Controller
 
         $query->where(function ($q) use ($ratings) {
             foreach ($ratings as $stars) {
-                $q->orWhere(function ($band) use ($stars) {
-                    $band->where('rating', '>=', $stars - 0.5)
-                        ->where('rating', '<', $stars + 0.5);
-                });
+                $q->orWhere('rating', '>=', $stars);
             }
         });
     }
@@ -2119,21 +2113,19 @@ class UserController extends Controller
             return $level !== null && $level !== '';
         }));
         if (!empty($spicyLevels)) {
-            $foodQuery->whereIn('spicyLevel', $spicyLevels); 
+            $foodQuery->whereIn('spicyLevel', $spicyLevels);
         }
 
         $allergyIds = array_values(array_filter((array) $req->input('allergies', []), function ($id) {
             return $id !== null && $id !== '';
         }));
         if (!empty($allergyIds)) {
-            $foodQuery->where(function ($allergyQuery) use ($allergyIds) {
-                foreach ($allergyIds as $allergyId) {
-                    $allergyQuery->orWhere(function ($q) use ($allergyId) {
-                        $q->whereNull('allergies')
-                            ->orWhereJsonDoesntContain('allergies', (int) $allergyId);
-                    });
-                }
-            }); // OR within allergies (safe filter)
+            foreach ($allergyIds as $allergyId) {
+                $foodQuery->where(function ($q) use ($allergyId) {
+                    $q->whereNull('allergies')
+                        ->orWhereJsonDoesntContain('allergies', (int) $allergyId);
+                });
+            } // AND: dish must be safe for every selected allergen
         }
 
         if ($req->filled('query')) {
