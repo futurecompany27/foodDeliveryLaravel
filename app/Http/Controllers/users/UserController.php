@@ -631,9 +631,14 @@ class UserController extends Controller
                     $query->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
                 });
 
+                
+                Log::info('Cuisine Type', [$cuisine->kitchentype]);
             // ✅ ONLY CHANGE: skip kitchen filter if id = 1
             if ($cuisine->kitchentype != "All" || $cuisine->kitchentype != "all") {
+                   Log::info("true cousine check ");
                 $query->whereJsonContains('kitchen_types', $cuisine->kitchentype);
+            }else{
+                Log::info("false cousine check ");
             }
 
             if ($req->refresh) {
