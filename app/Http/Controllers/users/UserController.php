@@ -634,7 +634,7 @@ class UserController extends Controller
                 
                 Log::info('Cuisine Type', [$cuisine->kitchentype]);
             // ✅ ONLY CHANGE: skip kitchen filter if id = 1
-            if ($cuisine->kitchentype != "All" || $cuisine->kitchentype != "all") {
+            if ($cuisine->kitchentype != "All") {
                    Log::info("true cousine check ");
                 $query->whereJsonContains('kitchen_types', $cuisine->kitchentype);
             }else{
