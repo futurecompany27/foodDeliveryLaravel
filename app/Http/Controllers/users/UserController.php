@@ -2093,7 +2093,13 @@ class UserController extends Controller
 
         $query->where(function ($q) use ($ratings) {
             foreach ($ratings as $stars) {
-                $q->orWhere('rating', '>=', $stars);
+                $q->orWhere(function ($subQuery) use ($stars) {
+                    $subQuery->where('rating', '>=', $stars);
+
+                    if ($stars < 5) {
+                        $subQuery->where('rating', '<', $stars + 1);
+                    }
+                });
             }
         });
     }
