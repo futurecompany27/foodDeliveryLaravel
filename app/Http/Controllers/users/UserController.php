@@ -17,6 +17,7 @@ use App\Models\ShippingAddresse;
 use App\Models\User;
 use App\Models\Chef;
 use App\Models\ChefReview;
+use App\Models\FoodCategory;
 use App\Models\FoodItem;
 use App\Models\FoodItemReview;
 use App\Models\Order;
@@ -2108,6 +2109,53 @@ class UserController extends Controller
         return in_array($normalized, $allowedLevels, true) ? $normalized : null;
     }
 
+    private function applyActiveFoodItemConstraints($foodQuery): void
+    {
+        $foodQuery->whereRaw('LOWER(TRIM(approved_status)) = ?', ['approved'])
+            ->whereRaw('LOWER(TRIM(status)) = ?', ['active']);
+    }
+
+    private function resolveFoodTypeFilters($input): array
+    {
+        $rawTypes = array_values(array_filter((array) $input, function ($type) {
+            return $type !== null && $type !== '';
+        }));
+
+        if (empty($rawTypes)) {
+            return [];
+        }
+
+        $categories = FoodCategory::query()->get(['id', 'category']);
+        $categoryIdsByKey = [];
+        $validCategoryIds = [];
+
+        foreach ($categories as $category) {
+            $categoryId = (int) $category->id;
+            $validCategoryIds[] = $categoryId;
+            $categoryKey = preg_replace('/\s+/', ' ', strtolower(trim($category->category)));
+            $categoryIdsByKey[$categoryKey] = $categoryId;
+        }
+
+        $resolved = [];
+        foreach ($rawTypes as $type) {
+            if (is_numeric($type)) {
+                $categoryId = (int) $type;
+                if (in_array($categoryId, $validCategoryIds, true)) {
+                    $resolved[] = $categoryId;
+                }
+
+                continue;
+            }
+
+            $categoryKey = preg_replace('/\s+/', ' ', strtolower(trim((string) $type)));
+            if (isset($categoryIdsByKey[$categoryKey])) {
+                $resolved[] = $categoryIdsByKey[$categoryKey];
+            }
+        }
+
+        return array_values(array_unique($resolved));
+    }
+
     private function resolveSpicyLevelFilters($input): array
     {
         $rawLevels = array_values(array_filter((array) $input, function ($level) {
@@ -2178,6 +2226,8 @@ class UserController extends Controller
 
     private function applyFoodItemFiltersForChefListing($foodQuery, Request $req, ?float $minPrice, ?float $maxPrice): void
     {
+        $this->applyActiveFoodItemConstraints($foodQuery);
+
         $foodQuery->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
         if ($minPrice !== null) {
             $foodQuery->where('price', '>=', $minPrice);
@@ -2186,11 +2236,9 @@ class UserController extends Controller
             $foodQuery->where('price', '<=', $maxPrice);
         }
 
-        $foodTypes = array_values(array_filter((array) $req->input('foodType', []), function ($id) {
-            return $id !== null && $id !== '';
-        }));
-        if (!empty($foodTypes)) {
-            $foodQuery->whereIn('foodTypeId', $foodTypes);
+        $foodTypeIds = $this->resolveFoodTypeFilters($req->input('foodType', []));
+        if (!empty($foodTypeIds)) {
+            $foodQuery->whereIn('foodTypeId', $foodTypeIds);
         }
 
         $spicyLevels = $this->resolveSpicyLevelFilters($req->input('spicyLevel', []));
