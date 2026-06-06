@@ -415,8 +415,8 @@ class UserController extends Controller
                 }
 
                 if ($req->filter == 'true') {
-                    $minPrice = floatval($req->input('min', 0));
-                    $maxPrice = $this->getFilterMaxPrice($req->input('max'));
+                    $minPrice = $this->getFilterPrice($req->input('min'));
+                    $maxPrice = $this->getFilterPrice($req->input('max'));
 
                     $query = Chef::where(function ($q) use ($selected_postal_code) {
                         foreach ($selected_postal_code as $postalCode) {
@@ -2068,11 +2068,13 @@ class UserController extends Controller
         return $chefDistances;
     }
 
-    private function getFilterMaxPrice($maxInput)
+    private function getFilterPrice($input): ?float
     {
-        $max = is_numeric($maxInput) ? floatval($maxInput) : 350;
+        if ($input === null || $input === '') {
+            return null;
+        }
 
-        return $max > 300 ? 99999999999999999 : $max;
+        return is_numeric($input) ? floatval($input) : null;
     }
 
     private function applyChefRatingFilter($query, $rating): void
@@ -2096,11 +2098,15 @@ class UserController extends Controller
         });
     }
 
-    private function applyFoodItemFiltersForChefListing($foodQuery, Request $req, $minPrice, $maxPrice): void
+    private function applyFoodItemFiltersForChefListing($foodQuery, Request $req, ?float $minPrice, ?float $maxPrice): void
     {
-        $foodQuery->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay)
-            ->where('price', '>=', $minPrice)
-            ->where('price', '<=', $maxPrice);
+        $foodQuery->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+        if ($minPrice !== null) {
+            $foodQuery->where('price', '>=', $minPrice);
+        }
+        if ($maxPrice !== null) {
+            $foodQuery->where('price', '<=', $maxPrice);
+        }
 
         $foodTypes = array_values(array_filter((array) $req->input('foodType', []), function ($id) {
             return $id !== null && $id !== '';
