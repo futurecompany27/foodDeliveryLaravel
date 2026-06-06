@@ -433,6 +433,10 @@ class UserController extends Controller
                         $this->applyFoodItemFiltersForChefListing($foodQuery, $req, $minPrice, $maxPrice);
                     });
 
+                    $query->with(['foodItems' => function ($foodQuery) use ($maxPrice, $minPrice, $req) {
+                        $this->applyFoodItemFiltersForChefListing($foodQuery, $req, $minPrice, $maxPrice);
+                    }]);
+
                     $total = $query->count();
                     $data = $query->get();
 
@@ -2068,6 +2072,20 @@ class UserController extends Controller
         return $chefDistances;
     }
 
+    private const SPICE_LEVELS_BY_ID = [
+        1 => 'not spicy',
+        2 => 'mild spicy',
+        3 => 'spicy',
+        4 => 'hot spicy',
+    ];
+
+    private const SPICE_LEVELS_BY_INDEX = [
+        0 => 'not spicy',
+        1 => 'mild spicy',
+        2 => 'spicy',
+        3 => 'hot spicy',
+    ];
+
     private function getFilterPrice($input): ?float
     {
         if ($input === null || $input === '') {
@@ -2075,6 +2093,60 @@ class UserController extends Controller
         }
 
         return is_numeric($input) ? floatval($input) : null;
+    }
+
+    private function normalizeSpicyLevelKey($level): ?string
+    {
+        $normalized = preg_replace('/\s+/', ' ', strtolower(trim((string) $level)));
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        $allowedLevels = array_values(self::SPICE_LEVELS_BY_ID);
+
+        return in_array($normalized, $allowedLevels, true) ? $normalized : null;
+    }
+
+    private function resolveSpicyLevelFilters($input): array
+    {
+        $rawLevels = array_values(array_filter((array) $input, function ($level) {
+            return $level !== null && $level !== '';
+        }));
+
+        if (empty($rawLevels)) {
+            return [];
+        }
+
+        $numericValues = [];
+        foreach ($rawLevels as $level) {
+            if (is_numeric($level)) {
+                $numericValues[] = (int) $level;
+            }
+        }
+
+        $useZeroBased = !empty($numericValues) && in_array(0, $numericValues, true);
+        $resolved = [];
+
+        foreach ($rawLevels as $level) {
+            if (is_numeric($level)) {
+                $numericLevel = (int) $level;
+                $map = $useZeroBased ? self::SPICE_LEVELS_BY_INDEX : self::SPICE_LEVELS_BY_ID;
+
+                if (isset($map[$numericLevel])) {
+                    $resolved[] = $map[$numericLevel];
+                }
+
+                continue;
+            }
+
+            $normalizedLevel = $this->normalizeSpicyLevelKey($level);
+            if ($normalizedLevel !== null) {
+                $resolved[] = $normalizedLevel;
+            }
+        }
+
+        return array_values(array_unique($resolved));
     }
 
     private function applyChefRatingFilter($query, $rating): void
@@ -2121,11 +2193,13 @@ class UserController extends Controller
             $foodQuery->whereIn('foodTypeId', $foodTypes);
         }
 
-        $spicyLevels = array_values(array_filter((array) $req->input('spicyLevel', []), function ($level) {
-            return $level !== null && $level !== '';
-        }));
+        $spicyLevels = $this->resolveSpicyLevelFilters($req->input('spicyLevel', []));
         if (!empty($spicyLevels)) {
-            $foodQuery->whereIn('spicyLevel', $spicyLevels);
+            $foodQuery->where(function ($spicyQuery) use ($spicyLevels) {
+                foreach ($spicyLevels as $spicyLevel) {
+                    $spicyQuery->orWhereRaw('LOWER(TRIM(spicyLevel)) = ?', [$spicyLevel]);
+                }
+            });
         }
 
         $allergyIds = array_values(array_filter((array) $req->input('allergies', []), function ($id) {
