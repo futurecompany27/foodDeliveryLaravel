@@ -2156,6 +2156,28 @@ class UserController extends Controller
         return array_values(array_unique($resolved));
     }
 
+    private function resolveAllergyFilters($input): array
+    {
+        return array_values(array_unique(array_filter(array_map(function ($id) {
+            return is_numeric($id) ? (int) $id : null;
+        }, (array) $input))));
+    }
+
+    private function applyAllergySafeForFoodItemFilter($foodQuery, int $allergyId): void
+    {
+        $foodQuery->where(function ($query) use ($allergyId) {
+            $query->where(function ($emptyQuery) {
+                $emptyQuery->whereNull('allergies')
+                    ->orWhere('allergies', '[]')
+                    ->orWhere('allergies', '')
+                    ->orWhereRaw('(JSON_VALID(allergies) AND JSON_LENGTH(allergies) = 0)');
+            })->orWhere(function ($safeQuery) use ($allergyId) {
+                $safeQuery->whereRaw('NOT JSON_CONTAINS(allergies, ?)', [json_encode($allergyId)])
+                    ->whereRaw('NOT JSON_CONTAINS(allergies, ?)', [json_encode((string) $allergyId)]);
+            });
+        });
+    }
+
     private function resolveSpicyLevelFilters($input): array
     {
         $rawLevels = array_values(array_filter((array) $input, function ($level) {
@@ -2250,15 +2272,10 @@ class UserController extends Controller
             });
         }
 
-        $allergyIds = array_values(array_filter((array) $req->input('allergies', []), function ($id) {
-            return $id !== null && $id !== '';
-        }));
+        $allergyIds = $this->resolveAllergyFilters($req->input('allergies', []));
         if (!empty($allergyIds)) {
             foreach ($allergyIds as $allergyId) {
-                $foodQuery->where(function ($q) use ($allergyId) {
-                    $q->whereNull('allergies')
-                        ->orWhereJsonDoesntContain('allergies', (int) $allergyId);
-                });
+                $this->applyAllergySafeForFoodItemFilter($foodQuery, $allergyId);
             } // AND: dish must be safe for every selected allergen
         }
 
