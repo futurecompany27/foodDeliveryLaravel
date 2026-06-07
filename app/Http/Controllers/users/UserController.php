@@ -17,6 +17,7 @@ use App\Models\ShippingAddresse;
 use App\Models\User;
 use App\Models\Chef;
 use App\Models\ChefReview;
+use App\Models\FoodCategory;
 use App\Models\FoodItem;
 use App\Models\FoodItemReview;
 use App\Models\Order;
@@ -415,8 +416,8 @@ class UserController extends Controller
                 }
 
                 if ($req->filter == 'true') {
-                    $minPrice = floatval($req->input('min', 0));
-                    $maxPrice = $this->getFilterMaxPrice($req->input('max'));
+                    $minPrice = $this->getFilterPrice($req->input('min'));
+                    $maxPrice = $this->getFilterPrice($req->input('max'));
 
                     $query = Chef::where(function ($q) use ($selected_postal_code) {
                         foreach ($selected_postal_code as $postalCode) {
@@ -432,6 +433,10 @@ class UserController extends Controller
                     $query->whereHas('foodItems', function ($foodQuery) use ($maxPrice, $minPrice, $req) {
                         $this->applyFoodItemFiltersForChefListing($foodQuery, $req, $minPrice, $maxPrice);
                     });
+
+                    $query->with(['foodItems' => function ($foodQuery) use ($maxPrice, $minPrice, $req) {
+                        $this->applyFoodItemFiltersForChefListing($foodQuery, $req, $minPrice, $maxPrice);
+                    }]);
 
                     $total = $query->count();
                     $data = $query->get();
@@ -2068,11 +2073,150 @@ class UserController extends Controller
         return $chefDistances;
     }
 
-    private function getFilterMaxPrice($maxInput)
-    {
-        $max = is_numeric($maxInput) ? floatval($maxInput) : 350;
+    private const SPICE_LEVELS_BY_ID = [
+        1 => 'not spicy',
+        2 => 'mild spicy',
+        3 => 'spicy',
+        4 => 'hot spicy',
+    ];
 
-        return $max > 300 ? 99999999999999999 : $max;
+    private const SPICE_LEVELS_BY_INDEX = [
+        0 => 'not spicy',
+        1 => 'mild spicy',
+        2 => 'spicy',
+        3 => 'hot spicy',
+    ];
+
+    private function getFilterPrice($input): ?float
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+
+        return is_numeric($input) ? floatval($input) : null;
+    }
+
+    private function normalizeSpicyLevelKey($level): ?string
+    {
+        $normalized = preg_replace('/\s+/', ' ', strtolower(trim((string) $level)));
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        $allowedLevels = array_values(self::SPICE_LEVELS_BY_ID);
+
+        return in_array($normalized, $allowedLevels, true) ? $normalized : null;
+    }
+
+    private function applyActiveFoodItemConstraints($foodQuery): void
+    {
+        $foodQuery->whereRaw('LOWER(TRIM(approved_status)) = ?', ['approved'])
+            ->whereRaw('LOWER(TRIM(status)) = ?', ['active']);
+    }
+
+    private function resolveFoodTypeFilters($input): array
+    {
+        $rawTypes = array_values(array_filter((array) $input, function ($type) {
+            return $type !== null && $type !== '';
+        }));
+
+        if (empty($rawTypes)) {
+            return [];
+        }
+
+        $categories = FoodCategory::query()->get(['id', 'category']);
+        $categoryIdsByKey = [];
+        $validCategoryIds = [];
+
+        foreach ($categories as $category) {
+            $categoryId = (int) $category->id;
+            $validCategoryIds[] = $categoryId;
+            $categoryKey = preg_replace('/\s+/', ' ', strtolower(trim($category->category)));
+            $categoryIdsByKey[$categoryKey] = $categoryId;
+        }
+
+        $resolved = [];
+        foreach ($rawTypes as $type) {
+            if (is_numeric($type)) {
+                $categoryId = (int) $type;
+                if (in_array($categoryId, $validCategoryIds, true)) {
+                    $resolved[] = $categoryId;
+                }
+
+                continue;
+            }
+
+            $categoryKey = preg_replace('/\s+/', ' ', strtolower(trim((string) $type)));
+            if (isset($categoryIdsByKey[$categoryKey])) {
+                $resolved[] = $categoryIdsByKey[$categoryKey];
+            }
+        }
+
+        return array_values(array_unique($resolved));
+    }
+
+    private function resolveAllergyFilters($input): array
+    {
+        return array_values(array_unique(array_filter(array_map(function ($id) {
+            return is_numeric($id) ? (int) $id : null;
+        }, (array) $input))));
+    }
+
+    private function applyAllergySafeForFoodItemFilter($foodQuery, int $allergyId): void
+    {
+        $foodQuery->where(function ($query) use ($allergyId) {
+            $query->where(function ($emptyQuery) {
+                $emptyQuery->whereNull('allergies')
+                    ->orWhere('allergies', '[]')
+                    ->orWhere('allergies', '')
+                    ->orWhereRaw('(JSON_VALID(allergies) AND JSON_LENGTH(allergies) = 0)');
+            })->orWhere(function ($safeQuery) use ($allergyId) {
+                $safeQuery->whereRaw('NOT JSON_CONTAINS(allergies, ?)', [json_encode($allergyId)])
+                    ->whereRaw('NOT JSON_CONTAINS(allergies, ?)', [json_encode((string) $allergyId)]);
+            });
+        });
+    }
+
+    private function resolveSpicyLevelFilters($input): array
+    {
+        $rawLevels = array_values(array_filter((array) $input, function ($level) {
+            return $level !== null && $level !== '';
+        }));
+
+        if (empty($rawLevels)) {
+            return [];
+        }
+
+        $numericValues = [];
+        foreach ($rawLevels as $level) {
+            if (is_numeric($level)) {
+                $numericValues[] = (int) $level;
+            }
+        }
+
+        $useZeroBased = !empty($numericValues) && in_array(0, $numericValues, true);
+        $resolved = [];
+
+        foreach ($rawLevels as $level) {
+            if (is_numeric($level)) {
+                $numericLevel = (int) $level;
+                $map = $useZeroBased ? self::SPICE_LEVELS_BY_INDEX : self::SPICE_LEVELS_BY_ID;
+
+                if (isset($map[$numericLevel])) {
+                    $resolved[] = $map[$numericLevel];
+                }
+
+                continue;
+            }
+
+            $normalizedLevel = $this->normalizeSpicyLevelKey($level);
+            if ($normalizedLevel !== null) {
+                $resolved[] = $normalizedLevel;
+            }
+        }
+
+        return array_values(array_unique($resolved));
     }
 
     private function applyChefRatingFilter($query, $rating): void
@@ -2091,40 +2235,47 @@ class UserController extends Controller
 
         $query->where(function ($q) use ($ratings) {
             foreach ($ratings as $stars) {
-                $q->orWhere('rating', '>=', $stars);
+                $q->orWhere(function ($subQuery) use ($stars) {
+                    $subQuery->where('rating', '>=', $stars);
+
+                    if ($stars < 5) {
+                        $subQuery->where('rating', '<', $stars + 1);
+                    }
+                });
             }
         });
     }
 
-    private function applyFoodItemFiltersForChefListing($foodQuery, Request $req, $minPrice, $maxPrice): void
+    private function applyFoodItemFiltersForChefListing($foodQuery, Request $req, ?float $minPrice, ?float $maxPrice): void
     {
-        $foodQuery->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay)
-            ->where('price', '>=', $minPrice)
-            ->where('price', '<=', $maxPrice);
+        $this->applyActiveFoodItemConstraints($foodQuery);
 
-        $foodTypes = array_values(array_filter((array) $req->input('foodType', []), function ($id) {
-            return $id !== null && $id !== '';
-        }));
-        if (!empty($foodTypes)) {
-            $foodQuery->whereIn('foodTypeId', $foodTypes);
+        $foodQuery->whereJsonContains('foodAvailibiltyOnWeekdays', $req->todaysWeekDay);
+        if ($minPrice !== null) {
+            $foodQuery->where('price', '>=', $minPrice);
+        }
+        if ($maxPrice !== null) {
+            $foodQuery->where('price', '<=', $maxPrice);
         }
 
-        $spicyLevels = array_values(array_filter((array) $req->input('spicyLevel', []), function ($level) {
-            return $level !== null && $level !== '';
-        }));
+        $foodTypeIds = $this->resolveFoodTypeFilters($req->input('foodType', []));
+        if (!empty($foodTypeIds)) {
+            $foodQuery->whereIn('foodTypeId', $foodTypeIds);
+        }
+
+        $spicyLevels = $this->resolveSpicyLevelFilters($req->input('spicyLevel', []));
         if (!empty($spicyLevels)) {
-            $foodQuery->whereIn('spicyLevel', $spicyLevels);
+            $foodQuery->where(function ($spicyQuery) use ($spicyLevels) {
+                foreach ($spicyLevels as $spicyLevel) {
+                    $spicyQuery->orWhereRaw('LOWER(TRIM(spicyLevel)) = ?', [$spicyLevel]);
+                }
+            });
         }
 
-        $allergyIds = array_values(array_filter((array) $req->input('allergies', []), function ($id) {
-            return $id !== null && $id !== '';
-        }));
+        $allergyIds = $this->resolveAllergyFilters($req->input('allergies', []));
         if (!empty($allergyIds)) {
             foreach ($allergyIds as $allergyId) {
-                $foodQuery->where(function ($q) use ($allergyId) {
-                    $q->whereNull('allergies')
-                        ->orWhereJsonDoesntContain('allergies', (int) $allergyId);
-                });
+                $this->applyAllergySafeForFoodItemFilter($foodQuery, $allergyId);
             } // AND: dish must be safe for every selected allergen
         }
 
