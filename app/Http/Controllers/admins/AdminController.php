@@ -1531,17 +1531,30 @@ class AdminController extends Controller
             return response()->json(["message" => $validator->errors()->first(), "success" => false], 400);
         }
         try {
+            DB::beginTransaction();
             $chefReviewDeleteRequest = ChefReviewDeleteRequest::find($req->id);
-            ChefReviewDeleteRequest::where('id', $req->id)->update(['status' => $req->status]);
-            if ($req->status == 1) {
-                ChefReview::where('id', $req->review_id)->update(['status' => 2]);
+            if (!$chefReviewDeleteRequest) {
+                DB::rollBack();
+                return response()->json(['message' => 'Review delete request not found.', 'success' => false], 404);
             }
+            $previousStatus = (string) $chefReviewDeleteRequest->status;
+            $newStatus = (string) $req->status;
+
+            ChefReviewDeleteRequest::where('id', $req->id)->update(['status' => $req->status]);
+
             $UserController = new UserController;
-            $UserController->updateChefrating($chefReviewDeleteRequest->chef_id);
+            if ($newStatus === '1') {
+                ChefReview::where('id', $req->review_id)->update(['status' => 2]);
+                $UserController->updateChefrating($chefReviewDeleteRequest->chef_id);
+            } elseif ($newStatus === '0' && $previousStatus === '1') {
+                ChefReview::where('id', $req->review_id)->where('status', 2)->update(['status' => 1]);
+                $UserController->updateChefrating($chefReviewDeleteRequest->chef_id);
+            }
+            DB::commit();
             return response()->json(["message" => 'Chef review delete request status updated successfully.', 'success' => true], 200);
-        } catch (\Exception $th) {
+        } catch (\Throwable $th) {
             Log::info($th->getMessage());
-            DB::rollback();
+            DB::rollBack();
             return response()->json(['message' => 'Oops! Something went wrong.', 'success' => false], 500);
         }
     }
@@ -2116,7 +2129,7 @@ class AdminController extends Controller
         foreach ($allReview as $value) {
             $totalStars = $totalStars + $value['star_rating'];
         }
-        $rating = $totalStars / $totalNoReview;
+        $rating = $totalNoReview > 0 ? $totalStars / $totalNoReview : 0;
         Chef::where('id', $chef_id)->update(['rating' => $rating]);
     }
 
