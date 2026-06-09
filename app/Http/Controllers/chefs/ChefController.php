@@ -1683,6 +1683,9 @@ class ChefController extends Controller
         }
         try {
             $chef = auth()->guard('chef')->user();
+            if (ChefReviewDeleteRequest::where('review_id', $req->review_id)->exists()) {
+                return response()->json(['message' => 'A delete request already exists for this review.', 'success' => false], 400);
+            }
             $request = new ChefReviewDeleteRequest();
             $request->chef_id = $chef->id;
             $request->user_id = $req->user_id;

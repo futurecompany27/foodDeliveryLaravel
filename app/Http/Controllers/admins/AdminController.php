@@ -1543,11 +1543,17 @@ class AdminController extends Controller
             ChefReviewDeleteRequest::where('id', $req->id)->update(['status' => $req->status]);
 
             $UserController = new UserController;
-            if ($newStatus === '1') {
+            $needsRatingUpdate = false;
+
+            if ($newStatus === '1' && $previousStatus !== '1') {
                 ChefReview::where('id', $req->review_id)->update(['status' => 2]);
-                $UserController->updateChefrating($chefReviewDeleteRequest->chef_id);
-            } elseif ($newStatus === '0' && $previousStatus === '1') {
-                ChefReview::where('id', $req->review_id)->where('status', 2)->update(['status' => 1]);
+                $needsRatingUpdate = true;
+            } elseif ($previousStatus === '1' && $newStatus !== '1') {
+                ChefReview::where('id', $req->review_id)->update(['status' => 1]);
+                $needsRatingUpdate = true;
+            }
+
+            if ($needsRatingUpdate) {
                 $UserController->updateChefrating($chefReviewDeleteRequest->chef_id);
             }
             DB::commit();
