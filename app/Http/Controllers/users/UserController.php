@@ -1278,7 +1278,7 @@ class UserController extends Controller
         foreach ($allReview as $value) {
             $totalStars = $totalStars + $value['star_rating'];
         }
-        $rating = $totalStars / $totalNoReview;
+        $rating = $totalNoReview > 0 ? $totalStars / $totalNoReview : 0;
         Chef::where('id', $chef_id)->update(['rating' => $rating]);
     }
 
