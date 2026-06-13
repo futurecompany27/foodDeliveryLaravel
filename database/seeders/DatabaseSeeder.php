@@ -38,6 +38,8 @@ class DatabaseSeeder extends Seeder
             UnitSeeder::class,
             taxSeeeder::class,
             OrderStatusSeeder::class
+            ,
+            \Database\Seeders\CouponSeeder::class
         ]);
     }
 }

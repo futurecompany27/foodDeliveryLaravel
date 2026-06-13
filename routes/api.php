@@ -18,6 +18,8 @@ use App\Http\Controllers\utility\commonFunctions;
 use App\Http\Controllers\utility\notificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\CouponController;
+use App\Http\Controllers\API\CouponUsageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -601,4 +603,19 @@ Route::group(['middleware' => 'auth.payment'], function () {
         Route::post('paypal-payment', [AuthorizePaymentController::class, 'paypalTransaction']);
         Route::post('paypal-payment-status', [AuthorizePaymentController::class, 'checkPaymentStatus']);
     });
+});
+
+// Coupons API - single-route handlers
+Route::group(['middleware' => 'auth.admin'], function () {
+
+    Route::prefix('coupons')->group(function () {
+
+        Route::get('', [CouponController::class, 'index']);
+        Route::post('', [CouponController::class, 'store']);
+        Route::get('{id}', [CouponController::class, 'show']);
+        Route::put('{id}', [CouponController::class, 'update']);
+        Route::delete('{id}', [CouponController::class, 'destroy']);
+
+    });
+
 });
