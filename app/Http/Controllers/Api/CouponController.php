@@ -49,7 +49,7 @@ class CouponController extends Controller
                 'discount_type' => 'required|in:fixed,percentage',
                 'discount_value' => 'required|numeric|min:1',
                 'max_discount' => 'nullable|numeric|min:1',
-                'min_order_amount' => 'nullable|numeric|min:0',
+                'min_order_amount' => 'nullable|numeric|min:1',
                 'usage_limit' => 'nullable|integer|min:1',
                 'per_user_limit' => 'nullable|integer|min:1',
                 'first_time_only' => 'required|in:0,1',
@@ -79,16 +79,6 @@ class CouponController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Percentage discount cannot exceed 100%.'
-                ]);
-            }
-
-            if (
-                $request->discount_type === 'percentage' &&
-                empty($request->max_discount)
-            ) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Maximum discount is required for percentage coupons.'
                 ]);
             }
 
@@ -152,7 +142,7 @@ class CouponController extends Controller
                 'discount_type' => 'required|in:fixed,percentage',
                 'discount_value' => 'required|numeric|min:1',
                 'max_discount' => 'nullable|numeric|min:1',
-                'min_order_amount' => 'nullable|numeric|min:0',
+                'min_order_amount' => 'nullable|numeric|min:1',
                 'usage_limit' => 'nullable|integer|min:1',
                 'per_user_limit' => 'nullable|integer|min:1',
                 'first_time_only' => 'required|in:0,1',
@@ -177,16 +167,6 @@ class CouponController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Percentage discount cannot exceed 100%.'
-                ]);
-            }
-
-            if (
-                $request->discount_type === 'percentage' &&
-                empty($request->max_discount)
-            ) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Maximum discount is required for percentage coupons.'
                 ]);
             }
 
