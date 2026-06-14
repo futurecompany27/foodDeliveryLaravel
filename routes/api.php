@@ -18,6 +18,7 @@ use App\Http\Controllers\utility\commonFunctions;
 use App\Http\Controllers\utility\notificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CouponController;
 
 /*
 |--------------------------------------------------------------------------
@@ -548,6 +549,13 @@ Route::prefix('admin')->group(function () {
             Route::post('/updateKitchenTypes', 'updateKitchenTypes');
             Route::post('/deleteKitchenTypes', 'deleteKitchenTypes');
             Route::post('/updateKitchentypeStatus', 'updateKitchentypeStatus');
+        });
+        Route::controller(CouponController::class)->group(function () {
+            Route::get('/getAllCoupons', 'getAllCoupons');
+            Route::post('/addCoupon', 'addCoupon');
+            Route::post('/updateCoupon', 'updateCoupon');
+            Route::post('/deleteCoupon', 'deleteCoupon');
+            Route::post('/updateCouponStatus', 'updateCouponStatus');
         });
     });
 });
