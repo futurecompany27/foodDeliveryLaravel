@@ -37,9 +37,7 @@ class DatabaseSeeder extends Seeder
             SitesettingSeeder::class,
             UnitSeeder::class,
             taxSeeeder::class,
-            OrderStatusSeeder::class,
-            \App\Models\Coupon::factory()->count(10)->create(),
-            \Database\Seeders\CouponSeeder::class
+            OrderStatusSeeder::class
         ]);
     }
 }
